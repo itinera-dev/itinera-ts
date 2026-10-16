@@ -1,0 +1,4 @@
+/node_modules
+/conformance-report
+/packages/*/dist
+/packages/itinera/api

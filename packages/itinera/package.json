@@ -1,0 +1,49 @@
+{
+  "name": "itinera",
+  "version": "0.0.0",
+  "description": "A workflow framework that keeps business rules separate from flow control.",
+  "keywords": [
+    "workflow",
+    "orchestration",
+    "business-rules",
+    "retry",
+    "agent"
+  ],
+  "homepage": "https://itinera-dev.org/",
+  "bugs": "https://github.com/itinera-dev/itinera-ts/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itinera-dev/itinera-ts.git",
+    "directory": "packages/itinera"
+  },
+  "license": "MIT OR Apache-2.0",
+  "type": "commonjs",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "LICENSE-APACHE",
+    "LICENSE-MIT"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "publishConfig": {
+    "tag": "next"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "npm run build"
+  }
+}
