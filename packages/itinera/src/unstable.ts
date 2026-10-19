@@ -4,7 +4,9 @@
  * to the subpath of its concept once itinera implements it fully.
  *
  * - Values: {@link Value}, {@link PlainValue}, {@link SerialisesItself} and
- *   {@link AsValue}, which move to `itinera/value`.
+ *   {@link AsValue}, and the type tokens a request names, such as
+ *   {@link integer}, {@link optional} and {@link classOf}, which move to
+ *   `itinera/value`.
  * - `Option`, `Some` and `None`, as `ts-results-es` defines them, which move
  *   to `itinera/option`. An optional request and a typed read of the data bag
  *   give an `Option`: `Some(value)` when present, a stored `null` included,
@@ -17,16 +19,21 @@
  *   {@link DispatcherFactory}, {@link DefaultDispatcher},
  *   {@link DefaultDispatcherFactory} and {@link DebugReporter}, which move to
  *   `itinera/report`.
- * - Steps: {@link Step}, {@link step}, {@link Outcome} and
- *   {@link StepDescriptor}, which move to `itinera/step`.
+ * - Steps: {@link Step}, {@link step}, {@link input}, {@link stepReporter},
+ *   {@link StepReporter}, {@link Outcome} and {@link StepDescriptor}, which
+ *   move to `itinera/step`.
+ * - Services: {@link service}, {@link serviceType} and {@link ServiceType},
+ *   which move to `itinera/service`.
  * - Workflows: {@link Workflow}, {@link workflow}, {@link withStep},
  *   {@link idGenerator}, {@link WorkflowBuilder}, {@link WorkflowDescriptor}
- *   and {@link Violations}, which move to `itinera/workflow`, and
+ *   {@link Violations} and the types of the request decorators, such as
+ *   {@link RequestDecorator}, which move to `itinera/workflow`, and
  *   {@link WorkflowInstance}, which moves to `itinera/instance`.
  * - Executors: {@link LocalExecutor}, {@link Refusal} and why `run` refuses
  *   an instance, which move to `itinera/executor`.
  * - Journeys: {@link JourneyResult}, how a journey ends, why it failed or
- *   was aborted, and its {@link DataBag}, which move to `itinera/journey`.
+ *   was aborted, its {@link DataBag}, {@link Contributor} and
+ *   {@link contributor}, which move to `itinera/journey`.
  * - Test support: {@link RecordingReporter}, {@link Ending}, {@link stepMock}
  *   and {@link StepMock}, which move to `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
@@ -62,7 +69,8 @@ export type {
   JourneyStatus,
   Succeeded,
 } from "./journey.js";
-export { AbortReason, DataBag, FailureCause } from "./journey.js";
+export type { Contributor } from "./journey.js";
+export { AbortReason, contributor, DataBag, FailureCause } from "./journey.js";
 export { None, Option, Some } from "./option.js";
 export type {
   FailWorkflow,
@@ -87,7 +95,8 @@ export {
   DefaultDispatcher,
   DefaultDispatcherFactory,
 } from "./report.js";
-export type { ProviderName } from "./service.js";
+export type { ProviderName, ServiceType } from "./service.js";
+export { service, serviceType } from "./service.js";
 export type {
   Outcome,
   Reason,
@@ -95,9 +104,10 @@ export type {
   StepDescriptor,
   StepName,
   StepOptions,
+  StepReporter,
   Success,
 } from "./step.js";
-export { Attempt, Step, step } from "./step.js";
+export { Attempt, input, Step, step, stepReporter } from "./step.js";
 export type {
   EndsAbnormally,
   EndsInSuccess,
@@ -106,13 +116,41 @@ export type {
   StepMockScript,
 } from "./testing.js";
 export { Ending, RecordingReporter, StepMock, stepMock } from "./testing.js";
-export type { AsValue, PlainValue, SerialisesItself, Value } from "./value.js";
+export type {
+  AsValue,
+  Optional,
+  PlainValue,
+  RequestType,
+  SerialisesItself,
+  Value,
+  ValueClass,
+} from "./value.js";
+export {
+  boolean,
+  classOf,
+  guard,
+  integer,
+  list,
+  listOf,
+  number,
+  object,
+  objectOf,
+  optional,
+  string,
+} from "./value.js";
 export type {
   AdapterName,
+  Answer,
   Built,
   DuplicateStepName,
   IdGeneratorDecorator,
   IdGeneratorKey,
+  KeyIn,
+  ParameterOf,
+  Place,
+  ReadFromMetadata,
+  RequestDecorator,
+  ValueRequestDecorator,
   Violation,
   WorkflowBuilder,
   WorkflowDescriptor,

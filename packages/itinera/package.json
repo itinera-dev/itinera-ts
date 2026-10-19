@@ -39,6 +39,16 @@
         "default": "./dist/unstable.js"
       }
     },
+    "./schema": {
+      "import": {
+        "types": "./dist/schema.d.mts",
+        "default": "./dist/schema.mjs"
+      },
+      "require": {
+        "types": "./dist/schema.d.ts",
+        "default": "./dist/schema.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -57,7 +67,9 @@
     "prepack": "npm run build"
   },
   "dependencies": {
-    "ts-results-es": "7.1.0"
+    "@standard-schema/spec": "1.1.0",
+    "ts-results-es": "7.1.0",
+    "zod": "4.6.7"
   },
   "peerDependencies": {
     "reflect-metadata": "^0.2.2"

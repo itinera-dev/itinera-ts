@@ -22,6 +22,15 @@ export {
   workflow,
   type WorkflowOptions,
 } from "./workflow/decorators.js";
+export type {
+  Answer,
+  KeyIn,
+  ParameterOf,
+  Place,
+  ReadFromMetadata,
+  RequestDecorator,
+  ValueRequestDecorator,
+} from "./declaration/parameter.js";
 export type { IdGeneratorKey, WorkflowBuilder } from "./workflow/builder.js";
 export type { WorkflowDescriptor } from "./workflow/descriptor.js";
 export {

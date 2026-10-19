@@ -1,10 +1,16 @@
-import {
-  refuseConstructorParameters,
-  refuseMethodParameters,
-} from "../declaration.js";
+import { requestsOf } from "../declaration.js";
+import type { Request } from "../declaration/request.js";
 import { Step, type StepClass } from "../step.js";
 
-const declared = new WeakSet<StepClass>();
+/** What a step requests: its needs, given to its constructor, then what its `run` takes. */
+export interface StepRequests {
+  /** The requests of the constructor's parameters, in order. */
+  readonly needs: readonly Request[];
+  /** The requests of the parameters of `run`, in order. */
+  readonly run: readonly Request[];
+}
+
+const declared = new WeakMap<StepClass, StepRequests>();
 
 /**
  * Declares a step: a class extending {@link Step} directly, whose `run`
@@ -12,7 +18,9 @@ const declared = new WeakSet<StepClass>();
  * a class declared with `@step`.
  *
  * Every parameter of the step's constructor and of its `run` is a request,
- * marked with the decorator of what it requests.
+ * marked with the decorator of what it requests: `@input` on the
+ * constructor's, `@service`, `@contributor` and `@stepReporter` on those of
+ * `run`.
  *
  * {@includeCode ../../examples/step.ts}
  *
@@ -27,18 +35,24 @@ export function step(): (target: StepClass) => void {
     if (declared.has(target)) {
       throw new Error(`${target.name} is declared with @step twice`);
     }
-    checkParameters(target);
-    declared.add(target);
+    declared.set(target, requestsOfStep(target));
   };
 }
 
 /**
- * Throws if a parameter of the constructor of `target` or of its `run` has
- * no request.
+ * What the step class `target` requests: what `@step` recorded, or else what
+ * the decorators of its parameters recorded.
+ *
+ * @throws Error if a parameter of its constructor or of its `run` has no
+ * request.
  */
-export function checkParameters(target: StepClass): void {
-  refuseConstructorParameters(target);
-  refuseMethodParameters(target.prototype, "run");
+export function requestsOfStep(target: StepClass): StepRequests {
+  return (
+    declared.get(target) ?? {
+      needs: requestsOf(target, undefined),
+      run: requestsOf(target, "run"),
+    }
+  );
 }
 
 /** Whether `target` was declared with {@link step}. */

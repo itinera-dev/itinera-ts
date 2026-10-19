@@ -13,37 +13,40 @@ Tier 1 runs a journey in one process, with steps, retries, rescue steps, policie
 ```mermaid
 flowchart LR
     accTitle: The packages of itinera-ts
-    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through itinera/unstable and reads the conformance cases.
+    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through itinera/unstable and reads the conformance cases. itinera depends on Zod, which it re-exports from itinera/schema.
     app["Application"] -->|"import, through the ESM layer"| itinera["itinera"]
     app -->|"require, the CommonJS module"| itinera
     runner["packages/conformance, the runner"] -->|"itinera/unstable"| itinera
     cases["Conformance cases, from itinera-dev/conformance"] --> runner
+    itinera -->|"re-exports z from itinera/schema"| zod["zod"]
 ```
 
 1. An application depends on one package, `itinera`, and imports each concept from a subpath of it. The package root exports nothing of its own.
 2. Each subpath is a CommonJS module with an ESM layer that only re-exports it, so `import` and `require` reach the same copy.
-3. Until a proposal is listed in `conformance.json`, its API is exported only from `itinera/unstable`, which is the only subpath for now.
+3. Until a proposal is listed in `conformance.json`, its API is exported only from `itinera/unstable`. The only other subpath for now is `itinera/schema`, which re-exports Zod's `z`, on which itinera's type tokens are built, so an application uses the same copy of Zod as itinera.
 4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
 
 The modules of `packages/itinera/src`, each the module of one concept:
 
 | Module | Holds |
 |---|---|
-| `value` | `Value`, `PlainValue`, `SerialisesItself` and `AsValue`, and the private capture that checks and copies a value |
+| `value` | `Value`, `PlainValue`, `SerialisesItself` and `AsValue`, the private capture that checks and copies a value, and the type tokens a request names, with `optional`, `classOf` and `guard` |
+| `schema` | Zod's `z`, re-exported |
 | `option` | `Option`, `Some` and `None` |
 | `event` | `Event`, every kind of event and what each carries |
 | `report` | Reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
-| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag |
-| `step` | Step names, reasons, `Step` and `@step`, outcomes, attempts, step descriptors and their options |
-| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, the builder, workflow descriptors, violations, the names of workflows and adapters |
+| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag, `Contributor` and `@contributor` |
+| `step` | Step names, reasons, `Step` and `@step`, `@input`, `@stepReporter` and `StepReporter`, outcomes, attempts, step descriptors and their options |
+| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
 | `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
-| `policy`, `service` | The names and closed sets events carry about policies, hooks and providers |
+| `policy` | The names and closed sets events carry about policies and hooks |
+| `service` | Provider names, service types and `@service` |
 | `testing` | Test support: `RecordingReporter`, `Ending`, `stepMock` and `StepMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
 | `name` | Private: `named`, which refuses an empty name as something is declared |
-| `declaration` | Private: the check that the compiler recorded the types of a decorated method's parameters |
+| `declaration` | Private: the table of the requests parameter decorators record, the types of the request decorators, the types read from the metadata, and the check that the compiler recorded it |
 | `index` | The package root, which exports nothing of its own |
 | `unstable` | The subpath `itinera/unstable`, which re-exports the API of the proposals not listed yet |
 
@@ -80,6 +83,26 @@ flowchart TD
 5. The local executor runs an instance. It reads only the `WorkflowInstance` interface, so it runs any instance, however it was made.
 
 Where it lives: `workflow/decorators.ts`, `workflow/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
+
+### How requests are declared
+
+```mermaid
+flowchart TD
+    accTitle: How a parameter's request is recorded and gathered
+    accDescr: A parameter decorator records its request in a private table, by class, method and position, taking its type from the request or from the compiler's metadata. A class decorator then reads the table for its constructor and methods, in the order of their parameters, and refuses a parameter that carries no request. What it gathers is the class's declaration.
+    parameter["A parameter decorator, such as @input or @service"] -->|"records, by class, method and position"| table["The table of requests"]
+    type["The type written: a token, another Standard Schema validator, or optional of one"] --> parameter
+    metadata["The compiler's metadata, when no type is written"] --> parameter
+    table -->|"read in the order of the parameters"| decorator["The class decorator, such as @step"]
+    decorator --> declared["The class's declaration: what its constructor and run request"]
+```
+
+1. Each parameter decorator records one request in a private table, keyed by the class, the method, or `undefined` for the constructor, and the parameter's position. A parameter carrying two requests is refused at once.
+2. A request for a value takes its type from what it is given: one of the tokens, any other Standard Schema validator, or either wrapped in `optional`. With no type given, it reads the parameter's declared type from the metadata the compiler records, which says only `number`, `string`, `boolean` or a class that serialises itself; anything else is refused when the class is defined.
+3. The types of the decorators refuse at compile time a request in a place that may not make it, and a parameter whose declared type does not accept what the request gives.
+4. The class decorator reads the table for its constructor and its methods, in the order of their parameters, counted from the metadata or the function's length, and refuses a parameter that carries no request. What it gathers is the class's declaration: for a step, what its constructor needs and what its `run` takes. Later stages resolve these requests when a step is built and run.
+
+Where it lives: `declaration.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `service/request.ts`.
 
 ### From declaration to result
 

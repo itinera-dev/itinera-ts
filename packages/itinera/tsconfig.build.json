@@ -5,8 +5,9 @@
     "outDir": "dist",
     "declaration": true,
     "skipLibCheck": false,
-    "types": [],
-    "noEmit": false
+    "types": ["node"],
+    "noEmit": false,
+    "lib": ["ES2024"]
   },
   "include": ["src"]
 }
