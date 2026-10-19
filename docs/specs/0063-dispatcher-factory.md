@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0063](https://github.com/itinera-dev/spec/blob/main/proposals/0063-dispatcher-factory.md), implemented in [#24](https://github.com/itinera-dev/itinera-ts/issues/24). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, and [0011](0011-events.md) the events and reporters.
 
-Status: in progress. Stage 1 added the dispatcher and factory interfaces, `DefaultDispatcher` and its factory. Stage 3 added `LocalExecutor`, which takes a factory, and the guards (see 0081). Stage 6 lists the proposal.
+Status: complete, and 63 is listed in `conformance.json`. Stage 1 added the dispatcher and factory interfaces, `DefaultDispatcher` and its factory. Stage 3 added `LocalExecutor`, which takes a factory, and the guards (see 0081). Stage 6 listed the proposal.
 
 ## API
 
-Until 0063 is listed, these are exported only from `itinera/unstable`. They are defined in `src/report.ts` and `src/report/default-dispatcher.ts`, and `src/report.ts` becomes the subpath `itinera/report` then.
+These are exported only from `itinera/unstable` while they name the events and reporters of proposal 0011, not yet listed, as the agents' manual says. They are defined in `src/report.ts` and `src/report/default-dispatcher.ts`, and `src/report.ts` becomes the subpath `itinera/report` then.
 
 - **`Dispatcher`**: `add(reporter)`, `dispatch(event)` and `setGlobalMetadata(key, value)`, named after chapter 2, 2.2's words, each returning nothing or a promise.
 - **`DispatcherFactory`**: an object with `create()`, returning a dispatcher or a promise of one. An object, rather than a function, so a factory is a class an application names and can configure, as the reporters it creates dispatchers for are, and as Rust's trait is.
@@ -28,4 +28,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0063` passes, and 63 is listed in `conformance.json`. Planned for stage 6.
+Done in stage 6: every scenario tagged `@proposal-0063` passes, and 63 is listed in `conformance.json`.

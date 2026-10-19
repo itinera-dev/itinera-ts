@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0056](https://github.com/itinera-dev/spec/blob/main/proposals/0056-data-bag-values.md), implemented in [#18](https://github.com/itinera-dev/itinera-ts/issues/18). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals.
 
-Status: in progress. Stage 1 added the types of values and the function that captures one. Stage 3 gave the data bag its initial data, and stage 5 what input adapters supply, the contributions, the details of a reason and what a step reporter is given, all captured by that function, and the function that reads a value back; stage 6 lists the proposal.
+Status: complete, and 56 is listed in `conformance.json`. Stage 1 added the types of values and the function that captures one. Stage 3 gave the data bag its initial data, and stage 5 what input adapters supply, the contributions, the details of a reason and what a step reporter is given, all captured by that function, and the function that reads a value back; stage 6 listed the proposal. Hooks and service providers capture what they give in the same way from stages 7 and 8.
 
 ## API
 
-Until 0056 is listed, these types are exported only from `itinera/unstable`. They are defined in `src/value.ts`, which becomes the subpath `itinera/value` then.
+These types are exported only from `itinera/unstable`, beside the type tokens of the same module, which the requests of proposals not yet listed use, so that `itinera/value` becomes a subpath once with everything it holds, as the agents' manual says. They are defined in `src/value.ts`.
 
 - **`PlainValue`**: `null`, a boolean, a number, a string, a list of plain values, or a plain object of them, with string keys. It is the form in which itinera keeps every value.
 - **`SerialisesItself`**: an object with `toValue(): Value`. itinera calls `toValue()` once, when the object is given, and keeps what it returns. A class whose instances a request reads back also has a static `fromValue`.
@@ -75,4 +75,4 @@ A check that returns a promise is asynchronous, which section 3 of the plan says
 
 ## Done when
 
-Every scenario tagged `@proposal-0056` passes, and 56 is listed in `conformance.json`. Planned for stage 6.
+Done in stage 6: every scenario tagged `@proposal-0056` passes, and 56 is listed in `conformance.json`.
