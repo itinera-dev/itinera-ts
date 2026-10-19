@@ -18,5 +18,18 @@ export interface Success {
   readonly kind: "success";
 }
 
+const made = new WeakSet<object>();
+
 /** The one success, which every step that succeeds reports. */
 export const success: Success = Object.freeze({ kind: "success" });
+made.add(success);
+
+/**
+ * Whether `returned` is an outcome itinera made, as a step's helpers make
+ * them, rather than anything else a cast lets a step return.
+ */
+export function isOutcome(returned: unknown): returned is Outcome {
+  return (
+    typeof returned === "object" && returned !== null && made.has(returned)
+  );
+}
