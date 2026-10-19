@@ -32,7 +32,7 @@ None of its own.
 - `tests/unit/service/reporter.test.ts`: what `@providerReporter()` records.
 - `tests/unit/workflow/builder.test.ts` and `tests/unit/workflow/builder.test-d.ts`: a provider named to the builder with its requests, one providing another service, and each refusal.
 - `tests/unit/service/reporter.test-d.ts`: `@providerReporter` on a parameter of another type or in a hook.
-- `tests/unit/workflow.test.ts`: what `this.provide(...)` makes, with and without data.
+- `tests/unit/workflow/base.test.ts`: what `this.provide(...)` makes, with and without data.
 - `tests/unit/workflow/violation/services.test.ts`, `providers.test.ts` and `scope.test.ts`: each violation about services and providers. `tests/unit/workflow/listing.test.ts`: the services listed with the provider serving each.
 - `examples/service.ts`: a step requesting a payment gateway. `examples/provider.ts`: providers of both scopes.
 

@@ -1,4 +1,4 @@
-import { requestsMadeBy } from "../declaration.js";
+import { requestsMadeBy } from "../declaration/allowed.js";
 import type { Request } from "../declaration/request.js";
 import { named } from "../name.js";
 import type { ProviderName } from "../service.js";
