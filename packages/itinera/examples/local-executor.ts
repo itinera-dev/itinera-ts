@@ -18,7 +18,7 @@ class Orders extends Workflow {}
 export default (async () => {
   const orders = Orders.builder()
     .name("orders")
-    .step(Ship, { name: "ship" })
+    .step(Ship.builder("ship"))
     .build();
   const recorder = new RecordingReporter();
   const executor = new LocalExecutor();

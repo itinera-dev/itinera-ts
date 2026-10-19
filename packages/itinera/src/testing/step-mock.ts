@@ -1,4 +1,4 @@
-import { type Outcome, Step } from "../step.js";
+import { type Outcome, Step, type StepBuilder } from "../step.js";
 import { Ending } from "./ending.js";
 
 /**
@@ -26,8 +26,8 @@ export interface StepMockScript {
 }
 
 /**
- * A class extending {@link StepMock}, which a workflow's builder takes as it
- * takes any step.
+ * A class extending {@link StepMock}, whose `builder(name)` starts a step for
+ * a workflow's builder, as any step class's does.
  *
  * {@includeCode ../../examples/step-mock.ts}
  */
@@ -36,6 +36,8 @@ export interface StepMockClass {
   new (): StepMock;
   /** The prototype every step mock of the class shares. */
   readonly prototype: StepMock;
+  /** Starts putting a step of the class together for a workflow's builder. */
+  builder(name: string): StepBuilder;
 }
 
 /**
@@ -66,8 +68,8 @@ export abstract class StepMock extends Step {
 }
 
 /**
- * A new class of step mock playing the script, to give a workflow's builder
- * as any step is given. The class counts the steps built from it as the
+ * A new class of step mock playing the script, whose `builder(name)` starts a
+ * step for a workflow's builder, as any step class's does. The class counts the steps built from it as the
  * attempts of its script, so each workflow takes a class of its own.
  *
  * {@includeCode ../../examples/step-mock.ts}
