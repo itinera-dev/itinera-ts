@@ -16,7 +16,8 @@ import { type Provided, serviceType } from "../../../src/service.js";
 import type { StepName } from "../../../src/step.js";
 import type { Attempt } from "../../../src/step/attempt.js";
 import { attempt, stepName } from "../../../src/step/request.js";
-import { key, type Supplied } from "../../../src/workflow/adapter.js";
+import { key } from "../../../src/workflow/adapter.js";
+import type { Supplied } from "../../../src/workflow/adapter/supplied.js";
 import { adaptersOf, providersOf } from "../../../src/workflow/descriptor.js";
 
 class Audit implements Reporter {
@@ -260,6 +261,8 @@ describe("the builder's other lists", () => {
         name: "pricing",
         steps: ["ship"],
         key: "pricing",
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- compared, never called
+        method: Tills.prototype.pricing,
         requests: [{ kind: "stepName" }, { kind: "key" }],
       },
     ]);

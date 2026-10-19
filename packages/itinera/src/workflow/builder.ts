@@ -1,4 +1,4 @@
-import { onlyAllowed, requestsOf } from "../declaration.js";
+import { onlyAllowed, type RequestOf, requestsOf } from "../declaration.js";
 import { requestsGiven } from "../declaration/marking.js";
 import type { Request } from "../declaration/request.js";
 import type { Place } from "../declaration/parameter.js";
@@ -24,9 +24,11 @@ import {
   adapterRequests,
   declaredAdapter,
   type DeclaredAdapter,
+  isFunction,
+  type Method,
   type InputAdapterOptions,
-  type Supplied,
 } from "./adapter.js";
+import type { Supplied } from "./adapter/supplied.js";
 import { assemble, type WorkflowDescriptor } from "./descriptor.js";
 import type { IdGeneratorKey } from "./id-generator.js";
 import type { ListedStep } from "./listing.js";
@@ -144,9 +146,9 @@ export class WorkflowBuilder<
       Place<InstanceType<C>, K>
     >
   ): this {
-    this.#requireMethod(key);
+    const method = this.#methodOf(key);
     this.#adapters.push(
-      declaredAdapter(this.#workflow, key, options, () =>
+      declaredAdapter(this.#workflow, key, method, options, () =>
         this.#given(key, requests, adapterRequests, "an input adapter"),
       ),
     );
@@ -175,7 +177,7 @@ export class WorkflowBuilder<
       Place<InstanceType<C>, K>
     >
   ): this {
-    this.#requireMethod(key);
+    this.#methodOf(key);
     this.#providers.push(
       declaredProvider(this.#workflow, key, type, options, () =>
         this.#given(key, requests, providerRequests, "a service provider"),
@@ -202,12 +204,8 @@ export class WorkflowBuilder<
     if (this.#idGenerator !== undefined) {
       throw new Error(`${this.#workflow.name} has more than one ID generator`);
     }
-    this.#requireMethod(key);
+    const generate = this.#methodOf(key);
     requestsOf(this.#workflow, key);
-    const generate: unknown = Reflect.get(
-      this.#workflow.prototype as Workflow,
-      key,
-    );
     this.#idGenerator = generate as IdGenerator;
     return this;
   }
@@ -267,24 +265,25 @@ export class WorkflowBuilder<
     );
   }
 
-  #requireMethod(key: string | symbol): void {
+  #methodOf(key: string | symbol): Method {
     const method: unknown = Reflect.get(
       this.#workflow.prototype as Workflow,
       key,
     );
-    if (typeof method !== "function") {
+    if (!isFunction(method)) {
       throw new Error(
         `${this.#workflow.name}.${String(key)} is not a method of the class`,
       );
     }
+    return method;
   }
 
-  #given(
+  #given<K extends Request["kind"]>(
     key: string | symbol,
     given: readonly unknown[],
-    allowed: readonly Request["kind"][],
+    allowed: readonly K[],
     what: string,
-  ): readonly Request[] {
+  ): readonly RequestOf<K>[] {
     return onlyAllowed(
       requestsGiven(this.#workflow, key, given),
       this.#workflow,

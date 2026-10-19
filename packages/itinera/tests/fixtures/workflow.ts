@@ -7,6 +7,7 @@ import type { StepDescriptor } from "../../src/step.js";
 import { describeStep } from "../../src/step/descriptor.js";
 import { Refund, Ship } from "./step.js";
 import type { DeclaredAdapter } from "../../src/workflow/adapter.js";
+import { fromBag, type Supplied } from "../../src/workflow/adapter/supplied.js";
 import type { AdapterName } from "../../src/workflow/names.js";
 
 /** A type of service for payments. */
@@ -43,7 +44,17 @@ export function step(name: string, parts: Parts = {}): StepDescriptor {
 
 /** An input adapter named `name`, attached to `steps`. */
 export function adapter(name: string, ...steps: string[]): DeclaredAdapter {
-  return { name: name as AdapterName, steps, key: name, requests: [] };
+  return {
+    name: name as AdapterName,
+    steps,
+    key: name,
+    method: supplyNothing,
+    requests: [],
+  };
+}
+
+function supplyNothing(): Supplied {
+  return fromBag;
 }
 
 /** A service provider named `name`, of the key `key`, as `parts` says. */

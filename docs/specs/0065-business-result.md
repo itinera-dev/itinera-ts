@@ -10,7 +10,7 @@ Until 0065 is listed, everything here is exported only from `itinera/unstable`. 
 
 - **`JourneyResult`** is an interface, frozen once made: `journeyId`, `status`, `failure`, `abort`, and `isSucceeded()`, `isFailed()` and `isAborted()`, each a type guard narrowing `status`, so the data bag is read without a switch, as chapter 5, 5.14 suggests.
 - **`JourneyStatus`** is a discriminated union on `kind`: `Succeeded` with the `dataBag`, `Failed` with the `failure` and the `dataBag`, and `Aborted` with the `abort` only.
-- **`DataBag`** is a class only itinera makes, with a private constructor and a module-private maker set in a static block, as `Attempt` is. Stage 3 gives it `keys()`, in the order each key was first set; stage 5 adds its typed reads.
+- **`DataBag`** is a class only itinera makes, with a private constructor and a module-private maker set in a static block, as `Attempt` is. Stage 3 gave it `keys()`, in the order each key was first set; stage 5 has added its typed read, `read(key, type)`, giving a `Read` (see [0091](0091-adapters-read-the-data-bag.md)).
 - **No step statuses.** The result never carries them nor the step that failed; the conformance runner derives them from the events.
 - **A refusal is not a result.** `run` rejects with a `Refusal` instead (see 0012).
 
@@ -21,10 +21,10 @@ None of its own.
 ## Tests
 
 - `tests/unit/journey/result.test.ts`: each status's guards, `failure` and `abort`, and the frozen result.
-- `tests/unit/journey/data-bag.test.ts`: keys in order, and a copy of what it was made from.
+- `tests/unit/journey/data-bag.test.ts`: keys in order, a copy of what it was made from, and each kind of read.
 - `tests/unit/journey.test-d.ts`: the data bag reached only through a status that has one.
 - `tests/unit/engine.test.ts`: the result of a journey that succeeded, failed or was aborted, and its journey ID.
-- `examples/journey-result.ts`.
+- `examples/journey-result.ts` and `examples/data-bag.ts`.
 
 ## Still open
 
