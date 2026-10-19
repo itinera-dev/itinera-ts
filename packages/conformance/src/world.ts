@@ -25,7 +25,7 @@ export class World {
 
   /** Builds the workflow the scenario declares, once. */
   admit(): Admission {
-    this.#admission ??= admitted(this.model, this.recorders, this.witness);
+    this.#admission ??= admitted(this.model, this.witness);
     return this.#admission;
   }
 

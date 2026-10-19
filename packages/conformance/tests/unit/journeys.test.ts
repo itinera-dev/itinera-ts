@@ -19,7 +19,7 @@ async function journeysOf(
   recorders: Recorders,
   times: number,
 ): Promise<Journey[]> {
-  const admission = admitted(model, recorders, new Witness());
+  const admission = admitted(model, new Witness());
   if (admission.kind === "refused") {
     throw admission.violations;
   }
