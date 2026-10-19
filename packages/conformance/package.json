@@ -2,5 +2,13 @@
   "name": "itinera-conformance",
   "private": true,
   "description": "The conformance runner of itinera-ts, which runs the Itinera conformance cases against the itinera package.",
-  "license": "MIT OR Apache-2.0"
+  "license": "MIT OR Apache-2.0",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "dependencies": {
+    "@cucumber/cucumber": "13.3.0",
+    "@cucumber/tag-expressions": "11.0.1",
+    "itinera": "0.0.0"
+  }
 }

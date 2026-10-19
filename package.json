@@ -16,7 +16,8 @@
     "docs": "typedoc --options packages/itinera/typedoc.json",
     "dependency-check": "npm audit && licensee --errors-only",
     "use-next-typescript": "npm install --no-save typescript@next",
-    "check": "npm run format && npm run lint && npm run typecheck && npm run typecheck-oldest && npm test && npm run package && npm run docs && npm run dependency-check"
+    "check": "npm run format && npm run lint && npm run typecheck && npm run typecheck-oldest && npm test && npm run package && npm run docs && npm run dependency-check",
+    "conformance": "npm run build && npm run build --workspace packages/conformance && node packages/conformance/dist/main.js"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",

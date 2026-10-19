@@ -20,7 +20,7 @@ The package will work with `import` and `require` alike, on Node 22.12 and later
 
 Each release will state the specification version, tier, capabilities and conformance cases it implements, and carry the report of those cases as a release asset.
 
-The conformance runner is not written yet. Once it is, to run the cases yourself, check out [itinera-dev/conformance](https://github.com/itinera-dev/conformance) at the tag pinned in [conformance.json](https://github.com/itinera-dev/itinera-ts/blob/main/conformance.json), then run `npm run conformance` from this repository with:
+To run the cases yourself, check out [itinera-dev/conformance](https://github.com/itinera-dev/conformance) at the tag pinned in [conformance.json](https://github.com/itinera-dev/itinera-ts/blob/main/conformance.json), then run `npm run conformance` from this repository with:
 
 - `ITINERA_CONFORMANCE_CASES` set to that checkout's `cases` directory;
 - `ITINERA_CONFORMANCE_TAGS` set to a Cucumber tag expression selecting the scenarios to run;

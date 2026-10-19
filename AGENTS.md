@@ -83,7 +83,7 @@ The `commit messages` check is required as well. Before pushing, run it on the c
 
 ## Running the conformance runner
 
-The runner arrives in stage 2, in `packages/conformance`. Run `npm run conformance` with:
+The runner is in `packages/conformance`. Run `npm run conformance`, which builds the package and the runner with `tsc` before it runs the cases, with:
 
 - `ITINERA_CONFORMANCE_CASES` set to the `cases` directory of a checkout of itinera-dev/conformance at the tag pinned in `conformance.json`;
 - `ITINERA_CONFORMANCE_TAGS` set to a Cucumber tag expression, for example `@proposal-0002 and not @non-value`;
