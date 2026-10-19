@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import {
+  type DataBag,
+  dataBag,
   type Event,
+  integer,
   type Outcome,
   type Reporter,
   Step,
@@ -32,8 +35,9 @@ class Orders extends Workflow {
     super();
   }
 
-  orderId(): string {
-    return `${this.shop}-1`;
+  orderId(data: DataBag): string {
+    const number = data.read("number", integer).option();
+    return `${this.shop}-${number.map(String).unwrapOr("unnumbered")}`;
   }
 }
 
@@ -42,13 +46,13 @@ const orders = Orders.builder()
   .step(Charge.builder("charge").retryBudget(1).noRetryOnAbnormalTermination())
   .step(Ship.builder("ship"))
   .reporter(Audit)
-  .idGenerator("orderId")
+  .idGenerator("orderId", dataBag())
   .constructWith("corner")
   .build();
 
-const instance = orders.instance();
+const instance = orders.instance({ number: 7 });
 assert.equal(instance.descriptor.name, "orders");
-assert.equal(instance.journeyId, "corner-1");
+assert.equal(instance.journeyId, "corner-7");
 assert.deepEqual(
   instance.descriptor.steps().map((described) => described.name),
   ["charge", "ship"],

@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import {
+  type DataBag,
+  dataBag,
   idGenerator,
+  integer,
   type Outcome,
   Step,
   step,
@@ -19,20 +22,18 @@ class Ship extends Step {
 @workflow({ name: "orders" })
 @withStep(Ship, { name: "ship" })
 class Orders extends Workflow {
-  #orders = 0;
-
   constructor(readonly shop: string) {
     super();
   }
 
   @idGenerator()
-  orderId(): string {
-    this.#orders += 1;
-    return `${this.shop}-${String(this.#orders)}`;
+  orderId(@dataBag() data: DataBag): string {
+    const number = data.read("number", integer).option();
+    return `${this.shop}-${number.map(String).unwrapOr("unnumbered")}`;
   }
 }
 
 const orders = Orders.build("corner");
 
-assert.equal(orders.instance().journeyId, "corner-1");
-assert.equal(orders.instance().journeyId, "corner-2");
+assert.equal(orders.instance({ number: 7 }).journeyId, "corner-7");
+assert.equal(orders.instance().journeyId, "corner-unnumbered");

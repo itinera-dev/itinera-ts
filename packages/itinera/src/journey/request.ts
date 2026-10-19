@@ -19,7 +19,8 @@ export function journeyId(): RequestDecorator<
 
 /**
  * Requests the data bag, in an input adapter, to read what it holds while
- * the step is built.
+ * the step is built, or in the ID generator, to read the instance's initial
+ * data while the instance is created.
  *
  * {@includeCode ../../examples/input-adapter.ts}
  */
