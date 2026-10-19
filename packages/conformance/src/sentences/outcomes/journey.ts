@@ -80,3 +80,23 @@ function violationOf(row: Row): string {
 function kindOf(violation: { readonly kind: string }): string {
   return violation.kind;
 }
+
+Then<World>(
+  "no contribution of {string} was committed",
+  function (key: string) {
+    const events = this.stream();
+    expectOfStream(
+      !events.some(committing(key)),
+      `no contribution_committed of "${key}"`,
+      events,
+    );
+  },
+);
+
+function committing(key: string): (event: Event) => boolean {
+  return (event) => isCommitOf(event, key);
+}
+
+function isCommitOf(event: Event, key: string): boolean {
+  return event.kind === "contribution_committed" && event.key === key;
+}

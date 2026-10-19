@@ -3,12 +3,14 @@
  * gives it, failing as the scenario scripts it.
  */
 import {
+  EntryRecordingReporter,
   type Event,
+  type GlobalMetadataEntry,
   type PlainValue,
-  RecordingReporter,
   type ReporterClass,
 } from "itinera/unstable";
 import { listedUnder } from "./listed.js";
+import { ModelError } from "./model/error.js";
 import type { ReporterFailure } from "./model/report.js";
 
 /**
@@ -16,7 +18,7 @@ import type { ReporterFailure } from "./model/report.js";
  * global metadata it receives, the one it fails on included, then fails as
  * the scenario scripts it, and remembers whether it ever failed.
  */
-export class ScenarioReporter extends RecordingReporter {
+export class ScenarioReporter extends EntryRecordingReporter {
   readonly #failure: ReporterFailure | undefined;
   #failed = false;
 
@@ -114,6 +116,21 @@ export class Recorders {
     return [...this.#listOf(name)];
   }
 
+  /**
+   * The reporters made under the name, in the order they were made, for a
+   * sentence that reads what they received.
+   *
+   * @throws ModelError when none was made, since the case names a reporter
+   * that no journey had.
+   */
+  receivers(name: string): readonly ScenarioReporter[] {
+    const made = this.made(name);
+    if (made.length === 0) {
+      throw new ModelError(`no reporter "${name}" was made`);
+    }
+    return made;
+  }
+
   #listOf(name: string): ScenarioReporter[] {
     return listedUnder(this.#made, name);
   }
@@ -122,4 +139,11 @@ export class Recorders {
 /** Every event the reporter received, in order. */
 export function eventsOf(reporter: ScenarioReporter): readonly Event[] {
   return reporter.events;
+}
+
+/** Every entry of global metadata the reporter received, in order. */
+export function entriesOf(
+  reporter: ScenarioReporter,
+): readonly GlobalMetadataEntry[] {
+  return reporter.entries;
 }

@@ -5,12 +5,14 @@
  */
 import {
   type Built,
+  contributor,
   dataBag,
   fromWorkflow,
   input,
   key,
   type StepName,
   stepName,
+  stepReporter,
   type Supplied,
   type Value,
   type WorkflowInstance,
@@ -23,6 +25,7 @@ import type { Input } from "./model/step.js";
 import type { Scripted } from "./model/value.js";
 import type { Model } from "./model.js";
 import type { Recorders } from "./recorders.js";
+import { actingOf } from "./scenario/actions.js";
 import { mockScriptOf } from "./scenario/mock.js";
 import { requestTypeOf, tokenOf } from "./tokens.js";
 import type { Witness } from "./witness.js";
@@ -81,9 +84,10 @@ export function workflowOf(
   for (const step of steps) {
     const script = model.step(step);
     const mock = witness
-      .classOf(step, mockScriptOf(script))
+      .classOf(step, mockScriptOf(script), actingOf(script))
       .builder(step)
       .needs(...script.inputs.map(inputOf))
+      .run(contributor(), stepReporter())
       .retryBudget(script.retries);
     builder.step(
       script.retriesAbnormalTerminations
