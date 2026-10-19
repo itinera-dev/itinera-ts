@@ -1,4 +1,4 @@
-import { marking } from "../declaration.js";
+import { marking } from "../declaration/marking.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { AsValue } from "../value.js";
 import type { StepPolicy } from "./step-policy.js";
@@ -14,7 +14,7 @@ export function hookReporter(): RequestDecorator<
   HookReporter,
   Place<StepPolicy | WorkflowPolicy, string | symbol>
 > {
-  return marking(() => ({ kind: "hookReporter" }));
+  return marking({ kind: "hookReporter" });
 }
 
 /**

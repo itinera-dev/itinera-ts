@@ -44,10 +44,18 @@ export type {
   Strict,
   ValueRequestDecorator,
 } from "./declaration/parameter.js";
-export type { IdGeneratorKey, WorkflowBuilder } from "./workflow/builder.js";
+export type {
+  Given,
+  MethodKey,
+  ParametersOf,
+  Token,
+  Tokens,
+} from "./declaration/token.js";
+export type { WorkflowBuilder } from "./workflow/builder.js";
 export {
   idGenerator,
   type IdGeneratorDecorator,
+  type IdGeneratorKey,
 } from "./workflow/id-generator.js";
 export { fromWorkflow } from "./workflow/request.js";
 export type { WorkflowDescriptor } from "./workflow/descriptor.js";

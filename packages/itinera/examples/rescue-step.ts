@@ -12,6 +12,7 @@ import {
   RescueStep,
   rescueStep,
   type RescueOutcome,
+  type RescueStepBuilder,
   type RescueStepClass,
   Some,
   Step,
@@ -51,11 +52,28 @@ class Charge extends Step {
   }
 }
 
+class Weigh extends RescueStep {
+  constructor(readonly grams: number) {
+    super();
+  }
+
+  override run(): RescueOutcome {
+    return this.succeed();
+  }
+}
+
 const rescue: RescueStepClass = Refund;
 
 @workflow({ name: "orders" })
 @withStep(Charge, { name: "charge", rescue })
 class Orders extends Workflow {}
+
+const weighing: RescueStepBuilder<typeof Weigh> = Weigh.builder().needs(
+  fromRescuedStep("grams", integer),
+);
+const shipping = Orders.builder()
+  .step(Charge.builder("ship").rescue(weighing))
+  .build();
 
 const refund = new Refund("A-1", Some(40), Some({ code: "declined" }));
 const unknown = new Refund("B-2", None, None);
@@ -65,3 +83,10 @@ assert.deepEqual(refund.refunded, ["A-1: 40 after declined"]);
 unknown.run();
 assert.deepEqual(unknown.refunded, ["B-2: 0 after a throw"]);
 assert.ok(Orders.build() instanceof Orders);
+assert.deepEqual(
+  shipping
+    .instance()
+    .descriptor.steps()
+    .map((described) => described.name),
+  ["charge", "ship"],
+);

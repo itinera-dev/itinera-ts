@@ -2,6 +2,7 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { Option } from "../option.js";
 import type { SerialisesItself } from "../value.js";
 import type { Optional, RequestType } from "../value/token.js";
+import type { Given, token } from "./token.js";
 
 /**
  * Where a request may be made: on a parameter of the constructor of a class
@@ -84,6 +85,12 @@ export type ReadFromMetadata<P> = [P] extends [number]
  */
 export interface RequestDecorator<A, P extends Place> {
   /**
+   * What the request gives and where it may be made, for a builder that is
+   * given it by position. It exists only in the types.
+   */
+  readonly [token]: Given<A, P, true>;
+
+  /**
    * Marks the parameter at position `index` of the constructor of `target`,
    * when `key` is `undefined`, or of its method `key`.
    */
@@ -112,6 +119,15 @@ export interface ValueRequestDecorator<
   T extends RequestType | undefined,
   P extends Place,
 > {
+  /**
+   * What the request gives and where it may be made, for a builder that is
+   * given it by position, which takes it only when its type is written. It
+   * exists only in the types.
+   */
+  readonly [token]: T extends RequestType
+    ? Given<Answer<T>, P, true>
+    : Given<unknown, P, false>;
+
   /**
    * Marks the parameter at position `index` of the constructor of `target`,
    * when `key` is `undefined`, or of its method `key`.

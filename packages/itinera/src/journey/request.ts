@@ -1,4 +1,4 @@
-import { marking } from "../declaration.js";
+import { marking } from "../declaration/marking.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { DataBag, JourneyId } from "../journey.js";
 import type { StepPolicy, WorkflowPolicy } from "../policy.js";
@@ -14,7 +14,7 @@ export function journeyId(): RequestDecorator<
   JourneyId,
   Place<StepPolicy | WorkflowPolicy | Workflow, string | symbol>
 > {
-  return marking(() => ({ kind: "journeyId" }));
+  return marking({ kind: "journeyId" });
 }
 
 /**
@@ -27,5 +27,5 @@ export function dataBag(): RequestDecorator<
   DataBag,
   Place<Workflow, string | symbol>
 > {
-  return marking(() => ({ kind: "dataBag" }));
+  return marking({ kind: "dataBag" });
 }

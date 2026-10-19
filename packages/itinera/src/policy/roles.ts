@@ -37,3 +37,15 @@ export type RolesOfOne<C> = [
 ] extends [(roles: infer R) => void]
   ? R
   : never;
+
+/**
+ * Nothing more, `unknown`, when a workflow whose objects are of type `W`
+ * implements the roles `R`; otherwise a message saying it does not, which
+ * nothing given fits, so that a policy whose roles the workflow does not
+ * implement does not compile where the workflow's builder is given it.
+ *
+ * {@includeCode ../../examples/policy-builder.ts}
+ */
+export type Provides<W, R> = [W] extends [R]
+  ? unknown
+  : "the workflow class does not implement the roles its policies request";

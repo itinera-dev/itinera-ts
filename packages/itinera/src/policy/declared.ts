@@ -7,6 +7,14 @@ import {
 import type { Request } from "../declaration/request.js";
 import { named } from "../name.js";
 import type { PolicyName } from "../policy.js";
+import {
+  type DeclaredHook,
+  describePolicy,
+  kindOf,
+  type PolicyClass,
+  type PolicyDescriptor,
+  type PolicyKind,
+} from "./descriptor.js";
 import { type Hook, hooksOf } from "./hooks.js";
 import { StepPolicy } from "./step-policy.js";
 import { WorkflowPolicy } from "./workflow-policy.js";
@@ -25,28 +33,7 @@ export interface PolicyOptions {
   readonly name?: string;
 }
 
-/**
- * What a policy class declared: its kind, its name, and its hooks with their
- * requests.
- */
-export interface PolicyDeclaration {
-  /** Whether it is a step policy or a workflow policy. */
-  readonly kind: "step" | "workflow";
-  /** The policy's name. */
-  readonly name: PolicyName;
-  /** Each hook the policy defines, with its method and its requests. */
-  readonly hooks: ReadonlyMap<Hook, DeclaredHook>;
-}
-
-/** One hook a policy defines. */
-export interface DeclaredHook {
-  /** The method that implements it. */
-  readonly key: string | symbol;
-  /** The requests of the method's parameters, in order. */
-  readonly requests: readonly Request[];
-}
-
-const declared = new WeakMap<object, PolicyDeclaration>();
+const declared = new WeakMap<object, PolicyDescriptor>();
 
 const causes: Partial<Record<Request["kind"], Cause>> = {
   failureCause: { name: "the failure cause", hook: "on step failure" },
@@ -99,24 +86,38 @@ export function workflowPolicy(
   };
 }
 
-/** What the policy class `target` declared, if it was declared. */
-export function declarationOfPolicy(
-  target: object,
-): PolicyDeclaration | undefined {
-  return declared.get(target);
+/**
+ * The descriptor of the policy class `target`, declared with `@stepPolicy`
+ * or `@workflowPolicy` as `kind` says.
+ *
+ * @throws Error if it is not declared with that decorator.
+ */
+export function declaredPolicy(
+  target: { readonly name: string },
+  kind: PolicyKind,
+): PolicyDescriptor {
+  const described = declared.get(target);
+  if (described === undefined || kindOf(described) !== kind) {
+    throw new Error(`${target.name} is not declared with @${kind}Policy`);
+  }
+  return described;
 }
 
-const bases: Readonly<Record<PolicyDeclaration["kind"], Owner>> = {
-  step: StepPolicy,
-  workflow: WorkflowPolicy,
-};
+/** Whether `target` was declared with `@stepPolicy` or `@workflowPolicy`. */
+export function isDeclaredPolicy(target: object): boolean {
+  return declared.has(target);
+}
+
+function baseOf(kind: PolicyKind): Owner {
+  return kind === "step" ? StepPolicy : WorkflowPolicy;
+}
 
 function declare(
-  target: Owner,
-  kind: PolicyDeclaration["kind"],
+  target: PolicyClass,
+  kind: PolicyKind,
   options: PolicyOptions,
 ): void {
-  const base = bases[kind];
+  const base = baseOf(kind);
   if (Object.getPrototypeOf(target) !== base) {
     throw new Error(`${target.name} must extend ${base.name} itself`);
   }
@@ -128,9 +129,6 @@ function declare(
     `policy class ${target.name}`,
   );
   const hooks = hooksOf(target);
-  if (hooks.size === 0) {
-    throw new Error(`policy ${name} defines no hook`);
-  }
   const unmarked = methodsWithRequests(target).find((key) =>
     isUnmarked(key, hooks),
   );
@@ -139,11 +137,15 @@ function declare(
       `${where(target, unmarked)} carries requests, but is marked with no hook`,
     );
   }
-  declared.set(target, {
-    kind,
-    name,
-    hooks: new Map([...hooks].map((hook) => declaredHook(target, hook))),
-  });
+  declared.set(
+    target,
+    describePolicy(
+      target,
+      kind,
+      name,
+      new Map([...hooks].map((hook) => declaredHook(target, hook))),
+    ),
+  );
 }
 
 function isUnmarked(
@@ -157,14 +159,29 @@ function declaredHook(
   target: Owner,
   [hook, key]: readonly [Hook, string | symbol],
 ): [Hook, DeclaredHook] {
-  const requests = requestsOf(target, key);
+  return [hook, checkedHook(target, hook, key, requestsOf(target, key))];
+}
+
+/**
+ * The hook `hook` of the policy class `target`, implemented by its method
+ * `key`, whose parameters make `requests`.
+ *
+ * @throws Error if it requests a cause it is not given: the failure cause
+ * outside `on step failure`, or the retry cause outside `on step retry`.
+ */
+export function checkedHook(
+  target: Owner,
+  hook: Hook,
+  key: string | symbol,
+  requests: readonly Request[],
+): DeclaredHook {
   const cause = requests.map(causeOf).find((found) => isMisplaced(found, hook));
   if (cause !== undefined) {
     throw new Error(
       `${where(target, key)} requests ${cause.name}, which only ${cause.hook} is given`,
     );
   }
-  return [hook, { key, requests }];
+  return { key, requests };
 }
 
 function causeOf(request: Request): Cause | undefined {

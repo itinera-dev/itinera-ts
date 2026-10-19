@@ -33,12 +33,15 @@ export type {
 } from "./policy/lifecycle.js";
 export { type HookReporter, hookReporter } from "./policy/reporter.js";
 export { failureCause, fromStep, retryCause, role } from "./policy/request.js";
-export type { RolesOf, RolesOfOne } from "./policy/roles.js";
+export type { PolicyDescriptor } from "./policy/descriptor.js";
+export type { Provides, RolesOf, RolesOfOne } from "./policy/roles.js";
 export { StepPolicy, type StepPolicyClass } from "./policy/step-policy.js";
+export type { StepPolicyBuilder } from "./policy/step-policy/builder.js";
 export {
   WorkflowPolicy,
   type WorkflowPolicyClass,
 } from "./policy/workflow-policy.js";
+export type { WorkflowPolicyBuilder } from "./policy/workflow-policy/builder.js";
 
 declare const policyName: unique symbol;
 

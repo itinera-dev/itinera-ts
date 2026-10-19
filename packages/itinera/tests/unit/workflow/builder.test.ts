@@ -11,6 +11,13 @@ import {
   workflow,
 } from "../../../src/workflow.js";
 import { Violations } from "../../../src/workflow/violation.js";
+import { Close, type Messages, Notify } from "../../fixtures/policy.js";
+import { type Provided, serviceType } from "../../../src/service.js";
+import type { StepName } from "../../../src/step.js";
+import type { Attempt } from "../../../src/step/attempt.js";
+import { attempt, stepName } from "../../../src/step/request.js";
+import { key, type Supplied } from "../../../src/workflow/adapter.js";
+import { adaptersOf, providersOf } from "../../../src/workflow/descriptor.js";
 
 class Audit implements Reporter {
   readonly events: Event[] = [];
@@ -169,5 +176,128 @@ describe("the builder", () => {
     expect(() => shop().idGenerator("withPrefix" as "orderId")).toThrow(
       "Shop.withPrefix: parameter 1 carries no request",
     );
+  });
+});
+
+const PAYMENTS = serviceType<string>("Payments");
+
+class Tills extends Workflow implements Messages {
+  readonly told: string[] = [];
+  readonly price = "not a method";
+
+  tell(message: string): void {
+    this.told.push(message);
+  }
+
+  pricing(step: StepName, inputKey: string): Supplied {
+    return this.supply(`${step}.${inputKey}`);
+  }
+
+  payments(attempted: Attempt): Provided<string> {
+    return this.provide(`till ${String(attempted)}`);
+  }
+
+  counter(): Provided<string> {
+    return this.provide("counter");
+  }
+}
+
+/** A workflow's builder whose lists take anything, as their methods' bivariance lets through. */
+function loosely(builder = tills()): {
+  inputAdapter(key: string, ...given: unknown[]): unknown;
+  provider(key: string, ...given: unknown[]): unknown;
+} {
+  return builder;
+}
+
+function tills() {
+  return Tills.builder().name("tills").step(Ship.builder("ship"));
+}
+
+describe("the builder's other lists", () => {
+  it("attaches workflow policies, declared classes or policies' builders, in order", () => {
+    const built = tills()
+      .policy(Notify)
+      .policy(Close.builder("close").onWorkflowSuccess("closed"))
+      .build();
+    expect(
+      built
+        .instance()
+        .descriptor.policies()
+        .map((policy) => policy.name),
+    ).toEqual(["notify", "close"]);
+  });
+
+  it("refuses at once a workflow policy class not declared with @workflowPolicy", () => {
+    expect(() => tills().policy(Close)).toThrow(
+      "Close is not declared with @workflowPolicy",
+    );
+  });
+
+  it("adds input adapters, their requests given by position", () => {
+    const built = tills()
+      .inputAdapter("pricing", { steps: ["ship"] }, stepName(), key())
+      .build();
+    expect(adaptersOf(built.instance().descriptor)).toEqual([
+      {
+        name: "pricing",
+        steps: ["ship"],
+        key: "pricing",
+        requests: [{ kind: "stepName" }, { kind: "key" }],
+      },
+    ]);
+  });
+
+  it("adds service providers, their requests given by position", () => {
+    const built = tills()
+      .provider("payments", PAYMENTS, { perAttempt: true }, attempt())
+      .provider("counter", PAYMENTS, { key: "cash", name: "cash desk" })
+      .build();
+    expect(providersOf(built.instance().descriptor)).toMatchObject([
+      {
+        name: "payments",
+        serviceKey: "payments",
+        type: PAYMENTS,
+        scope: "attempt",
+        steps: undefined,
+        key: "payments",
+        requests: [{ kind: "attempt" }],
+      },
+      { name: "cash desk", serviceKey: "cash", scope: "journey", requests: [] },
+    ]);
+  });
+
+  it("refuses at once a request an input adapter may not make", () => {
+    expect(() => {
+      loosely().inputAdapter(
+        "pricing",
+        { steps: ["ship"] },
+        stepName(),
+        attempt(),
+      );
+    }).toThrow("Tills.pricing: an input adapter cannot request @attempt");
+  });
+
+  it("refuses at once a parameter of a provider left without a request", () => {
+    expect(() => {
+      loosely().provider("payments", PAYMENTS, {});
+    }).toThrow("Tills.payments: parameter 1 carries no request");
+  });
+
+  it("refuses at once a field named as an input adapter", () => {
+    expect(() => {
+      loosely().inputAdapter("price", { steps: ["ship"] });
+    }).toThrow("Tills.price is not a method of the class");
+  });
+
+  it("refuses at once an empty name of an input adapter", () => {
+    expect(() =>
+      tills().inputAdapter(
+        "pricing",
+        { steps: ["ship"], name: "" },
+        stepName(),
+        key(),
+      ),
+    ).toThrow("the input adapter Tills.pricing has an empty name");
   });
 });
