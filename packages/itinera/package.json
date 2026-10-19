@@ -29,6 +29,16 @@
         "default": "./dist/index.js"
       }
     },
+    "./unstable": {
+      "import": {
+        "types": "./dist/unstable.d.mts",
+        "default": "./dist/unstable.mjs"
+      },
+      "require": {
+        "types": "./dist/unstable.d.ts",
+        "default": "./dist/unstable.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -45,5 +55,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "prepack": "npm run build"
+  },
+  "dependencies": {
+    "ts-results-es": "7.1.0"
   }
 }
