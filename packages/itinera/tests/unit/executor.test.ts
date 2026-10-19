@@ -38,7 +38,7 @@ describe("LocalExecutor", () => {
 
   it("refuses an instance while it runs a journey, and lets that journey run on", async () => {
     const slow = stepMock({ attempts: [Ending.success], asynchronous: true });
-    const workflow = orders([slow, { name: "charge" }]);
+    const workflow = orders(slow.builder("charge"));
     const executor = new LocalExecutor();
     const running = executor.run(workflow.instance());
     await expect(executor.run(charging())).rejects.toEqual(

@@ -29,8 +29,8 @@ export interface StepDescriptor {
 }
 
 /**
- * What a workflow says about one of its steps, to `@withStep` or to its
- * builder.
+ * What a workflow says about one of its steps to `@withStep`; its builder
+ * takes a step builder instead.
  *
  * {@includeCode ../../examples/descriptors.ts}
  *
@@ -84,12 +84,7 @@ export function describeStep(
   options: StepOptions<readonly StepPolicyClass[]>,
 ): StepDescriptor {
   const name = named<StepName>(options.name, `a step of class ${step.name}`);
-  const retryBudget = options.retryBudget ?? 0;
-  if (!Number.isSafeInteger(retryBudget) || retryBudget < 0) {
-    throw new Error(
-      `step ${name} has a retry budget of ${String(retryBudget)}, not a whole number from 0`,
-    );
-  }
+  const retryBudget = checkedRetryBudget(name, options.retryBudget ?? 0);
   const described: StepDescriptor = Object.freeze({
     name,
     retryBudget,
@@ -101,6 +96,20 @@ export function describeStep(
     rescue: options.rescue,
   });
   return described;
+}
+
+/**
+ * `retries`, the retry budget of the step `name`.
+ *
+ * @throws Error if it is not a whole number from 0.
+ */
+export function checkedRetryBudget(name: StepName, retries: number): number {
+  if (!Number.isSafeInteger(retries) || retries < 0) {
+    throw new Error(
+      `step ${name} has a retry budget of ${String(retries)}, not a whole number from 0`,
+    );
+  }
+  return retries;
 }
 
 /** The classes of the step policies attached to the step `described`. */

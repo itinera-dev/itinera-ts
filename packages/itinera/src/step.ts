@@ -4,10 +4,12 @@
  *
  * @module
  */
+import { type StepBuilder, stepBuilder } from "./step/builder.js";
 import { type Outcome, success } from "./step/outcome.js";
 import type { PlainValue } from "./value.js";
 
 export { Attempt } from "./step/attempt.js";
+export type { StepBuilder } from "./step/builder.js";
 export { step } from "./step/declared.js";
 export type { StepDescriptor, StepOptions } from "./step/descriptor.js";
 export type { Outcome, Success } from "./step/outcome.js";
@@ -83,6 +85,19 @@ export abstract class Step {
    */
   abstract run(...requests: never[]): Outcome | Promise<Outcome>;
 
+  /**
+   * Starts putting a step of this class together for a workflow's builder,
+   * named `name`, as `Charge.builder("charge")`.
+   *
+   * {@includeCode ../examples/builder.ts}
+   *
+   * @throws Error if the name is empty, or if a parameter of the step's
+   * constructor or of its `run` has no request.
+   */
+  static builder(this: StepClass, name: string): StepBuilder {
+    return stepBuilder(this, name);
+  }
+
   /** The outcome of an attempt that did its work. */
   protected succeed(): Outcome {
     return success;
@@ -99,4 +114,6 @@ export interface StepClass {
   new (...needs: never[]): Step;
   /** The prototype every step of the class shares. */
   readonly prototype: Step;
+  /** Starts putting a step of the class together for a workflow's builder. */
+  builder(name: string): StepBuilder;
 }
