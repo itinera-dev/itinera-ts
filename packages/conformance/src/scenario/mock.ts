@@ -1,9 +1,10 @@
 /**
- * The script of a scenario's step as a step mock plays it, refusing what
- * the runner cannot run yet.
+ * How a scenario's step ends each attempt, as a step mock plays it,
+ * refusing what the runner cannot run yet.
  */
-import { Ending, type StepMockScript } from "itinera/unstable";
-import type { AttemptScript } from "../model/step/attempt.js";
+import { Ending, type Reason, type StepMockScript } from "itinera/unstable";
+import { given } from "../given.js";
+import type { AttemptScript, ScriptedReason } from "../model/step/attempt.js";
 import type { StepScript } from "../model/step.js";
 
 /** The message of an abnormal termination the case scripts with none. */
@@ -42,9 +43,7 @@ export function mockScriptOf(script: StepScript): StepMockScript {
 
 function refuseWhatDoesNotRunYet(script: StepScript): void {
   const notYet = [
-    script.actions.length > 0 && "contributions, emits or global metadata",
     (script.hasRescueStep || script.isRescueStep) && "rescue steps",
-    script.ignoresFailedEmits && "failed emits",
     script.keepsHandles && "kept handles",
   ].find(isNamed);
   if (notYet !== undefined) {
@@ -56,19 +55,25 @@ function isNamed(what: string | false): what is string {
   return what !== false;
 }
 
-function endingOf(attempt: AttemptScript): Ending {
-  if (attempt.contributes.length > 0) {
-    throw new NotRunYet("contributions");
-  }
-  switch (attempt.outcome.kind) {
+function endingOf({ outcome }: AttemptScript): Ending {
+  switch (outcome.kind) {
     case "success":
       return Ending.success;
-    case "error":
-      return Ending.abnormalTermination(
-        attempt.outcome.message ?? unwrittenMessage,
-      );
     case "failure":
+      return Ending.failure(reasonOf(outcome.reason));
     case "skipped":
-      throw new NotRunYet("an attempt that fails or is skipped");
+      return outcome.reason === undefined
+        ? Ending.skip
+        : Ending.skipBecause(reasonOf(outcome.reason));
+    case "error":
+      return Ending.abnormalTermination(outcome.message ?? unwrittenMessage);
   }
+}
+
+function reasonOf({ code, message, details }: ScriptedReason): Reason {
+  return {
+    code,
+    ...(message === undefined ? {} : { message }),
+    ...(details === undefined ? {} : { details: given(details) }),
+  };
 }
