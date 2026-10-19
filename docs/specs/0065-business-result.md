@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0065](https://github.com/itinera-dev/spec/blob/main/proposals/0065-business-result.md), implemented in [#26](https://github.com/itinera-dev/itinera-ts/issues/26). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, [0083](0083-what-failures-carry.md) what a failure and an abort carry, and [0085](0085-aborted-result-has-no-data.md) the aborted result.
 
-Status: in progress. Stage 3 added `JourneyResult`, its statuses and the data bag it hands over. Stage 6 added `output` and lists the proposal.
+Status: complete, and 65 is listed in `conformance.json`. Stage 3 added `JourneyResult`, its statuses and the data bag it hands over. Stage 6 added `output` and listed the proposal.
 
 ## API
 
-Until 0065 is listed, everything here is exported only from `itinera/unstable`. It is defined in `src/journey/result.ts`, `src/journey/failure.ts`, `src/journey/abort.ts` and `src/journey/data-bag.ts`, re-exported by `src/journey.ts`, which becomes the subpath `itinera/journey` then.
+Everything here is exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the failure and the abort of 0083, as the agents' manual says. It is defined in `src/journey/result.ts`, `src/journey/failure.ts`, `src/journey/abort.ts` and `src/journey/data-bag.ts`, re-exported by `src/journey.ts`, which becomes the subpath `itinera/journey` then.
 
 - **`JourneyResult`** is an interface, frozen once made: `journeyId`, `status`, `failure`, `abort`, and `isSucceeded()`, `isFailed()` and `isAborted()`, each a type guard narrowing `status`, so the data bag is read without a switch, as chapter 5, 5.14 suggests.
 - **`JourneyStatus`** is a discriminated union on `kind`: `Succeeded` with the `dataBag`, `Failed` with the `failure` and the `dataBag`, and `Aborted` with the `abort` only.
@@ -31,4 +31,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0065` passes, and 65 is listed in `conformance.json`. Planned for stage 6.
+Done in stage 6: every scenario tagged `@proposal-0065` passes, and 65 is listed in `conformance.json`.
