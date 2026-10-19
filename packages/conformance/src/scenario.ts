@@ -74,12 +74,8 @@ export class Scenario extends Workflow {
  * @throws ModelError when an input adapter's script uses a data bag access
  * it could never hold.
  */
-export function workflowOf(
-  model: Model,
-  recorders: Recorders,
-  witness: Witness,
-): Built<Scenario> {
-  const { name, steps, adapters, reporters = [], idGenerator } = model.workflow;
+export function workflowOf(model: Model, witness: Witness): Built<Scenario> {
+  const { name, steps, adapters, idGenerator } = model.workflow;
   const builder = Scenario.builder().name(name);
   for (const step of steps) {
     const script = model.step(step);
@@ -104,9 +100,6 @@ export function workflowOf(
       key(),
       ...adapter.requests.map(requestOf),
     );
-  }
-  for (const reporter of reporters) {
-    builder.reporter(recorders.classOf(reporter));
   }
   const played = new Adapters(adapters);
   if (idGenerator?.kind === "returns") {
@@ -133,12 +126,19 @@ function requestOf(request: AdapterRequest) {
   }
 }
 
-/** A new instance of the workflow, with the initial data and global metadata the scenario gives. */
+/**
+ * A new instance of the workflow, with the initial data and global metadata
+ * the scenario gives, which makes each reporter the workflow lists with its
+ * journey ID.
+ */
 export function instanceOf(
   workflow: Built<Scenario>,
   model: Model,
+  recorders: Recorders,
 ): WorkflowInstance<Scenario> {
+  const { reporters = [] } = model.workflow;
   return workflow.instance(model.initialData.map(asGiven), {
+    reporters: reporters.map((name) => recorders.makerOf(name)),
     reportersGlobalMetadata: model.initialGlobalMetadata.map(asGiven),
   });
 }

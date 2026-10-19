@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 import { Given, Then, When } from "@cucumber/cucumber";
 import { type Journey, ofJourney } from "../journeys.js";
 import { ModelError } from "../model.js";
+import type { ScenarioReporter } from "../recorders.js";
 import { kindOf, numbered } from "../trace.js";
 import { expectOfStream, holds } from "../unmet.js";
 import type { World } from "../world.js";
@@ -74,3 +75,19 @@ Then<World>(
     }
   },
 );
+
+Then<World>(
+  "the reporter {string} was made with the journey ID {string}",
+  function (reporter: string, journeyId: string) {
+    const made = this.recorders.receivers(reporter).map(madeWith);
+    holds(
+      isDeepStrictEqual(new Set(made), new Set([journeyId])),
+      `"${reporter}" made with the journey ID "${journeyId}"`,
+      JSON.stringify(made),
+    );
+  },
+);
+
+function madeWith(reporter: ScenarioReporter): string | undefined {
+  return reporter.madeWith;
+}
