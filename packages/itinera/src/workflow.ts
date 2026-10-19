@@ -56,6 +56,7 @@ export type {
 export type { AdapterName, Built, WorkflowName } from "./workflow/names.js";
 export type {
   AttemptRequestInJourneyScope,
+  DuplicateAdapterName,
   DuplicateProviderName,
   DuplicateStepName,
   InputAdapterForUnknownStep,
