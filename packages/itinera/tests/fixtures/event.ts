@@ -11,28 +11,31 @@ const fixed = {
   workflow: "orders" as WorkflowName,
 };
 
+/** The fields every event carries, for the event at this place in its stream. */
+export function fixedFields(sequence: number) {
+  return { sequence, ...fixed };
+}
+
+/** The fields of an event about the step `charge`, during this attempt. */
+export function aboutCharge(sequence: number, attempt = Attempt.first) {
+  return { ...fixedFields(sequence), step: "charge" as StepName, attempt };
+}
+
 /** The first event of a journey, carrying the keys of its initial data. */
 export function journeyStarted(): Event {
-  return { kind: "journey_started", sequence: 1, ...fixed, initialKeys: [] };
+  return { kind: "journey_started", ...fixedFields(1), initialKeys: [] };
 }
 
 /** The first attempt of the step `charge` reported Success. */
 export function stepSucceeded(): Event {
-  return {
-    kind: "step_succeeded",
-    sequence: 2,
-    ...fixed,
-    step: "charge" as StepName,
-    attempt: Attempt.first,
-  };
+  return { kind: "step_succeeded", ...aboutCharge(2) };
 }
 
 /** The journey was aborted because a reporter failed. */
 export function journeyAborted(): JourneyAborted {
   return {
     kind: "journey_aborted",
-    sequence: 3,
-    ...fixed,
+    ...fixedFields(3),
     abort: { reason: "reporter failed", errorMessage: "disk full" },
   };
 }

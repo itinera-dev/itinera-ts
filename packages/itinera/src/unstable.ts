@@ -17,6 +17,8 @@
  *   {@link DispatcherFactory}, {@link DefaultDispatcher},
  *   {@link DefaultDispatcherFactory} and {@link DebugReporter}, which move to
  *   `itinera/report`.
+ * - Test support: {@link RecordingReporter}, which moves to
+ *   `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
  *   their concepts: `itinera/journey`, `itinera/workflow`, `itinera/step`,
  *   `itinera/policy` and `itinera/service`.
@@ -47,5 +49,6 @@ export {
 export type { ProviderName } from "./service.js";
 export type { Reason, StepName } from "./step.js";
 export { Attempt } from "./step.js";
+export { RecordingReporter } from "./testing.js";
 export type { AsValue, PlainValue, SerialisesItself, Value } from "./value.js";
 export type { AdapterName, WorkflowName } from "./workflow.js";
