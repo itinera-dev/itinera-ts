@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import {
   DefaultDispatcherFactory,
   type Event,
-  type PlainValue,
   type Reporter,
 } from "itinera/unstable";
+import { type PlainValue } from "itinera/value";
 
 class Keeping implements Reporter {
   readonly entries: string[] = [];

@@ -1,4 +1,4 @@
-import type { PlainValue } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import { ModelError } from "../error.js";
 import type { Row } from "../table.js";
 import { entries, scripted, type Scripted } from "../value.js";

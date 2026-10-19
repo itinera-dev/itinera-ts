@@ -7,7 +7,7 @@ import {
   optional,
   type RequestType,
   string,
-} from "itinera/unstable";
+} from "itinera/value";
 import type { ValueType } from "./model.js";
 
 const tokens = {

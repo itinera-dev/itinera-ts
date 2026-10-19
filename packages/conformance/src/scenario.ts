@@ -14,10 +14,10 @@ import {
   stepName,
   stepReporter,
   type Supplied,
-  type Value,
   type WorkflowInstance,
   Workflow,
 } from "itinera/unstable";
+import { type Value } from "itinera/value";
 import { Adapters } from "./adapters.js";
 import { given } from "./given.js";
 import { type AdapterRequest, refuseUnheldAccess } from "./model/adapter.js";

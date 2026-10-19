@@ -2,10 +2,8 @@ import assert from "node:assert/strict";
 import {
   type Answer,
   input,
-  integer,
   type KeyIn,
   None,
-  optional,
   type Option,
   type Outcome,
   type ParameterOf,
@@ -18,9 +16,9 @@ import {
   type StepClass,
   stepReporter,
   type StepReporter,
-  string,
   type ValueRequestDecorator,
 } from "itinera/unstable";
+import { integer, optional, string } from "itinera/value";
 
 @step()
 class Charge extends Step {

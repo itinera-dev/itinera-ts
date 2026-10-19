@@ -5,7 +5,6 @@ import {
   type Contributor,
   contributor,
   input,
-  integer,
   key,
   type Outcome,
   type Provided,
@@ -14,10 +13,10 @@ import {
   Step,
   type StepName,
   stepName,
-  string,
   type Supplied,
   Workflow,
 } from "itinera/unstable";
+import { integer, string } from "itinera/value";
 
 interface PaymentGateway {
   take(amount: number): string;

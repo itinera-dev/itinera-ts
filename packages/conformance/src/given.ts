@@ -1,5 +1,5 @@
 /** What the scenario gives, as the language gives it to itinera. */
-import type { PlainValue } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import type { Scripted } from "./model/value.js";
 
 /**

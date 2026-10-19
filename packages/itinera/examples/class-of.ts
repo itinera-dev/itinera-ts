@@ -1,15 +1,13 @@
 import assert from "node:assert/strict";
 import {
-  classOf,
   input,
   LocalExecutor,
   type Outcome,
-  type PlainValue,
   Step,
   step,
-  type ValueClass,
   Workflow,
 } from "itinera/unstable";
+import { classOf, type PlainValue, type ValueClass } from "itinera/value";
 
 class Payment {
   constructor(readonly cents: number) {}

@@ -6,7 +6,7 @@ Status: complete, and 56 is listed in `conformance.json`. Stage 1 added the type
 
 ## API
 
-These types are exported only from `itinera/unstable`, beside the type tokens of the same module, which the requests of proposals not yet listed use, so that `itinera/value` becomes a subpath once with everything it holds, as the agents' manual says. They are defined in `src/value.ts`.
+Since 0056 is listed, these types are exported from the subpath `itinera/value`, `src/value.ts`, with its ESM layer `src/value.mts`, and no longer from `itinera/unstable`. The module also holds the type tokens of [0062](0062-workflow-descriptors.md), listed, which name nothing of a proposal not yet listed, so they moved with it.
 
 - **`PlainValue`**: `null`, a boolean, a number, a string, a list of plain values, or a plain object of them, with string keys. It is the form in which itinera keeps every value.
 - **`SerialisesItself`**: an object with `toValue(): Value`. itinera calls `toValue()` once, when the object is given, and keeps what it returns. A class whose instances a request reads back also has a static `fromValue`.

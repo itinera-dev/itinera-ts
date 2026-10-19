@@ -3,10 +3,8 @@ import {
   failureReason,
   fromRescuedStep,
   input,
-  integer,
   None,
   type Option,
-  optional,
   type Outcome,
   type Reason,
   RescueStep,
@@ -17,11 +15,11 @@ import {
   Some,
   Step,
   step,
-  string,
   withStep,
   Workflow,
   workflow,
 } from "itinera/unstable";
+import { integer, optional, string } from "itinera/value";
 
 @rescueStep()
 class Refund extends RescueStep {

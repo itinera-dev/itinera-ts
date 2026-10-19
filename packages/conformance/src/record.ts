@@ -7,9 +7,9 @@ import {
   type Dispatcher,
   type DispatcherFactory,
   type Event,
-  type PlainValue,
   type Reporter,
 } from "itinera/unstable";
+import { type PlainValue } from "itinera/value";
 import type { Holding } from "./model.js";
 
 /**

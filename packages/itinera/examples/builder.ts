@@ -3,12 +3,12 @@ import {
   type DataBag,
   dataBag,
   type Event,
-  integer,
   type Outcome,
   type Reporter,
   Step,
   Workflow,
 } from "itinera/unstable";
+import { integer } from "itinera/value";
 
 class Charge extends Step {
   override run(): Outcome {

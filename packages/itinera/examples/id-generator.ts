@@ -3,7 +3,6 @@ import {
   type DataBag,
   dataBag,
   idGenerator,
-  integer,
   type Outcome,
   Step,
   step,
@@ -11,6 +10,7 @@ import {
   Workflow,
   workflow,
 } from "itinera/unstable";
+import { integer } from "itinera/value";
 
 @step()
 class Ship extends Step {

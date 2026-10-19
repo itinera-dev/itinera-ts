@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { PlainValue, Value } from "itinera/unstable";
+import type { PlainValue, Value } from "itinera/value";
 
 class Payment {
   constructor(readonly cents: number) {}
