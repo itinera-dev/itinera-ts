@@ -150,6 +150,23 @@ describe("the builder", () => {
     expect(Shop.made).toBe(made);
   });
 
+  it("lists what it has put together so far, without making a workflow object", () => {
+    const made = Shop.made;
+    expect(
+      shop()
+        .step(Charge.builder("charge"))
+        .listing()
+        .map((listed) => listed.step),
+    ).toEqual(["ship", "charge"]);
+    expect(Shop.made).toBe(made);
+  });
+
+  it("refuses to list a workflow with violations", () => {
+    expect(() => shop().step(Ship.builder("ship")).listing()).toThrow(
+      Violations,
+    );
+  });
+
   it("refuses a second ID generator", () => {
     expect(() => Orders.builder().idGenerator("orderId")).toThrow(
       "Orders has more than one ID generator",
@@ -218,7 +235,7 @@ describe("the builder's other lists", () => {
   it("attaches workflow policies, declared classes or policies' builders, in order", () => {
     const built = tills()
       .policy(Notify)
-      .policy(Close.builder("close").onWorkflowSuccess("closed"))
+      .policy(Close.builder("close").onWorkflowFailure("failed"))
       .build();
     expect(
       built

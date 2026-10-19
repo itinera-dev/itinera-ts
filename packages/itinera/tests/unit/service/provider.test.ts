@@ -1,21 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { DataBag, JourneyId } from "../../../src/journey.js";
 import { dataBag, journeyId } from "../../../src/journey/request.js";
-import { Charge } from "../../fixtures/step.js";
+import { Charge, Refund } from "../../fixtures/step.js";
 import { attempt, stepName } from "../../../src/step/request.js";
 import type { StepName } from "../../../src/step.js";
 import { Attempt } from "../../../src/step/attempt.js";
 import { withStep, Workflow, workflow } from "../../../src/workflow.js";
 import { declarationOf } from "../../../src/workflow/registry.js";
-import {
-  isProvided,
-  type Provided,
-  provider,
-} from "../../../src/service/provider.js";
-import {
-  providerReporter,
-  type ProviderReporter,
-} from "../../../src/service/reporter.js";
+import { isProvided, type Provided, provider } from "../../../src/service/provider.js";
+import { providerReporter, type ProviderReporter } from "../../../src/service/reporter.js";
 import { serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {
@@ -27,7 +20,7 @@ const PAYMENT_GATEWAY = serviceType<PaymentGateway>("PaymentGateway");
 const gateway: PaymentGateway = { take: String };
 
 @workflow({ name: "payments" })
-@withStep(Charge, { name: "charge" })
+@withStep(Charge, { name: "charge", rescue: Refund })
 class Payments extends Workflow {
   @provider(PAYMENT_GATEWAY)
   payments(

@@ -39,12 +39,12 @@
  * - Workflows: {@link Workflow}, {@link workflow}, {@link withStep},
  *   {@link idGenerator}, {@link fromWorkflow}, the input adapters'
  *   {@link inputAdapter}, {@link key} and {@link Supplied},
- *   {@link WorkflowBuilder},
- *   {@link WorkflowDescriptor}, {@link Violations}, the types of the
- *   request decorators, such as {@link RequestDecorator}, and of the
- *   requests a builder is given by position, such as {@link Tokens}, which move to
- *   `itinera/workflow`, and {@link WorkflowInstance}, which moves to
- *   `itinera/instance`.
+ *   {@link WorkflowBuilder}, {@link WorkflowDescriptor}, the listing's
+ *   {@link ListedStep}, {@link Violations} and each {@link Violation}, the
+ *   types of the request decorators, such as {@link RequestDecorator}, and
+ *   of the requests a builder is given by position, such as {@link Tokens},
+ *   which move to `itinera/workflow`, and {@link WorkflowInstance}, which
+ *   moves to `itinera/instance`.
  * - Executors: {@link LocalExecutor}, {@link Refusal} and why `run` refuses
  *   an instance, which move to `itinera/executor`.
  * - Journeys: {@link JourneyResult}, how a journey ends, why it failed or
@@ -225,21 +225,35 @@ export {
 export type {
   AdapterName,
   Answer,
+  AttemptRequestInJourneyScope,
   Built,
+  DuplicateProviderName,
   DuplicateStepName,
   FromDataBag,
   Given,
   IdGeneratorDecorator,
   IdGeneratorKey,
   InputAdapterDecorator,
+  InputAdapterForUnknownStep,
   InputAdapterOptions,
   KeyIn,
+  ListedRescue,
+  ListedService,
+  ListedStep,
   MethodKey,
   ParameterOf,
   ParametersOf,
   Place,
+  Position,
   ReadFromMetadata,
   RequestDecorator,
+  RescuedStepRetried,
+  ServiceNotProvided,
+  ServiceProvidedTwice,
+  ServiceProviderForUnknownStep,
+  ServiceRequestedTwice,
+  StepAdaptedTwice,
+  StepHookDefinedTwice,
   Strict,
   Supplied,
   SuppliedValue,
@@ -250,8 +264,10 @@ export type {
   WorkflowBuilder,
   WorkflowClass,
   WorkflowDescriptor,
+  WorkflowHookDefinedTwice,
   WorkflowName,
   WorkflowOptions,
+  WrongServiceType,
 } from "./workflow.js";
 export {
   fromWorkflow,

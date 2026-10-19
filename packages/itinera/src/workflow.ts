@@ -16,8 +16,9 @@ import type { AsValue } from "./value.js";
 import { fromBag, type Supplied, supplied } from "./workflow/adapter.js";
 import { WorkflowBuilder } from "./workflow/builder.js";
 import type { WorkflowDescriptor } from "./workflow/descriptor.js";
+import type { ListedStep } from "./workflow/listing.js";
 import type { Built } from "./workflow/names.js";
-import { declarationOf } from "./workflow/registry.js";
+import { declarationOf, declaredDescriptor } from "./workflow/registry.js";
 
 export {
   withStep,
@@ -59,13 +60,30 @@ export {
 } from "./workflow/id-generator.js";
 export { fromWorkflow } from "./workflow/request.js";
 export type { WorkflowDescriptor } from "./workflow/descriptor.js";
+export type {
+  ListedRescue,
+  ListedService,
+  ListedStep,
+  Position,
+} from "./workflow/listing.js";
 export type { AdapterName, Built, WorkflowName } from "./workflow/names.js";
-export {
-  type DuplicateStepName,
-  type Violation,
-  ViolationKind,
-  Violations,
+export type {
+  AttemptRequestInJourneyScope,
+  DuplicateProviderName,
+  DuplicateStepName,
+  InputAdapterForUnknownStep,
+  RescuedStepRetried,
+  ServiceNotProvided,
+  ServiceProvidedTwice,
+  ServiceProviderForUnknownStep,
+  ServiceRequestedTwice,
+  StepAdaptedTwice,
+  StepHookDefinedTwice,
+  WorkflowHookDefinedTwice,
+  WrongServiceType,
+  Violation,
 } from "./workflow/violation.js";
+export { ViolationKind, Violations } from "./workflow/violation.js";
 
 /**
  * The base class of every workflow. A class extending it is the workflow's
@@ -95,15 +113,25 @@ export abstract class Workflow {
     this: C,
     ...args: ConstructorParameters<C>
   ): Built<InstanceType<C>> {
-    const descriptor = declarationOf(this).descriptor;
-    if (descriptor === undefined) {
-      throw new Error(
-        `${this.name} is not declared with @workflow, so it has no workflow descriptor to build from`,
-      );
-    }
+    const descriptor = declaredDescriptor(this);
     const made = new this(...args);
     made.#init(descriptor);
     return made as Built<InstanceType<C>>;
+  }
+
+  /**
+   * Lists the steps the decorators of the class declared, in order, without
+   * running anything and without a workflow object, as its workflow
+   * descriptor's `listing()` does.
+   *
+   * {@includeCode ../examples/listing.ts}
+   *
+   * @throws Error if the class is not declared with `@workflow`.
+   */
+  static listing(
+    this: new (...args: never[]) => Workflow,
+  ): readonly ListedStep[] {
+    return declaredDescriptor(this).listing();
   }
 
   /**

@@ -3,18 +3,14 @@ import type { JourneyId } from "../../../src/journey.js";
 import { journeyId } from "../../../src/journey/request.js";
 import { attempt, stepName } from "../../../src/step/request.js";
 import type { Attempt, StepName } from "../../../src/step.js";
-import { Charge } from "../../fixtures/step.js";
+import { Charge, Refund, Ship } from "../../fixtures/step.js";
 import { withStep, Workflow, workflow } from "../../../src/workflow.js";
-import {
-  inputAdapter,
-  isSupplied,
-  key,
-  type Supplied,
-} from "../../../src/workflow/adapter.js";
+import { inputAdapter, isSupplied, key, type Supplied } from "../../../src/workflow/adapter.js";
 import { declarationOf } from "../../../src/workflow/registry.js";
 
 @workflow({ name: "prices" })
-@withStep(Charge, { name: "charge" })
+@withStep(Charge, { name: "charge", rescue: Refund })
+@withStep(Ship, { name: "ship" })
 class Prices extends Workflow {
   @inputAdapter({ steps: ["charge", "charge_rescue"], name: "prices" })
   price(@stepName() step: StepName, @key() key: string): Supplied {
