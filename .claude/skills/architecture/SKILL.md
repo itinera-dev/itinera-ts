@@ -11,9 +11,17 @@ description: How Claude finds which parts of docs/architecture.md in itinera-ts 
 
 The document starts in stage 3, which adds its first sections, and each later stage of tier 1 adds the sections of what it builds, or corrects those it changes. Each section ends with a "Where it lives" line.
 
-This skill keeps a table of the sections, with three columns: the section, the code it describes, which repeats its "Where it lives" line, and what else makes the section untrue when it changes, such as a subpath, a decorator, a request or an event being added, removed or renamed. The pull request that adds a section to the document adds its row here, and one that changes a "Where it lives" line changes the row. Until stage 3, the document and the table have no sections.
+This skill keeps a table of the sections, with three columns: the section, the code it describes, which repeats its "Where it lives" line, and what else makes the section untrue when it changes, such as a subpath, a decorator, a request or an event being added, removed or renamed. The pull request that adds a section to the document adds its row here, and one that changes a "Where it lives" line changes the row.
 
 Paths under `engine/`, `step/` and the like are in `packages/itinera/src/`.
+
+| Section | Code it describes | Also untrue when |
+|---|---|---|
+| The packages | `packages/`, and each module in `packages/itinera/src/` | a package, a subpath or a module is added, removed or renamed, or a module's contents move |
+| What a workflow is made of | `workflow/decorators.ts`, `workflow/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts` | a decorator, a builder method, or a member of `WorkflowDescriptor`, `StepDescriptor` or `WorkflowInstance` is added, removed or renamed |
+| From declaration to result | `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts` | a refusal is added or removed, or what happens before a journey changes order |
+| How a journey runs | `engine/scan.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts` | an outcome, a decision, an event of the flow, an abort reason or a status is added, or the scan changes |
+| Events and reporters | `engine/journey.ts`, `engine/emitter.ts`, `engine/guard.ts`, `engine/frozen.ts`, `report/default-dispatcher.ts` | what every event carries, or the rules on a reporter or dispatcher that fails, change |
 
 ## Checking a change
 

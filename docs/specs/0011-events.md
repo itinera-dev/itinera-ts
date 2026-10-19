@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0011](https://github.com/itinera-dev/spec/blob/main/proposals/0011-events.md), implemented in [#7](https://github.com/itinera-dev/itinera-ts/issues/7). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals; [0040](0040-events-facts-and-decisions.md) holds the decision events, [0063](0063-dispatcher-factory.md) the dispatchers and their factories, and [0102](0102-global-metadata.md) global metadata.
 
-Status: in progress. Stage 1 added the event types, reporters and `DebugReporter`. The emitter, the guards around reporters, freezing and the events from steps and hooks come with the engine, from stage 3, and stage 7 lists the proposal.
+Status: in progress. Stage 1 added the event types, reporters and `DebugReporter`. Stage 3 added the emitter, the guards around reporters (see 0081) and freezing. The events from steps and hooks come in stages 5 and 7, which lists the proposal.
 
 ## API
 
@@ -53,13 +53,17 @@ TypeDoc shows a closed set as a variable, with its names in alphabetical order a
 
 ### Reporters
 
-`Reporter` has `report(event)` and, optionally, `receiveGlobalMetadata(key, value)`, chapter 2, 2.1's **report** and **receive global metadata**, each returning nothing or a promise, so a reporter may be synchronous or asynchronous (decision 1). A reporter should handle its own trouble: a failure that escapes one aborts the journey with `reporter failed`, as 0081 says, which the engine's guards ensure from stage 3.
+`Reporter` has `report(event)` and, optionally, `receiveGlobalMetadata(key, value)`, chapter 2, 2.1's **report** and **receive global metadata**, each returning nothing or a promise, so a reporter may be synchronous or asynchronous (decision 1). A reporter should handle its own trouble: a failure that escapes one aborts the journey with `reporter failed`, as 0081 says, which the engine's guards ensure.
 
 `DebugReporter` prints each event as JSON, on a line of its own, with `console.log`. The language's declarations of the ES library leave `console` out, and the build loads no `@types/node`, so `src/report/debug-reporter.ts` declares the one method it calls.
 
 ## Dependencies
 
 None of its own.
+
+## The emitter
+
+`Emitter`, in `src/engine/emitter.ts`, makes every event of a journey from what it carries: it numbers them from 1 in the order made, stamps each with the executor's clock as an ISO 8601 UTC `Timestamp`, gives each the journey ID and the workflow's name, and freezes it with everything it carries, with `frozen` in `src/engine/frozen.ts`. A reporter receives the engine's event itself, so freezing is what keeps one reporter from changing what the next receives.
 
 ## Tests
 

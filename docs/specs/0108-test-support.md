@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0108](https://github.com/itinera-dev/spec/blob/main/proposals/0108-test-support.md), implemented in [#36](https://github.com/itinera-dev/itinera-ts/issues/36). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 13 what test support holds and section 14 how the conformance runner uses it.
 
-Status: in progress. Stage 2 added the recording reporter and its path, and started the conformance runner, which uses it. The step mock and its `Ending` come in stage 3, the policy mock and the two reporter mocks with the first scenarios that need them, the rest of chapter 8 in stage 10, which lists the proposal and claims `testing`.
+Status: in progress. Stage 2 added the recording reporter and its path, and started the conformance runner, which uses it. Stage 3 added the step mock and its `Ending`. The policy mock and the two reporter mocks with the first scenarios that need them, the rest of chapter 8 in stage 10, which lists the proposal and claims `testing`.
 
 ## API
 
@@ -15,6 +15,14 @@ Until 0108 is listed, test support is exported only from `itinera/unstable`. It 
 - **`events`**: every event it received, in order, as a new array on each read, so a test changing what it read changes nothing the reporter keeps. The events themselves are the engine's, which freezes them.
 - **`globalMetadata`**: each key with its latest value, in the order the keys were first set, as a new `Map` on each read. A `Map` keeps a key set again in its first place, which is what "the latest value of each entry" needs. The journey ID is its first entry, under `journey_id`.
 - **`path`**: one line per event of the journey's flow, in order, written as chapter 8, 8.3 writes them. The lines are made by `line(event)`, in `src/testing/recording-reporter/path.ts`, a `switch` over every kind of event, so that a new kind does not compile until it says whether it has a line. An attempt is written by its `number`, a reason by its `code`, a decision by its cause or by the policy of the hook that decided it, and an abort by its reason, with the step when it names one.
+
+### The ending
+
+`Ending`, in `src/testing/ending.ts`, is how a scripted attempt ends, given to a test tool that writes real steps, as chapter 8, 8.5 point 10 asks. It is a discriminated union on `kind`, made by a frozen object of the same name: `Ending.success`, and `Ending.abnormalTermination(errorMessage)`. `Ending.outcome(ending)` gives the outcome it stands for: the success outcome, or a throw of an `Error` carrying the message, as a step's `run` throws it. Stage 5 adds a failure and the skips, with the outcomes they stand for. A type and an object of one name, rather than a class, keep it a plain discriminated union, as every other union carrying data is.
+
+### The step mock
+
+`stepMock(script)`, in `src/testing/step-mock.ts`, makes a new class extending `StepMock`, itself an abstract class extending `Step`, as "How a mock receives its script" below settles. Its script, `StepMockScript`, says how each attempt ends, the last ending played again by every later attempt, whether `run` gives its outcome through a promise, and the message its constructor throws when it cannot be built. The class counts the steps built from it as attempts, so each workflow takes a class of its own. Stage 5 adds contributions, emitted events and global metadata, and the requests a mock is given by position.
 
 ## Dependencies
 
@@ -36,12 +44,15 @@ Stage 2 started the runner in `packages/conformance`, on cucumber-js 13.3.0, wit
 - `tests/unit/testing/recording-reporter.test.ts`: events kept in order, the latest value of each entry of global metadata in the order first set, the path made from the events, and copies on every read.
 - `tests/unit/testing/recording-reporter/path.test.ts`: the line of every event of the flow, each as chapter 8, 8.3 writes it, and no line for events outside the flow.
 - `examples/recording-reporter.ts`: a recording reporter added to a dispatcher, keeping the latest value of each entry.
+- `tests/unit/testing/ending.test.ts`: the outcome each ending stands for, and frozen endings.
+- `tests/unit/testing/step-mock.test.ts`: the attempts played in order, the last repeating, each class counting on its own, asynchronous endings and a step that cannot be built.
+- `examples/ending.ts` and `examples/step-mock.ts`.
 - `packages/conformance/tests/unit`, mirroring `src`: the environment, the model and what each sentence may declare only once, tables, values and types, attempts, contributions, events a step emits, event kinds and the recording dispatcher factory.
 - `packages/conformance/tests/integration/runner.test.ts`: the built runner run on its own cases in `tests/fixtures/cases`, passing a scenario of sentences it defines and reporting it as Cucumber JSON, running only what the tag expression selects, failing on an undefined sentence and on a case in error, and refusing to run without its environment.
 
 ## How a mock receives its script
 
-Settled in stage 3, as a default the maintainer may change: a function of test support makes a new class for each scripted step, extending the step mock's own class, which extends `Step`, and closing over the step's script, so the builder is given a class, as it requires, and builds it anew for every attempt, which reads its script from the closure. The builder takes a class extending `Step` through another class, which `@step` does not. When stage 4 gives steps requests, the runner gives a mock's requests to the builder by position, as `needs` and `run` in its step options, as it may for any class, so the requests of the mock's own class, recorded under that class, are never looked up for the class made per scenario. A policy mock is made the same way, in the stage whose scenarios first need one.
+Settled in stage 3, as a default the maintainer may change, and built by `stepMock`: a function of test support makes a new class for each scripted step, extending the step mock's own class, which extends `Step`, and closing over the step's script, so the builder is given a class, as it requires, and builds it anew for every attempt, which reads its script from the closure. The builder takes a class extending `Step` through another class, which `@step` does not. When stage 4 gives steps requests, the runner gives a mock's requests to the builder by position, as `needs` and `run` in its step options, as it may for any class, so the requests of the mock's own class, recorded under that class, are never looked up for the class made per scenario. A policy mock is made the same way, in the stage whose scenarios first need one.
 
 ## Done when
 
