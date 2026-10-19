@@ -7,6 +7,9 @@ const examples = readdirSync(directory);
 
 describe("the examples", () => {
   it.each(examples)("run %s to the end", async (example) => {
-    await expect(import(join(directory, example))).resolves.toBeDefined();
+    const ran = (await import(join(directory, example))) as {
+      default?: unknown;
+    };
+    await expect(Promise.resolve(ran.default)).resolves.toBeUndefined();
   });
 });
