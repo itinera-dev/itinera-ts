@@ -1,3 +1,7 @@
+import {
+  type WorkflowPolicyBuilder,
+  workflowPolicyBuilder,
+} from "./workflow-policy/builder.js";
 declare const roles: unique symbol;
 
 /**
@@ -25,6 +29,23 @@ export abstract class WorkflowPolicy<R = unknown> {
    * workflow it is attached to must provide them.
    */
   declare readonly [roles]: R;
+
+  /**
+   * Starts putting a workflow policy of this class together, for a class
+   * declared without decorators, named `name`, or else after the class, as
+   * `Notify.builder("notify")`.
+   *
+   * {@includeCode ../../examples/policy-builder.ts}
+   *
+   * @throws Error if the name is empty, or if the class is declared with a
+   * policy's decorator.
+   */
+  static builder<C extends WorkflowPolicyClass>(
+    this: C,
+    name?: string,
+  ): WorkflowPolicyBuilder<C> {
+    return workflowPolicyBuilder(this, name);
+  }
 }
 
 /**

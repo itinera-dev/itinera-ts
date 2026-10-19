@@ -29,6 +29,9 @@ const nothing: Parts = {
   name: "orders" as WorkflowName,
   steps: [],
   reporters: [],
+  policies: [],
+  adapters: [],
+  providers: [],
   idGenerator: undefined,
 };
 

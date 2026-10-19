@@ -94,7 +94,8 @@ export interface ProviderDecorator<T> {
 
 const helpers = new WeakSet<object>();
 
-const allowed: readonly Request["kind"][] = [
+/** The kinds of request a service provider may make. */
+export const providerRequests: readonly Request["kind"][] = [
   "journeyId",
   "fromWorkflow",
   "providerReporter",
@@ -125,23 +126,50 @@ export function provider<T>(
 ): ProviderDecorator<T> {
   return (prototype, key) => {
     const owner = prototype.constructor;
-    const method = `${owner.name}.${String(key)}`;
-    declarationOn(owner).providers.push({
-      name: named<ProviderName>(
-        options.name ?? String(key),
-        `the service provider ${method}`,
+    declarationOn(owner).providers.push(
+      declaredProvider(owner, key, type, options, () =>
+        requestsMadeBy(prototype, key, providerRequests, "a service provider"),
       ),
-      serviceKey: named<string>(
-        options.key ?? String(key),
-        `the key of the service provider ${method}`,
-      ),
-      type,
-      scope: options.perAttempt === true ? "attempt" : "journey",
-      steps: options.steps === undefined ? undefined : [...options.steps],
-      key,
-      requests: requestsMadeBy(prototype, key, allowed, "a service provider"),
-    });
+    );
   };
+}
+
+/**
+ * The service provider of the service type `type` that the method `key` of
+ * the workflow class `owner` implements, as `options` say, its parameters
+ * making the requests `requested` gives.
+ *
+ * @throws Error if its name or its key is empty, or whatever `requested`
+ * throws.
+ */
+export function declaredProvider(
+  owner: { readonly name: string },
+  key: string | symbol,
+  type: ServiceType<unknown>,
+  options: ProviderOptions,
+  requested: () => readonly Request[],
+): DeclaredProvider {
+  const method = `${owner.name}.${String(key)}`;
+  const name = named<ProviderName>(
+    options.name ?? String(key),
+    `the service provider ${method}`,
+  );
+  const serviceKey = named<string>(
+    options.key ?? String(key),
+    `the key of the service provider ${method}`,
+  );
+  return Object.freeze({
+    name,
+    serviceKey,
+    type,
+    scope: options.perAttempt === true ? "attempt" : "journey",
+    steps:
+      options.steps === undefined
+        ? undefined
+        : Object.freeze([...options.steps]),
+    key,
+    requests: requested(),
+  });
 }
 
 /** An instance a provider supplies, as `this.provide(...)` makes it. */

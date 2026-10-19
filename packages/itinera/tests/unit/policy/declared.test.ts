@@ -2,10 +2,13 @@ import { describe, expect, it } from "vitest";
 import { contributor } from "../../../src/journey/contributor.js";
 import type { Contributor } from "../../../src/journey.js";
 import {
-  declarationOfPolicy,
+  declaredPolicy,
+  isDeclaredPolicy,
   stepPolicy,
   workflowPolicy,
 } from "../../../src/policy/declared.js";
+import { hookOf, type PolicyDescriptor } from "../../../src/policy/descriptor.js";
+import type { Hook } from "../../../src/policy/hooks.js";
 import {
   onStepFailure,
   onStepRetry,
@@ -28,9 +31,9 @@ describe("stepPolicy", () => {
         return this.keepDefault();
       }
     }
-    const declared = declarationOfPolicy(Audit);
-    expect(declared?.name).toBe("audit");
-    expect([...(declared?.hooks ?? [])]).toEqual([
+    const declared = declaredPolicy(Audit, "step");
+    expect(declared.name).toBe("audit");
+    expect(hooksOf(declared)).toEqual([
       [
         "on step success",
         { key: "audited", requests: [{ kind: "contributor" }] },
@@ -46,7 +49,7 @@ describe("stepPolicy", () => {
         return this.keepDefault();
       }
     }
-    expect(declarationOfPolicy(Audit)?.name).toBe("Audit");
+    expect(declaredPolicy(Audit, "step").name).toBe("Audit");
   });
 
   it("gives the failure cause to on step failure and the retry cause to on step retry", () => {
@@ -62,7 +65,7 @@ describe("stepPolicy", () => {
         return this.failWorkflow(cause);
       }
     }
-    expect([...(declarationOfPolicy(Causes)?.hooks ?? [])]).toEqual([
+    expect(hooksOf(declaredPolicy(Causes, "step"))).toEqual([
       [
         "on step failure",
         { key: "failed", requests: [{ kind: "failureCause" }] },
@@ -204,7 +207,7 @@ describe("workflowPolicy", () => {
         contributor.contribute("notified", true);
       }
     }
-    expect([...(declarationOfPolicy(Notify)?.hooks.keys() ?? [])]).toEqual([
+    expect(declaredPolicy(Notify, "workflow").hooks()).toEqual([
       "on workflow success",
     ]);
   });
@@ -222,9 +225,31 @@ describe("workflowPolicy", () => {
   });
 });
 
-describe("declarationOfPolicy", () => {
-  it("gives nothing for a class not declared", () => {
+describe("declaredPolicy", () => {
+  it("refuses a class not declared", () => {
     class Audit extends StepPolicy {}
-    expect(declarationOfPolicy(Audit)).toBeUndefined();
+    expect(isDeclaredPolicy(Audit)).toBe(false);
+    expect(() => declaredPolicy(Audit, "step")).toThrow(
+      "Audit is not declared with @stepPolicy",
+    );
+  });
+
+  it("refuses a policy of the other kind", () => {
+    @workflowPolicy()
+    class Notify extends WorkflowPolicy {
+      @onWorkflowSuccess()
+      paid(): void {}
+    }
+    expect(() => declaredPolicy(Notify, "step")).toThrow(
+      "Notify is not declared with @stepPolicy",
+    );
   });
 });
+
+function hooksOf(described: PolicyDescriptor): unknown[] {
+  return described.hooks().map((hook) => definitionOf(described, hook));
+}
+
+function definitionOf(described: PolicyDescriptor, hook: Hook): unknown[] {
+  return [hook, hookOf(described, hook)];
+}

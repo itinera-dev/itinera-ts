@@ -51,3 +51,13 @@ export interface IdGeneratorDecorator {
     method: TypedPropertyDescriptor<M>,
   ): void;
 }
+
+/**
+ * The names of the methods of `W` that can make a journey ID: those taking
+ * nothing and returning a string.
+ *
+ * {@includeCode ../../examples/builder.ts}
+ */
+export type IdGeneratorKey<W> = {
+  [K in keyof W & (string | symbol)]: W[K] extends () => string ? K : never;
+}[keyof W & (string | symbol)];

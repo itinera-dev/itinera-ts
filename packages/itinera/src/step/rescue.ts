@@ -1,7 +1,9 @@
-import { checkedOf, marking, requestsOf } from "../declaration.js";
+import { requestsOf } from "../declaration.js";
+import { markingValue } from "../declaration/marking.js";
 import type { Place, ValueRequestDecorator } from "../declaration/parameter.js";
 import type { RequestType } from "../value/token.js";
 import { success, type Success } from "./outcome.js";
+import { type RescueStepBuilder, rescueStepBuilder } from "./rescue/builder.js";
 import type { StepRequests } from "./declared.js";
 
 /**
@@ -34,6 +36,16 @@ export abstract class RescueStep {
    * synchronous or asynchronous: itinera waits for the outcome either way.
    */
   abstract run(...requests: never[]): RescueOutcome | Promise<RescueOutcome>;
+
+  /**
+   * Starts putting a rescue step of this class together for a step's
+   * builder, as `Refund.builder()`.
+   *
+   * {@includeCode ../../examples/rescue-step.ts}
+   */
+  static builder<C extends RescueStepClass>(this: C): RescueStepBuilder<C> {
+    return rescueStepBuilder(this);
+  }
 
   /** The outcome of an attempt that did its work. */
   protected succeed(): RescueOutcome {
@@ -114,9 +126,5 @@ export function fromRescuedStep<T extends RequestType | undefined = undefined>(
   key: string,
   type?: T,
 ): ValueRequestDecorator<T, Place<RescueStepClass, undefined>> {
-  return marking((target, method, index) => ({
-    kind: "fromRescuedStep",
-    key,
-    type: checkedOf(type, target, method, index),
-  }));
+  return markingValue("fromRescuedStep", key, type);
 }

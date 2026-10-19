@@ -1,4 +1,4 @@
-import { marking } from "../declaration.js";
+import { marking } from "../declaration/marking.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { AsValue } from "../value.js";
 import type { Workflow } from "../workflow.js";
@@ -13,7 +13,7 @@ export function providerReporter(): RequestDecorator<
   ProviderReporter,
   Place<Workflow, string | symbol>
 > {
-  return marking(() => ({ kind: "providerReporter" }));
+  return marking({ kind: "providerReporter" });
 }
 
 /**
