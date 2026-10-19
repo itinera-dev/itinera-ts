@@ -5,6 +5,7 @@ import type { DeclaredProvider } from "../service/provider.js";
 import type { StepDescriptor } from "../step.js";
 import type { DeclaredAdapter } from "./adapter.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
+import { type ListedStep, listingOf } from "./listing.js";
 import type { IdGenerator } from "./registry.js";
 import { Violations, violationsOf } from "./violation.js";
 
@@ -15,9 +16,9 @@ let partsOf: (described: WorkflowDescriptor) => Parts;
 
 /**
  * How a workflow is described to the executor: its name, its steps, its
- * policies, its reporters, and how it makes a journey ID. The executor reads this and
- * nothing else about the workflow, and passes the workflow object to the
- * calls that need it.
+ * policies, its reporters, how it makes a journey ID, and its listing. The
+ * executor reads this and nothing else about the workflow, and passes the
+ * workflow object to the calls that need it.
  *
  * Only itinera makes one, when a class declared with `@workflow` is defined
  * or when a workflow's builder builds it, after checking it, and it never
@@ -62,6 +63,19 @@ export class WorkflowDescriptor {
    */
   policies(): readonly PolicyDescriptor[] {
     return this.#parts.policies;
+  }
+
+  /**
+   * Lists the workflow's steps in order, without running anything: each
+   * step's name, its position, the names of its policies, the name of its
+   * input adapter, if it has one, the services it requests, each with the
+   * provider that serves it, and a rescue section for a step with a rescue
+   * step.
+   *
+   * {@includeCode ../../examples/listing.ts}
+   */
+  listing(): readonly ListedStep[] {
+    return listingOf(this.#parts);
   }
 
   /**
@@ -125,7 +139,7 @@ export function assemble(parts: Parts, className: string): WorkflowDescriptor {
       `workflow ${className} has no name: give it one with @workflow or with its builder's name()`,
     );
   }
-  const [first, ...more] = violationsOf(parts.steps);
+  const [first, ...more] = violationsOf(parts);
   if (first !== undefined) {
     throw new Violations([first, ...more]);
   }

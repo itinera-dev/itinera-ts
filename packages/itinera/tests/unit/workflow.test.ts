@@ -29,7 +29,33 @@ describe("Workflow.build", () => {
   it("refuses a class not declared with @workflow", () => {
     class Undeclared extends Workflow {}
     expect(() => Undeclared.build()).toThrow(
-      "Undeclared is not declared with @workflow, so it has no workflow descriptor to build from",
+      "Undeclared is not declared with @workflow, so it has no workflow descriptor",
+    );
+  });
+});
+
+describe("Workflow.listing", () => {
+  it("lists what the decorators declared, without making a workflow object", () => {
+    @workflow({ name: "counted" })
+    @withStep(Ship, { name: "ship" })
+    class Counted extends Workflow {
+      static made = 0;
+
+      constructor() {
+        super();
+        Counted.made += 1;
+      }
+    }
+    expect(Counted.listing()).toEqual([
+      { step: "ship", position: 1, policies: [], services: [] },
+    ]);
+    expect(Counted.made).toBe(0);
+  });
+
+  it("refuses a class not declared with @workflow", () => {
+    class Undeclared extends Workflow {}
+    expect(() => Undeclared.listing()).toThrow(
+      "Undeclared is not declared with @workflow, so it has no workflow descriptor",
     );
   });
 });
