@@ -23,7 +23,7 @@ flowchart LR
 1. An application depends on one package, `itinera`, and imports each concept from a subpath of it. The package root exports nothing of its own.
 2. Each subpath is a CommonJS module with an ESM layer that only re-exports it, so `import` and `require` reach the same copy.
 3. Until a proposal is listed in `conformance.json`, its API is exported only from `itinera/unstable`, which is the only subpath for now.
-4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, as an application imports it.
+4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
 
 The modules of `packages/itinera/src`, each the module of one concept:
 

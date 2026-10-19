@@ -19,6 +19,11 @@ export class Row {
     return cell === "" ? undefined : cell;
   }
 
+  /** The columns of the row's table, in the order of its header. */
+  columns(): string[] {
+    return [...this.#cells.keys()];
+  }
+
   /** The cell under this column, which the row must have. */
   required(column: string): string {
     const cell = this.optional(column);

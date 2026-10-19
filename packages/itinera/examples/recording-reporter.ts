@@ -1,20 +1,53 @@
 import assert from "node:assert/strict";
-import { DefaultDispatcherFactory, RecordingReporter } from "itinera/unstable";
+import {
+  Ending,
+  LocalExecutor,
+  RecordingReporter,
+  stepMock,
+  Workflow,
+} from "itinera/unstable";
+
+class Orders extends Workflow {}
 
 export default (async () => {
+  const charge = stepMock({
+    attempts: [Ending.abnormalTermination("timeout"), Ending.success],
+  });
+  const orders = Orders.builder()
+    .name("orders")
+    .step(charge, { name: "charge", retryBudget: 1 })
+    .build();
   const recorder = new RecordingReporter();
-  const dispatcher = new DefaultDispatcherFactory().create();
-  dispatcher.add(recorder);
-  await dispatcher.setGlobalMetadata("tenant", "acme");
-  await dispatcher.setGlobalMetadata("region", "eu");
-  await dispatcher.setGlobalMetadata("tenant", "globex");
+  const instance = orders.instance(
+    { order: "A-1" },
+    { reporters: [recorder], reportersGlobalMetadata: { tenant: "acme" } },
+  );
+
+  await new LocalExecutor().run(instance);
+
+  assert.deepEqual(
+    recorder.events.map((event) => event.kind),
+    [
+      "journey_started",
+      "attempt_started",
+      "step_abnormal_termination",
+      "step_retrying",
+      "attempt_started",
+      "step_succeeded",
+      "journey_succeeded",
+    ],
+  );
+  assert.deepEqual(recorder.path, [
+    "charge attempt 1 terminated abnormally: timeout",
+    "charge retrying",
+    "charge attempt 2 succeeded",
+    "journey succeeded",
+  ]);
   assert.deepEqual(
     [...recorder.globalMetadata],
     [
-      ["tenant", "globex"],
-      ["region", "eu"],
+      ["journey_id", instance.journeyId],
+      ["tenant", "acme"],
     ],
   );
-  assert.deepEqual(recorder.events, []);
-  assert.deepEqual(recorder.path, []);
 })();
