@@ -229,7 +229,6 @@ describe("concluded", () => {
   });
 
   it("gives up a step whose retry budget is spent, and fails the journey there", async () => {
-    const ship = stepMock({ attempts: [Ending.success] });
     expect(
       await pathOf(
         orders(

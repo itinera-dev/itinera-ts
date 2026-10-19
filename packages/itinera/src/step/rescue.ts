@@ -61,6 +61,8 @@ export abstract class RescueStep {
   /**
    * The outcome of an attempt that could not do its work, for a reason, or
    * only its code, captured as a step's `fail` captures it.
+   *
+   * {@includeCode ../../examples/rescue-step.ts}
    */
   protected fail<T>(reason: GivenReason<T>): RescueOutcome {
     return failure(reason);

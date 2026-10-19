@@ -53,13 +53,17 @@ export class AttemptHandles {
     });
   }
 
-  /** Settles once every call the attempt made on its step reporter has settled. */
-  settled(): Promise<void> {
-    return this.#last;
-  }
-
-  /** Closes both handles, for good. */
-  close(): void {
+  /**
+   * Closes both handles, for good, once every call the attempt made on its
+   * step reporter has settled, those made while earlier ones settled
+   * included, so none is accepted after the engine stopped waiting.
+   */
+  async closed(): Promise<void> {
+    let last: Promise<void>;
+    do {
+      last = this.#last;
+      await last;
+    } while (last !== this.#last);
     this.#closed = true;
   }
 
@@ -128,7 +132,7 @@ export class AttemptHandles {
     });
   }
 
-  #refuseOnceClosed(handle: string): void {
+  #refuseOnceClosed(handle: "contributor" | "step reporter"): void {
     if (this.#closed) {
       const { step, attempt } = this.source;
       throw new Error(

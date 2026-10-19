@@ -53,8 +53,7 @@ export async function ran(
   } catch (error) {
     ended = { kind: "abnormal termination", error };
   }
-  await handles.settled();
-  handles.close();
+  await handles.closed();
   const { recorded } = journey;
   if (recorded !== undefined) {
     throw new JourneyAbortError(recorded);

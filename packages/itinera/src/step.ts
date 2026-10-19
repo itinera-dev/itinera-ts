@@ -122,6 +122,8 @@ export abstract class Step {
    * only its code. The reason's details are captured now, so changing them
    * afterwards changes nothing; details that are not a value abort the
    * journey with `not a value` once the attempt ends.
+   *
+   * {@includeCode ../examples/outcome.ts}
    */
   protected fail<T>(reason: GivenReason<T>): Fail {
     return failure(reason);
@@ -130,6 +132,8 @@ export abstract class Step {
   /**
    * The outcome of a step that decided not to do its work: it does not run
    * again in the journey, and what it contributed is discarded.
+   *
+   * {@includeCode ../examples/outcome.ts}
    */
   protected skip(): Skip {
     return skipped();
@@ -138,6 +142,8 @@ export abstract class Step {
   /**
    * The outcome of a step that decided not to do its work, saying why, with
    * a reason or only its code, captured as {@link Step.fail} captures it.
+   *
+   * {@includeCode ../examples/outcome.ts}
    */
   protected skipBecause<T>(reason: GivenReason<T>): Skip {
     return skipped(reason);

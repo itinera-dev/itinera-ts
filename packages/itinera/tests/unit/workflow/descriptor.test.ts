@@ -58,7 +58,7 @@ function generator(
   return { key: "orderId", method, requests };
 }
 
-const noData = new Map();
+const noData = new Map<string, Value>();
 
 describe("assemble", () => {
   it("refuses a workflow with no name", () => {
