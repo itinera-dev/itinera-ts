@@ -31,7 +31,7 @@ Engine events carry keys and never values of the data bag: no engine event has a
 
 ### An abort for a step that could not be built
 
-Chapter 2, 2.7 says an abort "while data was resolved … by or for an input adapter, or for a service provider" carries the adapter or the provider "and the key". `StepCouldNotBeBuilt` carries the provider when a provider failed, and no adapter and no key, as itinera-rs does. For a provider, chapter 4, 4.9 point 6.2 supports it: the abort names "the step and the provider", with no key. For an input adapter, only 2.7 speaks, and chapter 4, 4.2 point 3 says only that `input_adapter_failed` names the adapter. The conformance cases do not settle either: they leave the key of `journey_aborted` empty, and an empty cell is not compared. The reading is not decided here: it is raised with the maintainer, for the specification to say.
+Chapter 2, 2.7 says an abort "while data was resolved … by or for an input adapter, or for a service provider" carries the adapter or the provider "and the key". `StepCouldNotBeBuilt` names what failed under `source`, a union on `kind`: the step itself when its constructor failed, the input adapter with the key of the input it was resolving, or the service provider. The maintainer decided on 2026-10-19 that an input adapter's failure names the adapter and the key, as 2.7 says, though chapter 4, 4.2 point 3 says only that `input_adapter_failed` names the adapter and itinera-rs named neither. A provider's failure names the provider and no key, as chapter 4, 4.9 point 6.2 says: the abort names "the step and the provider". The conformance cases do not compare either: they leave the key and the adapter of `journey_aborted` empty for this abort.
 
 ### Names and attempts
 

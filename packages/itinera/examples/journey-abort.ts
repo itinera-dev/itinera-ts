@@ -29,6 +29,12 @@ export function describe(abort: JourneyAbort): string {
       ? `the data of ${abort.eventKind ?? "a reason"} is not a value`
       : `${abort.key} is not a value`;
   }
+  if (
+    abort.reason === "step could not be built" &&
+    abort.source.kind === "adapter"
+  ) {
+    return `${abort.step} could not be built: ${abort.source.adapter} failed for ${abort.source.key}`;
+  }
   if (abort.reason === "hook failed" || abort.reason === "reporter failed") {
     return `${abort.reason}: ${abort.errorMessage}`;
   }
