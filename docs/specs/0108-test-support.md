@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0108](https://github.com/itinera-dev/spec/blob/main/proposals/0108-test-support.md), implemented in [#36](https://github.com/itinera-dev/itinera-ts/issues/36). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 13 what test support holds and section 14 how the conformance runner uses it.
 
-Status: in progress. Stage 2 added the recording reporter and its path, and started the conformance runner, which uses it. Stage 3 added the step mock and its `Ending`, and made the runner run journeys with them. Stage 5 gave the step mock its inputs and the endings of a failure and a skip, and made the runner build steps with them and play input adapters. The policy mock and the two reporter mocks with the first scenarios that need them, the rest of chapter 8 in stage 10, which lists the proposal and claims `testing`.
+Status: in progress. Stage 2 added the recording reporter and its path, and started the conformance runner, which uses it. Stage 3 added the step mock and its `Ending`, and made the runner run journeys with them. Stage 5 gave the step mock its inputs and the endings of a failure and a skip, and made the runner build steps with them and play input adapters, then added the reporter that keeps every entry of global metadata. The policy mock and the reporter that fails come with the first scenarios that need them, the rest of chapter 8 in stage 10, which lists the proposal and claims `testing`.
 
 ## API
 
@@ -15,6 +15,10 @@ Until 0108 is listed, test support is exported only from `itinera/unstable`. It 
 - **`events`**: every event it received, in order, as a new array on each read, so a test changing what it read changes nothing the reporter keeps. The events themselves are the engine's, which freezes them.
 - **`globalMetadata`**: each key with its latest value, in the order the keys were first set, as a new `Map` on each read. A `Map` keeps a key set again in its first place, which is what "the latest value of each entry" needs. The journey ID is its first entry, under `journey_id`.
 - **`path`**: one line per event of the journey's flow, in order, written as chapter 8, 8.3 writes them. The lines are made by `line(event)`, in `src/testing/recording-reporter/path.ts`, a `switch` over every kind of event, so that a new kind does not compile until it says whether it has a line. An attempt is written by its `number`, a reason by its `code`, a decision by its cause or by the policy of the hook that decided it, and an abort by its reason, with the step when it names one.
+
+### The reporter that keeps every entry
+
+`EntryRecordingReporter`, in `src/testing/entry-recording-reporter.ts`, is one of the mocks beyond chapter 8 that the plan's section 13 adds for the conformance runner. It extends `RecordingReporter`, so it keeps what a recording reporter keeps, and never fails. Its `entries` are every entry of global metadata it received, in order, a key set again included, each a `GlobalMetadataEntry` with the key, the value and `after`, the kind of the event it received last before the entry, as an `Option`: `None` for an entry that came before every event, as the journey ID does. Each read gives a new array.
 
 ### The ending
 
@@ -48,6 +52,8 @@ Stage 2 started the runner in `packages/conformance`, on cucumber-js 13.3.0, wit
 - `tests/unit/testing/recording-reporter.test.ts`: events kept in order, the latest value of each entry of global metadata in the order first set, the path made from the events, and copies on every read.
 - `tests/unit/testing/recording-reporter/path.test.ts`: the line of every event of the flow, each as chapter 8, 8.3 writes it, and no line for events outside the flow.
 - `examples/recording-reporter.ts`: a recording reporter given to an instance, recording a journey's events, its path and its global metadata.
+- `tests/unit/testing/entry-recording-reporter.test.ts`: every entry kept in order with the kind of the event before it, what a recording reporter keeps kept too, and copies on every read.
+- `examples/entry-recording-reporter.ts`: the entries a journey's reporter received, a key set twice by a step included.
 - `tests/unit/testing/ending.test.ts`: the outcome each ending stands for, and frozen endings.
 - `tests/unit/testing/step-mock.test.ts`: the attempts played in order, the last repeating, each class counting on its own, asynchronous endings, the inputs kept in order, and a step that cannot be built.
 - `examples/ending.ts` and `examples/step-mock.ts`.
