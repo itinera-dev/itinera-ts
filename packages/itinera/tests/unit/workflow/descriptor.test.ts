@@ -3,12 +3,7 @@ import type { Event } from "../../../src/event.js";
 import type { Reporter } from "../../../src/report.js";
 import { describeStep } from "../../../src/step/descriptor.js";
 import { Ship } from "../../fixtures/step.js";
-import type { Value } from "../../../src/value.js";
-import {
-  Workflow,
-  workflow,
-  type WorkflowName,
-} from "../../../src/workflow.js";
+import { Workflow, workflow, type WorkflowName } from "../../../src/workflow.js";
 import { assemble, type Parts } from "../../../src/workflow/descriptor.js";
 import type { IdGenerator } from "../../../src/workflow/registry.js";
 import { Violations } from "../../../src/workflow/violation.js";
@@ -25,8 +20,6 @@ class Audit implements Reporter {
 class Shop extends Workflow {
   readonly shop = "corner";
 }
-
-const noData = new Map<string, Value>();
 
 const nothing: Parts = {
   name: "orders" as WorkflowName,
@@ -60,6 +53,10 @@ describe("assemble", () => {
     expect(descriptor.steps().map((step) => step.name)).toEqual(["ship"]);
   });
 
+  it("cannot be changed", () => {
+    expect(Object.isFrozen(assemble(nothing, "Orders"))).toBe(true);
+  });
+
   it("builds new reporters for every journey", () => {
     const descriptor = assemble({ ...nothing, reporters: [Audit] }, "Orders");
     const [first] = descriptor.reporters();
@@ -69,14 +66,14 @@ describe("assemble", () => {
 
   it("makes a random UUID v4 as the journey ID when it has no ID generator", () => {
     const descriptor = assemble(nothing, "Orders");
-    expect(descriptor.generateJourneyId(Shop.build(), noData)).toMatch(
+    expect(descriptor.generateJourneyId(Shop.build())).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
     );
   });
 
   it("calls its ID generator with the workflow object as this", () => {
     const descriptor = assemble({ ...nothing, idGenerator: shopId }, "Orders");
-    expect(descriptor.generateJourneyId(Shop.build(), noData)).toBe("corner-1");
+    expect(descriptor.generateJourneyId(Shop.build())).toBe("corner-1");
   });
 
   it("refuses a journey ID that is not a string", () => {
@@ -85,7 +82,7 @@ describe("assemble", () => {
       { ...nothing, idGenerator: numbered },
       "Orders",
     );
-    expect(() => descriptor.generateJourneyId(Shop.build(), noData)).toThrow(
+    expect(() => descriptor.generateJourneyId(Shop.build())).toThrow(
       "the ID generator of workflow orders returned number, not a string",
     );
   });

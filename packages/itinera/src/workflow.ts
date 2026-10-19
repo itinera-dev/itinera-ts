@@ -74,7 +74,7 @@ export {
  * {@includeCode ../examples/workflow.ts}
  */
 export abstract class Workflow {
-  #descriptor: WorkflowDescriptor<Workflow> | undefined;
+  #descriptor: WorkflowDescriptor | undefined;
 
   /**
    * Makes the workflow object of a class declared with `@workflow`, calling
@@ -181,7 +181,7 @@ export abstract class Workflow {
     return provided(instance, data);
   }
 
-  #init(descriptor: WorkflowDescriptor<Workflow>): void {
+  #init(descriptor: WorkflowDescriptor): void {
     this.#descriptor = descriptor;
   }
 }

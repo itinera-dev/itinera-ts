@@ -27,7 +27,7 @@ export interface Declaration {
   /** The method that makes each instance's journey ID, if one is marked. */
   idGenerator: IdGenerator | undefined;
   /** The workflow descriptor `@workflow` made, once it has. */
-  descriptor: WorkflowDescriptor<Workflow> | undefined;
+  descriptor: WorkflowDescriptor | undefined;
 }
 
 /** A method of a workflow class that makes a journey ID. */
