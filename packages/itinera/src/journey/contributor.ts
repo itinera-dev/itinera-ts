@@ -1,31 +1,33 @@
 import { marking } from "../declaration.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
+import type { StepPolicy, WorkflowPolicy } from "../policy.js";
 import type { Step } from "../step.js";
 import type { AsValue } from "../value.js";
 
 /**
- * What a step contributes data back through, during one attempt: values by
- * key, which reach the data bag only if the attempt succeeds. itinera makes
- * one for each attempt and closes it when the attempt ends.
+ * What a step or a hook contributes data back through: values by key, which
+ * reach the data bag only if the step's attempt succeeds, or as soon as the
+ * hook returns without failing. itinera makes one for each attempt or call,
+ * and closes it when the attempt or the call ends.
  *
  * {@includeCode ../../examples/contributor.ts}
  */
 export interface Contributor {
   /**
    * Contributes `value` under `key`, captured as it is now. The last value
-   * contributed under a key in an attempt wins.
+   * contributed under a key in an attempt or a call wins.
    */
   contribute<T>(key: string, value: T & AsValue<T>): void;
 }
 
 /**
- * Requests a contributor, in a step's `run`.
+ * Requests a contributor, in a step's `run` or in a hook.
  *
  * {@includeCode ../../examples/contributor.ts}
  */
 export function contributor(): RequestDecorator<
   Contributor,
-  Place<Step, "run">
+  Place<Step, "run"> | Place<StepPolicy | WorkflowPolicy, string | symbol>
 > {
   return marking(() => ({ kind: "contributor" }));
 }

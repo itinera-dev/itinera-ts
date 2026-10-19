@@ -20,20 +20,28 @@
  *   {@link DefaultDispatcherFactory} and {@link DebugReporter}, which move to
  *   `itinera/report`.
  * - Steps: {@link Step}, {@link step}, {@link input}, {@link stepReporter},
- *   {@link StepReporter}, {@link Outcome} and {@link StepDescriptor}, which
- *   move to `itinera/step`.
+ *   {@link StepReporter}, {@link Outcome} and {@link StepDescriptor}, and the
+ *   requests of a step hook about its step, such as {@link stepName},
+ *   {@link attempt}, {@link failureReason} and {@link error}, which move to
+ *   `itinera/step`.
+ * - Policies: {@link StepPolicy}, {@link WorkflowPolicy}, {@link stepPolicy},
+ *   {@link workflowPolicy}, the hooks' decorators, such as
+ *   {@link onStepSuccess}, what a hook returns, such as {@link OnSuccess},
+ *   and the requests only hooks make, such as {@link fromStep},
+ *   {@link role} and {@link hookReporter}, which move to `itinera/policy`.
  * - Services: {@link service}, {@link serviceType} and {@link ServiceType},
  *   which move to `itinera/service`.
  * - Workflows: {@link Workflow}, {@link workflow}, {@link withStep},
- *   {@link idGenerator}, {@link WorkflowBuilder}, {@link WorkflowDescriptor}
- *   {@link Violations} and the types of the request decorators, such as
- *   {@link RequestDecorator}, which move to `itinera/workflow`, and
- *   {@link WorkflowInstance}, which moves to `itinera/instance`.
+ *   {@link idGenerator}, {@link fromWorkflow}, {@link WorkflowBuilder},
+ *   {@link WorkflowDescriptor}, {@link Violations} and the types of the
+ *   request decorators, such as {@link RequestDecorator}, which move to
+ *   `itinera/workflow`, and {@link WorkflowInstance}, which moves to
+ *   `itinera/instance`.
  * - Executors: {@link LocalExecutor}, {@link Refusal} and why `run` refuses
  *   an instance, which move to `itinera/executor`.
  * - Journeys: {@link JourneyResult}, how a journey ends, why it failed or
- *   was aborted, its {@link DataBag}, {@link Contributor} and
- *   {@link contributor}, which move to `itinera/journey`.
+ *   was aborted, its {@link DataBag}, {@link Contributor},
+ *   {@link contributor} and {@link journeyId}, which move to `itinera/journey`.
  * - Test support: {@link RecordingReporter}, {@link Ending}, {@link stepMock}
  *   and {@link StepMock}, which move to `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
@@ -70,15 +78,51 @@ export type {
   Succeeded,
 } from "./journey.js";
 export type { Contributor } from "./journey.js";
-export { AbortReason, contributor, DataBag, FailureCause } from "./journey.js";
+export {
+  AbortReason,
+  contributor,
+  DataBag,
+  FailureCause,
+  journeyId,
+} from "./journey.js";
 export { None, Option, Some } from "./option.js";
 export type {
   FailWorkflow,
   FinishWorkflow,
+  HookDecorator,
+  HookReporter,
+  KeepDefault,
   Lifecycle,
+  OnFailure,
+  OnSuccess,
   PolicyName,
+  PolicyOptions,
+  RolesOf,
+  RolesOfOne,
+  StepFailureCause,
+  StepPolicyClass,
+  WorkflowPolicyClass,
 } from "./policy.js";
-export { RetryCause, StepHook, WorkflowHook } from "./policy.js";
+export {
+  failureCause,
+  fromStep,
+  hookReporter,
+  onStepAbnormalTermination,
+  onStepFailure,
+  onStepRetry,
+  onStepSuccess,
+  onWorkflowFailure,
+  onWorkflowSuccess,
+  RetryCause,
+  retryCause,
+  role,
+  StepHook,
+  StepPolicy,
+  stepPolicy,
+  WorkflowHook,
+  WorkflowPolicy,
+  workflowPolicy,
+} from "./policy.js";
 export type {
   InstanceOptions,
   ValuesByKey,
@@ -98,6 +142,8 @@ export {
 export type { ProviderName, ServiceType } from "./service.js";
 export { service, serviceType } from "./service.js";
 export type {
+  FromFailure,
+  FromFailureOptions,
   Outcome,
   Reason,
   StepClass,
@@ -107,7 +153,17 @@ export type {
   StepReporter,
   Success,
 } from "./step.js";
-export { Attempt, input, Step, step, stepReporter } from "./step.js";
+export {
+  Attempt,
+  attempt,
+  error,
+  failureReason,
+  input,
+  Step,
+  step,
+  stepName,
+  stepReporter,
+} from "./step.js";
 export type {
   EndsAbnormally,
   EndsInSuccess,
@@ -153,11 +209,13 @@ export type {
   ValueRequestDecorator,
   Violation,
   WorkflowBuilder,
+  WorkflowClass,
   WorkflowDescriptor,
   WorkflowName,
   WorkflowOptions,
 } from "./workflow.js";
 export {
+  fromWorkflow,
   idGenerator,
   ViolationKind,
   Violations,

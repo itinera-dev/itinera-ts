@@ -4,8 +4,11 @@ import type {
   RequestDecorator,
   ValueRequestDecorator,
 } from "../declaration/parameter.js";
-import type { Step, StepClass } from "../step.js";
+import type { Option } from "../option.js";
+import type { StepPolicy } from "../policy.js";
+import type { Reason, Step, StepClass, StepName } from "../step.js";
 import type { AsValue } from "../value.js";
+import type { Attempt } from "./attempt.js";
 import type { RequestType } from "../value/token.js";
 
 /**
@@ -44,6 +47,90 @@ export function stepReporter(): RequestDecorator<
   Place<Step, "run">
 > {
   return marking(() => ({ kind: "stepReporter" }));
+}
+
+/**
+ * Requests the name of the step a step hook acts on.
+ *
+ * {@includeCode ../../examples/policy.ts}
+ */
+export function stepName(): RequestDecorator<
+  StepName,
+  Place<StepPolicy, string | symbol>
+> {
+  return marking(() => ({ kind: "stepName" }));
+}
+
+/**
+ * Requests the attempt a step hook acts on.
+ *
+ * {@includeCode ../../examples/policy.ts}
+ */
+export function attempt(): RequestDecorator<
+  Attempt,
+  Place<StepPolicy, string | symbol>
+> {
+  return marking(() => ({ kind: "attempt" }));
+}
+
+/**
+ * What a request for the failure's reason or the error says.
+ *
+ * {@includeCode ../../examples/policy.ts}
+ *
+ * @typeParam O Whether the request is optional.
+ */
+export interface FromFailureOptions<O extends boolean> {
+  /**
+   * `true` to be given `None` when there is none, rather than aborting the
+   * journey: a reason exists only when the attempt reported a failure, and
+   * an error only when it ended in an abnormal termination.
+   */
+  readonly optional?: O;
+}
+
+/**
+ * What a request for the failure's reason or the error gives: `T`, or, when
+ * it is optional, `Some` of it or `None`.
+ *
+ * {@includeCode ../../examples/policy.ts}
+ */
+export type FromFailure<T, O extends boolean> = O extends true ? Option<T> : T;
+
+/**
+ * Requests, in a step hook, the reason the attempt it acts on reported with
+ * its failure: required unless `optional` is `true`.
+ *
+ * {@includeCode ../../examples/policy.ts}
+ */
+export function failureReason<O extends boolean = false>(
+  options: FromFailureOptions<O> = {},
+): RequestDecorator<
+  FromFailure<Reason, O>,
+  Place<StepPolicy, string | symbol>
+> {
+  return marking(() => ({
+    kind: "failureReason",
+    optional: options.optional === true,
+  }));
+}
+
+/**
+ * Requests, in a step hook, what the attempt it acts on threw when it ended
+ * in an abnormal termination: required unless `optional` is `true`.
+ *
+ * {@includeCode ../../examples/policy.ts}
+ */
+export function error<O extends boolean = false>(
+  options: FromFailureOptions<O> = {},
+): RequestDecorator<
+  FromFailure<unknown, O>,
+  Place<StepPolicy, string | symbol>
+> {
+  return marking(() => ({
+    kind: "error",
+    optional: options.optional === true,
+  }));
 }
 
 /**

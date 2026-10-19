@@ -16,10 +16,9 @@ import type { WorkflowDescriptor } from "./workflow/descriptor.js";
 import { declarationOf } from "./workflow/registry.js";
 
 export {
-  idGenerator,
-  type IdGeneratorDecorator,
   withStep,
   workflow,
+  type WorkflowClass,
   type WorkflowOptions,
 } from "./workflow/decorators.js";
 export type {
@@ -32,6 +31,11 @@ export type {
   ValueRequestDecorator,
 } from "./declaration/parameter.js";
 export type { IdGeneratorKey, WorkflowBuilder } from "./workflow/builder.js";
+export {
+  idGenerator,
+  type IdGeneratorDecorator,
+} from "./workflow/id-generator.js";
+export { fromWorkflow } from "./workflow/request.js";
 export type { WorkflowDescriptor } from "./workflow/descriptor.js";
 export {
   type DuplicateStepName,
