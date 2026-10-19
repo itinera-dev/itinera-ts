@@ -231,6 +231,7 @@ export type {
   Answer,
   AttemptRequestInJourneyScope,
   Built,
+  DuplicateAdapterName,
   DuplicateProviderName,
   DuplicateStepName,
   FromDataBag,

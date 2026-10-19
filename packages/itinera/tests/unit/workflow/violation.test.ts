@@ -33,13 +33,15 @@ describe("violationsOf", () => {
         step("charge"),
       ],
       policies: [],
-      adapters: [adapter("pricing", "pack")],
+      adapters: [adapter("pricing", "pack"), adapter("pricing", "ship")],
       providers: [provider("payments", { scope: "journey", steps: ["pack"] })],
     });
     expect(found.map(kindOf)).toEqual([
       "duplicate step name",
       "rescued step retried",
       "hook defined twice",
+      "duplicate adapter name",
+      "input adapter for unknown step",
       "input adapter for unknown step",
       "service not provided",
       "service provider for unknown step",
@@ -89,6 +91,11 @@ describe("Violations", () => {
       "a step adapted twice",
       { kind: "step adapted twice", step: "charge", adapters: [] },
       "step adapted twice: charge",
+    ],
+    [
+      "an adapter's name",
+      { kind: "duplicate adapter name", adapter: "pricing" },
+      "duplicate adapter name: pricing",
     ],
     [
       "an adapter's unknown step",

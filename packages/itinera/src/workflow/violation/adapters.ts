@@ -21,6 +21,18 @@ export interface StepAdaptedTwice {
 }
 
 /**
+ * Two input adapters of one workflow have the same name.
+ *
+ * {@includeCode ../../../examples/violations.ts}
+ */
+export interface DuplicateAdapterName {
+  /** Tells this violation from the others. */
+  readonly kind: typeof ViolationKind.DuplicateAdapterName;
+  /** The name two adapters have. */
+  readonly adapter: AdapterName;
+}
+
+/**
  * An input adapter is attached to a step or a rescue step the workflow does
  * not have.
  *
@@ -39,6 +51,13 @@ export interface InputAdapterForUnknownStep {
 interface Attachment<S extends string = string> {
   readonly adapter: AdapterName;
   readonly step: S;
+}
+
+/** Each name that more than one of `adapters` has, once. */
+export function duplicateAdapterNames(
+  adapters: readonly DeclaredAdapter[],
+): DuplicateAdapterName[] {
+  return grouped(adapters, nameOf).filter(repeated).map(duplicateAdapterName);
 }
 
 /** The attachments of `adapters` to a step `steps` does not have. */
@@ -89,12 +108,23 @@ function isUnknown(
   return stepNamed(steps, attachment.step) === undefined;
 }
 
+function nameOf(adapter: DeclaredAdapter): string {
+  return adapter.name;
+}
+
 function stepOf(attachment: Attachment): string {
   return attachment.step;
 }
 
 function adapterOf(attachment: Attachment): AdapterName {
   return attachment.adapter;
+}
+
+function duplicateAdapterName([adapter]: readonly [
+  DeclaredAdapter,
+  ...DeclaredAdapter[],
+]): DuplicateAdapterName {
+  return { kind: "duplicate adapter name", adapter: adapter.name };
 }
 
 function adapterForUnknownStep(
