@@ -20,9 +20,9 @@
  * - Steps: {@link Step}, {@link step}, {@link Outcome} and
  *   {@link StepDescriptor}, which move to `itinera/step`.
  * - Workflows: {@link Workflow}, {@link workflow}, {@link withStep},
- *   {@link idGenerator}, {@link WorkflowDescriptor} and {@link Violations},
- *   which move to `itinera/workflow`, and {@link WorkflowInstance}, which
- *   moves to `itinera/instance`.
+ *   {@link idGenerator}, {@link WorkflowBuilder}, {@link WorkflowDescriptor}
+ *   and {@link Violations}, which move to `itinera/workflow`, and
+ *   {@link WorkflowInstance}, which moves to `itinera/instance`.
  * - Test support: {@link RecordingReporter}, which moves to
  *   `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
@@ -80,7 +80,9 @@ export type {
   Built,
   DuplicateStepName,
   IdGeneratorDecorator,
+  IdGeneratorKey,
   Violation,
+  WorkflowBuilder,
   WorkflowDescriptor,
   WorkflowName,
   WorkflowOptions,

@@ -11,6 +11,7 @@ import {
   type ValuesByKey,
   type WorkflowInstance,
 } from "./instance.js";
+import { WorkflowBuilder } from "./workflow/builder.js";
 import type { WorkflowDescriptor } from "./workflow/descriptor.js";
 import { declarationOf } from "./workflow/registry.js";
 
@@ -21,6 +22,7 @@ export {
   workflow,
   type WorkflowOptions,
 } from "./workflow/decorators.js";
+export type { IdGeneratorKey, WorkflowBuilder } from "./workflow/builder.js";
 export type { WorkflowDescriptor } from "./workflow/descriptor.js";
 export {
   type DuplicateStepName,
@@ -75,9 +77,11 @@ export type Built<W extends Workflow> = W & {
  * and its methods are what its decorators mark, such as its ID generator.
  *
  * The static `build()` makes the workflow object an application runs, never
- * `new`, and the object's `instance()` makes one instance of the workflow per
- * journey. A workflow inherits nothing the executor calls: the executor reads
- * the workflow's {@link WorkflowDescriptor}, which `build()` gives the object.
+ * `new`, or `builder()` when it adds to what the decorators declared or puts
+ * the workflow together without them, and the object's `instance()` makes
+ * one instance of the workflow per journey. A workflow inherits nothing the
+ * executor calls: the executor reads the workflow's
+ * {@link WorkflowDescriptor}, which `build()` gives the object.
  *
  * {@includeCode ../examples/workflow.ts}
  */
@@ -104,6 +108,30 @@ export abstract class Workflow {
     const made = new this(...args);
     made.#init(descriptor);
     return made as Built<InstanceType<C>>;
+  }
+
+  /**
+   * Starts putting the workflow together from what the decorators of the
+   * class declared, if anything, adding to it what the decorators cannot
+   * say, or everything, for a class declared without them.
+   *
+   * {@includeCode ../examples/builder.ts}
+   *
+   * @throws Error if the class does not extend `Workflow` itself.
+   */
+  static builder<C extends new (...args: never[]) => Workflow>(
+    this: C,
+  ): WorkflowBuilder<C> {
+    if (Object.getPrototypeOf(this) !== Workflow) {
+      throw new Error(`${this.name} must extend Workflow itself`);
+    }
+    return new WorkflowBuilder(
+      this,
+      declarationOf(this),
+      (made, descriptor) => {
+        made.#init(descriptor);
+      },
+    );
   }
 
   /**

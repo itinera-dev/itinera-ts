@@ -39,9 +39,9 @@ Stage 2 started the runner in `packages/conformance`, on cucumber-js 13.3.0, wit
 - `packages/conformance/tests/unit`, mirroring `src`: the environment, the model and what each sentence may declare only once, tables, values and types, attempts, contributions, events a step emits, event kinds and the recording dispatcher factory.
 - `packages/conformance/tests/integration/runner.test.ts`: the built runner run on its own cases in `tests/fixtures/cases`, passing a scenario of sentences it defines and reporting it as Cucumber JSON, running only what the tag expression selects, failing on an undefined sentence and on a case in error, and refusing to run without its environment.
 
-## Open points
+## How a mock receives its script
 
-- **How a mock receives its script**, before stage 3: how a step mock or a policy mock, given to the builder as a class, receives its scenario's script, for example through a mock class made per scenario.
+Settled in stage 3, as a default the maintainer may change: a function of test support makes a new class for each scripted step, extending the step mock's own class, which extends `Step`, and closing over the step's script, so the builder is given a class, as it requires, and builds it anew for every attempt, which reads its script from the closure. The builder takes a class extending `Step` through another class, which `@step` does not. When stage 4 gives steps requests, the runner gives a mock's requests to the builder by position, as `needs` and `run` in its step options, as it may for any class, so the requests of the mock's own class, recorded under that class, are never looked up for the class made per scenario. A policy mock is made the same way, in the stage whose scenarios first need one.
 
 ## Done when
 
