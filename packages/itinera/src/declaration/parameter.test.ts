@@ -1,8 +1,8 @@
-import { join } from "node:path";
+import { resolve } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
-const loose = join(__dirname, "loose.ts");
+const loose = resolve(__dirname, "loose.ts");
 
 const valueRequest = `
 import { input } from "../step/request.js";
@@ -36,6 +36,10 @@ const sources = [
   { name: "a request of anything else", source: request },
 ];
 
+function isLoose(file: string): boolean {
+  return resolve(file) === loose;
+}
+
 function diagnosticsOf(
   source: string,
   options: ts.CompilerOptions,
@@ -43,8 +47,8 @@ function diagnosticsOf(
   const host = ts.createCompilerHost(options);
   const read = host.readFile.bind(host);
   const exists = host.fileExists.bind(host);
-  host.readFile = (file) => (file === loose ? source : read(file));
-  host.fileExists = (file) => file === loose || exists(file);
+  host.readFile = (file) => (isLoose(file) ? source : read(file));
+  host.fileExists = (file) => isLoose(file) || exists(file);
   const program = ts.createProgram([loose], options, host);
   return ts
     .getPreEmitDiagnostics(program)
