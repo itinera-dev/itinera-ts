@@ -4,6 +4,7 @@
  * it, through itinera's public API.
  */
 import { ModelError } from "./model/error.js";
+import { type AdapterScript, unscriptedAdapter } from "./model/adapter.js";
 import type { Dispatching, ReporterFailure } from "./model/report.js";
 import {
   rescueOf,
@@ -14,6 +15,7 @@ import {
 import type { Scripted } from "./model/value.js";
 import type { IdGenerator, WorkflowModel } from "./model/workflow.js";
 
+export { answerOf, type AdapterScript } from "./model/adapter.js";
 export { ModelError } from "./model/error.js";
 export { eventKind, type Holding } from "./model/report.js";
 export {
@@ -57,6 +59,7 @@ export class Model {
       name,
       steps,
       scripts: new Map(steps.map(unscriptedAs)),
+      adapters: [],
     };
   }
 
@@ -73,6 +76,28 @@ export class Model {
     const script = this.workflow.scripts.get(name);
     if (script === undefined) {
       throw new ModelError(`the workflow has no step "${name}"`);
+    }
+    return script;
+  }
+
+  /** Declares an input adapter attached to the steps. */
+  declareAdapter(name: string, steps: readonly string[]): void {
+    const [first, ...rest] = steps;
+    if (first === undefined) {
+      throw new ModelError(
+        `the input adapter "${name}" is attached to no step`,
+      );
+    }
+    this.workflow.adapters.push(unscriptedAdapter(name, [first, ...rest]));
+  }
+
+  /** The script of an input adapter the workflow declares. */
+  adapter(name: string): AdapterScript {
+    const script = this.workflow.adapters.find((declared) =>
+      isNamed(declared, name),
+    );
+    if (script === undefined) {
+      throw new ModelError(`the workflow declares no input adapter "${name}"`);
     }
     return script;
   }
@@ -165,4 +190,8 @@ export class Model {
 /** A step that does nothing yet, under its name. */
 function unscriptedAs(name: string): [string, StepScript] {
   return [name, unscripted()];
+}
+
+function isNamed(adapter: AdapterScript, name: string): boolean {
+  return adapter.name === name;
 }

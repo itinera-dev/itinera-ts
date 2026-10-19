@@ -50,6 +50,11 @@ describe("stepMock", () => {
     await expect(new charge().run()).rejects.toThrow("timeout");
   });
 
+  it("keeps the inputs it was built with, in order", () => {
+    const charge = stepMock({ attempts: [Ending.success] });
+    expect(new charge(42, "EUR").inputs).toEqual([42, "EUR"]);
+  });
+
   it("cannot be built when its script says so", () => {
     const charge = stepMock({
       attempts: [Ending.success],

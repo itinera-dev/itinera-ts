@@ -13,10 +13,10 @@ Tier 1 runs a journey in one process, with steps, retries, rescue steps, policie
 ```mermaid
 flowchart LR
     accTitle: The packages of itinera-ts
-    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through itinera/unstable and reads the conformance cases. itinera depends on Zod, which it re-exports from itinera/schema.
+    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through itinera/unstable, and itinera/schema for Zod, and reads the conformance cases. itinera depends on Zod, which it re-exports from itinera/schema.
     app["Application"] -->|"import, through the ESM layer"| itinera["itinera"]
     app -->|"require, the CommonJS module"| itinera
-    runner["packages/conformance, the runner"] -->|"itinera/unstable"| itinera
+    runner["packages/conformance, the runner"] -->|"itinera/unstable and itinera/schema"| itinera
     cases["Conformance cases, from itinera-dev/conformance"] --> runner
     itinera -->|"re-exports z from itinera/schema"| zod["zod"]
 ```
@@ -24,7 +24,7 @@ flowchart LR
 1. An application depends on one package, `itinera`, and imports each concept from a subpath of it. The package root exports nothing of its own.
 2. Each subpath is a CommonJS module with an ESM layer that only re-exports it, so `import` and `require` reach the same copy.
 3. Until a proposal is listed in `conformance.json`, its API is exported only from `itinera/unstable`. The only other subpath for now is `itinera/schema`, which re-exports Zod's `z`, on which itinera's type tokens are built, so an application uses the same copy of Zod as itinera.
-4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
+4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, and `itinera/schema` for Zod, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, given their inputs by position, and its input adapters from one method of the scenario's workflow class that plays their scripts, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
 
 The modules of `packages/itinera/src`, each the module of one concept:
 
