@@ -7,7 +7,7 @@ import { serving, servicesOf } from "../service/serving.js";
 import type { StepDescriptor, StepName } from "../step.js";
 import type { StepRequests } from "../step/declared.js";
 import { requestsOfDescribed, rescueOf } from "../step/descriptor.js";
-import type { DeclaredAdapter } from "./adapter.js";
+import { adapting, type DeclaredAdapter } from "./adapter.js";
 import type { AdapterName } from "./names.js";
 
 declare const position: unique symbol;
@@ -108,7 +108,7 @@ function section(
   step: StepName,
   requests: StepRequests,
 ): ListedRescue {
-  const adapter = listed.adapters.find((attached) => adapts(attached, step));
+  const adapter = adapting(listed.adapters, step);
   return {
     step,
     ...(adapter === undefined ? {} : { adapter: adapter.name }),
@@ -120,10 +120,6 @@ function section(
 
 function nameOf(policy: PolicyDescriptor): PolicyName {
   return policy.name;
-}
-
-function adapts(adapter: DeclaredAdapter, step: StepName): boolean {
-  return adapter.steps.includes(step);
 }
 
 function listedService(

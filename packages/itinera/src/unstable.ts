@@ -48,9 +48,9 @@
  * - Executors: {@link LocalExecutor}, {@link Refusal} and why `run` refuses
  *   an instance, which move to `itinera/executor`.
  * - Journeys: {@link JourneyResult}, how a journey ends, why it failed or
- *   was aborted, its {@link DataBag}, {@link Contributor},
- *   {@link contributor}, {@link journeyId} and {@link dataBag}, which move to
- *   `itinera/journey`.
+ *   was aborted, its {@link DataBag} and what reading it finds,
+ *   {@link Read}, {@link Contributor}, {@link contributor}, {@link journeyId}
+ *   and {@link dataBag}, which move to `itinera/journey`.
  * - Test support: {@link RecordingReporter}, {@link Ending}, {@link stepMock}
  *   and {@link StepMock}, which move to `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
@@ -77,6 +77,7 @@ export { LocalExecutor, Refusal } from "./executor.js";
 export type {
   Abort,
   Aborted,
+  Absent,
   Failed,
   Failure,
   FailureWithError,
@@ -84,6 +85,9 @@ export type {
   JourneyId,
   JourneyResult,
   JourneyStatus,
+  OtherType,
+  Present,
+  Read,
   Succeeded,
 } from "./journey.js";
 export type { Contributor } from "./journey.js";

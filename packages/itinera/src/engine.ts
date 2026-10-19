@@ -34,15 +34,14 @@ export async function runJourney(
     new Emitter(journeyId, descriptor.name, clock),
     dispatcher,
     failures,
+    data,
   );
   return resultOf(journeyId, await ended());
 
   async function ended(): Promise<JourneyStatus> {
     try {
-      const failure = await travel(journey, descriptor.steps(), [
-        ...data.keys(),
-      ]);
-      const dataBag = dataBagOf(data);
+      const failure = await travel(journey, instance);
+      const dataBag = dataBagOf(journey.data);
       return failure === undefined
         ? { kind: "succeeded", dataBag }
         : { kind: "failed", failure, dataBag };

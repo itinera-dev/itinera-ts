@@ -57,9 +57,15 @@ export class StepDescriptor {
     return this.#parts.policies;
   }
 
-  /** Builds the step for one attempt, as a new object. */
-  build(): Step {
-    return new this.#step();
+  /**
+   * Builds the step for one attempt, as a new object, giving its
+   * constructor `needs`, what its constructor's requests were answered
+   * with, in order.
+   *
+   * @throws Whatever the step's constructor throws.
+   */
+  build(needs: readonly unknown[] = []): Step {
+    return new this.#step(...(needs as never[]));
   }
 }
 

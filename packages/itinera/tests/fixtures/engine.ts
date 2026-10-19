@@ -2,17 +2,24 @@ import type { Event } from "../../src/event.js";
 import type { EventKind } from "../../src/event/kind.js";
 import type { WorkflowInstance } from "../../src/instance.js";
 import type { JourneyId, JourneyResult } from "../../src/journey.js";
-import type {
-  Dispatcher,
-  DispatcherFactory,
-  Reporter,
-} from "../../src/report.js";
+import type { Dispatcher, DispatcherFactory, Reporter } from "../../src/report.js";
 import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
-import type { StepBuilder, StepClass } from "../../src/step.js";
+import {
+  type Outcome,
+  Step,
+  type StepBuilder,
+  type StepClass,
+} from "../../src/step.js";
 import { Ending } from "../../src/testing/ending.js";
+import { RecordingReporter } from "../../src/testing/recording-reporter.js";
 import { type StepMockClass, stepMock } from "../../src/testing/step-mock.js";
-import type { PlainValue } from "../../src/value.js";
-import { type Built, Workflow, type WorkflowName } from "../../src/workflow.js";
+import type { PlainValue, Value } from "../../src/value.js";
+import {
+  type Built,
+  type Supplied,
+  Workflow,
+  type WorkflowName,
+} from "../../src/workflow.js";
 import { runJourney } from "../../src/engine.js";
 import { Emitter } from "../../src/engine/emitter.js";
 import { Failures } from "../../src/engine/guard.js";
@@ -27,6 +34,57 @@ function atNoon(): Date {
 
 /** A workflow class that declares nothing, for the builder. */
 export class Orders extends Workflow {}
+
+/** What the input adapter of a {@link Shop} does with what it is given. */
+export type Adapting = (
+  shop: Shop,
+  ...given: unknown[]
+) => Supplied | Promise<Supplied>;
+
+/**
+ * A workflow class whose method `adapt`, given to the builder as an input
+ * adapter, keeps what each call was given and does as `adapting` says.
+ */
+export class Shop extends Workflow {
+  readonly calls: unknown[][] = [];
+
+  constructor(private readonly adapting: Adapting) {
+    super();
+  }
+
+  adapt(...given: unknown[]): Supplied | Promise<Supplied> {
+    this.calls.push(given);
+    return this.adapting(this, ...given);
+  }
+
+  supplying(value: Value): Supplied {
+    return this.supply(value);
+  }
+
+  reading(): Supplied {
+    return this.fromDataBag();
+  }
+}
+
+/**
+ * A class of steps whose every step built keeps what its constructor was
+ * given in `built`, for a builder given its requests by position.
+ */
+export function keeping(built: unknown[][]): KeepingClass {
+  return class Keeping extends Step {
+    constructor(...needs: unknown[]) {
+      super();
+      built.push(needs);
+    }
+
+    override run(): Outcome {
+      return this.succeed();
+    }
+  };
+}
+
+/** A class of steps that {@link keeping} makes. */
+type KeepingClass = StepClass & (new (...needs: unknown[]) => Step);
 
 /** The workflow `orders`, with these steps in order. */
 export function orders(
@@ -61,7 +119,7 @@ export function journeyThrough(
     "orders" as WorkflowName,
     atNoon,
   );
-  return new Journey(emitter, dispatcher, failures);
+  return new Journey(emitter, dispatcher, failures, new Map());
 }
 
 /** A new instance of the workflow `orders` whose one step `charge` succeeds. */
@@ -77,6 +135,37 @@ export function run(
   factory: DispatcherFactory = new DefaultDispatcherFactory(),
 ): Promise<JourneyResult> {
   return runJourney(instance, factory, atNoon);
+}
+
+/**
+ * What a recording reporter given to an instance of `workflow` with the
+ * initial data `data` recorded of its journey, run with the clock at noon.
+ */
+export async function recorded(
+  workflow: Built<Workflow>,
+  data: Readonly<Record<string, Value>> = {},
+): Promise<RecordingReporter> {
+  const recorder = new RecordingReporter();
+  await run(workflow.instance(data, { reporters: [recorder] }));
+  return recorder;
+}
+
+/** What a promise rejected with, given as its value. */
+export function caught(thrown: unknown): unknown {
+  return thrown;
+}
+
+/** A class whose instances serialise themselves as a number of cents. */
+export class Payment {
+  constructor(readonly cents: number) {}
+
+  static fromValue(value: PlainValue): Payment {
+    return new Payment(Number(value));
+  }
+
+  toValue(): PlainValue {
+    return this.cents;
+  }
 }
 
 /** A reporter that throws an error with the message on each event of a kind. */

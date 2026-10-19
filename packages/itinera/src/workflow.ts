@@ -13,7 +13,11 @@ import {
 } from "./instance.js";
 import { type Provided, provided } from "./service/provider.js";
 import type { AsValue } from "./value.js";
-import { fromBag, type Supplied, supplied } from "./workflow/adapter.js";
+import {
+  fromBag,
+  type Supplied,
+  supplied,
+} from "./workflow/adapter/supplied.js";
 import { WorkflowBuilder } from "./workflow/builder.js";
 import type { WorkflowDescriptor } from "./workflow/descriptor.js";
 import type { ListedStep } from "./workflow/listing.js";
@@ -27,14 +31,16 @@ export {
   type WorkflowOptions,
 } from "./workflow/decorators.js";
 export {
-  type FromDataBag,
   inputAdapter,
   type InputAdapterDecorator,
   type InputAdapterOptions,
   key,
-  type Supplied,
-  type SuppliedValue,
 } from "./workflow/adapter.js";
+export type {
+  FromDataBag,
+  Supplied,
+  SuppliedValue,
+} from "./workflow/adapter/supplied.js";
 export type {
   Answer,
   KeyIn,
