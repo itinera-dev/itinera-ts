@@ -8,10 +8,7 @@ Status: in progress. Stage 3 added the aborted status with no data bag, and made
 
 - **No data bag by type.** `Aborted`, the status of an aborted journey, has `kind` and `abort` and no field that could hold a data bag, so the rule holds by type; `isAborted()` and `abort` read it without a switch.
 - **An abort is final.** The engine records the first abort and throws the journey-abort error, `JourneyAbortError` in `src/engine/signal.ts`, which is never exported; only `runJourney` catches it, delivers `journey_aborted` and makes the aborted result. Nothing resumes the journey.
-
-## Still open
-
-What `output` does on an aborted result, settled with `output` in stage 6.
+- **No output.** `output` on an aborted result throws an `OutputError` whose problem is `aborted`, since there is no data bag to read it from (see [0065](0065-business-result.md)).
 
 ## Decided
 

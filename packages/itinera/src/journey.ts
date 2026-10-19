@@ -10,6 +10,15 @@ export type { Abort } from "./journey/abort.js";
 export { type Contributor, contributor } from "./journey/contributor.js";
 export { DataBag } from "./journey/data-bag.js";
 export type { Absent, OtherType, Present, Read } from "./journey/read.js";
+export type {
+  JourneyWasAborted,
+  Output,
+  OutputProblem,
+  OutputShape,
+  ValueAbsent,
+  ValueOfOtherType,
+} from "./journey/output.js";
+export { OutputError } from "./journey/output.js";
 export { dataBag, journeyId } from "./journey/request.js";
 export type {
   Failure,

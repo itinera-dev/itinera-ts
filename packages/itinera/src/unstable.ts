@@ -49,8 +49,9 @@
  *   an instance, which move to `itinera/executor`.
  * - Journeys: {@link JourneyResult}, how a journey ends, why it failed or
  *   was aborted, its {@link DataBag} and what reading it finds,
- *   {@link Read}, {@link Contributor}, {@link contributor}, {@link journeyId}
- *   and {@link dataBag}, which move to `itinera/journey`.
+ *   {@link Read}, its output, read with {@link OutputShape} and failing with
+ *   {@link OutputError}, {@link Contributor}, {@link contributor},
+ *   {@link journeyId} and {@link dataBag}, which move to `itinera/journey`.
  * - Test support: {@link RecordingReporter}, {@link EntryRecordingReporter},
  *   {@link Ending}, {@link stepMock} and {@link StepMock}, which move to
  *   `itinera/testing`.
@@ -86,10 +87,16 @@ export type {
   JourneyId,
   JourneyResult,
   JourneyStatus,
+  JourneyWasAborted,
   OtherType,
+  Output,
+  OutputProblem,
+  OutputShape,
   Present,
   Read,
   Succeeded,
+  ValueAbsent,
+  ValueOfOtherType,
 } from "./journey.js";
 export type { Contributor } from "./journey.js";
 export {
@@ -99,6 +106,7 @@ export {
   dataBag,
   FailureCause,
   journeyId,
+  OutputError,
 } from "./journey.js";
 export { None, Option, Some } from "./option.js";
 export type {

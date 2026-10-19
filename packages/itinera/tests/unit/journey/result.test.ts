@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { JourneyId } from "../../../src/journey.js";
+import { string } from "../../../src/value/token.js";
 import { dataBagOf } from "../../../src/journey/data-bag.js";
+import { OutputError } from "../../../src/journey/output.js";
 import { resultOf } from "../../../src/journey/result.js";
 
 const journeyId = "journey-1" as JourneyId;
@@ -51,5 +53,19 @@ describe("resultOf", () => {
     const result = resultOf(journeyId, { kind: "succeeded", dataBag });
     expect(Object.isFrozen(result)).toBe(true);
     expect(Object.isFrozen(result.status)).toBe(true);
+  });
+
+  it.each([
+    ["succeeded", resultOf(journeyId, { kind: "succeeded", dataBag })],
+    ["failed", resultOf(journeyId, { kind: "failed", failure, dataBag })],
+  ])("reads the output of a journey that %s from its data bag", (_, result) => {
+    expect(result.output({ order: string })).toEqual({ order: "A-1" });
+  });
+
+  it("throws an OutputError whose problem is aborted when reading an aborted journey's output", () => {
+    const result = resultOf(journeyId, { kind: "aborted", abort });
+    expect(() => result.output({ order: string })).toThrow(
+      new OutputError({ kind: "aborted" }),
+    );
   });
 });
