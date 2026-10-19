@@ -70,7 +70,8 @@ export type WorkflowClass<R = unknown> = abstract new (
  * @throws Error, when the class is defined, if the name is empty, if the
  * class does not extend `Workflow` itself, if it is declared twice, if a
  * policy is not declared with `@workflowPolicy`, or if a method carries
- * requests but is marked with neither `@inputAdapter` nor `@provider`.
+ * requests but is marked with none of `@inputAdapter`, `@provider` and
+ * `@idGenerator`.
  */
 export function workflow<
   const P extends readonly WorkflowPolicyClass[] = readonly [],
@@ -90,7 +91,7 @@ export function workflow<
     );
     if (unmarked !== undefined) {
       throw new Error(
-        `${where(target, unmarked)} carries requests, but is marked with neither @inputAdapter nor @provider`,
+        `${where(target, unmarked)} carries requests, but is marked with none of @inputAdapter, @provider and @idGenerator`,
       );
     }
     declaration.reporters = options.reporters ?? [];
@@ -147,7 +148,12 @@ function asWorkflowPolicy(policy: WorkflowPolicyClass): PolicyDescriptor {
 }
 
 function isUnmarked(key: string | symbol, declaration: Declaration): boolean {
-  return ![...declaration.adapters, ...declaration.providers]
-    .map((marked) => marked.key)
-    .includes(key);
+  return !markedOf(declaration).includes(key);
+}
+
+function markedOf(declaration: Declaration): readonly (string | symbol)[] {
+  const { adapters, providers, idGenerator } = declaration;
+  return [...adapters, ...providers, ...(idGenerator ? [idGenerator] : [])].map(
+    (marked) => marked.key,
+  );
 }

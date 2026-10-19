@@ -1,4 +1,5 @@
 import { describe, expectTypeOf, it } from "vitest";
+import { type DataBag, dataBag, type JourneyId, journeyId } from "../../src/journey.js";
 import type { Reporter } from "../../src/report.js";
 import type { Outcome } from "../../src/step.js";
 import { Ship } from "../fixtures/step.js";
@@ -97,12 +98,22 @@ describe("idGenerator", () => {
     expectTypeOf(Shop).toBeConstructibleWith();
   });
 
-  it("marks a method whose parameters all carry requests", () => {
+  it("marks a method taking the data bag", () => {
     class Shop extends Workflow {
-      // @ts-expect-error no request can be made of an ID generator yet
       @idGenerator()
-      orderId(prefix: string): string {
-        return prefix;
+      orderId(@dataBag() data: DataBag): string {
+        return data.keys().join("-");
+      }
+    }
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+
+  it("marks a method taking nothing but the data bag", () => {
+    class Shop extends Workflow {
+      // @ts-expect-error an ID generator requests only the data bag
+      @idGenerator()
+      orderId(@journeyId() id: JourneyId): string {
+        return id;
       }
     }
     expectTypeOf(Shop).toBeConstructibleWith();

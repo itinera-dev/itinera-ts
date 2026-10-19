@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Event } from "../../../src/event.js";
+import { journeyId } from "../../../src/journey.js";
 import type { Reporter } from "../../../src/report.js";
 import { type Outcome, Step } from "../../../src/step.js";
 import { Charge, Ship } from "../../fixtures/step.js";
@@ -42,6 +43,10 @@ class Shop extends Workflow {
 
   withPrefix(prefix: string): string {
     return `${prefix}-1`;
+  }
+
+  fromAnything(given: unknown): string {
+    return String(given);
   }
 }
 
@@ -187,6 +192,12 @@ describe("the builder", () => {
     class Special extends Orders {}
     expect(() => Special.builder()).toThrow(
       "Special must extend Workflow itself",
+    );
+  });
+
+  it("refuses a request an ID generator may not make, which a parameter of type unknown lets through", () => {
+    expect(() => shop().idGenerator("fromAnything", journeyId())).toThrow(
+      "Shop.fromAnything: an ID generator cannot request @journeyId",
     );
   });
 
