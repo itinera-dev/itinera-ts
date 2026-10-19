@@ -1,7 +1,9 @@
 import type { WorkflowPolicyClass } from "../policy.js";
 import type { ReporterClass } from "../report.js";
+import type { DeclaredProvider } from "../service/provider.js";
 import type { StepDescriptor } from "../step.js";
 import { Workflow, type WorkflowName } from "../workflow.js";
+import type { DeclaredAdapter } from "./adapter.js";
 import type { WorkflowDescriptor } from "./descriptor.js";
 
 /**
@@ -18,6 +20,10 @@ export interface Declaration {
   reporters: readonly ReporterClass[];
   /** The classes of the workflow policies attached to the workflow. */
   policies: readonly WorkflowPolicyClass[];
+  /** The input adapters, in the order their methods are written. */
+  readonly adapters: DeclaredAdapter[];
+  /** The service providers, in the order their methods are written. */
+  readonly providers: DeclaredProvider[];
   /** The method that makes each instance's journey ID, if one is marked. */
   idGenerator: IdGenerator | undefined;
   /** The workflow descriptor `@workflow` made, once it has. */
@@ -40,6 +46,8 @@ export function declarationOf(target: object): Declaration {
     steps: [],
     reporters: [],
     policies: [],
+    adapters: [],
+    providers: [],
     idGenerator: undefined,
     descriptor: undefined,
   };

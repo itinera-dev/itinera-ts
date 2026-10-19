@@ -2,6 +2,7 @@ import { marking } from "../declaration.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { StepPolicy, WorkflowPolicy } from "../policy.js";
 import type { Step } from "../step.js";
+import type { RescueStep } from "../step/rescue.js";
 import type { AsValue } from "../value.js";
 
 /**
@@ -21,13 +22,15 @@ export interface Contributor {
 }
 
 /**
- * Requests a contributor, in a step's `run` or in a hook.
+ * Requests a contributor, in the `run` of a step or a rescue step, or in a
+ * hook.
  *
  * {@includeCode ../../examples/contributor.ts}
  */
 export function contributor(): RequestDecorator<
   Contributor,
-  Place<Step, "run"> | Place<StepPolicy | WorkflowPolicy, string | symbol>
+  | Place<Step | RescueStep, "run">
+  | Place<StepPolicy | WorkflowPolicy, string | symbol>
 > {
   return marking(() => ({ kind: "contributor" }));
 }

@@ -31,12 +31,12 @@ export interface Input {
 }
 
 /**
- * Data a hook requests by key: from the step it acts on, or from the
- * workflow, read from the data bag.
+ * Data requested by key: from the step a hook acts on or a rescue step
+ * rescues, or from the workflow, read from the data bag.
  */
 export interface Data {
   /** Where the data is read from. */
-  readonly kind: "fromStep" | "fromWorkflow";
+  readonly kind: "fromRescuedStep" | "fromStep" | "fromWorkflow";
   /** The key. */
   readonly key: string;
   /** The type of the value. */
@@ -67,15 +67,26 @@ export interface Service {
  */
 export interface Handle {
   /** Which handle is requested. */
-  readonly kind: "contributor" | "hookReporter" | "role" | "stepReporter";
+  readonly kind:
+    | "contributor"
+    | "dataBag"
+    | "hookReporter"
+    | "providerReporter"
+    | "role"
+    | "stepReporter";
 }
 
 /**
  * Something itinera knows about the call: the step, its attempt, the
- * journey, or a cause.
+ * journey, the key of an input, or a cause.
  */
 export interface Context {
   /** What is requested. */
   readonly kind:
-    "attempt" | "failureCause" | "journeyId" | "retryCause" | "stepName";
+    | "attempt"
+    | "failureCause"
+    | "journeyId"
+    | "key"
+    | "retryCause"
+    | "stepName";
 }

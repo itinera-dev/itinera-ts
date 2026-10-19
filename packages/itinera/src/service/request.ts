@@ -2,6 +2,7 @@ import { marking } from "../declaration.js";
 import { named } from "../name.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { Step } from "../step.js";
+import type { RescueStep } from "../step/rescue.js";
 
 declare const served: unique symbol;
 
@@ -38,15 +39,15 @@ export function serviceType<T>(name: string): ServiceType<T> {
 }
 
 /**
- * Requests a service of type `type`, by its key, in a step's `run`: the
- * workflow's provider of that key lends one for the attempt. A service is
- * always required.
+ * Requests a service of type `type`, by its key, in the `run` of a step or a
+ * rescue step: the workflow's provider of that key lends one for the
+ * attempt. A service is always required.
  *
  * {@includeCode ../../examples/service.ts}
  */
 export function service<T>(
   key: string,
   type: ServiceType<T>,
-): RequestDecorator<T, Place<Step, "run">> {
+): RequestDecorator<T, Place<Step | RescueStep, "run">> {
   return marking(() => ({ kind: "service", key, type }));
 }

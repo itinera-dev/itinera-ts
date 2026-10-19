@@ -35,18 +35,18 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `option` | `Option`, `Some` and `None` |
 | `event` | `Event`, every kind of event and what each carries |
 | `report` | Reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
-| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag, `Contributor` and `@contributor`, and `@journeyId` |
-| `step` | Step names, reasons, `Step` and `@step`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors and their options |
-| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
+| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
+| `step` | Step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors and their options |
+| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
 | `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
 | `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, and the names and closed sets events carry about policies and hooks |
-| `service` | Provider names, service types and `@service` |
+| `service` | Provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter` |
 | `testing` | Test support: `RecordingReporter`, `Ending`, `stepMock` and `StepMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
 | `name` | Private: `named`, which refuses an empty name as something is declared |
-| `declaration` | Private: the table of the requests parameter decorators record, the types of the request decorators, the types read from the metadata, and the check that the compiler recorded it |
+| `declaration` | Private: the table of the requests parameter decorators record, the types of the request decorators, the types read from the metadata, the check that the compiler recorded it, and the guard that refuses to compile without `strictNullChecks` |
 | `index` | The package root, which exports nothing of its own |
 | `unstable` | The subpath `itinera/unstable`, which re-exports the API of the proposals not listed yet |
 
@@ -99,10 +99,10 @@ flowchart TD
 
 1. Each parameter decorator records one request in a private table, keyed by the class, the method, or `undefined` for the constructor, and the parameter's position. A parameter carrying two requests is refused at once.
 2. A request for a value takes its type from what it is given: one of the tokens, any other Standard Schema validator, or either wrapped in `optional`. With no type given, it reads the parameter's declared type from the metadata the compiler records, which says only `number`, `string`, `boolean` or a class that serialises itself; anything else is refused when the class is defined.
-3. The types of the decorators refuse at compile time a request in a place that may not make it, and a parameter whose declared type does not accept what the request gives.
+3. The types of the decorators refuse at compile time a request in a place that may not make it, and a parameter whose declared type does not accept what the request gives. Without the compiler option `strictNullChecks`, `null` would belong to every type and these refusals would compile, so then no request decorator compiles.
 4. The class decorator reads the table for its constructor and its methods, in the order of their parameters, counted from the metadata or the function's length, and refuses a parameter that carries no request. What it gathers is the class's declaration: for a step, what its constructor needs and what its `run` takes; for a policy, what each of its hooks requests. Later stages resolve these requests when a step is built and run, and when a hook is called.
 
-Where it lives: `declaration.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `journey/request.ts`, `service/request.ts`, `workflow/request.ts`, `policy/request.ts`, `policy/reporter.ts`.
+Where it lives: `declaration.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `journey/request.ts`, `service/request.ts`, `service/provider.ts`, `service/reporter.ts`, `workflow/request.ts`, `workflow/adapter.ts`, `step/rescue.ts`, `policy/request.ts`, `policy/reporter.ts`.
 
 ### How policies are declared
 
@@ -125,6 +125,27 @@ flowchart TD
 4. `@withStep` attaches step policies to its step, and `@workflow` workflow policies to the workflow, each refusing a policy not declared with its decorator, including a policy of the other kind given through a cast. A policy names the roles it requests as its base class's type argument, so both compile only on a workflow class that implements every role their policies request. Nothing about roles exists at run time.
 
 Where it lives: `policy/hooks.ts`, `policy/declared.ts`, `policy/step-policy.ts`, `policy/workflow-policy.ts`, `policy/lifecycle.ts`, `policy/roles.ts`, `workflow/decorators.ts`, `workflow/registry.ts`, `step/descriptor.ts`.
+
+### How rescue steps, input adapters and providers are declared
+
+```mermaid
+flowchart TD
+    accTitle: How rescue steps, input adapters and service providers are declared
+    accDescr: The rescue step decorator gathers what a rescue step's constructor and run request, and withStep attaches a declared rescue step to its step. The input adapter and provider decorators mark methods of the workflow class, check what their parameters request against what each may request, and add each to the workflow's declaration, which also holds its steps, its policies and its ID generator.
+    rescue["@rescueStep on a class extending RescueStep"] -->|"what its constructor and run request"| withStep["@withStep, its rescue"]
+    withStep --> declaration["The workflow's declaration"]
+    adapter["@inputAdapter on a method of the workflow class"] -->|"its steps and requests"| declaration
+    provider["@provider on a method of the workflow class"] -->|"its service, scope, steps and requests"| declaration
+    requests["The table of requests"] --> rescue
+    requests -->|"checked against what each may request"| adapter
+    requests -->|"checked against what each may request"| provider
+```
+
+1. `@rescueStep` gathers what a rescue step's constructor and its `run` request, as `@step` does for a step, and `@withStep` attaches a rescue step declared with it to its step, through `rescue`.
+2. `@inputAdapter` and `@provider` mark methods of the workflow class. Each reads its method's requests from the table of requests, refuses at once a request it may not make, and adds the adapter or the provider, with its name, the steps it serves and its requests, to the workflow's declaration, beside its steps, its policies and its ID generator. `@workflow` then refuses any method that carries requests but is marked with neither.
+3. An input adapter returns `this.supply(value)` or `this.fromDataBag()`, and a provider `this.provide(instance)` or `this.provide(instance, data)`, helpers of `Workflow`; what they make is recorded, so what a cast lets through is told apart from them. Later stages call them while a step is built.
+
+Where it lives: `step/rescue.ts`, `workflow/adapter.ts`, `service/provider.ts`, `service/reporter.ts`, `workflow/registry.ts`, `workflow/decorators.ts`, `workflow.ts`, `step/descriptor.ts`, `declaration.ts`.
 
 ### From declaration to result
 

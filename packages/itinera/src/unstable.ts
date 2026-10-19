@@ -20,19 +20,23 @@
  *   {@link DefaultDispatcherFactory} and {@link DebugReporter}, which move to
  *   `itinera/report`.
  * - Steps: {@link Step}, {@link step}, {@link input}, {@link stepReporter},
- *   {@link StepReporter}, {@link Outcome} and {@link StepDescriptor}, and the
- *   requests of a step hook about its step, such as {@link stepName},
- *   {@link attempt}, {@link failureReason} and {@link error}, which move to
- *   `itinera/step`.
+ *   {@link StepReporter}, {@link Outcome} and {@link StepDescriptor}, the
+ *   rescue steps' {@link RescueStep}, {@link rescueStep} and
+ *   {@link fromRescuedStep}, and the requests of a step hook about its step,
+ *   such as {@link stepName}, {@link attempt}, {@link failureReason} and
+ *   {@link error}, which move to `itinera/step`.
  * - Policies: {@link StepPolicy}, {@link WorkflowPolicy}, {@link stepPolicy},
  *   {@link workflowPolicy}, the hooks' decorators, such as
  *   {@link onStepSuccess}, what a hook returns, such as {@link OnSuccess},
  *   and the requests only hooks make, such as {@link fromStep},
  *   {@link role} and {@link hookReporter}, which move to `itinera/policy`.
  * - Services: {@link service}, {@link serviceType} and {@link ServiceType},
- *   which move to `itinera/service`.
+ *   and the service providers' {@link provider}, {@link Provided} and
+ *   {@link providerReporter}, which move to `itinera/service`.
  * - Workflows: {@link Workflow}, {@link workflow}, {@link withStep},
- *   {@link idGenerator}, {@link fromWorkflow}, {@link WorkflowBuilder},
+ *   {@link idGenerator}, {@link fromWorkflow}, the input adapters'
+ *   {@link inputAdapter}, {@link key} and {@link Supplied},
+ *   {@link WorkflowBuilder},
  *   {@link WorkflowDescriptor}, {@link Violations} and the types of the
  *   request decorators, such as {@link RequestDecorator}, which move to
  *   `itinera/workflow`, and {@link WorkflowInstance}, which moves to
@@ -41,7 +45,8 @@
  *   an instance, which move to `itinera/executor`.
  * - Journeys: {@link JourneyResult}, how a journey ends, why it failed or
  *   was aborted, its {@link DataBag}, {@link Contributor},
- *   {@link contributor} and {@link journeyId}, which move to `itinera/journey`.
+ *   {@link contributor}, {@link journeyId} and {@link dataBag}, which move to
+ *   `itinera/journey`.
  * - Test support: {@link RecordingReporter}, {@link Ending}, {@link stepMock}
  *   and {@link StepMock}, which move to `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
@@ -82,6 +87,7 @@ export {
   AbortReason,
   contributor,
   DataBag,
+  dataBag,
   FailureCause,
   journeyId,
 } from "./journey.js";
@@ -139,13 +145,22 @@ export {
   DefaultDispatcher,
   DefaultDispatcherFactory,
 } from "./report.js";
-export type { ProviderName, ServiceType } from "./service.js";
-export { service, serviceType } from "./service.js";
+export type {
+  Provided,
+  ProviderDecorator,
+  ProviderName,
+  ProviderOptions,
+  ProviderReporter,
+  ServiceType,
+} from "./service.js";
+export { provider, providerReporter, service, serviceType } from "./service.js";
 export type {
   FromFailure,
   FromFailureOptions,
   Outcome,
   Reason,
+  RescueOutcome,
+  RescueStepClass,
   StepClass,
   StepDescriptor,
   StepName,
@@ -158,7 +173,10 @@ export {
   attempt,
   error,
   failureReason,
+  fromRescuedStep,
   input,
+  RescueStep,
+  rescueStep,
   Step,
   step,
   stepName,
@@ -199,13 +217,19 @@ export type {
   Answer,
   Built,
   DuplicateStepName,
+  FromDataBag,
   IdGeneratorDecorator,
   IdGeneratorKey,
+  InputAdapterDecorator,
+  InputAdapterOptions,
   KeyIn,
   ParameterOf,
   Place,
   ReadFromMetadata,
   RequestDecorator,
+  Strict,
+  Supplied,
+  SuppliedValue,
   ValueRequestDecorator,
   Violation,
   WorkflowBuilder,
@@ -217,6 +241,8 @@ export type {
 export {
   fromWorkflow,
   idGenerator,
+  inputAdapter,
+  key,
   ViolationKind,
   Violations,
   withStep,

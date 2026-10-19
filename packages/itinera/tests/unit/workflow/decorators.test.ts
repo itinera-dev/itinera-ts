@@ -11,12 +11,24 @@ import {
 import type { OnSuccess } from "../../../src/policy/lifecycle.js";
 import { StepPolicy } from "../../../src/policy/step-policy.js";
 import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
-import { policiesOf } from "../../../src/step/descriptor.js";
-import { Charge, Ship } from "../../fixtures/step.js";
+import { policiesOf, rescueOf } from "../../../src/step/descriptor.js";
+import { Charge, Refund, Ship } from "../../fixtures/step.js";
+import { RescueStep, type RescueOutcome } from "../../../src/step/rescue.js";
+import type { JourneyId } from "../../../src/journey.js";
+import { journeyId } from "../../../src/journey/request.js";
+import { type Provided, provider } from "../../../src/service/provider.js";
+import { serviceType } from "../../../src/service/request.js";
 import { Workflow } from "../../../src/workflow.js";
+import { inputAdapter, type Supplied } from "../../../src/workflow/adapter.js";
 import { withStep, workflow } from "../../../src/workflow/decorators.js";
 import { declarationOf } from "../../../src/workflow/registry.js";
 import { Violations } from "../../../src/workflow/violation.js";
+
+interface PaymentGateway {
+  take(amount: number): string;
+}
+
+const PAYMENT_GATEWAY = serviceType<PaymentGateway>("PaymentGateway");
 
 describe("workflow", () => {
   it("lists the steps in the order their decorators are written", () => {
@@ -72,6 +84,42 @@ describe("workflow", () => {
   });
 });
 
+describe("workflow, on the methods of its class", () => {
+  it("refuses a method that carries requests but is marked with neither @inputAdapter nor @provider", () => {
+    expect(() => {
+      @workflow({ name: "orders" })
+      class Orders extends Workflow {
+        tell(@journeyId() id: JourneyId): JourneyId {
+          return id;
+        }
+      }
+      return Orders;
+    }).toThrow(
+      "Orders.tell carries requests, but is marked with neither @inputAdapter nor @provider",
+    );
+  });
+
+  it("accepts the methods its adapters and providers mark", () => {
+    @workflow({ name: "orders" })
+    class Orders extends Workflow {
+      @inputAdapter({ steps: ["charge"] })
+      price(@journeyId() id: JourneyId): Supplied {
+        return this.supply(id);
+      }
+
+      @provider(PAYMENT_GATEWAY)
+      payments(@journeyId() id: JourneyId): Provided<PaymentGateway> {
+        return this.provide({ take: () => id });
+      }
+    }
+    const declaration = declarationOf(Orders);
+    expect([declaration.adapters, declaration.providers]).toEqual([
+      [expect.objectContaining({ key: "price" })],
+      [expect.objectContaining({ key: "payments" })],
+    ]);
+  });
+});
+
 describe("withStep", () => {
   it("refuses a step class not declared with @step", () => {
     class Pack extends Step {
@@ -85,6 +133,27 @@ describe("withStep", () => {
       class Orders extends Workflow {}
       return Orders;
     }).toThrow("Pack is not declared with @step");
+  });
+
+  it("attaches the rescue step it names", () => {
+    @workflow({ name: "orders" })
+    @withStep(Charge, { name: "charge", rescue: Refund })
+    class Orders extends Workflow {}
+    expect(declarationOf(Orders).steps.map(rescueOf)).toEqual([Refund]);
+  });
+
+  it("refuses a rescue step not declared with @rescueStep", () => {
+    class Retry extends RescueStep {
+      override run(): RescueOutcome {
+        return this.succeed();
+      }
+    }
+    expect(() => {
+      @workflow({ name: "orders" })
+      @withStep(Charge, { name: "charge", rescue: Retry })
+      class Orders extends Workflow {}
+      return Orders;
+    }).toThrow("Retry is not declared with @rescueStep");
   });
 
   it("refuses to be written above @workflow", () => {
