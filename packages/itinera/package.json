@@ -49,6 +49,16 @@
         "default": "./dist/schema.js"
       }
     },
+    "./value": {
+      "import": {
+        "types": "./dist/value.d.mts",
+        "default": "./dist/value.mjs"
+      },
+      "require": {
+        "types": "./dist/value.d.ts",
+        "default": "./dist/value.js"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": [

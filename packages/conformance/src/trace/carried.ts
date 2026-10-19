@@ -1,5 +1,5 @@
 import { isDeepStrictEqual } from "node:util";
-import type { PlainValue } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import type { Line } from "./line.js";
 
 /** Whether the event carries this message: as its message, its error's or its reason's. */

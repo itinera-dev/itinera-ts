@@ -2,11 +2,11 @@ import {
   Attempt,
   type Event,
   type JourneyId,
-  type PlainValue,
   type StepName,
   type Timestamp,
   type WorkflowName,
 } from "itinera/unstable";
+import { type PlainValue } from "itinera/value";
 
 const journey = {
   sequence: 1,

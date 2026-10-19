@@ -11,7 +11,7 @@ import {
   type Optional,
   type RequestType,
   string,
-} from "itinera/unstable";
+} from "itinera/value";
 
 function isCurrency(value: unknown): value is "EUR" | "GBP" {
   return value === "EUR" || value === "GBP";

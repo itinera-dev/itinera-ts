@@ -1,4 +1,4 @@
-import type { PlainValue } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import { ModelError } from "./error.js";
 
 /** The neutral vocabulary of types the cases name. */

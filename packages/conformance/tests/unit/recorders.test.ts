@@ -1,4 +1,5 @@
-import type { Event, JourneyId, PlainValue } from "itinera/unstable";
+import type { Event, JourneyId } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import { describe, expect, it } from "vitest";
 import type { ReporterFailure } from "../../src/model/report.js";
 import { ModelError } from "../../src/model/error.js";

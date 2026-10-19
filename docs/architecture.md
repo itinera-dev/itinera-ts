@@ -6,31 +6,31 @@ Every diagram is followed by a numbered list that says everything it shows, and 
 
 ## Tier 1
 
-Tier 1 runs a journey in one process, with steps, retries, rescue steps, policies and their hooks, roles, input adapters, services, events and reporters. So far, a journey builds each step from its inputs, read from the data bag or supplied by its input adapter, and runs steps that succeed or terminate abnormally, with retries of abnormal terminations, events and reporters.
+Tier 1 runs a journey in one process, with steps, retries, rescue steps, policies and their hooks, roles, input adapters, services, events and reporters. So far, a journey builds each step from its inputs, read from the data bag or supplied by its input adapter, runs steps that succeed, fail, skip or terminate abnormally, retries or gives them up, aborts when something illegal happens, with events and reporters, and ends with a result whose output the application reads.
 
 ### The packages
 
 ```mermaid
 flowchart LR
     accTitle: The packages of itinera-ts
-    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through itinera/unstable, and itinera/schema for Zod, and reads the conformance cases. itinera depends on Zod, which it re-exports from itinera/schema.
+    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through itinera/unstable, itinera/value, and itinera/schema for Zod, and reads the conformance cases. itinera depends on Zod, which it re-exports from itinera/schema.
     app["Application"] -->|"import, through the ESM layer"| itinera["itinera"]
     app -->|"require, the CommonJS module"| itinera
-    runner["packages/conformance, the runner"] -->|"itinera/unstable and itinera/schema"| itinera
+    runner["packages/conformance, the runner"] -->|"itinera/unstable, itinera/value and itinera/schema"| itinera
     cases["Conformance cases, from itinera-dev/conformance"] --> runner
     itinera -->|"re-exports z from itinera/schema"| zod["zod"]
 ```
 
 1. An application depends on one package, `itinera`, and imports each concept from a subpath of it. The package root exports nothing of its own.
 2. Each subpath is a CommonJS module with an ESM layer that only re-exports it, so `import` and `require` reach the same copy.
-3. Until a proposal is listed in `conformance.json`, its API is exported only from `itinera/unstable`. The only other subpath for now is `itinera/schema`, which re-exports Zod's `z`, on which itinera's type tokens are built, so an application uses the same copy of Zod as itinera.
-4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, and `itinera/schema` for Zod, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, given their inputs by position, each extended to play what the step does before it ends, and its input adapters from one method of the scenario's workflow class that plays their scripts, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
+3. Until a proposal is listed in `conformance.json`, and while its API holds a stand-in or names API of a proposal not yet listed, its API is exported only from `itinera/unstable`. The other subpaths for now are `itinera/value`, with values and the type tokens, and `itinera/schema`, which re-exports Zod's `z`, on which itinera's type tokens are built, so an application uses the same copy of Zod as itinera.
+4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, `itinera/value`, and `itinera/schema` for Zod, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, given their inputs by position, each extended to play what the step does before it ends, and its input adapters from one method of the scenario's workflow class that plays their scripts, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
 
 The modules of `packages/itinera/src`, each the module of one concept:
 
 | Module | Holds |
 |---|---|
-| `value` | `Value`, `PlainValue`, `SerialisesItself` and `AsValue`, the private capture that checks and copies a value, the private read that gives a requester its own copy checked by a schema, and the type tokens a request names, with `optional`, `classOf` and `guard` |
+| `value` | The subpath `itinera/value`: `Value`, `PlainValue`, `SerialisesItself` and `AsValue`, the private capture that checks and copies a value, the private read that gives a requester its own copy checked by a schema, and the type tokens a request names, with `optional`, `classOf` and `guard` |
 | `schema` | Zod's `z`, re-exported |
 | `option` | `Option`, `Some` and `None` |
 | `event` | `Event`, every kind of event and what each carries |
@@ -48,7 +48,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `name` | Private: `named`, which refuses an empty name as something is declared |
 | `declaration` | Private: the table of the requests parameter decorators record, the requests a builder is given by position, the types of the request decorators and of the requests given by position, the types read from the metadata, the check that the compiler recorded it, and the guard that refuses to compile without `strictNullChecks` |
 | `index` | The package root, which exports nothing of its own |
-| `unstable` | The subpath `itinera/unstable`, which re-exports the API of the proposals not listed yet |
+| `unstable` | The subpath `itinera/unstable`, which re-exports the API of the proposals not listed yet, and of those listed whose API still names it |
 
 Where it lives: `packages/`, and each module in `packages/itinera/src/`, with its submodules in the directory of its name.
 

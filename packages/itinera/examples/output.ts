@@ -1,15 +1,13 @@
 import assert from "node:assert/strict";
 import {
-  integer,
   LocalExecutor,
   None,
   type Option,
-  optional,
   OutputError,
   Step,
-  string,
   Workflow,
 } from "itinera/unstable";
+import { integer, optional, string } from "itinera/value";
 
 class Charge extends Step {
   override run() {

@@ -7,8 +7,8 @@ import {
   type Event,
   type GlobalMetadataEntry,
   type JourneyId,
-  type PlainValue,
 } from "itinera/unstable";
+import { type PlainValue } from "itinera/value";
 import { listedUnder } from "./listed.js";
 import { ModelError } from "./model/error.js";
 import type { ReporterFailure } from "./model/report.js";

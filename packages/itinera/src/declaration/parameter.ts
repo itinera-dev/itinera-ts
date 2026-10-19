@@ -39,7 +39,7 @@ export type ParameterOf<T, K, I extends number> = [K] extends [undefined]
 
 /**
  * What a request whose type is `T` gives its parameter: the value, or, when
- * `T` is {@link optional}, `Some` of the value or `None`. For a class that
+ * `T` is {@link value!optional}, `Some` of the value or `None`. For a class that
  * serialises itself, named with `classOf`, the value is an instance of it.
  *
  * {@includeCode ../../examples/requests.ts}

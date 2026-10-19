@@ -2,7 +2,8 @@
  * What a scenario's step does on each attempt before it ends, as the runner
  * plays it through the handles itinera lends the step's `run`.
  */
-import type { Contributor, PlainValue, StepReporter } from "itinera/unstable";
+import type { Contributor, StepReporter } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import { fresh, given } from "../given.js";
 import { ModelError } from "../model/error.js";
 import type { Input, StepAction, StepScript } from "../model/step.js";
