@@ -200,7 +200,7 @@ Where it lives: `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start
 ```mermaid
 flowchart TD
     accTitle: How the engine runs a journey
-    accDescr: The engine emits journey_started, then attempts each step in order. Each attempt emits attempt_started and resolves the inputs the step's constructor requests, in order, each from the step's input adapter or from the data bag. A required input without a value, a value of another type, or an input adapter that fails aborts the journey. Then the step is built; a constructor that fails aborts the journey too. The step runs; an outcome means step_succeeded and the next step. Anything else is an abnormal termination, which the step either retries, emitting step_retrying and attempting again, or gives up, emitting step_given_up and journey_failed. Once every step succeeded, the journey emits journey_succeeded. An abort emits journey_aborted.
+    accDescr: The engine emits journey_started, then attempts each step in order. Each attempt emits attempt_started and resolves the inputs the step's constructor requests, in order, each from the step's input adapter or from the data bag. A required input without a value, a value of another type, or an input adapter that fails aborts the journey. Then the step is built; a constructor that fails aborts the journey too. The step runs with the handles its run requests, which are closed once the attempt and every call it made on them have settled. A success emits step_succeeded and commits what the attempt contributed, then the next step. A skip emits step_skipped and contributions_discarded, then the next step. A failure emits step_failed, and an error or what is not an outcome step_abnormal_termination; either is retried, emitting step_retrying and attempting again, or given up, emitting step_given_up and journey_failed. Once no step is left, the journey emits journey_succeeded. An abort emits journey_aborted.
     started["journey_started"] --> next{"Another step?"}
     next -->|"no"| succeeded["journey_succeeded, the result succeeded"]
     next -->|"yes"| attempt["attempt_started"]
@@ -208,11 +208,16 @@ flowchart TD
     inputs -->|"missing, of another type, or the adapter fails"| aborted["journey_aborted, the result aborted"]
     inputs -->|"resolved"| build{"The step is built"}
     build -->|"its constructor fails"| aborted
-    build -->|"built"| run{"run gives"}
-    run -->|"an outcome"| stepSucceeded["step_succeeded"]
+    build -->|"built"| run{"run, with its handles, gives"}
+    run -->|"a handle's call aborts the journey"| aborted
+    run -->|"a success"| stepSucceeded["step_succeeded, then each contribution committed"]
     stepSucceeded --> next
+    run -->|"a skip"| skipped["step_skipped, then contributions_discarded"]
+    skipped --> next
+    run -->|"a failure"| stepFailed["step_failed"]
     run -->|"a throw, a rejection, or what is not an outcome"| abnormal["step_abnormal_termination"]
-    abnormal --> decide{"Retry on abnormal termination, and budget left?"}
+    stepFailed --> decide{"Retried, with budget left?"}
+    abnormal --> decide
     decide -->|"yes"| retrying["step_retrying"]
     retrying --> attempt
     decide -->|"no"| givenUp["step_given_up"]
@@ -225,14 +230,22 @@ flowchart TD
     2. Otherwise the input is read from the data bag. Each requester gets its own copy, checked by the input's schema through the Standard Schema interface, and made an instance with `fromValue` wherever `classOf` names a class.
     3. A required input without a value aborts the journey with `required data missing`, and a value the schema refuses with `wrong type`, each naming the input adapter when the adapter made the request or supplied the value. An optional input without a value is `None`, and emits `optional_input_absent`.
     4. Then the engine builds the step with its descriptor's `build`, giving the constructor the inputs. A constructor that throws aborts the journey with `step could not be built`.
-3. The engine awaits the step's `run`, synchronous or asynchronous. An outcome made by the step's helpers emits `step_succeeded`, and the engine goes on to the next step.
-4. A throw, a rejected promise, or anything returned that is not an outcome made by the helpers, is an abnormal termination, and emits `step_abnormal_termination` with the error's message.
-5. The engine then decides by its own rule. While the step retries abnormal terminations and its retry budget allows another attempt, it emits `step_retrying` and attempts the step again.
-6. Otherwise it emits `step_given_up`, with the cause `abnormal termination` when the step has no budget or does not retry abnormal terminations, and `retries exhausted` when its budget is spent. Then it emits `journey_failed`, and the result is failed, with the error as it was thrown.
-7. Once every step succeeded, it emits `journey_succeeded`, and the result is succeeded.
-8. An abort, from an input, a step that cannot be built or a reporter that fails, ends the journey at once: the engine emits `journey_aborted`, and the result is aborted, with no data bag.
+3. The engine makes the attempt's handles, its contributor and its step reporter, and awaits the step's `run`, synchronous or asynchronous, lending it the handles its `run` requests, in order:
+    1. A contribution is captured when it is made, and kept until the attempt ends; the last value under a key wins.
+    2. Every call on the step reporter, an event the step emits or an entry of global metadata it sets, runs once the calls made before it have settled, so a call the step does not await keeps its place. Its data is captured when the call is made. An entry of global metadata reaches the reporters, then emits `global_metadata_set`.
+    3. A contribution, event data or global metadata that is not a value, global metadata under `journey_id`, or a reporter that fails on the step's event or entry, aborts the journey in that call's turn, and the call ends the step with the executor's signal, the journey-abort error, which the package never exports. A call made after the journey was aborted delivers nothing.
+    4. Once `run` and every call it made have settled, the handles are closed: a call on a closed handle throws where it is made and changes nothing. If the journey was aborted during the attempt, whatever the step returned or threw is ignored, and the journey ends aborted.
+4. What the attempt reported decides what follows:
+    1. A success emits `step_succeeded`, then commits each contribution to the data bag, in the order its key was first contributed, emitting `contribution_committed`, and `data_overwritten` when it replaced a value. The engine goes on to the next step.
+    2. A skip emits `step_skipped`, with its reason if it gave one, then `contributions_discarded`, and the engine goes on to the next step.
+    3. A failure emits `step_failed` with its reason. A throw, a rejected promise, or anything returned that is not an outcome made by the helpers, is an abnormal termination, and emits `step_abnormal_termination` with the error's message. Neither commits what the attempt contributed.
+    4. A failure or a skip whose reason was given details that are not a value aborts the journey with `not a value`, with no outcome reported.
+5. After a failure or an abnormal termination the engine decides by its own rule. While its retry budget allows another attempt, and, for an abnormal termination, while the step retries those, it emits `step_retrying` and attempts the step again.
+6. Otherwise it emits `step_given_up`: with the cause `failure` or `abnormal termination` when the step has no budget, or does not retry abnormal terminations, and `retries exhausted` when its budget is spent. Then it emits `journey_failed`, and the result is failed, with the last attempt's reason, or its error as it was thrown.
+7. Once no step is left, it emits `journey_succeeded`, and the result is succeeded.
+8. An abort, from an input, a step that cannot be built, a handle's call or a reporter that fails, ends the journey at once: the engine emits `journey_aborted`, and the result is aborted, with no data bag.
 
-Where it lives: `engine/scan.ts`, `engine/build.ts`, `engine/request.ts`, `engine/adapter.ts`, `engine/order.ts`, `value/read.ts`, `journey/data-bag.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts`.
+Where it lives: `engine/scan.ts`, `engine/build.ts`, `engine/request.ts`, `engine/adapter.ts`, `engine/order.ts`, `value/read.ts`, `journey/data-bag.ts`, `engine/run.ts`, `engine/handles.ts`, `engine/outcome.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts`.
 
 ### Events and reporters
 
@@ -256,6 +269,6 @@ flowchart LR
 3. A guard passes on the failure of its reporter, and records it in the journey's failures, where the first failure stands.
 4. When the dispatcher fails, or a reporter failed even though the dispatcher swallowed the failure, the journey is aborted with `reporter failed`, naming the step being run, if any.
 5. Once a reporter failed, the guards let nothing through but `journey_aborted`, and nothing at all to a reporter that failed. A failure while `journey_aborted` is delivered is ignored, so it reaches the reporters after it.
-6. Global metadata goes through the same guards, before the journey starts.
+6. Global metadata goes through the same guards, before the journey starts and while it runs, when a step sets an entry. A reporter or the dispatcher that fails on an entry while the journey runs aborts it with `reporter failed`, as on an event.
 
 Where it lives: `engine/journey.ts`, `engine/emitter.ts`, `engine/guard.ts`, `engine/frozen.ts`, `report/default-dispatcher.ts`.
