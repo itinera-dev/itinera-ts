@@ -1,8 +1,27 @@
-import { describe, it } from "vitest";
-import type { AdapterName, WorkflowName } from "../../src/workflow.js";
+import { describe, expectTypeOf, it } from "vitest";
+import type { Reporter } from "../../src/report.js";
+import type { Outcome } from "../../src/step.js";
+import { Ship } from "../fixtures/step.js";
+import {
+  type AdapterName,
+  type Built,
+  idGenerator,
+  withStep,
+  Workflow,
+  workflow,
+  type WorkflowName,
+} from "../../src/workflow.js";
 
 declare function naming(workflow: WorkflowName): void;
 declare function adapting(adapter: AdapterName): void;
+
+@workflow({ name: "orders" })
+@withStep(Ship, { name: "ship" })
+class Orders extends Workflow {
+  constructor(readonly shop: string) {
+    super();
+  }
+}
 
 describe("WorkflowName", () => {
   it("is never a plain string", () => {
@@ -15,5 +34,133 @@ describe("AdapterName", () => {
   it("is never a plain string", () => {
     // @ts-expect-error a plain string is not an adapter name
     adapting("pricing");
+  });
+});
+
+describe("Workflow.build", () => {
+  it("makes a built workflow object of the class", () => {
+    expectTypeOf(Orders.build("corner")).toEqualTypeOf<Built<Orders>>();
+  });
+
+  it("takes the arguments of the class's constructor", () => {
+    // @ts-expect-error the constructor takes a string
+    Orders.build(3);
+  });
+
+  it("cannot build Workflow itself", () => {
+    // @ts-expect-error Workflow is abstract
+    Workflow.build();
+  });
+});
+
+describe("Workflow.instance", () => {
+  it("is called only on a workflow object made by build()", () => {
+    // @ts-expect-error an object made with new is not built
+    new Orders("corner").instance();
+  });
+
+  it("takes initial data made of values only", () => {
+    // @ts-expect-error a date is not a value
+    Orders.build("corner").instance({ at: new Date() });
+  });
+
+  it("takes initial global metadata made of values only", () => {
+    Orders.build("corner").instance(
+      {},
+      // @ts-expect-error a date is not a value
+      { reportersGlobalMetadata: { at: new Date() } },
+    );
+  });
+});
+
+describe("workflow", () => {
+  it("marks only a class extending Workflow", () => {
+    // @ts-expect-error the class does not extend Workflow
+    @workflow({ name: "orders" })
+    class Shop {
+      readonly shop = "corner";
+    }
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+
+  it("lists only reporters built without arguments", () => {
+    class Tagged implements Reporter {
+      constructor(readonly tag: string) {}
+
+      report(): void {}
+    }
+    // @ts-expect-error the reporter's constructor takes an argument
+    @workflow({ name: "orders", reporters: [Tagged] })
+    class Shop extends Workflow {}
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+});
+
+describe("withStep", () => {
+  it("lists only a class extending Step", () => {
+    class Pack {
+      run(): Outcome {
+        return { kind: "success" };
+      }
+    }
+    // @ts-expect-error Pack does not extend Step
+    @withStep(Pack, { name: "pack" })
+    class Shop extends Workflow {}
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+
+  it("marks only a class extending Workflow", () => {
+    // @ts-expect-error the class does not extend Workflow
+    @withStep(Ship, { name: "ship" })
+    class Shop {
+      readonly shop = "corner";
+    }
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+});
+
+describe("idGenerator", () => {
+  it("marks a method returning a string", () => {
+    class Shop extends Workflow {
+      // @ts-expect-error a journey ID is a string
+      @idGenerator()
+      orderId(): number {
+        return 1;
+      }
+    }
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+
+  it("marks a synchronous method", () => {
+    class Shop extends Workflow {
+      // @ts-expect-error the ID is made synchronously
+      @idGenerator()
+      orderId(): Promise<string> {
+        return Promise.resolve("order-1");
+      }
+    }
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+
+  it("marks a method whose parameters all carry requests", () => {
+    class Shop extends Workflow {
+      // @ts-expect-error no request can be made of an ID generator yet
+      @idGenerator()
+      orderId(prefix: string): string {
+        return prefix;
+      }
+    }
+    expectTypeOf(Shop).toBeConstructibleWith();
+  });
+
+  it("marks only a method of a class extending Workflow", () => {
+    class Shop {
+      // @ts-expect-error the class does not extend Workflow
+      @idGenerator()
+      orderId(): string {
+        return "order-1";
+      }
+    }
+    expectTypeOf(Shop).toBeConstructibleWith();
   });
 });

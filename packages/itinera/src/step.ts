@@ -1,9 +1,16 @@
 /**
- * Steps: what a step is called, its attempts, and the reasons it gives.
+ * Steps: the work of a workflow, what a step is called, its attempts, its
+ * outcomes, and the reasons it gives.
  *
  * @module
  */
+import { type Outcome, success } from "./step/outcome.js";
 import type { PlainValue } from "./value.js";
+
+export { Attempt } from "./step/attempt.js";
+export { step } from "./step/declared.js";
+export type { StepDescriptor, StepOptions } from "./step/descriptor.js";
+export type { Outcome, Success } from "./step/outcome.js";
 
 declare const stepName: unique symbol;
 
@@ -17,52 +24,6 @@ export type StepName = string & {
   /** Marks the string as a step name made by itinera. */
   readonly [stepName]: true;
 };
-
-let following: (attempt: Attempt) => Attempt;
-
-/**
- * One attempt of a step, counted from 1: the first execution of a step is
- * its first attempt, and each retry is the next. Only itinera makes one.
- *
- * It writes itself as its number, in a template string and in JSON.
- *
- * {@includeCode ../examples/attempt.ts}
- */
-export class Attempt {
-  /** The first attempt of a step. */
-  static readonly first = new Attempt(1);
-
-  static {
-    following = (attempt) => new Attempt(attempt.number + 1);
-  }
-
-  private constructor(
-    /** The attempt's number, from 1. */
-    readonly number: number,
-  ) {
-    Object.freeze(this);
-  }
-
-  /** Whether this is the first attempt of its step. */
-  isFirst(): boolean {
-    return this.number === 1;
-  }
-
-  /** The attempt's number, as text. */
-  toString(): string {
-    return String(this.number);
-  }
-
-  /** The attempt's number, which is how `JSON.stringify` writes it. */
-  toJSON(): number {
-    return this.number;
-  }
-}
-
-/** The attempt that follows the one given. */
-export function nextAttempt(attempt: Attempt): Attempt {
-  return following(attempt);
-}
 
 /**
  * Why a step failed or was skipped, or why a hook failed the journey: a code,
@@ -80,4 +41,44 @@ export interface Reason {
   readonly message?: string;
   /** Anything else the reason says, as a value. */
   readonly details?: PlainValue;
+}
+
+/**
+ * The base class of every step: one unit of work in a workflow, built anew
+ * for each attempt, which reports how the attempt went by the outcome its
+ * `run` returns, made with the helpers this class gives it.
+ *
+ * A step reports something abnormal by throwing, or by returning a rejected
+ * promise: that is an abnormal termination of the attempt, which its workflow
+ * may retry. Only a class extending `Step` is a step, whether it is declared
+ * with {@link step} or given to a workflow's builder.
+ *
+ * {@includeCode ../examples/step.ts}
+ */
+export abstract class Step {
+  // eslint-disable-next-line no-unused-private-class-members -- only a class extending Step has this field, so only such a class has the type of a step
+  readonly #step = true;
+
+  /**
+   * Runs one attempt of the step, and reports how it went. It may be
+   * synchronous or asynchronous: itinera waits for the outcome either way.
+   */
+  abstract run(...requests: never[]): Outcome | Promise<Outcome>;
+
+  /** The outcome of an attempt that did its work. */
+  protected succeed(): Outcome {
+    return success;
+  }
+}
+
+/**
+ * A class extending {@link Step}, which itinera builds for each attempt.
+ *
+ * {@includeCode ../examples/descriptors.ts}
+ */
+export interface StepClass {
+  /** Builds a step for one attempt. */
+  new (...needs: never[]): Step;
+  /** The prototype every step of the class shares. */
+  readonly prototype: Step;
 }
