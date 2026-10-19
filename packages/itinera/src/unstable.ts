@@ -167,13 +167,16 @@ export type {
 } from "./service.js";
 export { provider, providerReporter, service, serviceType } from "./service.js";
 export type {
+  Fail,
   FromFailure,
   FromFailureOptions,
+  GivenReason,
   Outcome,
   Reason,
   RescueOutcome,
   RescueStepBuilder,
   RescueStepClass,
+  Skip,
   StepBuilder,
   StepClass,
   StepDescriptor,
@@ -198,6 +201,8 @@ export {
 } from "./step.js";
 export type {
   EndsAbnormally,
+  EndsInFailure,
+  EndsInSkip,
   EndsInSuccess,
   Endings,
   StepMockClass,

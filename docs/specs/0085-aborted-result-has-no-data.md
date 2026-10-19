@@ -11,7 +11,11 @@ Status: in progress. Stage 3 added the aborted status with no data bag, and made
 
 ## Still open
 
-What `output` does on an aborted result, settled with `output` in stage 6, and whether the engine stops committing the remaining contributions once an abort is recorded, which point 5 of the proposal leaves to the implementation and stage 5 decides.
+What `output` does on an aborted result, settled with `output` in stage 6.
+
+## Decided
+
+- **Commits stop once an abort is recorded**, which point 5 of the proposal leaves to the implementation. A successful attempt's contributions are committed one at a time, each followed by its `contribution_committed`, in `src/engine/outcome.ts`; when a reporter fails on one, the emit throws the journey-abort error, so the remaining contributions are neither committed nor reported. Since an aborted result has no data bag, nothing but the events could tell. `src/engine/outcome.test.ts` checks it.
 
 ## Dependencies
 
