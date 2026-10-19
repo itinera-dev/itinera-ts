@@ -1,4 +1,5 @@
-import { onlyAllowed, type RequestOf, requestsOf } from "../declaration.js";
+import { requestsOf } from "../declaration.js";
+import { onlyAllowed, type RequestOf } from "../declaration/allowed.js";
 import { requestsGiven } from "../declaration/marking.js";
 import type { Request } from "../declaration/request.js";
 import type { Place } from "../declaration/parameter.js";
