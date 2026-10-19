@@ -1,3 +1,4 @@
+import { methodsWithRequests, where } from "../declaration.js";
 import { named } from "../name.js";
 import type {
   RolesOf,
@@ -12,9 +13,10 @@ import type { ReporterClass } from "../report.js";
 import type { StepClass, StepOptions } from "../step.js";
 import { isDeclared } from "../step/declared.js";
 import { describeStep } from "../step/descriptor.js";
+import { requestsOfRescue } from "../step/rescue.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
 import { assemble } from "./descriptor.js";
-import { declarationOn } from "./registry.js";
+import { type Declaration, declarationOn } from "./registry.js";
 
 /**
  * What `@workflow` says about a workflow.
@@ -68,8 +70,9 @@ export type WorkflowClass<R = unknown> = abstract new (
  * how the workflow is put together.
  *
  * @throws Error, when the class is defined, if the name is empty, if the
- * class does not extend `Workflow` itself, if it is declared twice, or if a
- * policy is not declared with `@workflowPolicy`.
+ * class does not extend `Workflow` itself, if it is declared twice, if a
+ * policy is not declared with `@workflowPolicy`, or if a method carries
+ * requests but is marked with neither `@inputAdapter` nor `@provider`.
  */
 export function workflow<
   const P extends readonly WorkflowPolicyClass[] = readonly [],
@@ -85,6 +88,14 @@ export function workflow<
       options.name,
       `workflow class ${target.name}`,
     );
+    const unmarked = methodsWithRequests(target).find((key) =>
+      isUnmarked(key, declaration),
+    );
+    if (unmarked !== undefined) {
+      throw new Error(
+        `${where(target, unmarked)} carries requests, but is marked with neither @inputAdapter nor @provider`,
+      );
+    }
     declaration.reporters = options.reporters ?? [];
     declaration.policies = policies;
     declaration.descriptor = assemble(declaration, target.name);
@@ -100,9 +111,10 @@ export function workflow<
  * {@includeCode ../../examples/workflow.ts}
  *
  * @throws Error, when the class is defined, if the step is not declared with
- * `@step`, if a policy is not declared with `@stepPolicy`, if its name is
- * empty, if its retry budget is not a whole number from 0, or if it is
- * written above `@workflow`.
+ * `@step`, if a policy is not declared with `@stepPolicy`, if its rescue step
+ * is not declared with `@rescueStep`, if its name is empty, if its retry
+ * budget is not a whole number from 0, or if it is written above
+ * `@workflow`.
  */
 export function withStep<
   const P extends readonly StepPolicyClass[] = readonly [],
@@ -115,6 +127,10 @@ export function withStep<
       throw new Error(`${step.name} is not declared with @step`);
     }
     requireDeclared(options.policies ?? [], "step");
+    const rescue = options.rescue;
+    if (rescue !== undefined && requestsOfRescue(rescue) === undefined) {
+      throw new Error(`${rescue.name} is not declared with @rescueStep`);
+    }
     const declaration = declarationOn(target);
     if (declaration.descriptor !== undefined) {
       throw new Error(
@@ -140,4 +156,10 @@ function isUndeclared(
   kind: PolicyDeclaration["kind"],
 ): boolean {
   return declarationOfPolicy(policy)?.kind !== kind;
+}
+
+function isUnmarked(key: string | symbol, declaration: Declaration): boolean {
+  return ![...declaration.adapters, ...declaration.providers]
+    .map((marked) => marked.key)
+    .includes(key);
 }

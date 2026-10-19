@@ -1,6 +1,7 @@
 import { named } from "../name.js";
 import type { StepPolicyClass } from "../policy.js";
 import type { Step, StepClass, StepName } from "../step.js";
+import type { RescueStepClass } from "./rescue.js";
 
 /**
  * How a workflow describes one of its steps to the executor: its name, its
@@ -57,9 +58,20 @@ export interface StepOptions<
    * the roles each of them requests.
    */
   readonly policies?: P;
+  /**
+   * The rescue step that runs, as `<step name>_rescue`, before the step runs
+   * again after an attempt that failed, declared with `@rescueStep`.
+   */
+  readonly rescue?: RescueStepClass;
 }
 
-const attached = new WeakMap<StepDescriptor, readonly StepPolicyClass[]>();
+/** What a workflow attaches to one of its steps. */
+interface Attached {
+  readonly policies: readonly StepPolicyClass[];
+  readonly rescue: RescueStepClass | undefined;
+}
+
+const attached = new WeakMap<StepDescriptor, Attached>();
 
 /**
  * The descriptor of the step `step`, as `options` describe it.
@@ -84,7 +96,10 @@ export function describeStep(
     retryOnAbnormalTermination: options.noRetryOnAbnormalTermination !== true,
     build: () => new step(),
   });
-  attached.set(described, Object.freeze([...(options.policies ?? [])]));
+  attached.set(described, {
+    policies: Object.freeze([...(options.policies ?? [])]),
+    rescue: options.rescue,
+  });
   return described;
 }
 
@@ -92,5 +107,12 @@ export function describeStep(
 export function policiesOf(
   described: StepDescriptor,
 ): readonly StepPolicyClass[] {
-  return attached.get(described) ?? [];
+  return attached.get(described)?.policies ?? [];
+}
+
+/** The class of the rescue step of the step `described`, if it has one. */
+export function rescueOf(
+  described: StepDescriptor,
+): RescueStepClass | undefined {
+  return attached.get(described)?.rescue;
 }

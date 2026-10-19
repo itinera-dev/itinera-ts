@@ -49,3 +49,39 @@ describe("Workflow.instance", () => {
     );
   });
 });
+
+@workflow({ name: "shop" })
+@withStep(Ship, { name: "ship" })
+class Shop extends Workflow {
+  supplied(value: string): unknown {
+    return this.supply(value);
+  }
+
+  fromBag(): unknown {
+    return this.fromDataBag();
+  }
+
+  provided(instance: object, data?: string): unknown {
+    return this.provide(instance, data);
+  }
+}
+
+describe("the helpers of input adapters and service providers", () => {
+  it("supply a value to an input", () => {
+    expect(Shop.build().supplied("A-1")).toEqual({
+      kind: "supplied",
+      value: "A-1",
+    });
+  });
+
+  it("supply nothing, so that an input is read from the data bag", () => {
+    expect(Shop.build().fromBag()).toEqual({ kind: "fromDataBag" });
+  });
+
+  it.each([
+    ["with data", "eu", { instance: Ship, data: "eu" }],
+    ["without data", undefined, { instance: Ship }],
+  ])("lend an instance of a service %s", (_, data, provided) => {
+    expect(Shop.build().provided(Ship, data)).toEqual(provided);
+  });
+});
