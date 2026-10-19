@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import {
   Ending,
+  input,
   LocalExecutor,
   RecordingReporter,
+  type StepMock,
   stepMock,
+  string,
   Workflow,
 } from "itinera/unstable";
 
@@ -31,4 +34,23 @@ export default (async () => {
     "charge attempt 2 succeeded",
     "journey succeeded",
   ]);
+
+  const built: StepMock[] = [];
+  class Ship extends stepMock({ attempts: [Ending.success] }) {
+    constructor(...inputs: unknown[]) {
+      super(...inputs);
+      built.push(this);
+    }
+  }
+  const shipping = Orders.builder()
+    .name("shipping")
+    .step(Ship.builder("ship").needs(input("parcel", string)))
+    .build();
+
+  await new LocalExecutor().run(shipping.instance({ parcel: "box" }));
+
+  assert.deepEqual(
+    built.map((ship) => ship.inputs),
+    [["box"]],
+  );
 })();

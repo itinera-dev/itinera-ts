@@ -1,5 +1,8 @@
-import { Then } from "@cucumber/cucumber";
+import { isDeepStrictEqual } from "node:util";
+import { type DataTable, Then } from "@cucumber/cucumber";
 import type { Abort, DataBag, Event, Failure } from "itinera/unstable";
+import { z } from "itinera/schema";
+import { json, rows } from "../../model.js";
 import { abortsAt } from "../../trace/status.js";
 import { expectOfStream, holds, Unmet } from "../../unmet.js";
 import type { World } from "../../world.js";
@@ -142,6 +145,20 @@ Then<World>(
     );
   },
 );
+
+Then<World>("the result's data bag contains:", function (table: DataTable) {
+  const bag = dataBag(this);
+  for (const row of rows(table)) {
+    const key = row.required("key");
+    const expected = json(row.required("value"));
+    const read = bag.read(key, z.json());
+    holds(
+      read.kind === "present" && isDeepStrictEqual(read.value, expected),
+      `"${key}" = ${JSON.stringify(expected)} in the data bag`,
+      JSON.stringify(read),
+    );
+  }
+});
 
 /** The data bag of the scenario's journey, which must have one. */
 function dataBag(world: World): DataBag {
