@@ -45,6 +45,7 @@ Every one of these is a required check in CI:
 - `npm run format`: Prettier, without configuration, checks the formatting of every file but Markdown;
 - `npm run lint`: ESLint with typescript-eslint's strict type-checked rules, with no warning allowed;
 - `npm run typecheck`: `tsc` over the whole repository with `tsconfig.json`, then over the package's sources alone, without Node's types, since the package uses only the language and the web platform;
+- `npm run typecheck-oldest`: the same two type checks on TypeScript 5.5, the oldest version applications may use, which `npx` fetches without touching the installed TypeScript; the type tests and examples are checked with `tsconfig.oldest.json`, whose library is ES2023, and the package's sources alone, without Node's types and with every declaration they use checked, with `packages/itinera/tsconfig.oldest.json`;
 - `npm test`: Vitest, with its type checking;
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
 - `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented;

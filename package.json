@@ -9,13 +9,14 @@
     "format": "prettier --check .",
     "lint": "eslint --max-warnings 0 .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p packages/itinera/tsconfig.build.json",
+    "typecheck-oldest": "npx --yes --package typescript@5.5.4 -- tsc -p tsconfig.oldest.json && npx --yes --package typescript@5.5.4 -- tsc -p packages/itinera/tsconfig.oldest.json",
     "test": "vitest run",
     "build": "npm run build --workspace packages/itinera",
     "package": "npm run build && publint packages/itinera && attw --pack packages/itinera --profile node16",
     "docs": "typedoc --options packages/itinera/typedoc.json",
     "dependency-check": "npm audit && licensee --errors-only",
     "use-next-typescript": "npm install --no-save typescript@next",
-    "check": "npm run format && npm run lint && npm run typecheck && npm test && npm run package && npm run docs && npm run dependency-check"
+    "check": "npm run format && npm run lint && npm run typecheck && npm run typecheck-oldest && npm test && npm run package && npm run docs && npm run dependency-check"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",

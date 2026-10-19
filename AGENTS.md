@@ -71,6 +71,7 @@ After `npm ci`, each of these is a required CI check, and every one must pass be
 - `npm run format`
 - `npm run lint`
 - `npm run typecheck`
+- `npm run typecheck-oldest`
 - `npm test`
 - `npm run package`
 - `npm run docs`
