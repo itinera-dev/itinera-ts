@@ -51,8 +51,9 @@
  *   was aborted, its {@link DataBag} and what reading it finds,
  *   {@link Read}, {@link Contributor}, {@link contributor}, {@link journeyId}
  *   and {@link dataBag}, which move to `itinera/journey`.
- * - Test support: {@link RecordingReporter}, {@link Ending}, {@link stepMock}
- *   and {@link StepMock}, which move to `itinera/testing`.
+ * - Test support: {@link RecordingReporter}, {@link EntryRecordingReporter},
+ *   {@link Ending}, {@link stepMock} and {@link StepMock}, which move to
+ *   `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
  *   their concepts: `itinera/journey`, `itinera/workflow`, `itinera/step`,
  *   `itinera/policy` and `itinera/service`.
@@ -205,10 +206,17 @@ export type {
   EndsInSkip,
   EndsInSuccess,
   Endings,
+  GlobalMetadataEntry,
   StepMockClass,
   StepMockScript,
 } from "./testing.js";
-export { Ending, RecordingReporter, StepMock, stepMock } from "./testing.js";
+export {
+  Ending,
+  EntryRecordingReporter,
+  RecordingReporter,
+  StepMock,
+  stepMock,
+} from "./testing.js";
 export type {
   AsValue,
   Optional,

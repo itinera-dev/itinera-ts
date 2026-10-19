@@ -42,7 +42,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
 | `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
 | `service` | Provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter` |
-| `testing` | Test support: `RecordingReporter`, `Ending`, `stepMock` and `StepMock` |
+| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `Ending`, `stepMock` and `StepMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
 | `name` | Private: `named`, which refuses an empty name as something is declared |

@@ -12,6 +12,10 @@ export type {
   Endings,
 } from "./testing/ending.js";
 export { Ending } from "./testing/ending.js";
+export {
+  EntryRecordingReporter,
+  type GlobalMetadataEntry,
+} from "./testing/entry-recording-reporter.js";
 export { RecordingReporter } from "./testing/recording-reporter.js";
 export type { StepMockClass, StepMockScript } from "./testing/step-mock.js";
 export { StepMock, stepMock } from "./testing/step-mock.js";
