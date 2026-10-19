@@ -34,7 +34,7 @@ The subpath `itinera/unstable` holds API that the specification has not accepted
 
 `itinera` supports Node 22.12 and later. Working on it needs the latest Node 22 or a later version, since some of the tools need it, and `npm ci` installs everything else, at the exact versions of `package-lock.json`. `.npmrc` makes npm write exact versions into `package.json`.
 
-TypeScript is pinned at 6.0, because typescript-eslint, whose type-aware rules matter for an asynchronous engine, supports only versions below 6.1. Moving to TypeScript 7 waits until it supports that. Applications may use TypeScript 5.0 or later.
+TypeScript is pinned at 6.0, because typescript-eslint, whose type-aware rules matter for an asynchronous engine, supports only versions below 6.1. Moving to TypeScript 7 waits until it supports that. Applications may use TypeScript 5.5 or later, the oldest version that compiles the declarations of Zod, which itinera re-exports.
 
 Vitest runs the tests through its swc plugin, `unplugin-swc`, since esbuild records no decorator metadata. It reads the compiler options from `tsconfig.json`, and runs the type tests, `*.test-d.ts`, with `tsc`.
 

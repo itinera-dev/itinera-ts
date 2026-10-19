@@ -1,11 +1,11 @@
 ---
 name: stack
-description: How Claude opens, links, updates and follows a stack of pull requests in itinera-ts. Use when a stage's work is split into layers, before amending or force-pushing a branch in a stack, when a lower layer changes or merges, and when deciding whether to rebase an upper layer.
+description: How Claude opens, links, updates and follows a stack of pull requests in itinera-ts. Use when a layer of tier 1's stack is opened, before amending or force-pushing a branch in a stack, when a lower layer changes or merges, and when deciding whether to rebase an upper layer.
 ---
 
 # Stacks of pull requests
 
-[AGENTS.md](../../../AGENTS.md) says that each stage is one stack of pull requests, one layer per coherent piece, and when a pull request is ready to report. This skill is how Claude opens and follows the stack.
+[AGENTS.md](../../../AGENTS.md) says that tier 1 is one long stack of pull requests, one pull request per project thread, each layer based on the previous layer's branch, and when a pull request is ready to report. This skill is how Claude opens and follows the stack.
 
 In cloud sessions, `gh` works only through REST. GraphQL is refused, so `gh pr create`, `gh pr edit` and the `gh stack` extension do not work there; the REST forms are given below.
 
@@ -13,13 +13,13 @@ In cloud sessions, `gh` works only through REST. GraphQL is refused, so `gh pr c
 
 1. Push one branch per layer. Each layer passes all of `main`'s checks on its own.
 2. Have every layer reviewed before it is opened, as the `review-change` skill describes.
-3. Open every layer before linking any of them, because a stack cannot gain a layer through REST (see "A layer outside the stack"). Each pull request's base is the branch of the layer below, and the bottom one's base is `main`.
+3. Open the layers one after another, one per thread, each when its thread's work is ready. Each pull request's base is the branch of the layer below, and the bottom one's base is `main`.
    - Locally: `gh pr create --base <lower branch> --head <branch> --title <title> --body-file <file>`.
    - In the cloud: `gh api -X POST repos/itinera-dev/itinera-ts/pulls -f title=<title> -f head=<branch> -f base=<lower branch> -F body=@<file>`.
 4. Assign each pull request to the maintainer, whose GitHub login is the account `gh api user --jq .login` returns: `gh api -X POST repos/itinera-dev/itinera-ts/issues/<number>/assignees -f 'assignees[]=<login>'`.
-5. Link them at once, in one call, with the pull request numbers ordered bottom first:
+5. Link each layer into the stack as it is opened, if the stacks API allows appending a layer; otherwise leave the layers unlinked, as in "A layer outside the stack", and link them all in one call once the last layer is open:
    - Locally, with the `gh stack` extension; `gh stack --help` lists its commands.
-   - In the cloud: `echo '{"pull_requests":[<bottom>,<middle>,<top>]}' | gh api -X POST repos/itinera-dev/itinera-ts/stacks --input -`.
+   - In the cloud, the stack is created with its first layers, ordered bottom first: `echo '{"pull_requests":[<bottom>,<next>]}' | gh api -X POST repos/itinera-dev/itinera-ts/stacks --input -`. Each later layer is appended as it is opened with `POST repos/itinera-dev/itinera-ts/stacks/<number>/add`, if the API allows it. Otherwise, once the last layer is open, the stack is created with every layer at once: `[<bottom>,<middle>,<top>]`.
    - Then check that the stack lists them, with `gh api repos/itinera-dev/itinera-ts/stacks`. A stack is addressed by its `number`.
 
 ## While the stack is open
@@ -43,7 +43,7 @@ When a lower layer merges, GitHub's restack rewrites the upper branches, so loca
 
 ## A layer outside the stack
 
-The REST API cannot add a pull request to a stack that exists already, or remove one. A layer that is only thought of later, in a cloud session, is therefore opened on top of the stack without being linked. Locally, `gh stack` may be able to add it; check its help first. A layer that would belong in the middle of a stack is better opened as a separate pull request after the stack merges.
+When the stacks API cannot append a layer to a stack that exists already, through `POST stacks/<number>/add` or, locally, `gh stack`, each layer stays unlinked from the moment it is opened until the last layer is open and the whole stack is linked in one call. Until then, it is a layer outside the stack, and what follows applies to it. A layer that would belong in the middle of a stack is better opened as a separate pull request after the stack merges.
 
 GitHub never restacks an unlinked layer. Whenever any layer below it merges, either the layer directly below it merged, or GitHub rewrote that layer, which is the unlinked layer's base. Either way its diff would show the old commits. Then:
 

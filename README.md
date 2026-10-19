@@ -14,7 +14,7 @@ itinera-ts is being built, and no version has been released yet. It is planned t
 
 Once released, applications will depend on one package, `itinera`, installed with `npm install itinera`, and import each concept from a subpath of its own, such as `itinera/step`. Test support will be the subpath `itinera/testing`, which an application reaches only when it imports it.
 
-The package will work with `import` and `require` alike, on Node 22.12 and later. Applications will declare their workflows mainly as classes marked with decorators, which need TypeScript 5.0 or later with `experimentalDecorators`, `emitDecoratorMetadata` and `strict` turned on, and a compiler that records decorator metadata, such as `tsc` or swc. Applications that do not use decorators, such as those built with esbuild, Vite or tsx, will declare them with a builder instead, which needs only TypeScript 5.0 or later with `strict`.
+The package will work with `import` and `require` alike, on Node 22.12 and later. Applications will declare their workflows mainly as classes marked with decorators, which need TypeScript 5.5 or later with `experimentalDecorators`, `emitDecoratorMetadata` and `strict` turned on, and a compiler that records decorator metadata, such as `tsc` or swc. Applications that do not use decorators, such as those built with esbuild, Vite or tsx, will declare them with a builder instead, which needs only TypeScript 5.5 or later with `strict`.
 
 ## Conformance
 

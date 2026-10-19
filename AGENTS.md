@@ -24,9 +24,10 @@ The plan is implemented in stages, tracked in [#1](https://github.com/itinera-de
 8. Services: providers of both scopes, their requests, events, data, global metadata and implementation names.
 9. Rescue steps: the rescue, its requests, decisions and statuses, adapters and providers attached to `<step>_rescue`.
 10. Test support: `itinera/testing`, the mocks moved there from `itinera/unstable`, what test support still lacks, the runner's test support sentences, `testing` claimed.
-11. Release: the API reference, the package overview, examples, the release workflow, `0.1.0-beta.1`.
+11. Release preparation: the API reference, the package overview, examples, the release workflow, ready for `0.1.0-beta.1`, published only after the maintainer merges the stack.
+12. The book: the TypeScript edition of [itinera-dev/book](https://github.com/itinera-dev/book), a `typescript/` book beside `rust/`, following BOOK.md, its examples compiled and run against itinera-ts in CI, written as a chain of pull requests of its own in the book repository after stage 11, against the top branch of this repository's stack until the release.
 
-A proposal is added to `proposals` in `conformance.json` only by the pull request that completes it, which says `Closes #N` for its implementation issue. Proofs that a rule is impossible to express land with their feature, together with their entries under `impossible`.
+A proposal is added to `proposals` in `conformance.json` only by the pull request that completes it, which says `Closes #N` for its implementation issue. A proposal is listed only once its cases are at the tag `conformance.json` pins; cases not merged yet are run locally from their pull request's branch. Proofs that a rule is impossible to express land with their feature, together with their entries under `impossible`.
 
 ## Code
 
@@ -93,7 +94,7 @@ The runner builds each scenario's workflow with the builder, from test support's
 
 ## Pull requests and stacks
 
-- Each stage is one stack of pull requests, made with `gh stack`, one layer per coherent piece. Every layer passes all of `main`'s checks.
+- Tier 1 is one long stack of pull requests, made with `gh stack`: one pull request per project thread, each layer based on the previous layer's branch, and the threads run one after another. A stage is one or more layers, in the plan's order, and no layer merges until the maintainer merges the stack. Every layer passes all of `main`'s checks.
 - Every pull request names an open issue in this repository: `Refs #N` when it contributes, `Closes #N` when it finishes. Work that belongs to no proposal refers to #1, or to an issue of its own.
 - Public API of a proposal not yet listed in `conformance.json`, or of one the specification has not accepted yet, is exported only from the subpath `itinera/unstable`. So is a listed proposal's API while it holds a stand-in that a later stage replaces, or names API of a proposal not yet listed.
 - Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/). The subject is `type(scope): description`, or `type: description`, with the description in the imperative and starting in lower case, such as `feat(step)!: give an attempt a type of its own`. The type is one of `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `ci`, `build`, `chore` and `revert`. The scope, when there is one, is a module or an area, such as `step`, `value`, `release` or `conformance`. A `!` before the colon marks a change that breaks code written for the last release. The body says what changed and why, in plain prose.
