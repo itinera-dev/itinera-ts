@@ -9,7 +9,10 @@ class Charge extends Step {
 
   override run(): Outcome {
     if (this.amount === 0) {
-      return this.skipBecause("nothing to charge");
+      return this.skip();
+    }
+    if (this.amount < 0) {
+      return this.skipBecause("refunds are not charged");
     }
     if (this.amount > 100) {
       return this.fail({
@@ -23,9 +26,10 @@ class Charge extends Step {
 }
 
 assert.deepEqual(new Charge(40).run(), { kind: "success" });
-assert.deepEqual(new Charge(0).run(), {
+assert.deepEqual(new Charge(0).run(), { kind: "skipped" });
+assert.deepEqual(new Charge(-5).run(), {
   kind: "skipped",
-  reason: { code: "nothing to charge" },
+  reason: { code: "refunds are not charged" },
 });
 assert.deepEqual(new Charge(140).run(), {
   kind: "failure",

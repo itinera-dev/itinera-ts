@@ -5,6 +5,8 @@ import {
   type Contributor,
   contributor,
 } from "../journey.js";
+import type { Event } from "../event.js";
+import type { Reporter } from "../report.js";
 import { DefaultDispatcher } from "../report/default-dispatcher.js";
 import {
   type Outcome,
@@ -41,6 +43,29 @@ class NotAwaiting extends Step {
   override run(reporter: StepReporter): Outcome {
     void reporter.info("charged");
     return this.succeed();
+  }
+}
+
+class Chaining extends Step {
+  override run(reporter: StepReporter): Outcome {
+    void chained(reporter);
+    return this.succeed();
+  }
+}
+
+async function chained(reporter: StepReporter): Promise<void> {
+  await reporter.info("first");
+  await reporter.info("second");
+}
+
+/** A reporter that takes its time over each event, noting when each starts and ends. */
+class Slow implements Reporter {
+  readonly noted: string[] = [];
+
+  async report(event: Event): Promise<void> {
+    this.noted.push(`start ${event.kind}`);
+    await new Promise((resolve) => setTimeout(resolve, 1));
+    this.noted.push(`end ${event.kind}`);
   }
 }
 
@@ -143,6 +168,18 @@ describe("ran", () => {
       "step_info",
       "step_succeeded",
       "journey_succeeded",
+    ]);
+  });
+
+  it("waits for the calls a step made while its earlier calls settled before reporting its outcome", async () => {
+    const slow = new Slow();
+    await run(reporting(Chaining).instance({}, { reporters: [slow] }));
+    expect(slow.noted.slice(4, 9)).toEqual([
+      "start step_info",
+      "end step_info",
+      "start step_info",
+      "end step_info",
+      "start step_succeeded",
     ]);
   });
 

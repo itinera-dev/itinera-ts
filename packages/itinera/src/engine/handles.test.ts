@@ -24,9 +24,9 @@ function lent(...others: readonly Reporter[]): Lent {
   const failures = new Failures();
   const dispatcher = new DefaultDispatcher();
   const recorder = new RecordingReporter();
-  [recorder, ...others].forEach((reporter) => {
+  for (const reporter of [recorder, ...others]) {
     dispatcher.add(new Guard(reporter, failures));
-  });
+  }
   const journey = journeyThrough(dispatcher, failures);
   journey.step = charge;
   const handles = new AttemptHandles(journey, {
@@ -66,7 +66,7 @@ describe("the contributor of an attempt", () => {
     expect(() => {
       handles.contributor.contribute("total", notAValue);
     }).toThrow(JourneyAbortError);
-    await handles.settled();
+    await handles.closed();
     expect([journey.recorded, handles.contributed.size]).toEqual([
       { reason: "not a value", step: "charge", key: "total" },
       0,
@@ -109,7 +109,7 @@ describe("the step reporter of an attempt", () => {
     void handles.reporter.info("first");
     void handles.reporter.setGlobalMetadata("tenant", "acme");
     void handles.reporter.info("second");
-    await handles.settled();
+    await handles.closed();
     expect(kindsOf(recorder)).toEqual([
       "step_info",
       "global_metadata_set",
@@ -174,14 +174,14 @@ describe("the step reporter of an attempt", () => {
       handles.contributor.contribute("total", notAValue);
     }).toThrow(JourneyAbortError);
     void handles.reporter.info("after");
-    await handles.settled();
+    await handles.closed();
     expect(recorder.events).toMatchObject([{ message: "before" }]);
   });
 
   it("leaves no rejection unhandled when the step does not await a call that fails", async () => {
     const { handles, journey } = lent();
     void handles.reporter.info("charged", notAValue);
-    await handles.settled();
+    await handles.closed();
     expect(journey.recorded?.reason).toBe("not a value");
   });
 });
@@ -210,14 +210,14 @@ describe("closed handles", () => {
     "throw where they are used, %s, and change nothing",
     async (_, use, handle) => {
       const { handles, journey, recorder } = lent();
-      handles.close();
-      handles.close();
+      await handles.closed();
+      await handles.closed();
       expect(() => use(handles)).toThrow(
         new Error(
           `the ${handle} of attempt 1 of step charge was used after the attempt ended`,
         ),
       );
-      await handles.settled();
+      await handles.closed();
       expect([
         handles.contributed.size,
         recorder.events,
