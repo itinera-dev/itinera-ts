@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
-import {
-  Attempt,
-  type StepDescriptor,
-  type StepName,
-} from "../../../src/step.js";
+import { Attempt, type StepDescriptor } from "../../../src/step.js";
 import { nextAttempt } from "../../../src/step/attempt.js";
+import { describeStep } from "../../../src/step/descriptor.js";
+import { Charge } from "../../fixtures/step.js";
 import {
   type AfterAbnormalTermination,
   afterAbnormalTermination,
@@ -14,14 +12,11 @@ function step(
   retryBudget: number,
   retryOnAbnormalTermination: boolean,
 ): StepDescriptor {
-  return {
-    name: "charge" as StepName,
+  return describeStep(Charge, {
+    name: "charge",
     retryBudget,
-    retryOnAbnormalTermination,
-    build: () => {
-      throw new Error("never built");
-    },
-  };
+    noRetryOnAbnormalTermination: !retryOnAbnormalTermination,
+  });
 }
 
 const second = nextAttempt(Attempt.first);

@@ -1,41 +1,79 @@
 import type { JourneyId } from "../journey.js";
 import type { Reporter, ReporterClass } from "../report.js";
 import type { StepDescriptor } from "../step.js";
-import type { Value } from "../value.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
 import type { IdGenerator } from "./registry.js";
 import { Violations, violationsOf } from "./violation.js";
 
 declare const crypto: { randomUUID(): string };
 
+let describing: (name: WorkflowName, parts: Parts) => WorkflowDescriptor;
+
 /**
  * How a workflow is described to the executor: its name, its steps, its
  * reporters, and how it makes a journey ID. The executor reads this and
- * nothing else about the workflow, and passes the workflow object `W` to the
- * calls that need it, so it runs any workflow, however it was declared.
+ * nothing else about the workflow, and passes the workflow object to the
+ * calls that need it.
  *
- * itinera makes one when a class declared with `@workflow` is defined, or
- * when a workflow's builder builds it, after checking it, and it never
- * changes afterwards. It is the executor's contract, not a way to declare a
- * workflow.
+ * Only itinera makes one, when a class declared with `@workflow` is defined
+ * or when a workflow's builder builds it, after checking it, and it never
+ * changes afterwards: an object written by hand, with the same members, is
+ * not a workflow descriptor and does not compile where one is expected. It
+ * is the executor's contract, not a way to declare a workflow.
  *
  * {@includeCode ../../examples/descriptors.ts}
  */
-export interface WorkflowDescriptor<W = unknown> {
+export class WorkflowDescriptor {
+  static {
+    describing = (name, parts) => new WorkflowDescriptor(name, parts);
+  }
+
   /** The workflow's name, which every event of its journeys carries. */
   readonly name: WorkflowName;
+  readonly #steps: readonly StepDescriptor[];
+  readonly #reporters: readonly ReporterClass[];
+  readonly #idGenerator: IdGenerator | undefined;
+
+  private constructor(name: WorkflowName, parts: Parts) {
+    this.name = name;
+    this.#steps = Object.freeze([...parts.steps]);
+    this.#reporters = Object.freeze([...parts.reporters]);
+    this.#idGenerator = parts.idGenerator;
+    Object.freeze(this);
+  }
+
   /** The workflow's steps, in the order they run. */
-  steps(): readonly StepDescriptor[];
+  steps(): readonly StepDescriptor[] {
+    return this.#steps;
+  }
+
   /**
    * Builds the reporters the workflow lists, as new objects, for one new
    * instance.
    */
-  reporters(): readonly Reporter[];
+  reporters(): readonly Reporter[] {
+    return this.#reporters.map(build);
+  }
+
   /**
-   * Makes the journey ID of a new instance of the workflow object given,
-   * which may derive it from the instance's initial data.
+   * Makes the journey ID of a new instance of the workflow object given, with
+   * the workflow's ID generator or as a random UUID.
+   *
+   * @throws TypeError if the ID generator returns what is not a string.
+   * @throws Whatever the ID generator throws.
    */
-  generateJourneyId(workflow: W, data: ReadonlyMap<string, Value>): JourneyId;
+  generateJourneyId(workflow: Workflow): JourneyId {
+    const id: unknown =
+      this.#idGenerator === undefined
+        ? crypto.randomUUID()
+        : this.#idGenerator.call(workflow);
+    if (typeof id !== "string") {
+      throw new TypeError(
+        `the ID generator of workflow ${this.name} returned ${typeof id}, not a string`,
+      );
+    }
+    return id as JourneyId;
+  }
 }
 
 /** The lists a workflow descriptor is made from. */
@@ -57,10 +95,7 @@ export interface Parts {
  * @throws Violations listing every violation found.
  * @throws Error if the workflow has no name.
  */
-export function assemble(
-  parts: Parts,
-  className: string,
-): WorkflowDescriptor<Workflow> {
+export function assemble(parts: Parts, className: string): WorkflowDescriptor {
   if (parts.name === undefined) {
     throw new Error(
       `workflow ${className} has no name: give it one with @workflow or with its builder's name()`,
@@ -70,42 +105,7 @@ export function assemble(
   if (first !== undefined) {
     throw new Violations([first, ...more]);
   }
-  return Object.freeze(new Described(parts.name, parts));
-}
-
-class Described implements WorkflowDescriptor<Workflow> {
-  readonly name: WorkflowName;
-  readonly #steps: readonly StepDescriptor[];
-  readonly #reporters: readonly ReporterClass[];
-  readonly #idGenerator: IdGenerator | undefined;
-
-  constructor(name: WorkflowName, parts: Parts) {
-    this.name = name;
-    this.#steps = Object.freeze([...parts.steps]);
-    this.#reporters = Object.freeze([...parts.reporters]);
-    this.#idGenerator = parts.idGenerator;
-  }
-
-  steps(): readonly StepDescriptor[] {
-    return this.#steps;
-  }
-
-  reporters(): readonly Reporter[] {
-    return this.#reporters.map(build);
-  }
-
-  generateJourneyId(workflow: Workflow): JourneyId {
-    const id: unknown =
-      this.#idGenerator === undefined
-        ? crypto.randomUUID()
-        : this.#idGenerator.call(workflow);
-    if (typeof id !== "string") {
-      throw new TypeError(
-        `the ID generator of workflow ${this.name} returned ${typeof id}, not a string`,
-      );
-    }
-    return id as JourneyId;
-  }
+  return describing(parts.name, parts);
 }
 
 function build(reporter: ReporterClass): Reporter {
