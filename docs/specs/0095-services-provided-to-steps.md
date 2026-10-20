@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0095](https://github.com/itinera-dev/spec/blob/main/proposals/0095-services-provided-to-steps.md), implemented in [#31](https://github.com/itinera-dev/itinera-ts/issues/31). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 8 the service providers, [0008](0008-steps.md) the steps that request services, and [0062](0062-workflow-descriptors.md) the table of requests.
 
-Status: in progress. Stage 4 has added `serviceType` and `@service`, a step's request for a service, then `@provider`, what a provider returns and `@providerReporter`. Its sixth layer has added providers to the builder, its seventh has added the violations about services and the listing, and stage 8 runs the providers while a step is built and lends their instances to its `run`; its runner pull request lists the proposal.
+Status: complete, and 95 is listed in `conformance.json`. Stage 4 has added `serviceType` and `@service`, a step's request for a service, then `@provider`, what a provider returns and `@providerReporter`. Its sixth layer has added providers to the builder, its seventh has added the violations about services and the listing, and stage 8 runs the providers while a step is built, lends their instances to its `run`, gives the runner its service sentences and listed the proposal. The scenarios that also name the rescue steps of [0003](0003-rescue-steps.md) run once 0003 is listed, in stage 9.
 
 ## API
 
-Until 0095 is listed, everything here is exported only from `itinera/unstable`. It is defined in `src/service.ts`, which becomes the subpath `itinera/service` then, with its submodules in `src/service/`.
+0095 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as `RescueStep` of [0003](0003-rescue-steps.md), whose `run` may request a service, as the agents' manual says. It is defined in `src/service.ts`, which becomes the subpath `itinera/service` then, with its submodules in `src/service/`.
 
 - **`ServiceType<T>`** is a token for a type of service, since an interface does not exist at run time. `serviceType<T>(name)` makes one: a frozen object holding its name, for people, typed through a `unique symbol` that only itinera can name, so only `serviceType` makes one. Two service types are the same only when they are the same object, which is how `wrong service type` will compare them. An empty name throws.
 - **`@service(key, serviceType)`** marks a parameter of a step's `run` with a request for a service, always required. It compiles only on a parameter of `run` of a class extending `Step`, whose declared type accepts the token's service type. It records the key and the service type in the table of requests.
@@ -46,7 +46,9 @@ None of its own.
 - `tests/unit/workflow/base.test.ts`: what `this.provide(...)` makes, with and without data.
 - `tests/unit/workflow/violation/services.test.ts`, `providers.test.ts` and `scope.test.ts`: each violation about services and providers. `tests/unit/workflow/listing.test.ts`: the services listed with the provider serving each.
 - `examples/service.ts`: a step requesting a payment gateway. `examples/provider.ts`: providers of both scopes. `examples/descriptors.ts`: `provide`.
+- `tests/proofs.test-d.ts`: a provider returning nothing or a bare instance does not compile, with the decorator or with the builder, the proof of the `@no-instance` exclusion in `conformance.json`.
+- `packages/conformance`: the runner's service sentences, its labellers and meters, and its providers, one method of the scenario's workflow class each, playing every scenario of 0095, 0102 and 0104 that runs.
 
 ## Done when
 
-Every scenario tagged `@proposal-0095` passes, and 95 is listed in `conformance.json`. Planned for stage 8.
+Done in stage 8: every scenario tagged `@proposal-0095` passes, but those that also name a proposal not yet listed and the one tagged `@no-instance`, which `conformance.json` excludes with its proof, and 95 is listed in `conformance.json`. The runner has no step definition for the sentence that a provider returns nothing, since only that excluded scenario uses it and a provider written as the sentence says does not compile.

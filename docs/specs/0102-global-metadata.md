@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0102](https://github.com/itinera-dev/spec/blob/main/proposals/0102-global-metadata.md), implemented in [#33](https://github.com/itinera-dev/itinera-ts/issues/33). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, and [0011](0011-events.md) and [0063](0063-dispatcher-factory.md) the reporters and dispatchers.
 
-Status: in progress. Stage 1 added global metadata on reporters and dispatchers, the event `global_metadata_set` and the abort reason `reserved metadata key`. Stage 3 sets it before the journey: `journey_id` first, then each initial entry in order, a value that is not a value or an entry under `journey_id` refusing the instance with `initial values`, and a reporter or dispatcher that fails refusing it with `global metadata not set` (see 0012). Stage 5 sets it from steps, through their step reporter, stage 7 from hooks, through their hook reporter, and stage 8 from service providers, through their provider reporter; stage 8's runner pull request lists the proposal.
+Status: complete, and 102 is listed in `conformance.json`. Stage 1 added global metadata on reporters and dispatchers, the event `global_metadata_set` and the abort reason `reserved metadata key`. Stage 3 sets it before the journey: `journey_id` first, then each initial entry in order, a value that is not a value or an entry under `journey_id` refusing the instance with `initial values`, and a reporter or dispatcher that fails refusing it with `global metadata not set` (see 0012). Stage 5 sets it from steps, through their step reporter, stage 7 from hooks, through their hook reporter, and stage 8 from service providers, through their provider reporter, and stage 8 listed the proposal.
 
 ## API
 
-Until 0102 is listed, these are exported only from `itinera/unstable`.
+0102 is listed, but its API stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), whose reporters set global metadata too, as the agents' manual says.
 
 - **`Reporter.receiveGlobalMetadata(key, value)`**, chapter 2, 2.1's **receive global metadata**, is optional. A reporter without it accepts every entry and does nothing with it. The value is a `PlainValue`, captured before it reaches any reporter (see [0056](0056-data-bag-values.md)).
 - **`Dispatcher.setGlobalMetadata(key, value)`** passes one entry to its reporters; `DefaultDispatcher` does so in the order they were added, and stops at the first that fails.
@@ -31,4 +31,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0102` passes, and 102 is listed in `conformance.json`. Planned for stage 8.
+Done in stage 8: every scenario tagged `@proposal-0102` passes, and 102 is listed in `conformance.json`.

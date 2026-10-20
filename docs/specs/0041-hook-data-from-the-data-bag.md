@@ -6,7 +6,7 @@ Status: complete, and 41 is listed in `conformance.json`. Stage 4 has added `@fr
 
 ## API
 
-0041 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says. It is defined in `src/workflow/request.ts` and re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow`.
+0041 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), as the agents' manual says. It is defined in `src/workflow/request.ts` and re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow`.
 
 - **`@fromWorkflow(key, type?)`** marks a parameter of a hook with a request for data from the workflow, read from the data bag under the key, never through an input adapter. It is typed like `@input`: required unless its type is wrapped in `optional`, its type written as a token or any other Standard Schema validator, or read from the metadata. It compiles only in a method of either kind of policy, on a parameter whose type accepts what it gives, and records the key and the type in the table of requests.
 
