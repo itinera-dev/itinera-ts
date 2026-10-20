@@ -4,7 +4,7 @@ import {
   type ValuesByKey,
   type WorkflowInstance,
 } from "../instance.js";
-import { type Provided, provided } from "../service/provider.js";
+import { type Provided, provided } from "../service/provider/provided.js";
 import type { AsValue } from "../value.js";
 import { fromBag, type Supplied, supplied } from "./adapter/supplied.js";
 import { WorkflowBuilder } from "./builder.js";

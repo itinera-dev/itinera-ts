@@ -7,11 +7,11 @@
  */
 
 export {
-  type Provided,
   provider,
   type ProviderDecorator,
   type ProviderOptions,
 } from "./service/provider.js";
+export type { Provided } from "./service/provider/provided.js";
 export { providerReporter, type ProviderReporter } from "./service/reporter.js";
 export { service, serviceType, type ServiceType } from "./service/request.js";
 

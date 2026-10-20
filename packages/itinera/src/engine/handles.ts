@@ -1,6 +1,7 @@
 import { EventKind } from "../event/kind.js";
 import { AbortReason, type Abort, type Contributor } from "../journey.js";
 import type { HookReporter } from "../policy.js";
+import type { ProviderReporter } from "../service.js";
 import type { StepReporter } from "../step.js";
 import type { PlainValue } from "../value.js";
 import { capture } from "../value/capture.js";
@@ -18,21 +19,25 @@ import { JourneyAbortError } from "./signal.js";
 import { journeyIdKey } from "./start.js";
 
 /**
- * The handles itinera lends one attempt of a step, or one call of a hook:
- * its contributor and its reporter, a step reporter or a hook reporter. They
- * keep what was contributed, and run every call that emits or sets global
- * metadata in the order it was made, each once the one before has settled,
- * so a call that is not awaited keeps its place. Once the attempt or the
- * call ends they are closed: a call then throws where it is made, and
- * changes nothing.
+ * The handles itinera lends one attempt of a step, or one call of a hook or
+ * of a service provider: its contributor, which a provider is never lent,
+ * and its reporter, a step reporter, a hook reporter or a provider reporter.
+ * They keep what was contributed, and run every call that emits or sets
+ * global metadata in the order it was made, each once the one before has
+ * settled, so a call that is not awaited keeps its place. Once the attempt
+ * or the call ends they are closed: a call then throws where it is made,
+ * and changes nothing.
  */
 export class Handles {
   /** What was contributed, by key, in the order first contributed. */
   readonly contributed = new Map<string, PlainValue>();
   /** The contributor lent. */
   readonly contributor: Contributor;
-  /** The reporter lent: a step's, or a hook's, which have the same calls. */
-  readonly reporter: StepReporter & HookReporter;
+  /**
+   * The reporter lent: a step's, a hook's or a provider's, which have the
+   * same calls.
+   */
+  readonly reporter: StepReporter & HookReporter & ProviderReporter;
   #closed = false;
   #last: Promise<void> = Promise.resolve();
 
@@ -139,9 +144,7 @@ export class Handles {
       const { holder } = this;
       const isStep = holder.kind === "step";
       const lent =
-        handle === "contributor"
-          ? handle
-          : `${isStep ? "step" : "hook"} reporter`;
+        handle === "contributor" ? handle : `${borrowerOf(holder)} reporter`;
       throw new Error(
         `the ${lent} of ${described(holder)} was used after ${isStep ? "the attempt ended" : "it returned"}`,
       );
@@ -174,6 +177,19 @@ export class Handles {
   #aborting(abort: Abort): JourneyAbortError {
     void this.#abortInTurn(abort);
     return new JourneyAbortError(abort);
+  }
+}
+
+/** Who a reporter is lent to, as a message about one used too late says. */
+function borrowerOf(holder: Holder): "step" | "hook" | "provider" {
+  switch (holder.kind) {
+    case "step":
+      return "step";
+    case "provider":
+      return "provider";
+    case "step hook":
+    case "workflow hook":
+      return "hook";
   }
 }
 
