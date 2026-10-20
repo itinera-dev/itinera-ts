@@ -7,7 +7,7 @@ import {
   type StepPolicyMockScript,
   type WorkflowHookEnding,
   type WorkflowPolicyMockScript,
-} from "itinera/unstable";
+} from "itinera/testing";
 import { ModelError } from "../../model/error.js";
 import type {
   HookReturn,

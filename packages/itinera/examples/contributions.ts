@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { type Contributor, contributor } from "itinera/journey";
 import { type Outcome, Step, step } from "itinera/step";
-import { Contributions } from "itinera/unstable";
+import { Contributions } from "itinera/testing";
 import { integer } from "itinera/value";
 
 @step()

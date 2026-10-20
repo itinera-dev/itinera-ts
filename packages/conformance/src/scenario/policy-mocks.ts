@@ -12,7 +12,7 @@ import {
   type WorkflowPolicyMock,
   workflowPolicyMock,
   type WorkflowPolicyMockScript,
-} from "itinera/unstable";
+} from "itinera/testing";
 import type { Hook, PolicyScript } from "../model/policy.js";
 import type { Witness } from "../witness.js";
 import { hookActed } from "./hooks.js";

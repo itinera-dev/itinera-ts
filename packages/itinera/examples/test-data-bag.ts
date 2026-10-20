@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { dataBag, type DataBag } from "itinera/journey";
-import { TestDataBag } from "itinera/unstable";
+import { TestDataBag } from "itinera/testing";
 import { input, type Outcome, Step, step } from "itinera/step";
 import { integer } from "itinera/value";
 import {

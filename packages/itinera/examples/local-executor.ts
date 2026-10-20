@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { LocalExecutor } from "itinera/executor";
 import { type Outcome, Step } from "itinera/step";
-import { RecordingReporter } from "itinera/unstable";
+import { RecordingReporter } from "itinera/testing";
 import { Workflow } from "itinera/workflow";
 
 class Ship extends Step {

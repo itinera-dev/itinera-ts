@@ -9,7 +9,7 @@ import {
   stepMock,
   stepPolicyMock,
   workflowPolicyMock,
-} from "itinera/unstable";
+} from "itinera/testing";
 import { Workflow } from "itinera/workflow";
 
 class Orders extends Workflow {}

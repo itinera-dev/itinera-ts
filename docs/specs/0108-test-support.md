@@ -6,7 +6,7 @@ Status: in progress. Stage 2 added the recording reporter and its path, and star
 
 ## API
 
-Until 0108 is listed, test support is exported only from `itinera/unstable`. It lives in the module `testing`, `src/testing.ts`, which becomes the subpath `itinera/testing` in stage 10, so that nothing of test support is reachable without importing it, as chapter 8, 8.1 point 2 asks. No other module re-exports it: the recording reporter is a reporter, but `itinera/report` does not offer it.
+Test support is the subpath `itinera/testing`, the module `testing`, `src/testing.ts`, with its ESM layer `src/testing.mts`, so that nothing of test support is reachable without importing it, as chapter 8, 8.1 point 2 asks. Until stage 10 listed 0108, it was exported from `itinera/unstable`, which holds nothing now. No other module re-exports it: the recording reporter is a reporter, but `itinera/report` does not offer it.
 
 ### The recording reporter
 

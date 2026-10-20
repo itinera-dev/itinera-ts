@@ -6,7 +6,7 @@ import type {
   RescueStepMockClass,
   StepMock,
   StepMockClass,
-} from "itinera/unstable";
+} from "itinera/testing";
 
 /**
  * A class of step mocks whose `run` requests the attempt's contributor and

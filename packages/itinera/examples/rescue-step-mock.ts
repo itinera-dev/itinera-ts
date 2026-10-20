@@ -7,7 +7,7 @@ import {
   type RescueStepMock,
   rescueStepMock,
   stepMock,
-} from "itinera/unstable";
+} from "itinera/testing";
 import { Workflow } from "itinera/workflow";
 
 class Orders extends Workflow {}
