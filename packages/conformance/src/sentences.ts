@@ -17,6 +17,7 @@ import "./sentences/outcomes/hooks.js";
 import "./sentences/outcomes/hooks/data.js";
 import "./sentences/outcomes/hooks/received.js";
 import "./sentences/outcomes/inputs.js";
+import "./sentences/outcomes/rescued.js";
 import "./sentences/outcomes/journey.js";
 import "./sentences/outcomes/listing.js";
 import "./sentences/outcomes/result.js";
