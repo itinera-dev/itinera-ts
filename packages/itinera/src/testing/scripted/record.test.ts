@@ -1,18 +1,25 @@
 import { describe, expect, it } from "vitest";
 import { keeping, orders } from "../../engine/fixtures.js";
 import { input } from "../../step/request.js";
-import { integer } from "../../value/token.js";
+import { fromRescuedStep } from "../../step/rescue.js";
+import { integer, string } from "../../value/token.js";
 import { MistakeKind, TestMistake } from "../mistake.js";
 import { scripted } from "../scripted.js";
 import { stepMock } from "../step-mock.js";
 import { Ending } from "../ending.js";
-import { rescued, shop } from "./fixtures.js";
+import { rescueStepMock } from "../rescue-step-mock.js";
+import { charge, rescued, shop } from "./fixtures.js";
+import type { AttemptRecord } from "./record.js";
 
 function charging() {
   return keeping([])
     .builder("charge")
     .needs(input("amount", integer))
     .retryBudget(1);
+}
+
+function numberOf(record: AttemptRecord): number {
+  return record.attempt.number;
 }
 
 describe("ScriptedRun", () => {
@@ -46,7 +53,7 @@ describe("StepRecord", () => {
       .willRunForReal()
       .run();
     const attempts = run.step("charge").attempts;
-    expect(attempts.map((attempt) => attempt.number.number)).toEqual([1, 2]);
+    expect(attempts.map(numberOf)).toEqual([1, 2]);
     expect(run.step("charge").attempt(2).unwrap()).toBe(attempts[1]);
   });
 
@@ -83,5 +90,27 @@ describe("AttemptRecord", () => {
     const attempt = run.step("charge").attempt(1).unwrap();
     expect(attempt.input("amount", integer).option().unwrap()).toBe(40);
     expect(attempt.input("currency", integer).kind).toBe("absent");
+  });
+
+  it("reads, for a rescue step, the contributions it requested of the failed attempt", async () => {
+    const run = await scripted(
+      orders(
+        charge().rescue(
+          rescueStepMock({ attempts: [Ending.success] })
+            .builder()
+            .needs(fromRescuedStep("card", string)),
+        ),
+      ).instance(),
+    )
+      .step("charge")
+      .willContribute("card", "expired")
+      .willFail("expired")
+      .onAttempt(2)
+      .willSucceed()
+      .andStep("charge_rescue")
+      .willSucceed()
+      .run();
+    const rescue = run.step("charge_rescue").attempt(1).unwrap();
+    expect(rescue.input("card", string).option().unwrap()).toBe("expired");
   });
 });

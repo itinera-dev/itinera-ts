@@ -70,11 +70,11 @@ export type {
   StepPolicyMockScript,
 } from "./testing/step-policy-mock.js";
 export { StepPolicyMock, stepPolicyMock } from "./testing/step-policy-mock.js";
+export { TestDataBag } from "./testing/test-data-bag.js";
 export type {
   WorkflowPolicyMockClass,
   WorkflowPolicyMockScript,
 } from "./testing/workflow-policy-mock.js";
-export { TestDataBag } from "./testing/test-data-bag.js";
 export {
   WorkflowPolicyMock,
   workflowPolicyMock,

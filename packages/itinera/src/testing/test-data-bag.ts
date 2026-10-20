@@ -11,12 +11,7 @@ import { captured } from "./captured.js";
  * {@includeCode ../../examples/test-data-bag.ts}
  */
 export class TestDataBag {
-  readonly #values: ReadonlyMap<string, PlainValue>;
-
-  /** A data bag holding `values`, or nothing. */
-  constructor(values: ReadonlyMap<string, PlainValue> = new Map()) {
-    this.#values = values;
-  }
+  #values: ReadonlyMap<string, PlainValue> = new Map();
 
   /**
    * A data bag holding what this one holds, and `value` under `key`,
@@ -25,12 +20,12 @@ export class TestDataBag {
    * @throws TypeError when `value` is not a value.
    */
   with<T>(key: string, value: T & AsValue<T>): TestDataBag {
-    return new TestDataBag(
-      new Map(this.#values).set(
-        key,
-        captured(value, `the value given under ${key}`),
-      ),
+    const bag = new TestDataBag();
+    bag.#values = new Map(this.#values).set(
+      key,
+      captured(value, `the value given under ${key}`),
     );
+    return bag;
   }
 
   /** Read access to the data bag, as an input adapter requests it. */

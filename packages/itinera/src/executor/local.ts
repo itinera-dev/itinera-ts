@@ -1,5 +1,5 @@
 import { runJourney } from "../engine.js";
-import type { Script } from "../engine/script.js";
+import type { Scripting } from "../engine/script.js";
 import { isInstance, type WorkflowInstance } from "../instance/made.js";
 import type { JourneyResult } from "../journey.js";
 import type { DispatcherFactory } from "../report.js";
@@ -9,7 +9,7 @@ import { Refusal } from "./refusal.js";
 let scripting: (
   executor: LocalExecutor,
   instance: WorkflowInstance,
-  script: Script,
+  script: Scripting,
 ) => Promise<JourneyResult>;
 
 /**
@@ -62,7 +62,7 @@ export class LocalExecutor {
 
   async #run(
     instance: WorkflowInstance,
-    script?: Script,
+    script?: Scripting,
   ): Promise<JourneyResult> {
     if (!isInstance(instance)) {
       throw new TypeError(
@@ -88,7 +88,7 @@ export class LocalExecutor {
 export function runScripted(
   executor: LocalExecutor,
   instance: WorkflowInstance,
-  script: Script,
+  script: Scripting,
 ): Promise<JourneyResult> {
   return scripting(executor, instance, script);
 }

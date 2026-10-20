@@ -239,6 +239,23 @@ describe("providedBy", () => {
     ]);
   });
 
+  it.each([
+    ["throws", throwing],
+    ["rejects", rejecting],
+  ])(
+    "aborts the journey with step could not be built, carrying the error, when the instance's fake %s",
+    async (_, fake) => {
+      const instance = chargingTill(counted).instance();
+      useFake(instance, "main" as ProviderName, fake);
+      const result = await run(instance);
+      expect(result.abort).toMatchObject({
+        reason: "step could not be built",
+        source: { kind: "provider", provider: "main" },
+        errorMessage: "gateway down",
+      });
+    },
+  );
+
   it("does not call the instance's fake when the provider's requests abort the journey", async () => {
     const till = chargingTill(counted, [fromWorkflow("gateway", string)]);
     const faked: string[] = [];

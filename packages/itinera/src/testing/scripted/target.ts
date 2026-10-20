@@ -3,6 +3,10 @@ import type { StepDescriptor, StepName } from "../../step.js";
 import type { StepRequests } from "../../step/declared.js";
 import { requestsOfDescribed, rescueOf } from "../../step/descriptor.js";
 import type { PlainValue } from "../../value.js";
+import {
+  type Requesting,
+  withRescueSteps,
+} from "../../workflow/violation/steps.js";
 import type { Level } from "../emitted.js";
 import type { Ending } from "../ending.js";
 
@@ -106,7 +110,7 @@ export function targetNamed(
 export function everyName(
   steps: readonly StepDescriptor[],
 ): readonly StepName[] {
-  return steps.flatMap(targetsOf).map(nameOf);
+  return withRescueSteps(steps).map(nameOf);
 }
 
 /** Whether a target is named `name`. */
@@ -131,8 +135,8 @@ function targetsOf(step: StepDescriptor): readonly Target[] {
     : [own, new Target(rescue.name, { kind: "rescue" }, rescue.requests)];
 }
 
-function nameOf(target: Target): StepName {
-  return target.name;
+function nameOf(step: Requesting): StepName {
+  return step.name;
 }
 
 function isContributor(request: Request): boolean {

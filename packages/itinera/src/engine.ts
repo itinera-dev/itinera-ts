@@ -12,7 +12,7 @@ import type { DispatcherFactory } from "./report.js";
 import { type Clock, Emitter } from "./engine/emitter.js";
 import { Journey } from "./engine/journey.js";
 import { travel } from "./engine/scan.js";
-import type { Script } from "./engine/script.js";
+import type { Scripting } from "./engine/script.js";
 import { JourneyAbortError } from "./engine/signal.js";
 import { start } from "./engine/start.js";
 
@@ -29,7 +29,7 @@ export async function runJourney(
   instance: WorkflowInstance,
   factory: DispatcherFactory,
   clock: Clock,
-  script?: Script,
+  script?: Scripting,
 ): Promise<JourneyResult> {
   const { data, dispatcher, failures, policies } = await start(
     instance,

@@ -7,7 +7,7 @@ import type { PlainValue } from "../value.js";
  * the construction of its step, and plays, for the attempts it describes,
  * what they do in place of the step's `run`.
  */
-export interface Script {
+export interface Scripting {
   /**
    * Records that `attempt` of the step, or rescue step, `step` is handed to
    * the construction of its step, with the values its requests found, by
@@ -31,10 +31,10 @@ export interface Script {
  * then the outcome it ends with, or a throw, as an error escaping a step's
  * `run`.
  */
-export type Play = (lent: Lent) => Promise<Outcome>;
+export type Play = (lent: PlayedWith) => Promise<Outcome>;
 
 /** The handles an attempt lends what plays it. */
-export interface Lent {
+export interface PlayedWith {
   /** The attempt's contributor. */
   readonly contributor: Contributor;
   /** The attempt's step reporter. */

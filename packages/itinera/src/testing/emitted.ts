@@ -1,24 +1,8 @@
-import { closedSet, type ValueOf } from "../closed-set.js";
+import type { Level } from "../event/level.js";
 import type { Option } from "../option.js";
 import type { PlainValue } from "../value.js";
 
-/**
- * The level of an event a step or a hook emits through its reporter: `info`,
- * `warning` or `error`.
- *
- * {@includeCode ../../examples/event-reporter-recorders.ts}
- */
-export const Level = closedSet({
-  /** Emitted with `info`. */
-  Info: "info",
-  /** Emitted with `warning`. */
-  Warning: "warning",
-  /** Emitted with `error`. */
-  Error: "error",
-});
-
-/** One of the values of {@link Level}. */
-export type Level = ValueOf<typeof Level>;
+export { Level } from "../event/level.js";
 
 /**
  * An event a step or a hook emitted through the reporter a recorder lent it:

@@ -106,12 +106,12 @@ export class AttemptRecord {
     attemptMade = (built) => new AttemptRecord(built);
   }
 
-  /** The attempt. */
-  readonly number: Attempt;
+  /** The attempt it records. */
+  readonly attempt: Attempt;
   readonly #values: ReadonlyMap<string, PlainValue>;
 
   private constructor(built: Built) {
-    this.number = built.attempt;
+    this.attempt = built.attempt;
     this.#values = built.values;
   }
 
@@ -164,5 +164,5 @@ function attemptRecord(built: Built): AttemptRecord {
 }
 
 function numbered(number: number): (attempt: AttemptRecord) => boolean {
-  return (attempt) => attempt.number.number === number;
+  return (record) => record.attempt.number === number;
 }
