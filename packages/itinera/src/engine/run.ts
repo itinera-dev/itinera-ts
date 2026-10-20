@@ -4,7 +4,7 @@ import type { Attempt, Outcome, Step, StepDescriptor } from "../step.js";
 import { requestsOfDescribed } from "../step/descriptor.js";
 import { hasDetailsRefused, isOutcome } from "../step/outcome.js";
 import type { PlainValue } from "../value.js";
-import { AttemptHandles } from "./handles.js";
+import { Handles } from "./handles.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
 import { JourneyAbortError } from "./signal.js";
@@ -38,7 +38,7 @@ export async function ran(
   attempt: Attempt,
   made: Step,
 ): Promise<Ran> {
-  const handles = new AttemptHandles(journey, {
+  const handles = new Handles(journey, {
     kind: "step",
     step: step.name,
     attempt,
@@ -67,7 +67,7 @@ export async function ran(
 function lending(
   journey: Journey,
   step: StepDescriptor,
-  handles: AttemptHandles,
+  handles: Handles,
   request: Request,
 ): unknown {
   if (request.kind === "contributor") {
@@ -99,7 +99,7 @@ function notLent(
 function endedWith(
   step: StepDescriptor,
   returned: unknown,
-  handles: AttemptHandles,
+  handles: Handles,
 ): Ran {
   return isOutcome(returned)
     ? { kind: "outcome", outcome: returned, contributed: handles.contributed }

@@ -28,7 +28,10 @@ export async function runJourney(
   factory: DispatcherFactory,
   clock: Clock,
 ): Promise<JourneyResult> {
-  const { data, dispatcher, failures } = await start(instance, factory);
+  const { data, dispatcher, failures, policies } = await start(
+    instance,
+    factory,
+  );
   const { descriptor, journeyId } = instance;
   const journey = new Journey(
     new Emitter(journeyId, descriptor.name, clock),
@@ -40,7 +43,7 @@ export async function runJourney(
 
   async function ended(): Promise<JourneyStatus> {
     try {
-      const failure = await travel(journey, instance);
+      const failure = await travel(journey, instance, policies);
       const dataBag = dataBagOf(journey.data);
       return failure === undefined
         ? { kind: "succeeded", dataBag }

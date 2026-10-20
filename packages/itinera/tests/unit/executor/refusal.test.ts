@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { PolicyName } from "../../../src/policy.js";
 import { Refusal, type Refused } from "../../../src/executor/refusal.js";
 
 const failed = { error: new Error("disk full"), errorMessage: "disk full" };
@@ -32,6 +33,15 @@ describe("Refusal", () => {
         initialGlobalMetadata: ["journey_id"],
       },
       "run refused an instance: the initial data is not a value under order; the initial global metadata is not a value, or is reserved, under journey_id",
+    ],
+    [
+      "a workflow policy that failed while it was built",
+      {
+        kind: "workflow policy failed",
+        policy: "audit" as PolicyName,
+        ...failed,
+      },
+      "run refused an instance: workflow policy audit failed while it was built: disk full",
     ],
     [
       "a dispatcher factory that failed",

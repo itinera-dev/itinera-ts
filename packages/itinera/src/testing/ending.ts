@@ -110,7 +110,8 @@ function abnormalTermination(errorMessage: string): EndsAbnormally {
   return Object.freeze({ kind: "abnormal termination", errorMessage });
 }
 
-function reasonOf(reason: Reason | string): Reason {
+/** The reason, or one with only the code, when given only its code. */
+export function reasonOf(reason: Reason | string): Reason {
   return typeof reason === "string" ? { code: reason } : reason;
 }
 

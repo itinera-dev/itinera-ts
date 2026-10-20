@@ -77,7 +77,12 @@ assert.deepEqual(
   ["audit"],
 );
 assert.deepEqual(attached[0]?.hooks(), ["on step success", "on step failure"]);
-assert.ok(attached[0].build() instanceof Audit);
+const built = attached[0].build();
+assert.ok(built instanceof Audit);
+assert.deepEqual(attached[0].call(built, "on step failure", ["failure"]), {
+  kind: "FailWorkflow",
+  reason: { code: "failure" },
+});
 assert.deepEqual(
   descriptor.policies().map((policy) => policy.name),
   ["notify"],

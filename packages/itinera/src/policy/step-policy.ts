@@ -2,13 +2,17 @@ import {
   type StepPolicyBuilder,
   stepPolicyBuilder,
 } from "./step-policy/builder.js";
-import type { Reason } from "../step.js";
-import type { FailWorkflow, FinishWorkflow, KeepDefault } from "./lifecycle.js";
+import type { GivenReason } from "../step.js";
+import {
+  type FailWorkflow,
+  failingWorkflow,
+  finished,
+  type FinishWorkflow,
+  type KeepDefault,
+  keptDefault,
+} from "./lifecycle.js";
 
 declare const roles: unique symbol;
-
-const keptDefault: KeepDefault = Object.freeze({ kind: "KeepDefault" });
-const finished: FinishWorkflow = Object.freeze({ kind: "FinishWorkflow" });
 
 /**
  * The base class of every step policy: hooks called around the attempts of
@@ -65,13 +69,11 @@ export abstract class StepPolicy<R = unknown> {
 
   /**
    * What a step hook returns to make the journey fail at once, with a
-   * reason, or only its code.
+   * reason, or only its code. Its details may be any value, an object that
+   * serialises itself included, and are captured now.
    */
-  protected failWorkflow(reason: Reason | string): FailWorkflow {
-    return Object.freeze({
-      kind: "FailWorkflow",
-      reason: typeof reason === "string" ? { code: reason } : reason,
-    });
+  protected failWorkflow<T>(reason: GivenReason<T>): FailWorkflow {
+    return failingWorkflow(reason);
   }
 }
 
