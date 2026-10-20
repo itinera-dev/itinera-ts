@@ -1,8 +1,8 @@
 {
   "cases": "v0.1.0-rc.15",
   "proposals": [
-    2, 8, 9, 10, 11, 12, 24, 27, 32, 40, 41, 42, 49, 54, 55, 56, 57, 58, 60, 61,
-    62, 63, 64, 65, 81, 83, 85, 91, 95, 102, 104, 106
+    2, 3, 8, 9, 10, 11, 12, 24, 27, 32, 40, 41, 42, 49, 54, 55, 56, 57, 58, 60,
+    61, 62, 63, 64, 65, 81, 83, 85, 91, 95, 98, 102, 104, 106
   ],
   "capabilities": ["async"],
   "impossible": {
@@ -33,6 +33,16 @@
         "proof": {
           "test": "an adapter cannot write through its access to the data bag",
           "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      }
+    ],
+    "rescue-skip": [
+      {
+        "feature": "cases/tier-1/0003-rescue-steps/failing-rescue.feature",
+        "scenario": "A rescue step that skips aborts the journey",
+        "proof": {
+          "test": "a rescue step cannot skip",
+          "file": "packages/itinera/tests/proofs.test-d.ts"
         }
       }
     ],
