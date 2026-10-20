@@ -42,17 +42,9 @@ export function mockScriptOf(script: StepScript): StepMockScript {
 }
 
 function refuseWhatDoesNotRunYet(script: StepScript): void {
-  const notYet = [
-    (script.hasRescueStep || script.isRescueStep) && "rescue steps",
-    script.keepsHandles && "kept handles",
-  ].find(isNamed);
-  if (notYet !== undefined) {
-    throw new NotRunYet(notYet);
+  if (script.hasRescueStep || script.isRescueStep) {
+    throw new NotRunYet("rescue steps");
   }
-}
-
-function isNamed(what: string | false): what is string {
-  return what !== false;
 }
 
 function endingOf({ outcome }: AttemptScript): Ending {

@@ -139,7 +139,7 @@ function ignore(): void {
  * allows: the elements of a list, or the properties of a plain object, and
  * nothing for any other value, which cannot be changed in place.
  */
-function changeInPlace(target: unknown, content: PlainValue): void {
+export function changeInPlace(target: unknown, content: PlainValue): void {
   if (isList(target) && isListValue(content)) {
     target.splice(0, target.length, ...content);
   } else if (isPlainObject(target) && isPlainObject(content)) {

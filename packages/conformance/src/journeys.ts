@@ -17,7 +17,8 @@ import {
   type ScenarioReporter,
 } from "./recorders.js";
 import { executorOf, runnersRecorder } from "./executor.js";
-import { instanceOf, type Scenario, workflowOf } from "./scenario.js";
+import { instanceOf, workflowOf } from "./scenario.js";
+import type { Scenario } from "./scenario/workflow.js";
 import type { Witness } from "./witness.js";
 
 /** What building the workflow gave: the workflow, or the violations refusing it. */
