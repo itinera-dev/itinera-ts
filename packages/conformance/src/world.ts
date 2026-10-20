@@ -2,6 +2,7 @@ import type { Event } from "itinera/event";
 import type { JourneyResult } from "itinera/journey";
 import type { ListedStep } from "itinera/workflow";
 import { Alone } from "./alone.js";
+import { type Fixture, fixtureListing, ranFixture } from "./fixture.js";
 import {
   admitted,
   type Admission,
@@ -35,6 +36,16 @@ export class World {
   #journeys: readonly Journey[] = [];
   #listing: readonly ListedStep[] | undefined;
   #alone: Alone | undefined;
+  #fixture: Fixture | undefined;
+
+  /**
+   * Names the hand-written workflow the scenario runs, which declares the
+   * scenario's workflow, so that no other may be declared.
+   */
+  nameFixture(fixture: Fixture): void {
+    this.model.declare(fixture, []);
+    this.#fixture = fixture;
+  }
 
   /** Builds the workflow the scenario declares, once. */
   admit(): Admission {
@@ -43,10 +54,20 @@ export class World {
   }
 
   /**
-   * Runs the journeys of the workflow, `times` of them on one executor, once
-   * admitted, keeping the test mistake that stops them.
+   * Runs `times` journeys on one executor: of the hand-written workflow the
+   * scenario names, or of the workflow it declares, once admitted, keeping
+   * the test mistake that stops them.
    */
   async run(times: number): Promise<void> {
+    if (this.#fixture !== undefined) {
+      this.#journeys = await ranFixture(
+        this.#fixture,
+        this.model,
+        this.recorders,
+        times,
+      );
+      return;
+    }
     const admission = this.admit();
     if (admission.kind === "admitted") {
       await this.tested.caught(async () => {
@@ -98,9 +119,15 @@ export class World {
     return this.#alone;
   }
 
-  /** Lists the workflow the scenario declares, without running anything. */
+  /**
+   * Lists the workflow the scenario declares or names, without running
+   * anything.
+   */
   list(): void {
-    this.#listing = listingOf(this.model, this.witness);
+    this.#listing =
+      this.#fixture === undefined
+        ? listingOf(this.model, this.witness)
+        : fixtureListing(this.#fixture);
   }
 
   /** The workflow's listing, once a When sentence listed it. */

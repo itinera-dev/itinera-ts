@@ -28,7 +28,11 @@ import { type Scenario, serving } from "./scenario/workflow.js";
 import { tokenOf } from "./tokens.js";
 import type { ActingClass, Witness } from "./witness.js";
 
-export { type GivenReporter, instanceOf } from "./scenario/instance.js";
+export {
+  asGiven,
+  type GivenReporter,
+  instanceOf,
+} from "./scenario/instance.js";
 
 /**
  * The workflow the scenario declares, put together with the builder, each

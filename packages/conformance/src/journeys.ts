@@ -2,23 +2,20 @@
  * What the scenario's When sentences do: build the workflow, then run its
  * journeys, keeping what each gave for the Then sentences.
  */
-import type { Event } from "itinera/event";
-import { Refusal } from "itinera/executor";
+import { type LocalExecutor, Refusal } from "itinera/executor";
+import type { WorkflowInstance } from "itinera/instance";
 import type { JourneyResult } from "itinera/journey";
 import { type Built, Violations } from "itinera/workflow";
-import { ModelError } from "./model/error.js";
 import type { Model } from "./model.js";
-import {
-  eventsOf,
-  type Recorders,
-  type ScenarioReporter,
-} from "./recorders.js";
+import type { Recorders } from "./recorders.js";
 import { executorOf, runnersRecorder } from "./executor.js";
 import { workflowOf } from "./scenario.js";
 import { runScript } from "./script.js";
 import type { Scenario } from "./scenario/workflow.js";
 import type { Tested } from "./tested.js";
 import type { Witness } from "./witness.js";
+
+export { ofJourney, streamOf } from "./journeys/stream.js";
 
 /** What building the workflow gave: the workflow, or the violations refusing it. */
 export type Admission =
@@ -62,13 +59,26 @@ export async function ran(
   tested: Tested,
   times: number,
 ): Promise<Journey[]> {
-  const executor = executorOf(model.dispatching, recorders);
+  return journeysOf(executorOf(model.dispatching, recorders), times, () =>
+    tested.instanceOf(workflow, model, recorders),
+  );
+}
+
+/**
+ * Runs `times` journeys on the executor, one after another, each with a new
+ * instance that `instance` makes.
+ */
+export async function journeysOf(
+  executor: LocalExecutor,
+  times: number,
+  instance: () => WorkflowInstance,
+): Promise<Journey[]> {
   const journeys: Journey[] = [];
   for (let run = 0; run < times; run += 1) {
-    const instance = tested.instanceOf(workflow, model, recorders);
+    const made = instance();
     journeys.push({
-      journeyId: instance.journeyId,
-      ended: await endedOf(executor.run(instance)),
+      journeyId: made.journeyId,
+      ended: await endedOf(executor.run(made)),
     });
   }
   return journeys;
@@ -104,6 +114,7 @@ export async function ranScripted(
   ];
 }
 
+/** How a call to `run` ended: with the journey's result, or refused. */
 async function endedOf(running: Promise<JourneyResult>): Promise<Ended> {
   try {
     return { kind: "result", result: await running };
@@ -113,80 +124,4 @@ async function endedOf(running: Promise<JourneyResult>): Promise<Ended> {
     }
     throw error;
   }
-}
-
-/**
- * The event stream of one of the scenario's journeys: what the reporter the
- * runner's dispatchers hold received of it, or, under the default
- * dispatcher, what the first reporter the workflow lists that never failed
- * received, made for that journey. With no journey given, it is everything
- * the held reporter received, or nothing under the default dispatcher,
- * since no listed reporter was made.
- */
-export function streamOf(
-  model: Model,
-  recorders: Recorders,
-  journeys: readonly Journey[],
-  journey: Journey | undefined,
-): readonly Event[] {
-  const { dispatching } = model;
-  if (dispatching.kind === "default") {
-    return journey === undefined
-      ? []
-      : firstThatNeverFailed(model, recorders, journeys.indexOf(journey))
-          .events;
-  }
-  const held =
-    dispatching.kind === "holding" ? dispatching.reporter : runnersRecorder;
-  const events = recorders.made(held).flatMap(eventsOf);
-  return journey === undefined
-    ? events
-    : events.filter(ofJourney(journey.journeyId));
-}
-
-/** Whether an event is of the journey. */
-export function ofJourney(journeyId: string): (event: Event) => boolean {
-  return (event) => isOf(event, journeyId);
-}
-
-function isOf(event: Event, journeyId: string): boolean {
-  return event.journeyId === journeyId;
-}
-
-function firstThatNeverFailed(
-  model: Model,
-  recorders: Recorders,
-  place: number,
-): ScenarioReporter {
-  const found = (model.workflow.reporters ?? [])
-    .map(madeFor(recorders, place))
-    .find(neverFailed);
-  if (found === undefined) {
-    throw new ModelError(
-      "every reporter the workflow lists failed, so no complete stream is left to read",
-    );
-  }
-  return found;
-}
-
-/** The reporter made under a name for the journey at this place. */
-function madeFor(
-  recorders: Recorders,
-  place: number,
-): (name: string) => ScenarioReporter | undefined {
-  return (name) => madeAt(recorders, name, place);
-}
-
-function madeAt(
-  recorders: Recorders,
-  name: string,
-  place: number,
-): ScenarioReporter | undefined {
-  return recorders.made(name)[place];
-}
-
-function neverFailed(
-  reporter: ScenarioReporter | undefined,
-): reporter is ScenarioReporter {
-  return reporter !== undefined && !reporter.failed;
 }
