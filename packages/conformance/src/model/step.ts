@@ -36,6 +36,8 @@ export interface StepScript {
   ignoresFailedEmits: boolean;
   /** Whether it keeps its contributor and step reporter after its attempt. */
   keepsHandles: boolean;
+  /** Whether its `run` declares a contributor and a step reporter, as by default. */
+  declaresHandles: boolean;
   /** The step policies it has, in order, once stated. */
   policies?: readonly string[];
 }
@@ -103,6 +105,7 @@ export function unscripted(): StepScript {
     asynchronous: false,
     ignoresFailedEmits: false,
     keepsHandles: false,
+    declaresHandles: true,
   };
 }
 

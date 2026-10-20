@@ -14,8 +14,10 @@ import {
   type ScenarioReporter,
 } from "./recorders.js";
 import { executorOf, runnersRecorder } from "./executor.js";
-import { instanceOf, workflowOf } from "./scenario.js";
+import { workflowOf } from "./scenario.js";
+import { runScript } from "./script.js";
 import type { Scenario } from "./scenario/workflow.js";
+import type { Tested } from "./tested.js";
 import type { Witness } from "./witness.js";
 
 /** What building the workflow gave: the workflow, or the violations refusing it. */
@@ -57,18 +59,49 @@ export async function ran(
   workflow: Built<Scenario>,
   model: Model,
   recorders: Recorders,
+  tested: Tested,
   times: number,
 ): Promise<Journey[]> {
   const executor = executorOf(model.dispatching, recorders);
   const journeys: Journey[] = [];
   for (let run = 0; run < times; run += 1) {
-    const instance = instanceOf(workflow, model, recorders);
+    const instance = tested.instanceOf(workflow, model, recorders);
     journeys.push({
       journeyId: instance.journeyId,
       ended: await endedOf(executor.run(instance)),
     });
   }
   return journeys;
+}
+
+/**
+ * Runs one journey of the admitted workflow with the scenario's script,
+ * through test support, on a local executor without a dispatcher factory,
+ * the runner's recorder being the instance's first reporter.
+ *
+ * @throws TestMistake, as a rejection, when the script is mistaken or
+ * leaves something out.
+ */
+export async function ranScripted(
+  workflow: Built<Scenario>,
+  model: Model,
+  recorders: Recorders,
+  tested: Tested,
+): Promise<Journey[]> {
+  const instance = tested.instanceOf(
+    workflow,
+    model,
+    recorders,
+    recorders.makerOf(runnersRecorder),
+  );
+  const { script, ensuresAll } = model.testing;
+  const running = runScript(instance, script, ensuresAll);
+  return [
+    {
+      journeyId: instance.journeyId,
+      ended: await endedOf(running.then((run) => tested.keep(run))),
+    },
+  ];
 }
 
 async function endedOf(running: Promise<JourneyResult>): Promise<Ended> {

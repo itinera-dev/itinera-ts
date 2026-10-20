@@ -15,7 +15,12 @@ import { operated } from "./services.js";
 import type { Acting } from "./scenario/actions.js";
 import type { Kept } from "./scenario/hooks.js";
 import { HookWitness } from "./witness/hooks.js";
-import type { ActingClass, ActingRescueClass, Mock } from "./witness/mocks.js";
+import type {
+  ActingClass,
+  ActingRescueClass,
+  Mock,
+  RunWith,
+} from "./witness/mocks.js";
 
 export type { ActingClass, ActingRescueClass, Mock } from "./witness/mocks.js";
 
@@ -84,12 +89,9 @@ export class Witness {
         built.push(this);
       }
 
-      override run(
-        contributor?: Contributor,
-        reporter?: StepReporter,
-        ...given: unknown[]
-      ) {
+      override run(...handed: RunWith) {
         ran(this);
+        const [contributor, reporter, ...given] = handed;
         const handles = { contributor, reporter, given };
         const acted = play(playing, this.#attempt, this.inputs, handles);
         return acted === undefined
@@ -123,12 +125,9 @@ export class Witness {
         built.push(this);
       }
 
-      override run(
-        contributor?: Contributor,
-        reporter?: StepReporter,
-        ...given: unknown[]
-      ) {
+      override run(...handed: RunWith) {
         ran(this);
+        const [contributor, reporter, ...given] = handed;
         const handles = { contributor, reporter, given };
         const acted = play(playing, this.#attempt, this.inputs, handles);
         return acted === undefined
