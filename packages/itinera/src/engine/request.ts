@@ -1,4 +1,4 @@
-import type { Requester, RequestSource } from "../event.js";
+import type { HookSource, Requester, RequestSource } from "../event.js";
 import { EventKind } from "../event/kind.js";
 import type { Checked } from "../declaration/request.js";
 import { AbortReason } from "../journey.js";
@@ -11,12 +11,12 @@ import type { Journey } from "./journey.js";
 
 /**
  * Who makes a request for a value, as its abort and its events name it: the
- * step it is for, who requested it, and who an `optional_input_absent`
- * names.
+ * step it is for, unless a workflow hook makes it, who requested it, and who
+ * an `optional_input_absent` names.
  */
 export interface Requesting {
-  /** The step the request is for. */
-  readonly step: StepName;
+  /** The step the request is for, unless a workflow hook makes it. */
+  readonly step?: StepName;
   /** Who requested it, as an abort names them. */
   readonly requester: Requester;
   /** Who requested it, as `optional_input_absent` names them. */
@@ -45,6 +45,19 @@ export function byAdapter(
   };
 }
 
+/** The hook `hook`, requesting for its call. */
+export function byHook(hook: HookSource): Requesting {
+  if (hook.kind === "workflow hook") {
+    return { requester: hook, source: hook };
+  }
+  const { policy, step } = hook;
+  return {
+    step,
+    requester: { kind: "step hook", policy, hook: hook.hook },
+    source: hook,
+  };
+}
+
 /**
  * What a request for the value under `key`, of the type `type`, receives,
  * given `found`, the value under the key, if any: the value, as the
@@ -66,7 +79,7 @@ export async function requested(
     if (!type.optional) {
       throw journey.abort({
         reason: AbortReason.RequiredDataMissing,
-        step: requesting.step,
+        ...stepOf(requesting),
         missing: { kind: "key", key, requester: requesting.requester },
       });
     }
@@ -81,10 +94,15 @@ export async function requested(
   if (value.isNone()) {
     throw journey.abort({
       reason: AbortReason.WrongType,
-      step: requesting.step,
+      ...stepOf(requesting),
       key,
       requester: requesting.requester,
     });
   }
   return type.optional ? value : value.value;
+}
+
+/** The step a request is for, as an abort names it, if there is one. */
+function stepOf({ step }: Requesting): { readonly step?: StepName } {
+  return step === undefined ? {} : { step };
 }

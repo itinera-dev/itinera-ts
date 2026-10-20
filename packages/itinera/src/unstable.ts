@@ -49,8 +49,10 @@
  *   {@link OutputError}, {@link Contributor}, {@link contributor},
  *   {@link journeyId} and {@link dataBag}, which move to `itinera/journey`.
  * - Test support: {@link RecordingReporter}, {@link EntryRecordingReporter},
- *   {@link Ending}, {@link stepMock} and {@link StepMock}, which move to
- *   `itinera/testing`.
+ *   {@link FailingReporter}, {@link Ending}, {@link stepMock},
+ *   {@link StepMock}, {@link HookEnding}, {@link stepPolicyMock},
+ *   {@link StepPolicyMock}, {@link workflowPolicyMock} and
+ *   {@link WorkflowPolicyMock}, which move to `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
  *   their concepts: `itinera/journey`, `itinera/workflow`, `itinera/step`,
  *   `itinera/policy` and `itinera/service`.
@@ -70,6 +72,7 @@ export type {
   InstanceRan,
   JourneyRunning,
   Refused,
+  WorkflowPolicyFailed,
 } from "./executor.js";
 export { LocalExecutor, Refusal } from "./executor.js";
 export type {
@@ -210,16 +213,35 @@ export type {
   EndsInSkip,
   EndsInSuccess,
   Endings,
+  FailsWorkflow,
+  FailureHookEnding,
+  FinishesWorkflow,
   GlobalMetadataEntry,
+  HookCall,
+  HookEndings,
+  HookFails,
+  KeepsDefault,
+  ReporterFailure,
   StepMockClass,
   StepMockScript,
+  StepPolicyMockClass,
+  StepPolicyMockScript,
+  WorkflowHookEnding,
+  WorkflowPolicyMockClass,
+  WorkflowPolicyMockScript,
 } from "./testing.js";
 export {
   Ending,
   EntryRecordingReporter,
+  FailingReporter,
+  HookEnding,
   RecordingReporter,
   StepMock,
   stepMock,
+  StepPolicyMock,
+  stepPolicyMock,
+  WorkflowPolicyMock,
+  workflowPolicyMock,
 } from "./testing.js";
 export type {
   AdapterName,

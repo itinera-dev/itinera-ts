@@ -10,8 +10,24 @@ import {
 } from "../../../src/step.js";
 import { Ending } from "../../../src/testing/ending.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { HookEnding } from "../../../src/testing/hook-ending.js";
 import { stepMock } from "../../../src/testing/step-mock.js";
-import { charge, noon, orders, recorded, run } from "../../fixtures/engine.js";
+import type { WorkflowPolicyMock } from "../../../src/testing/workflow-policy-mock.js";
+import {
+  alarm,
+  audit,
+  callsOf,
+  charge,
+  guarded,
+  loggedCharge,
+  Logging,
+  logging,
+  noon,
+  orders,
+  recorded,
+  run,
+  kindOf,
+} from "../../fixtures/engine.js";
 
 async function pathOf(
   workflow: ReturnType<typeof orders>,
@@ -98,6 +114,88 @@ describe("travel", () => {
       decidedBy: "default",
     });
     expect(events.at(-1)).not.toHaveProperty("errorMessage");
+  });
+});
+
+/** The workflow policy `audit`, defining both workflow hooks, keeping each one built in `built`. */
+function audited(built: WorkflowPolicyMock[]) {
+  return audit(built)
+    .onWorkflowSuccess("onWorkflowSuccess")
+    .onWorkflowFailure("onWorkflowFailure");
+}
+
+describe("travel, building the step policies", () => {
+  it("builds a step's policy anew for every attempt, right after attempt_started and before the step", async () => {
+    const log: string[] = [];
+    const audit = logging(log, "audit")
+      .builder("audit")
+      .onStepSuccess("onStepSuccess");
+    await run(
+      orders(loggedCharge(log).policy(audit)).instance(
+        {},
+        { reporters: [new Logging(log)] },
+      ),
+    );
+    expect(log).toEqual([
+      "journey_started",
+      "attempt_started",
+      "audit built",
+      "charge built",
+      "step_failed",
+      "step_retrying",
+      "attempt_started",
+      "audit built",
+      "charge built",
+      "step_succeeded",
+      "hook_called",
+      "journey_succeeded",
+    ]);
+  });
+});
+
+describe("travel, calling the workflow hooks", () => {
+  it.each([
+    [
+      "after its last step",
+      charge(),
+      "on workflow success",
+      "journey_succeeded",
+    ],
+    [
+      "when a step hook finished the workflow",
+      charge().policy(
+        alarm([], { onStepSuccess: HookEnding.finishWorkflow }).onStepSuccess(
+          "onStepSuccess",
+        ),
+      ),
+      "on workflow success",
+      "journey_succeeded",
+    ],
+    [
+      "after a step was given up",
+      stepMock({ attempts: [Ending.failure("declined")] }).builder("charge"),
+      "on workflow failure",
+      "journey_failed",
+    ],
+  ])(
+    "calls the workflow hook for how the journey ended, %s, before saying so",
+    async (_, step, hook, ended) => {
+      const built: WorkflowPolicyMock[] = [];
+      const { events } = await recorded(guarded(audited(built), step));
+      expect(events.slice(-2).map(kindOf)).toEqual(["hook_called", ended]);
+      expect(callsOf(built)).toEqual([{ hook, received: [] }]);
+    },
+  );
+
+  it("calls no workflow hook once the journey is aborted", async () => {
+    const built: WorkflowPolicyMock[] = [];
+    const unbuildable = stepMock({
+      attempts: [Ending.success],
+      buildFailure: "no connection",
+    }).builder("charge");
+    const result = await run(guarded(audited(built), unbuildable).instance());
+    expect(result.abort?.reason).toBe("step could not be built");
+    expect(callsOf(built)).toEqual([]);
   });
 });
 

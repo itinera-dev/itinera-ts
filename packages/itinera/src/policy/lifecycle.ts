@@ -1,4 +1,5 @@
 import type { Reason } from "../step.js";
+import { type GivenReason, reasonOf } from "../step/outcome.js";
 
 /**
  * A lifecycle a step hook returned, which decides what happens next, as the
@@ -58,3 +59,34 @@ export type OnSuccess = KeepDefault | FinishWorkflow | FailWorkflow;
  * {@includeCode ../../examples/policy.ts}
  */
 export type OnFailure = KeepDefault | FailWorkflow;
+
+const detailsRefused = new WeakSet<object>();
+
+/** What every hook that keeps the default returns. */
+export const keptDefault: KeepDefault = Object.freeze({ kind: "KeepDefault" });
+
+/** What every hook that finishes the workflow returns. */
+export const finished: FinishWorkflow = Object.freeze({
+  kind: "FinishWorkflow",
+});
+
+/**
+ * The lifecycle that fails the journey for the reason `given`, its details
+ * captured now.
+ */
+export function failingWorkflow<T>(given: GivenReason<T>): FailWorkflow {
+  const { reason, refused } = reasonOf(given);
+  const failing: FailWorkflow = Object.freeze({ kind: "FailWorkflow", reason });
+  if (refused) {
+    detailsRefused.add(failing);
+  }
+  return failing;
+}
+
+/**
+ * Whether `returned` is a lifecycle failing the workflow whose details were
+ * not a value, so that its reason holds none.
+ */
+export function hasDetailsRefused(returned: object): boolean {
+  return detailsRefused.has(returned);
+}

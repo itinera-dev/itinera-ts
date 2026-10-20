@@ -19,6 +19,7 @@ export type {
   InstanceRan,
   JourneyRunning,
   Refused,
+  WorkflowPolicyFailed,
 } from "./executor/refusal.js";
 export { Refusal } from "./executor/refusal.js";
 

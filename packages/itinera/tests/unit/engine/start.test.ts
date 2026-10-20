@@ -4,11 +4,19 @@ import {
   DefaultDispatcher,
   DefaultDispatcherFactory,
 } from "../../../src/report/default-dispatcher.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { FailingReporter } from "../../../src/testing/failing-reporter.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
+import type { WorkflowPolicyMock } from "../../../src/testing/workflow-policy-mock.js";
 import {
+  audit,
+  charge,
   charging,
   factoryOf,
-  FailingOnGlobalMetadata,
+  guarded,
+  loggedCharge,
+  run,
   Swallowing,
 } from "../../fixtures/engine.js";
 import { start } from "../../../src/engine/start.js";
@@ -75,6 +83,37 @@ describe("start", () => {
     });
   });
 
+  it("builds the workflow policies before it makes the dispatcher", async () => {
+    let made = 0;
+    const counting = {
+      create: () => {
+        made += 1;
+        return new DefaultDispatcher();
+      },
+    };
+    const failing = audit([], { buildFailure: "no ledger" }).onWorkflowSuccess(
+      "onWorkflowSuccess",
+    );
+    const instance = guarded(failing, charge()).instance();
+    expect(await refusedWith(start(instance, counting))).toMatchObject({
+      kind: "workflow policy failed",
+    });
+    expect(made).toBe(0);
+  });
+
+  it("builds each workflow policy once for the journey, whatever its steps and attempts", async () => {
+    const built: WorkflowPolicyMock[] = [];
+    const ship = stepMock({ attempts: [Ending.success] }).builder("ship");
+    await run(
+      guarded(
+        audit(built).onWorkflowSuccess("onWorkflowSuccess"),
+        loggedCharge([]),
+        ship,
+      ).instance(),
+    );
+    expect(built).toHaveLength(1);
+  });
+
   it("sets the journey ID first, then the initial global metadata in order", async () => {
     const recorder = new RecordingReporter();
     const instance = charging(
@@ -95,7 +134,15 @@ describe("start", () => {
   it("refuses the instance when a reporter fails on global metadata", async () => {
     const instance = charging(
       {},
-      { reporters: [new FailingOnGlobalMetadata("disk full")] },
+      {
+        reporters: [
+          new FailingReporter({
+            kind: "on global metadata",
+            key: "journey_id",
+            message: "disk full",
+          }),
+        ],
+      },
     );
     expect(await refusedWith(start(instance, factory))).toEqual({
       kind: "global metadata not set",
@@ -107,7 +154,15 @@ describe("start", () => {
   it("refuses the instance when its dispatcher swallows a reporter's failure on global metadata", async () => {
     const instance = charging(
       {},
-      { reporters: [new FailingOnGlobalMetadata("disk full")] },
+      {
+        reporters: [
+          new FailingReporter({
+            kind: "on global metadata",
+            key: "journey_id",
+            message: "disk full",
+          }),
+        ],
+      },
     );
     expect(
       await refusedWith(start(instance, factoryOf(new Swallowing()))),

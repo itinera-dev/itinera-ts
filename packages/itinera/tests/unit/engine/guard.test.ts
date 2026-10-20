@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { Event } from "../../../src/event.js";
 import { journeyAborted, journeyStarted } from "../../fixtures/event.js";
+import { FailingReporter } from "../../../src/testing/failing-reporter.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
-import { FailingOn, FailingOnGlobalMetadata } from "../../fixtures/engine.js";
+import { failingOn } from "../../fixtures/engine.js";
 import { Failures, Guard } from "../../../src/engine/guard.js";
 
 function kinds(recorder: RecordingReporter): string[] {
@@ -21,7 +22,7 @@ describe("Guard", () => {
   it("passes on the failure of its reporter and records it as the first", async () => {
     const failures = new Failures();
     const guard = new Guard(
-      new FailingOn("journey_started", "disk full"),
+      failingOn("journey_started", "disk full"),
       failures,
     );
     await expect(guard.report(journeyStarted())).rejects.toThrow("disk full");
@@ -31,10 +32,7 @@ describe("Guard", () => {
   it("keeps the first failure when another reporter fails after it", async () => {
     const failures = new Failures();
     failures.record("first");
-    const guard = new Guard(
-      new FailingOn("journey_started", "second"),
-      failures,
-    );
+    const guard = new Guard(failingOn("journey_started", "second"), failures);
     await guard.report(journeyStarted());
     expect(failures.first?.error).toBe("first");
   });
@@ -50,11 +48,11 @@ describe("Guard", () => {
   });
 
   it("delivers nothing more to a reporter that failed, journey_aborted included", async () => {
-    const reporter = new FailingOn("journey_started", "disk full");
+    const reporter = failingOn("journey_started", "disk full");
     const guard = new Guard(reporter, new Failures());
     await guard.report(journeyStarted()).catch(String);
     await guard.report(journeyAborted());
-    expect(reporter.received.map((event: Event) => event.kind)).toEqual([
+    expect(reporter.events.map((event: Event) => event.kind)).toEqual([
       "journey_started",
     ]);
   });
@@ -62,7 +60,7 @@ describe("Guard", () => {
   it("ignores a failure on journey_aborted", async () => {
     const failures = new Failures();
     const guard = new Guard(
-      new FailingOn("journey_aborted", "disk full"),
+      failingOn("journey_aborted", "disk full"),
       failures,
     );
     await guard.report(journeyAborted());
@@ -80,7 +78,14 @@ describe("Guard", () => {
 
   it("passes on and records the failure of its reporter on global metadata", async () => {
     const failures = new Failures();
-    const guard = new Guard(new FailingOnGlobalMetadata("disk full"), failures);
+    const guard = new Guard(
+      new FailingReporter({
+        kind: "on global metadata",
+        key: "tenant",
+        message: "disk full",
+      }),
+      failures,
+    );
     await expect(guard.receiveGlobalMetadata("tenant", "acme")).rejects.toThrow(
       "disk full",
     );

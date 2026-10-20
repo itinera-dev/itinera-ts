@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { type Contributor, contributor } from "../../../src/journey.js";
+import { None } from "../../../src/option.js";
+import { fromStep } from "../../../src/policy/request.js";
 import {
   type Outcome,
   Step,
@@ -7,11 +9,22 @@ import {
   type StepClass,
 } from "../../../src/step.js";
 import { Ending } from "../../../src/testing/ending.js";
+import { HookEnding } from "../../../src/testing/hook-ending.js";
 import { stepMock } from "../../../src/testing/step-mock.js";
-import { integer, string } from "../../../src/value/token.js";
+import type { StepPolicyMock } from "../../../src/testing/step-policy-mock.js";
+import { integer, optional, string } from "../../../src/value/token.js";
 import type { PlainValue } from "../../../src/value.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
-import { FailingOn, orders, recorded, run } from "../../fixtures/engine.js";
+import {
+  alarm,
+  callsOf,
+  charge,
+  orders,
+  recorded,
+  run,
+  kindOf,
+  failingOn,
+} from "../../fixtures/engine.js";
 
 /** What one attempt of a {@link contributing} step contributes, and how it ends. */
 interface Attempted {
@@ -96,7 +109,7 @@ describe("concluded", () => {
         {
           reporters: [
             recorder,
-            new FailingOn("contribution_committed", "disk full"),
+            failingOn("contribution_committed", "disk full"),
           ],
         },
       ),
@@ -260,5 +273,142 @@ describe("concluded", () => {
       "charge given up: abnormal termination",
       "journey failed at charge: timeout",
     ]);
+  });
+});
+
+describe("concluded, calling the step hooks", () => {
+  it("calls on step success once what the attempt contributed is committed, and goes on to the next step when it keeps the default", async () => {
+    const workflow = orders(
+      contributing("charge", {
+        contributes: { receipt: "R-1" },
+        ending: Ending.success,
+      }).policy(alarm().onStepSuccess("onStepSuccess")),
+      ship.builder("ship"),
+    );
+    const recorder = await recorded(workflow);
+    expect(recorder.events.slice(2, 5).map(kindOf)).toEqual([
+      "step_succeeded",
+      "contribution_committed",
+      "hook_called",
+    ]);
+    expect(recorder.path).toEqual([
+      "charge attempt 1 succeeded",
+      "ship attempt 1 succeeded",
+      "journey succeeded",
+    ]);
+  });
+
+  it("makes the journey succeed at once, decided by the hook, when on step success finishes the workflow", async () => {
+    const early = alarm([], {
+      onStepSuccess: HookEnding.finishWorkflow,
+    }).onStepSuccess("onStepSuccess");
+    const recorder = await recorded(
+      orders(charge().policy(early), ship.builder("ship")),
+    );
+    expect(recorder.path).toEqual([
+      "charge attempt 1 succeeded",
+      "journey succeeded, decided by alarm",
+    ]);
+    expect(recorder.events.at(-1)).toMatchObject({
+      kind: "journey_succeeded",
+      decidedBy: { policy: "alarm", hook: "on step success" },
+    });
+  });
+
+  it("fails the journey at once for its reason, decided by the hook, when on step success fails the workflow, the step staying succeeded with its contributions committed", async () => {
+    const failing = alarm([], {
+      onStepSuccess: HookEnding.failWorkflow("fraud"),
+    }).onStepSuccess("onStepSuccess");
+    const workflow = orders(
+      contributing("charge", {
+        contributes: { receipt: "R-1" },
+        ending: Ending.success,
+      }).policy(failing),
+      ship.builder("ship"),
+    );
+    const recorder = await recorded(workflow);
+    expect(recorder.path).toEqual([
+      "charge attempt 1 succeeded",
+      "journey failed at charge: fraud",
+    ]);
+    expect(recorder.events.at(-1)).toMatchObject({
+      kind: "journey_failed",
+      step: "charge",
+      cause: "FailWorkflow",
+      reason: { code: "fraud" },
+      decidedBy: { policy: "alarm", hook: "on step success" },
+    });
+    const result = await run(workflow.instance());
+    expect([
+      result.failure,
+      result.isFailed() && result.status.dataBag.keys(),
+    ]).toEqual([
+      { cause: "FailWorkflow", reason: { code: "fraud" } },
+      ["receipt"],
+    ]);
+  });
+
+  it("calls no hook after a step skipped itself", async () => {
+    const built: StepPolicyMock[] = [];
+    await recorded(
+      orders(
+        stepMock({ attempts: [Ending.skip] })
+          .builder("charge")
+          .policy(alarm(built).onStepSuccess("onStepSuccess")),
+      ),
+    );
+    expect(callsOf(built)).toEqual([]);
+  });
+
+  it("calls on step abnormal termination before the executor's own rule decides, giving it nothing the attempt contributed", async () => {
+    const built: StepPolicyMock[] = [];
+    const watched = alarm(built).onStepAbnormalTermination(
+      "onStepAbnormalTermination",
+      fromStep("draft", optional(string)),
+    );
+    const workflow = orders(
+      contributing(
+        "charge",
+        {
+          contributes: { draft: "D-1" },
+          ending: Ending.abnormalTermination("timeout"),
+        },
+        { contributes: {}, ending: Ending.success },
+      )
+        .retryBudget(1)
+        .policy(watched),
+    );
+    const recorder = await recorded(workflow);
+    expect(recorder.events.slice(2, 6).map(kindOf)).toEqual([
+      "step_abnormal_termination",
+      "optional_input_absent",
+      "hook_called",
+      "step_retrying",
+    ]);
+    expect(callsOf(built)).toEqual([
+      { hook: "on step abnormal termination", received: [None] },
+    ]);
+  });
+
+  it("gives the step up at once, decided by the hook, when on step abnormal termination fails the workflow, whatever the retry budget", async () => {
+    const failing = alarm([], {
+      onStepAbnormalTermination: HookEnding.failWorkflow("unstable"),
+    }).onStepAbnormalTermination("onStepAbnormalTermination");
+    const recorder = await recorded(
+      orders(
+        crashing("timeout").builder("charge").retryBudget(3).policy(failing),
+      ),
+    );
+    expect(recorder.path).toEqual([
+      "charge attempt 1 terminated abnormally: timeout",
+      "charge given up: FailWorkflow from alarm",
+      "journey failed at charge: unstable",
+    ]);
+    expect(recorder.events.at(-2)).toMatchObject({
+      kind: "step_given_up",
+      cause: "FailWorkflow",
+      reason: { code: "unstable" },
+      decidedBy: { policy: "alarm", hook: "on step abnormal termination" },
+    });
   });
 });
