@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { Ending } from "itinera/unstable";
+import { Ending } from "itinera/testing";
 
 assert.deepEqual(Ending.outcome(Ending.success), { kind: "success" });
 assert.deepEqual(Ending.outcome(Ending.failure("declined")), {

@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { type DataTable, Given, Then } from "@cucumber/cucumber";
-import type { GlobalMetadataEntry } from "itinera/unstable";
+import type { GlobalMetadataEntry } from "itinera/testing";
 import type { PlainValue } from "itinera/value";
 import {
   globalMetadataUnder,

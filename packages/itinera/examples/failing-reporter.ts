@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { LocalExecutor } from "itinera/executor";
 import { AbortReason } from "itinera/journey";
-import { Ending, FailingReporter, stepMock } from "itinera/unstable";
+import { Ending, FailingReporter, stepMock } from "itinera/testing";
 import { Workflow } from "itinera/workflow";
 
 class Orders extends Workflow {}

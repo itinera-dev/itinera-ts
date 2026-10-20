@@ -5,7 +5,7 @@ import {
   type RescueStepMockScript,
   stepMock,
   type StepMockScript,
-} from "itinera/unstable";
+} from "itinera/testing";
 import { listedUnder } from "./listed.js";
 import type { Role } from "./model/policy.js";
 import type { Providers, ServiceRequest } from "./model/provider.js";

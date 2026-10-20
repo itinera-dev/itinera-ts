@@ -14,7 +14,7 @@ import {
   stepReporter,
   type StepReporter,
 } from "itinera/step";
-import { HookEventReporter, Level, StepEventReporter } from "itinera/unstable";
+import { HookEventReporter, Level, StepEventReporter } from "itinera/testing";
 
 @step()
 class Ship extends Step {
