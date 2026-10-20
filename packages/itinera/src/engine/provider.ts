@@ -3,7 +3,6 @@ import { EventKind } from "../event/kind.js";
 import type { WorkflowInstance } from "../instance.js";
 import type { Result } from "ts-results-es";
 import { AbortReason } from "../journey.js";
-import { None, type Option, Some } from "../option.js";
 import { implementationOf } from "../service/implementation.js";
 import type { DeclaredProvider } from "../service/provider.js";
 import { isProvided } from "../service/provider/provided.js";
@@ -65,13 +64,11 @@ export async function providedBy(
   }
   switch (called.kind) {
     case "threw":
-      throw await failed(calling, Some(called.error));
+      throw await failed(calling, called.error);
     case "returned":
       throw await failed(
         calling,
-        called.returned === undefined
-          ? None
-          : Some(new TypeError(notProvided(calling, called.returned))),
+        new TypeError(notProvided(calling, called.returned)),
       );
     case "provided": {
       const data = dataOf(calling, called.data);
@@ -114,7 +111,8 @@ async function call(
 }
 
 function notProvided({ provider }: Calling, returned: unknown): string {
-  return `service provider ${provider.name} returned ${typeof returned}, not what provide() makes`;
+  const what = returned === undefined ? "nothing" : typeof returned;
+  return `service provider ${provider.name} returned ${what}, not what provide() makes`;
 }
 
 /**
@@ -145,11 +143,11 @@ function dataOf(
 /**
  * Reports that the provider failed, or returned no instance, and aborts the
  * journey with `step could not be built`, naming the provider and carrying
- * the error, if one made it fail.
+ * `error`, what it threw or why what it returned is not an instance.
  */
 async function failed(
   { journey, provider, source, key }: Calling,
-  thrown: Option<unknown>,
+  error: unknown,
 ): Promise<JourneyAbortError> {
   const { step, attempt } = source;
   await journey.emit({
@@ -159,16 +157,11 @@ async function failed(
     key,
     provider: provider.name,
   });
-  const by = { kind: "provider", provider: provider.name } as const;
-  return journey.abort(
-    thrown.isNone()
-      ? { reason: AbortReason.StepCouldNotBeBuilt, step, source: by }
-      : {
-          reason: AbortReason.StepCouldNotBeBuilt,
-          step,
-          source: by,
-          errorMessage: messageOf(thrown.value),
-          error: thrown.value,
-        },
-  );
+  return journey.abort({
+    reason: AbortReason.StepCouldNotBeBuilt,
+    step,
+    source: { kind: "provider", provider: provider.name },
+    errorMessage: messageOf(error),
+    error,
+  });
 }
