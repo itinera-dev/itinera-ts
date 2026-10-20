@@ -1,14 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { Dispatcher, Reporter } from "../../../src/report.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
+import type { ProviderName } from "../../../src/service.js";
 import type { StepName } from "../../../src/step.js";
 import { FailingReporter } from "../../../src/testing/failing-reporter.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
-import {
-  journeyThrough,
-  Swallowing,
-  failingOn,
-} from "../../fixtures/engine.js";
+import { journeyThrough, Swallowing, failingOn } from "../../fixtures/engine.js";
 import { Failures, Guard } from "../../../src/engine/guard.js";
 import { JourneyAbortError } from "../../../src/engine/signal.js";
 
@@ -172,5 +169,14 @@ describe("Journey.deliverAborted", () => {
         error: "x",
       }),
     ).resolves.toBeUndefined();
+  });
+});
+
+describe("Journey.end", () => {
+  it("lets go of every instance of journey scope it kept", () => {
+    const journey = journeyThrough(new DefaultDispatcher());
+    journey.kept.set("payments" as ProviderName, { label: "main 1" });
+    journey.end();
+    expect(journey.kept.size).toBe(0);
   });
 });

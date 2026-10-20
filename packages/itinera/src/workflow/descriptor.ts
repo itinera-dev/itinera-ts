@@ -2,13 +2,14 @@ import type { JourneyId } from "../journey.js";
 import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { Reporter, ReporterClass } from "../report.js";
 import type { DeclaredProvider } from "../service/provider.js";
+import { serving } from "../service/serving.js";
 import type { StepDescriptor, StepName } from "../step.js";
 import type { Value } from "../value.js";
 import { adapting, type DeclaredAdapter } from "./adapter.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
 import { type ListedStep, listingOf } from "./listing.js";
-import { type DeclaredIdGenerator, generatedBy } from "./id-generator.js";
-import { Violations, violationsOf } from "./violation.js";
+import { generatedBy } from "./id-generator.js";
+import type { Parts } from "./descriptor/assemble.js";
 
 declare const crypto: { randomUUID(): string };
 
@@ -18,9 +19,9 @@ let partsOf: (described: WorkflowDescriptor) => Parts;
 /**
  * How a workflow is described to the executor: its name, its steps, its
  * policies, its reporters, how it asks an input adapter for an input, how it
- * makes a journey ID, and its listing. The
- * executor reads this and nothing else about the workflow, and passes the
- * workflow object to the calls that need it.
+ * asks a service provider for a service, how it makes a journey ID, and its
+ * listing. The executor reads this and nothing else about the workflow, and
+ * passes the workflow object to the calls that need it.
  *
  * Only itinera makes one, when a class declared with `@workflow` is defined
  * or when a workflow's builder builds it, after checking it, and it never
@@ -114,6 +115,32 @@ export class WorkflowDescriptor {
   }
 
   /**
+   * Asks the service provider serving the step `step` for the service under
+   * `key`: calls the provider's method on the workflow object given, with
+   * `answers`, what its requests were answered with, in the order the
+   * provider declares them, and gives what the method returns.
+   *
+   * {@includeCode ../../examples/descriptors.ts}
+   *
+   * @throws TypeError if no service provider serves the step under the key.
+   * @throws Whatever the provider's method throws.
+   */
+  provide(
+    workflow: Workflow,
+    step: StepName,
+    key: string,
+    answers: readonly unknown[],
+  ): unknown {
+    const provider = serving(this.#parts.providers, step, key);
+    if (provider === undefined) {
+      throw new TypeError(
+        `no service provider of workflow ${this.name} serves step ${step} under the key ${key}`,
+      );
+    }
+    return Reflect.apply(provider.method, workflow, answers);
+  }
+
+  /**
    * Makes the journey ID of a new instance of the workflow object given,
    * holding `initialData`, with the workflow's ID generator or as a random
    * UUID.
@@ -139,42 +166,15 @@ export class WorkflowDescriptor {
   }
 }
 
-/** The lists a workflow descriptor is made from. */
-export interface Parts {
-  /** The workflow's name, if it was given one. */
-  readonly name: WorkflowName | undefined;
-  /** The step descriptors, in the order the steps run. */
-  readonly steps: readonly StepDescriptor[];
-  /** The classes of the workflow's own reporters. */
-  readonly reporters: readonly ReporterClass[];
-  /** The workflow policies attached to the workflow, in order. */
-  readonly policies: readonly PolicyDescriptor[];
-  /** The input adapters, in order. */
-  readonly adapters: readonly DeclaredAdapter[];
-  /** The service providers, in order. */
-  readonly providers: readonly DeclaredProvider[];
-  /** The method that makes each instance's journey ID, if there is one. */
-  readonly idGenerator: DeclaredIdGenerator | undefined;
-}
-
 /**
- * The workflow descriptor made from `parts`, for the workflow class named
- * `className`, once it is checked.
- *
- * @throws Violations listing every violation found.
- * @throws Error if the workflow has no name.
+ * The workflow descriptor of the workflow named `name`, made from `parts`,
+ * which are checked already.
  */
-export function assemble(parts: Parts, className: string): WorkflowDescriptor {
-  if (parts.name === undefined) {
-    throw new Error(
-      `workflow ${className} has no name: give it one with @workflow or with its builder's name()`,
-    );
-  }
-  const [first, ...more] = violationsOf(parts);
-  if (first !== undefined) {
-    throw new Violations([first, ...more]);
-  }
-  return describing(parts.name, parts);
+export function describedAs(
+  name: WorkflowName,
+  parts: Parts,
+): WorkflowDescriptor {
+  return describing(name, parts);
 }
 
 /** The input adapters of the workflow `described`, in order. */

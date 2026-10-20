@@ -5,17 +5,12 @@ import type { Value } from "../../../src/value.js";
 import type { Reporter } from "../../../src/report.js";
 import { describeStep } from "../../../src/step/descriptor.js";
 import { Ship } from "../../fixtures/step.js";
-import {
-  Workflow,
-  workflow,
-  type WorkflowName,
-} from "../../../src/workflow.js";
+import { Workflow, workflow, type WorkflowName } from "../../../src/workflow.js";
 import type { StepName } from "../../../src/step.js";
 import type { DeclaredAdapter } from "../../../src/workflow/adapter.js";
-import { assemble, type Parts } from "../../../src/workflow/descriptor.js";
-import { adapter } from "../../fixtures/workflow.js";
+import { assemble, type Parts } from "../../../src/workflow/descriptor/assemble.js";
+import { adapter, provider } from "../../fixtures/workflow.js";
 import type { DeclaredIdGenerator } from "../../../src/workflow/id-generator.js";
-import { Violations } from "../../../src/workflow/violation.js";
 
 class Audit implements Reporter {
   readonly events: Event[] = [];
@@ -64,20 +59,7 @@ function generator(
 
 const noData = new Map<string, Value>();
 
-describe("assemble", () => {
-  it("refuses a workflow with no name", () => {
-    expect(() => assemble({ ...nothing, name: undefined }, "Orders")).toThrow(
-      "workflow Orders has no name: give it one with @workflow or with its builder's name()",
-    );
-  });
-
-  it("refuses a workflow with violations", () => {
-    const ship = shipping();
-    expect(() =>
-      assemble({ ...nothing, steps: [ship, ship] }, "Orders"),
-    ).toThrow(Violations);
-  });
-
+describe("WorkflowDescriptor", () => {
   it("keeps the steps it was given, though the list given changes afterwards", () => {
     const steps = [shipping()];
     const descriptor = assemble({ ...nothing, steps }, "Orders");
@@ -182,6 +164,31 @@ describe("assemble", () => {
     ).toThrow(
       new TypeError(
         "no input adapter of workflow orders is attached to step charge",
+      ),
+    );
+  });
+
+  it("asks the service provider serving a step for a service, with the workflow object as this and the answers in order", () => {
+    const till = { ...provider("till"), method: shopAndAnswers };
+    const descriptor = assemble(
+      { ...nothing, steps: [shipping()], providers: [till] },
+      "Orders",
+    );
+    expect(
+      descriptor.provide(Shop.build(), "ship" as StepName, "payments", [7]),
+    ).toEqual(["corner", 7]);
+  });
+
+  it("refuses to provide a service no provider serves the step under", () => {
+    const descriptor = assemble(
+      { ...nothing, steps: [shipping()], providers: [provider("till")] },
+      "Orders",
+    );
+    expect(() =>
+      descriptor.provide(Shop.build(), "ship" as StepName, "stock", []),
+    ).toThrow(
+      new TypeError(
+        "no service provider of workflow orders serves step ship under the key stock",
       ),
     );
   });

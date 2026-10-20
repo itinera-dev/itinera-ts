@@ -39,7 +39,11 @@ export async function runJourney(
     failures,
     data,
   );
-  return resultOf(journeyId, await ended());
+  try {
+    return resultOf(journeyId, await ended());
+  } finally {
+    journey.end();
+  }
 
   async function ended(): Promise<JourneyStatus> {
     try {

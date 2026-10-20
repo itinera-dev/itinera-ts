@@ -7,15 +7,9 @@ import type { StepName } from "../../../src/step.js";
 import { Attempt } from "../../../src/step/attempt.js";
 import { withStep, Workflow, workflow } from "../../../src/workflow.js";
 import { declarationOf } from "../../../src/workflow/registry.js";
-import {
-  isProvided,
-  type Provided,
-  provider,
-} from "../../../src/service/provider.js";
-import {
-  providerReporter,
-  type ProviderReporter,
-} from "../../../src/service/reporter.js";
+import { provider } from "../../../src/service/provider.js";
+import type { Provided } from "../../../src/service/provider/provided.js";
+import { providerReporter, type ProviderReporter } from "../../../src/service/reporter.js";
 import { serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {
@@ -63,6 +57,7 @@ describe("provider", () => {
         scope: "journey",
         steps: undefined,
         key: "payments",
+        method: Reflect.get(Payments.prototype, "payments"),
         requests: [{ kind: "journeyId" }, { kind: "providerReporter" }],
       },
       {
@@ -72,6 +67,7 @@ describe("provider", () => {
         scope: "attempt",
         steps: ["charge", "charge_rescue"],
         key: "perAttempt",
+        method: Reflect.get(Payments.prototype, "perAttempt"),
         requests: [{ kind: "stepName" }, { kind: "attempt" }],
       },
     ]);
@@ -100,6 +96,14 @@ describe("provider", () => {
     }).toThrow(message);
   });
 
+  it("refuses what is not a method", () => {
+    expect(() => {
+      provider(PAYMENT_GATEWAY)(Payments.prototype, "payments", {
+        get: () => undefined,
+      } as never);
+    }).toThrow("@provider marks a method, not Payments.payments");
+  });
+
   it("refuses a request a service provider may not make", () => {
     expect(() => {
       class Orders extends Workflow {
@@ -110,23 +114,5 @@ describe("provider", () => {
       }
       return Orders;
     }).toThrow("Orders.payments: a service provider cannot request @dataBag");
-  });
-});
-
-describe("isProvided", () => {
-  it("accepts what the workflow's helper makes", async () => {
-    const payments = Payments.build();
-    expect(
-      isProvided(
-        await payments.perAttempt("charge" as StepName, Attempt.first),
-      ),
-    ).toBe(true);
-  });
-
-  it.each([
-    ["an instance a cast makes", { instance: gateway }],
-    ["nothing", undefined],
-  ])("refuses %s", (_, returned) => {
-    expect(isProvided(returned)).toBe(false);
   });
 });

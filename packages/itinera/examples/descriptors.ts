@@ -3,17 +3,26 @@ import {
   inputAdapter,
   key,
   type Outcome,
+  type Provided,
+  provider,
+  service,
+  serviceType,
   Step,
   step,
+  type StepName,
+  stepName,
   type Supplied,
   withStep,
   Workflow,
   workflow,
 } from "itinera/unstable";
 
+const RECEIPTS = serviceType<string[]>("Receipts");
+
 @step()
 class Charge extends Step {
-  override run(): Outcome {
+  override run(@service("receipts", RECEIPTS) receipts: string[]): Outcome {
+    receipts.push("charged");
     return this.succeed();
   }
 }
@@ -28,6 +37,11 @@ class Payments extends Workflow {
   @inputAdapter({ steps: ["charge"] })
   price(@key() key: string): Supplied {
     return this.supply(key.length);
+  }
+
+  @provider(RECEIPTS, { perAttempt: true })
+  receipts(@stepName() step: StepName): Provided<string[]> {
+    return this.provide([`receipts of ${step}`]);
   }
 }
 
@@ -45,3 +59,7 @@ assert.deepEqual(descriptor.adapt(payments, charge.name, ["amount"]), {
   kind: "supplied",
   value: 6,
 });
+assert.deepEqual(
+  descriptor.provide(payments, charge.name, "receipts", [charge.name]),
+  { instance: ["receipts of charge"] },
+);

@@ -69,9 +69,14 @@ export function provider(
     scope: "attempt",
     steps: undefined,
     key: name,
+    method: provideNothing,
     requests: [],
     ...parts,
   };
+}
+
+function provideNothing(): undefined {
+  return undefined;
 }
 
 function request([key, type]: readonly [

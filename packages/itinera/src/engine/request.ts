@@ -3,6 +3,7 @@ import { EventKind } from "../event/kind.js";
 import type { Checked } from "../declaration/request.js";
 import { AbortReason } from "../journey.js";
 import { None } from "../option.js";
+import type { ProviderName } from "../service.js";
 import type { Attempt, StepName } from "../step.js";
 import type { PlainValue } from "../value.js";
 import { received } from "../value/read.js";
@@ -42,6 +43,19 @@ export function byAdapter(
     step,
     requester: { kind: "adapter", adapter },
     source: { kind: "adapter", adapter, step, attempt },
+  };
+}
+
+/** The service provider `provider`, requesting for the step `step` and `attempt`. */
+export function byProvider(
+  provider: ProviderName,
+  step: StepName,
+  attempt: Attempt,
+): Requesting {
+  return {
+    step,
+    requester: { kind: "provider", provider },
+    source: { kind: "provider", provider, step, attempt },
   };
 }
 

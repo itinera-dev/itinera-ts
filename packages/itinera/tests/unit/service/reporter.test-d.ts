@@ -1,11 +1,9 @@
 import { describe, expectTypeOf, it } from "vitest";
 import { StepPolicy } from "../../../src/policy/step-policy.js";
 import { Workflow } from "../../../src/workflow.js";
-import { type Provided, provider } from "../../../src/service/provider.js";
-import {
-  providerReporter,
-  type ProviderReporter,
-} from "../../../src/service/reporter.js";
+import { provider } from "../../../src/service/provider.js";
+import type { Provided } from "../../../src/service/provider/provided.js";
+import { providerReporter, type ProviderReporter } from "../../../src/service/reporter.js";
 import { serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {
