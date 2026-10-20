@@ -477,7 +477,7 @@ The order follows the specification's suggested implementation order, as Rust's 
 | 8. Services | providers of both scopes, their requests, events, data, global metadata and implementation names | 0095, 0102, 0104 |
 | 9. Rescue steps | the rescue, its requests, decisions and statuses, adapters and providers attached to `<step>_rescue` | 0003, 0098, and with it tier 1 |
 | 10. Test support | `itinera/testing`, the mocks moved there from `itinera/unstable`, what test support still lacks, the runner's test support sentences, `testing` claimed | 0108 |
-| 11. Release preparation | the API reference, the package overview, examples, the release workflow, ready for `0.1.0-beta.1`, published only after the maintainer merges the stack | none |
+| 11. Release preparation | the API reference and its versioned hosting on the organisation's site (section "Release"), the package overview, examples, the release workflow, ready for `0.1.0-beta.1`, published only after the maintainer merges the stack | none |
 | 12. The book | the TypeScript edition of [itinera-dev/book](https://github.com/itinera-dev/book), a `typescript/` book beside `rust/`, following BOOK.md, its examples compiled and run against itinera-ts in CI; written as a chain of pull requests of its own in the book repository after stage 11, against the itinera-ts stack's top branch until the release | none |
 
 The proposals in each row are those whose every scenario can pass once that stage lands; 0102 waits for stage 8 because one of its scenarios, tagged with 0102 alone, has a service provider set an entry. The tech specs confirm the exact split, and a scenario tagged with two proposals simply waits until both are listed.
@@ -541,6 +541,7 @@ The new AGENTS.md carries Rust's rules over where they are not about Rust:
 - **The release workflow** mirrors itinera-rs: `release-gate` (tag matches `package.json`, commit on `main`, changelog section, every tier 1 proposal listed), CI on the tagged commit, `npm publish` in a `npm` environment, and `create-release` with the conformance report attached.
 - **`release-gate` reads `Cargo.toml` today**, so itinera-dev/actions needs a small change to read `package.json` before the first release.
 - **npm trusted publishing is configured on an existing package**, so, as with crates.io, the first version is published by hand by the maintainer, and every later one by the workflow.
+- **The API reference is hosted on the organisation's site**, since npm has no docs.rs (decided by the maintainer on 2026-10-20). TypeDoc builds it from itinera-ts, versioned as the book is: the newest release at `itinera-dev.org/api/typescript/`, `itinera-dev.org/api/typescript/next/` following `main`, and a frozen copy of each release at `itinera-dev.org/api/typescript/VERSION/`, such as `/api/typescript/0.1.0-beta.1/`. The editions come from itinera-ts's own release tags, `vVERSION`, which the maintainer creates, so the reference needs no tags of its own. The site's Pages build makes every edition on each deployment, as the book's `editions.mjs` does, and the book links to the reference. Publishing it is part of the release process: once the release workflow has published a version on npm, it asks the site to deploy again, which adds the frozen `/api/typescript/VERSION/` and moves `/api/typescript/` to it, and a change on `main` deploys `next/` the same way. Stage 11 writes the site's build, as a pull request in itinera-dev/itinera-dev.github.io, and the steps in itinera-ts's release and `main` workflows that ask for the deployment. The site's Pages workflow gains a `repository_dispatch` trigger, and the request is an action in itinera-dev/actions, like the change to `release-gate`; nothing is deployed until the maintainer merges the site's pull request at the release.
 - **After the release**, out of this plan: the site's `languages.json` entry for TypeScript and a news post. The TypeScript edition of the book is not left for after the release: it is stage 12 (section 17), written before the release against the stack's top branch.
 
 ## What the maintainer does by hand
@@ -549,6 +550,7 @@ The new AGENTS.md carries Rust's rules over where they are not about Rust:
 2. After stage 0, add the "Protect main" ruleset requiring the CI checks, with merge commits only.
 3. Make sure the labels `implements-proposal`, `tier: 1`, `spec update` and `waiting for spec` exist in the new repository.
 4. Before the first release: the `npm` environment, the first publish of `itinera` by hand, then trusted publishing for `release.yml`, and the tag.
+5. Before the first release: whatever lets itinera-ts's workflows ask the site to deploy, such as a token with access to itinera-dev/itinera-dev.github.io, stored as a secret.
 
 ## Decisions
 
