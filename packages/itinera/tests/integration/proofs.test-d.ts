@@ -9,7 +9,9 @@ import {
   onWorkflowSuccess,
   type OnSuccess,
   type Outcome,
+  provider,
   role,
+  serviceType,
   Step,
   step,
   StepPolicy,
@@ -21,6 +23,12 @@ import {
   WorkflowPolicy,
   workflowPolicy,
 } from "itinera/unstable";
+
+interface Gateway {
+  take(amount: number): string;
+}
+
+const gateway: Gateway = { take: String };
 
 interface Messages {
   tell(message: string): void;
@@ -111,5 +119,34 @@ describe("bag-write", () => {
       }
     }
     return Orders;
+  });
+});
+
+describe("no-instance", () => {
+  it("a service provider cannot return what this.provide(...) does not make", () => {
+    const GATEWAY = serviceType<Gateway>("Gateway");
+    class Shop extends Workflow {
+      // @ts-expect-error a provider returns this.provide(instance), never nothing
+      @provider(GATEWAY)
+      nothing(): void {}
+
+      // @ts-expect-error a provider returns this.provide(instance), never a bare instance
+      @provider(GATEWAY)
+      bare(): Gateway {
+        return gateway;
+      }
+    }
+    class Kiosk extends Workflow {
+      nothing(): void {}
+
+      bare(): Gateway {
+        return gateway;
+      }
+    }
+    // @ts-expect-error a provider returns this.provide(instance), never nothing
+    Kiosk.builder().provider("nothing", GATEWAY, {});
+    // @ts-expect-error a provider returns this.provide(instance), never a bare instance
+    Kiosk.builder().provider("bare", GATEWAY, {});
+    return Shop;
   });
 });
