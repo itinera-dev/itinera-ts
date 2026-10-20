@@ -8,10 +8,8 @@ import {
   contributor,
   dataBag,
   fromWorkflow,
-  input,
   key,
   type ListedStep,
-  service,
   stepName,
   type StepBuilder,
   stepReporter,
@@ -22,8 +20,8 @@ import { type Value } from "itinera/value";
 import { Adapters } from "./adapters.js";
 import { given } from "./given.js";
 import { type AdapterRequest, refuseUnheldAccess } from "./model/adapter.js";
-import type { ProviderScript, ServiceRequest } from "./model/provider.js";
-import type { Input } from "./model/step.js";
+import type { ProviderScript } from "./model/provider.js";
+import { rescueOf } from "./model/step.js";
 import type { Scripted } from "./model/value.js";
 import type { Model } from "./model.js";
 import type { Recorders } from "./recorders.js";
@@ -31,9 +29,10 @@ import { actingOf } from "./scenario/actions.js";
 import { mockScriptOf } from "./scenario/mock.js";
 import { stepPolicyOf, workflowPolicyOf } from "./scenario/policies.js";
 import { provideWith } from "./scenario/providers.js";
+import { inputOf, serviceOf } from "./scenario/requests.js";
+import { rescueStepOf } from "./scenario/rescue.js";
 import { type Scenario, serving } from "./scenario/workflow.js";
-import { serviceTypeOf } from "./services.js";
-import { requestTypeOf, tokenOf } from "./tokens.js";
+import { tokenOf } from "./tokens.js";
 import type { ActingClass, Witness } from "./witness.js";
 
 /**
@@ -41,9 +40,8 @@ import type { ActingClass, Witness } from "./witness.js";
  * step a step mock the witness keeps.
  *
  * @throws Violations when the builder refuses the workflow.
- * @throws NotRunYet when the scenario scripts what the runner cannot run.
  * @throws ModelError when an input adapter's script uses a data bag access
- * it could never hold.
+ * it could never hold, or a rescue step's script says it skips.
  */
 export function workflowOf(model: Model, witness: Witness): Built<Scenario> {
   return builderOf(model, witness).build();
@@ -95,9 +93,12 @@ function builderOf(
       .needs(...script.inputs.map(inputOf))
       .run(contributor(), stepReporter(), ...script.services.map(serviceOf))
       .retryBudget(script.retries);
+    const rescued = script.hasRescueStep
+      ? scripted.rescue(rescueStepOf(rescueOf(step), model, witness))
+      : scripted;
     const mock = (script.policies ?? []).reduce(
       (attached, policy) => withPolicy(attached, policy, model, witness),
-      scripted,
+      rescued,
     );
     builder.step(
       script.retriesAbnormalTerminations
@@ -133,14 +134,6 @@ function builderOf(
 
 function nameOf({ name }: ProviderScript): string {
   return name;
-}
-
-function serviceOf({ key, type }: ServiceRequest) {
-  return service<unknown>(key, serviceTypeOf(type));
-}
-
-function inputOf({ key, type, optional }: Input) {
-  return input(key, requestTypeOf(type, optional));
 }
 
 function requestOf(request: AdapterRequest) {
