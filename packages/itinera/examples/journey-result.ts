@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
-import { LocalExecutor, Step, Workflow } from "itinera/unstable";
+import { LocalExecutor } from "itinera/executor";
+import { Step } from "itinera/step";
+import { Workflow } from "itinera/workflow";
 
 class Charge extends Step {
   override run(): never {

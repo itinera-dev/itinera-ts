@@ -1,12 +1,7 @@
 import assert from "node:assert/strict";
-import {
-  input,
-  LocalExecutor,
-  type Outcome,
-  Step,
-  step,
-  Workflow,
-} from "itinera/unstable";
+import { LocalExecutor } from "itinera/executor";
+import { input, type Outcome, Step, step } from "itinera/step";
+import { Workflow } from "itinera/workflow";
 import { classOf, type PlainValue, type ValueClass } from "itinera/value";
 
 class Payment {

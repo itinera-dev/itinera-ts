@@ -1,52 +1,56 @@
 import assert from "node:assert/strict";
 import {
-  attempt,
-  Attempt,
   type Contributor,
   contributor,
-  failureCause,
-  failureReason,
-  type FromFailure,
-  type FromFailureOptions,
-  fromStep,
-  fromWorkflow,
-  type HookDecorator,
   type JourneyId,
   journeyId,
+} from "itinera/journey";
+import { None, type Option, Some } from "itinera/option";
+import {
+  failureCause,
+  fromStep,
+  type HookDecorator,
   type KeepDefault,
-  None,
   type OnFailure,
   onStepFailure,
   onStepRetry,
   onStepSuccess,
   type OnSuccess,
   onWorkflowSuccess,
-  type Option,
-  type Outcome,
   type PolicyOptions,
-  type Reason,
   RetryCause,
   retryCause,
   role,
-  Some,
   type RolesOf,
   type RolesOfOne,
-  Step,
-  step,
   type StepFailureCause,
-  type StepName,
-  stepName,
   StepPolicy,
   stepPolicy,
   type StepPolicyClass,
+  WorkflowPolicy,
+  workflowPolicy,
+  type WorkflowPolicyClass,
+} from "itinera/policy";
+import {
+  attempt,
+  Attempt,
+  failureReason,
+  type FromFailure,
+  type FromFailureOptions,
+  type Outcome,
+  type Reason,
+  Step,
+  step,
+  type StepName,
+  stepName,
+} from "itinera/step";
+import {
+  fromWorkflow,
   withStep,
   Workflow,
   workflow,
   type WorkflowClass,
-  WorkflowPolicy,
-  workflowPolicy,
-  type WorkflowPolicyClass,
-} from "itinera/unstable";
+} from "itinera/workflow";
 import { integer, optional } from "itinera/value";
 
 /** A role the shop provides: telling a customer something. */

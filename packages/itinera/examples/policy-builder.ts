@@ -1,22 +1,20 @@
 import assert from "node:assert/strict";
+import { type Contributor, contributor } from "itinera/journey";
 import {
-  type Contributor,
-  contributor,
   failureCause,
   fromStep,
   type OnFailure,
   type OnSuccess,
   type PolicyDescriptor,
   role,
-  Step,
   type StepFailureCause,
   StepPolicy,
   type StepPolicyBuilder,
-  type Outcome,
-  Workflow,
   WorkflowPolicy,
   type WorkflowPolicyBuilder,
-} from "itinera/unstable";
+} from "itinera/policy";
+import { Step, type Outcome } from "itinera/step";
+import { Workflow } from "itinera/workflow";
 import { integer } from "itinera/value";
 
 /** A role the shop provides: telling a customer something. */

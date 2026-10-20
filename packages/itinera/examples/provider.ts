@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
+import { type JourneyId, journeyId } from "itinera/journey";
 import {
-  Attempt,
-  attempt,
-  type JourneyId,
-  journeyId,
-  type Outcome,
   type Provided,
   provider,
   type ProviderDecorator,
@@ -13,14 +9,17 @@ import {
   type ProviderReporter,
   service,
   serviceType,
+} from "itinera/service";
+import {
+  Attempt,
+  attempt,
+  type Outcome,
   Step,
   step,
   type StepName,
   stepName,
-  withStep,
-  Workflow,
-  workflow,
-} from "itinera/unstable";
+} from "itinera/step";
+import { withStep, Workflow, workflow } from "itinera/workflow";
 
 interface PaymentGateway {
   take(amount: number): string;

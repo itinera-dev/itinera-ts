@@ -1,6 +1,7 @@
-import type { Provided, StepName, Supplied } from "itinera/unstable";
-import { Workflow } from "itinera/unstable";
+import type { Provided } from "itinera/service";
+import type { StepName } from "itinera/step";
 import type { PlainValue } from "itinera/value";
+import { type Supplied, Workflow } from "itinera/workflow";
 import type { Adapters } from "../adapters.js";
 import { given } from "../given.js";
 import type { Played } from "../providers.js";

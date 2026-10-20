@@ -2,9 +2,19 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": [
     "src/index.ts",
+    "src/event.ts",
+    "src/executor.ts",
+    "src/instance.ts",
+    "src/journey.ts",
+    "src/option.ts",
+    "src/policy.ts",
+    "src/report.ts",
     "src/schema.ts",
+    "src/service.ts",
+    "src/step.ts",
     "src/unstable.ts",
-    "src/value.ts"
+    "src/value.ts",
+    "src/workflow.ts"
   ],
   "tsconfig": "tsconfig.build.json",
   "out": "api",

@@ -6,7 +6,7 @@ Status: complete, and 63 is listed in `conformance.json`. Stage 1 added the disp
 
 ## API
 
-These are exported only from `itinera/unstable` while they name the events and reporters of proposal 0011, not yet listed, as the agents' manual says. They are defined in `src/report.ts` and `src/report/default-dispatcher.ts`, and `src/report.ts` becomes the subpath `itinera/report` then.
+Since stage 10, these are exported from the subpath `itinera/report`. They are defined in `src/report.ts` and `src/report/default-dispatcher.ts`.
 
 - **`Dispatcher`**: `add(reporter)`, `dispatch(event)` and `setGlobalMetadata(key, value)`, named after chapter 2, 2.2's words, each returning nothing or a promise.
 - **`DispatcherFactory`**: an object with `create()`, returning a dispatcher or a promise of one. An object, rather than a function, so a factory is a class an application names and can configure, as the reporters it creates dispatchers for are, and as Rust's trait is.

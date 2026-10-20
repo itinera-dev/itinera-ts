@@ -2,6 +2,8 @@
  * Journeys: what one run of a workflow is called, its data, how it ends,
  * and the result it gives.
  *
+ * {@includeCode ../examples/journey-result.ts}
+ *
  * @module
  */
 import { closedSet, type ValueOf } from "./closed-set.js";

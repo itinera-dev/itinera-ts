@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { Then } from "@cucumber/cucumber";
-import type { Event, EventKind } from "itinera/unstable";
+import type { Event, EventKind } from "itinera/event";
 import { eventKind } from "../../model.js";
 import { eventsOf as recorded } from "../../recorders.js";
 import { kindOf, type Numbered, numbered } from "../../trace.js";

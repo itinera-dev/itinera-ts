@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
+import { service, serviceType } from "itinera/service";
+import { type Outcome, Step, step } from "itinera/step";
 import {
   key,
-  type Outcome,
-  service,
-  serviceType,
-  Step,
-  step,
   type Supplied,
   type Violation,
   ViolationKind,
@@ -13,7 +10,7 @@ import {
   withStep,
   Workflow,
   workflow,
-} from "itinera/unstable";
+} from "itinera/workflow";
 
 @step()
 class Ship extends Step {

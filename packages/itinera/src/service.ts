@@ -3,6 +3,8 @@
  * providers that make them, what a provider is called, and how a step
  * requests a service.
  *
+ * {@includeCode ../examples/service.ts}
+ *
  * @module
  */
 

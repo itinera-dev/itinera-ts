@@ -6,7 +6,7 @@ Status: complete, and 95 is listed in `conformance.json`. Stage 4 has added `ser
 
 ## API
 
-0095 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as `RescueStep` of [0003](0003-rescue-steps.md), whose `run` may request a service, as the agents' manual says. It is defined in `src/service.ts`, which becomes the subpath `itinera/service` then, with its submodules in `src/service/`.
+Since stage 10, its API is exported from the subpaths of its concepts, chiefly `itinera/service`. It is defined in `src/service.ts`, with its submodules in `src/service/`.
 
 - **`ServiceType<T>`** is a token for a type of service, since an interface does not exist at run time. `serviceType<T>(name)` makes one: a frozen object holding its name, for people, typed through a `unique symbol` that only itinera can name, so only `serviceType` makes one. Two service types are the same only when they are the same object, which is how `wrong service type` will compare them. An empty name throws.
 - **`@service(key, serviceType)`** marks a parameter of a step's `run` with a request for a service, always required. It compiles only on a parameter of `run` of a class extending `Step`, whose declared type accepts the token's service type. It records the key and the service type in the table of requests.

@@ -1,11 +1,7 @@
 import assert from "node:assert/strict";
-import {
-  LocalExecutor,
-  type Outcome,
-  Refusal,
-  Step,
-  Workflow,
-} from "itinera/unstable";
+import { LocalExecutor, Refusal } from "itinera/executor";
+import { type Outcome, Step } from "itinera/step";
+import { Workflow } from "itinera/workflow";
 
 class Ship extends Step {
   override run(): Outcome {

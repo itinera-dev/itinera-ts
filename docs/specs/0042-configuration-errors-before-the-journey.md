@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0042](https://github.com/itinera-dev/spec/blob/main/proposals/0042-configuration-errors-before-the-journey.md), implemented in [#14](https://github.com/itinera-dev/itinera-ts/issues/14). [0032](0032-configuration-errors.md) holds when each configuration error is caught, [0062](0062-workflow-descriptors.md) the violations and the builder, and [0012](0012-local-executor.md) the refusals of `run`.
 
-Status: complete, and 42 is listed in `conformance.json`. Stage 4 checked every violation when a class is defined and when the builder builds, and sealed descriptors and instances. Stage 6 listed the proposal. Its API stays in `itinera/unstable` while it names API of proposals not yet listed, as the agents' manual says.
+Status: complete, and 42 is listed in `conformance.json`. Stage 4 checked every violation when a class is defined and when the builder builds, and sealed descriptors and instances. Stage 6 listed the proposal. Since stage 10, its API is exported from the subpaths of its concepts.
 
 ## How the rules hold
 
@@ -19,7 +19,7 @@ None of its own.
 ## Tests
 
 - `tests/unit/workflow/violation.test.ts`, the tests of each submodule of `src/workflow/violation/`, under `tests/unit/workflow/violation/`, `tests/unit/workflow/builder.test.ts` and `tests/unit/workflow/decorators.test.ts`: every violation, all at once, before any workflow object exists.
-- `tests/unit/workflow/descriptor.test-d.ts`, `tests/unit/step/descriptor.test-d.ts` and `tests/unit/instance.test-d.ts`: a descriptor or an instance written by hand does not compile.
+- `tests/unit/workflow/descriptor.test-d.ts`, `tests/unit/step/descriptor.test-d.ts` and `tests/unit/instance/made.test-d.ts`: a descriptor or an instance written by hand does not compile.
 - `tests/unit/executor.test.ts`: an instance `instance()` did not make, rejected before any refusal.
 
 ## Done when

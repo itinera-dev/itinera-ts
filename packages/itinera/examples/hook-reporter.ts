@@ -5,7 +5,7 @@ import {
   onWorkflowSuccess,
   WorkflowPolicy,
   workflowPolicy,
-} from "itinera/unstable";
+} from "itinera/policy";
 
 @workflowPolicy({ name: "notify" })
 class Notify extends WorkflowPolicy {

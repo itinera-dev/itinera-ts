@@ -1,11 +1,10 @@
 /** How each hook of a scenario's policy ends, as test support's policy mocks play it. */
+import { StepHook, WorkflowHook } from "itinera/policy";
 import {
   type FailureHookEnding,
   HookEnding,
   type HookFails,
-  StepHook,
   type StepPolicyMockScript,
-  WorkflowHook,
   type WorkflowHookEnding,
   type WorkflowPolicyMockScript,
 } from "itinera/unstable";

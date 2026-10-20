@@ -3,19 +3,16 @@
  * API: the workflow, put together with the builder from test support's step
  * mocks, and its instances.
  */
+import type { WorkflowInstance } from "itinera/instance";
+import { contributor, dataBag } from "itinera/journey";
+import { stepName, type StepBuilder, stepReporter } from "itinera/step";
 import {
   type Built,
-  contributor,
-  dataBag,
   fromWorkflow,
   key,
   type ListedStep,
-  stepName,
-  type StepBuilder,
-  stepReporter,
   type WorkflowBuilder,
-  type WorkflowInstance,
-} from "itinera/unstable";
+} from "itinera/workflow";
 import { type Value } from "itinera/value";
 import { Adapters } from "./adapters.js";
 import { given } from "./given.js";

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { DefaultDispatcher, type DispatcherFactory } from "itinera/unstable";
+import { DefaultDispatcher, type DispatcherFactory } from "itinera/report";
 
 class Counting implements DispatcherFactory {
   created = 0;

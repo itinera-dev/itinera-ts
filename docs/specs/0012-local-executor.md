@@ -6,7 +6,7 @@ Status: complete, and 12 is listed in `conformance.json`. Stage 3 added `LocalEx
 
 ## API
 
-Everything here is exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the steps a workflow instance runs, as the agents' manual says. It is defined in `src/executor.ts`, which becomes the subpath `itinera/executor` then, with the refusals in `src/executor/refusal.ts`.
+Since stage 10, everything here is exported from the subpath `itinera/executor`. It is defined in `src/executor.ts`, with the refusals in `src/executor/refusal.ts`.
 
 - **`new LocalExecutor(dispatcherFactory?)`** takes the dispatcher factory as its one optional argument, `DefaultDispatcherFactory` without it. This was the open point of #8; a constructor argument mirrors Rust's `LocalExecutor::with_dispatcher_factory` without a second way to say the same thing, and an options object can be added later without breaking it.
 - **`await executor.run(instance)`** resolves to the journey's `JourneyResult` (see 0065), whatever happens inside the journey. It takes a `WorkflowInstance` that `instance()` made; one that a cast lets through is rejected with a `TypeError` (see "Before the journey").

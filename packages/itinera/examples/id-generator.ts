@@ -1,15 +1,7 @@
 import assert from "node:assert/strict";
-import {
-  type DataBag,
-  dataBag,
-  idGenerator,
-  type Outcome,
-  Step,
-  step,
-  withStep,
-  Workflow,
-  workflow,
-} from "itinera/unstable";
+import { type DataBag, dataBag } from "itinera/journey";
+import { type Outcome, Step, step } from "itinera/step";
+import { idGenerator, withStep, Workflow, workflow } from "itinera/workflow";
 import { integer } from "itinera/value";
 
 @step()

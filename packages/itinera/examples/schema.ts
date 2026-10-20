@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { z } from "itinera/schema";
-import { input, type Outcome, Step, step } from "itinera/unstable";
+import { input, type Outcome, Step, step } from "itinera/step";
 
 const Order = z.object({ id: z.string(), total: z.number().nonnegative() });
 

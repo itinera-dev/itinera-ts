@@ -6,7 +6,7 @@ Status: complete, and 62 is listed in `conformance.json`. Stage 3 added the base
 
 ## API
 
-0062 is listed, but what it defines names the steps, policies, input adapters and providers of proposals not listed yet, such as 0008 and 0010, so everything here stays exported only from `itinera/unstable` until they are, as the agents' manual requires, but the type tokens, which name none of them and are exported from `itinera/value` since stage 6 (see [0056](0056-data-bag-values.md)). The base class is defined in `src/workflow/base.ts`, re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow` then, with its submodules in `src/workflow/`.
+Since stage 10, everything here is exported from the subpath `itinera/workflow`, but the type tokens, exported from `itinera/value` since stage 6 (see [0056](0056-data-bag-values.md)). The base class is defined in `src/workflow/base.ts`, re-exported by `src/workflow.ts`, with its submodules in `src/workflow/`.
 
 ### The descriptors, the executor's contract
 
@@ -91,7 +91,7 @@ Status: complete, and 62 is listed in `conformance.json`. Stage 3 added the base
 - `tests/unit/workflow/decorators.test.ts`: steps in written order, a rescue step attached, and every refusal when a class is defined.
 - `tests/unit/workflow/id-generator.test.ts`: the ID generator recorded as a reference to its method, with its requests, refused on what is not a method, refused twice, refused with a parameter carrying no request or a request other than the data bag, and refused without metadata.
 - `tests/unit/declaration/parameter.test.ts`: a request decorator compiles with `strictNullChecks` and does not without it, compiled through the TypeScript compiler's API.
-- `tests/unit/workflow/descriptor.test-d.ts`, `tests/unit/step/descriptor.test-d.ts` and `tests/unit/instance.test-d.ts`: a workflow descriptor, a step descriptor or an instance written by hand, as an object or as a class, does not compile.
+- `tests/unit/workflow/descriptor.test-d.ts`, `tests/unit/step/descriptor.test-d.ts` and `tests/unit/instance/made.test-d.ts`: a workflow descriptor, a step descriptor or an instance written by hand, as an object or as a class, does not compile.
 - `tests/unit/workflow/descriptor/assemble.test.ts`: no name, and violations.
 - `tests/unit/workflow/descriptor.test.ts`: steps kept whatever happens to the list given, new reporters on every call, a random UUID v4, the ID generator called on the workflow object, given a data bag of the initial data for each request, without what is not a value, and emptied afterwards, and an ID that is not a string, `adapt` calling the adapter attached to a step on the workflow object with the answers in order, or refusing a step none is attached to, and `provide` calling the provider serving a step on the workflow object with the answers in order, or refusing a step none serves.
 - `tests/unit/workflow/violation.test.ts`: a workflow with nothing wrong, every kind found in order, the message with a line per violation, and the error's name. The tests of each submodule of `src/workflow/violation/`, under `tests/unit/workflow/violation/`: each kind, a rescue step's name counted as a step's, adapters and providers attached to an unknown step or to the rescue step of a step without one, and what is left out, with the shared fixtures of `tests/fixtures/workflow.ts`.

@@ -3,7 +3,7 @@
  * line, the line a table's row expects, and how lines are compared.
  */
 import { isDeepStrictEqual } from "node:util";
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 import { eventKind, json, ModelError, type Row } from "./model.js";
 import { implementationNamed } from "./model/provider.js";
 import { runtimeNameOf } from "./services.js";

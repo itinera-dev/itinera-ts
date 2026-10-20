@@ -1,13 +1,7 @@
 import assert from "node:assert/strict";
-import {
-  AbortReason,
-  EventKind,
-  FailureCause,
-  RescueCause,
-  RetryCause,
-  StepHook,
-  WorkflowHook,
-} from "itinera/unstable";
+import { EventKind, RescueCause } from "itinera/event";
+import { AbortReason, FailureCause } from "itinera/journey";
+import { RetryCause, StepHook, WorkflowHook } from "itinera/policy";
 
 assert.equal(EventKind.StepFailed, "step_failed");
 assert.equal(AbortReason.ReporterFailed, "reporter failed");
