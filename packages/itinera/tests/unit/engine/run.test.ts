@@ -16,6 +16,8 @@ import {
   stepReporter,
   type StepReporter,
 } from "../../../src/step.js";
+import { success } from "../../../src/step/outcome.js";
+import { string } from "../../../src/value/token.js";
 import { failureReason } from "../../../src/step/request.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import {
@@ -26,7 +28,14 @@ import {
   failingOn,
 } from "../../fixtures/engine.js";
 import type { Journey } from "../../../src/engine/journey.js";
+import type { Lent, Script } from "../../../src/engine/script.js";
 import { travel } from "../../../src/engine/scan.js";
+
+async function played(lent: Lent): Promise<Outcome> {
+  lent.contributor.contribute("receipt", "R-2");
+  await lent.reporter.info("played");
+  return success;
+}
 
 class Lending extends Step {
   override async run(
@@ -163,6 +172,27 @@ describe("ran", () => {
       { kind: "step_succeeded" },
       { kind: "contribution_committed", key: "receipt" },
     ]);
+  });
+
+  it("plays what a script gives an attempt in place of the step's run, lending it the attempt's contributor and reporter", async () => {
+    const recorder = new RecordingReporter();
+    const script: Script = {
+      building: () => undefined,
+      play: () => played,
+    };
+    const result = await run(
+      orders(
+        Lending.builder("charge").run(stepReporter(), contributor()),
+      ).instance({}, { reporters: [recorder] }),
+      undefined,
+      script,
+    );
+    expect(recorder.events.slice(2, 5)).toMatchObject([
+      { kind: "step_info", message: "played" },
+      { kind: "step_succeeded" },
+      { kind: "contribution_committed", key: "receipt" },
+    ]);
+    expect(result.output({ receipt: string })).toEqual({ receipt: "R-2" });
   });
 
   it("settles every call the step made before its outcome is reported", async () => {

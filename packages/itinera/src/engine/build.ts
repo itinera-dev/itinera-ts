@@ -2,6 +2,7 @@ import type { Input, Request } from "../declaration/request.js";
 import type { WorkflowInstance } from "../instance.js";
 import { AbortReason } from "../journey.js";
 import type { Attempt } from "../step.js";
+import type { PlainValue } from "../value.js";
 import { adapting, type DeclaredAdapter } from "../workflow/adapter.js";
 import { adaptersOf } from "../workflow/descriptor.js";
 import { adapted } from "./adapter.js";
@@ -16,7 +17,8 @@ import { JourneyAbortError } from "./signal.js";
 
 /**
  * A step, or a rescue step, being built for an attempt of a journey of an
- * instance, with the input adapter attached to its name, if any.
+ * instance, with the input adapter attached to its name, if any, and the
+ * values its requests found, by key, as a scripted run records them.
  */
 interface Building {
   readonly journey: Journey;
@@ -24,6 +26,7 @@ interface Building {
   readonly step: Buildable;
   readonly attempt: Attempt;
   readonly adapter: DeclaredAdapter | undefined;
+  readonly found: Map<string, PlainValue>;
 }
 
 /**
@@ -43,7 +46,8 @@ export interface BuiltStep {
  * `run` requests, then its constructor called with what they were answered
  * with. Its inputs come through the input adapter attached to its own name,
  * and a rescue step's requests of the step it rescues from what that step's
- * failed attempt left.
+ * failed attempt left. A scripted run records the attempt, with the values
+ * its requests found, just before the constructor is called.
  *
  * @throws JourneyAbortError when resolving a request or a service aborts the
  * journey, or with `step could not be built` when its constructor fails.
@@ -60,11 +64,13 @@ export async function built(
     step,
     attempt,
     adapter: adapting(adaptersOf(instance.descriptor), step.name),
+    found: new Map(),
   };
   const needs = await inOrder(step.requests.needs, (request) =>
     need(building, request),
   );
   const services = await servicesFor(journey, instance, step, attempt);
+  journey.script?.building(step.name, attempt, building.found);
   try {
     return { made: step.build(needs), services };
   } catch (error) {
@@ -81,6 +87,9 @@ async function need(building: Building, request: Request): Promise<unknown> {
     return input(building, request);
   }
   if (step.rescued !== undefined && isOfRescued(request)) {
+    if (request.kind === "fromRescuedStep") {
+      foundUnder(building, request.key, step.rescued.contributed);
+    }
     return fromRescued(journey, step.name, attempt, step.rescued, request);
   }
   throw couldNotBeBuilt(
@@ -104,6 +113,7 @@ async function input(building: Building, request: Input): Promise<unknown> {
       input: request,
     });
     if (supplied.isSome()) {
+      building.found.set(request.key, supplied.value);
       return requested(
         journey,
         byAdapter(adapter.name, step.name, attempt),
@@ -113,6 +123,7 @@ async function input(building: Building, request: Input): Promise<unknown> {
       );
     }
   }
+  foundUnder(building, request.key, journey.data);
   return requested(
     journey,
     byStep(step.name, attempt),
@@ -120,6 +131,18 @@ async function input(building: Building, request: Input): Promise<unknown> {
     request.type,
     journey.data.get(request.key),
   );
+}
+
+/** Keeps the value `values` hold under `key`, if any, as found under it. */
+function foundUnder(
+  { found }: Building,
+  key: string,
+  values: ReadonlyMap<string, PlainValue>,
+): void {
+  const value = values.get(key);
+  if (value !== undefined) {
+    found.set(key, value);
+  }
 }
 
 function couldNotBeBuilt(
