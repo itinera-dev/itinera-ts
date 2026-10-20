@@ -6,7 +6,7 @@ Every diagram is followed by a numbered list that says everything it shows, and 
 
 ## Tier 1
 
-Tier 1 runs a journey in one process, with steps, retries, rescue steps, policies and their hooks, roles, input adapters, services, events and reporters. So far, a journey builds each step from its inputs, read from the data bag or supplied by its input adapter, runs steps that succeed, fail, skip or terminate abnormally, retries or gives them up, aborts when something illegal happens, with events and reporters, and ends with a result whose output the application reads.
+Tier 1 runs a journey in one process, with steps, retries, rescue steps, policies and their hooks, roles, input adapters, services, events and reporters. So far, a journey builds each step from its inputs, read from the data bag or supplied by its input adapter, runs steps that succeed, fail, skip or terminate abnormally, retries or gives them up, calls the hooks of its policies around each decision, with the workflow object as the roles they request, aborts when something illegal happens, with events and reporters, and ends with a result whose output the application reads.
 
 ### The packages
 
@@ -42,7 +42,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
 | `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
 | `service` | Provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter` |
-| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `Ending`, `stepMock` and `StepMock` |
+| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `FailingReporter`, `Ending`, `stepMock` and `StepMock`, `HookEnding`, `stepPolicyMock` and `StepPolicyMock`, `workflowPolicyMock` and `WorkflowPolicyMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
 | `name` | Private: `named`, which refuses an empty name as something is declared |
@@ -107,7 +107,7 @@ flowchart TD
 1. Each parameter decorator records one request in a private table, keyed by the class, the method, or `undefined` for the constructor, and the parameter's position. A parameter carrying two requests is refused at once.
 2. A request for a value takes its type from what it is given: one of the tokens, any other Standard Schema validator, or either wrapped in `optional`. With no type given, it reads the parameter's declared type from the metadata the compiler records, which says only `number`, `string`, `boolean` or a class that serialises itself; anything else is refused when the class is defined.
 3. The types of the decorators refuse at compile time a request in a place that may not make it, and a parameter whose declared type does not accept what the request gives. Without the compiler option `strictNullChecks`, `null` would belong to every type and these refusals would compile, so then no request decorator compiles.
-4. The class decorator reads the table for its constructor and its methods, in the order of their parameters, counted from the metadata or the function's length, and refuses a parameter that carries no request. What it gathers is the class's declaration: for a step, what its constructor needs and what its `run` takes; for a policy, what each of its hooks requests. The engine resolves a step's constructor requests as it builds the step, and lends those of `run` as it runs it, as "How a journey runs" shows; later stages resolve those of hooks.
+4. The class decorator reads the table for its constructor and its methods, in the order of their parameters, counted from the metadata or the function's length, and refuses a parameter that carries no request. What it gathers is the class's declaration: for a step, what its constructor needs and what its `run` takes; for a policy, what each of its hooks requests. The engine resolves a step's constructor requests as it builds the step, and lends those of `run` as it runs it, as "How a journey runs" shows, and resolves a hook's as it calls the hook, as "How a hook is called" shows.
 5. A class declared without decorators is given its requests by position, through a builder: each is a request decorator itself, such as `input("amount", integer)`, which remembers the request it stands for, so the builder gathers the same declaration without the table. Its type carries what the request gives and where it may be made, so a request that does not fit its parameter, or one left out, does not compile, and a request for a value must write its type, since no metadata is read there.
 
 Where it lives: `declaration.ts`, `declaration/allowed.ts`, `declaration/marking.ts`, `declaration/token.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `journey/request.ts`, `service/request.ts`, `service/provider.ts`, `service/reporter.ts`, `workflow/request.ts`, `workflow/adapter.ts`, `step/rescue.ts`, `policy/request.ts`, `policy/reporter.ts`.
@@ -132,7 +132,7 @@ flowchart TD
 2. The parameter decorators record each hook's requests in the table of requests, as for a step.
 3. `@stepPolicy` or `@workflowPolicy` gathers the policy's kind, its name, the class's name unless one is given, and each hook with its requests. It refuses, when the class is defined, a policy that defines no hook, a method that carries requests but no hook, and a cause requested by a hook that is not given it.
 4. For a policy class declared without decorators, a policy's builder, `Audit.builder(name)`, names the method of each hook with its requests by position, and checks at once what the decorators check when a class is defined. It is refused for a class declared with a policy's decorator, which is given as the class itself.
-5. Either way the policy becomes a `PolicyDescriptor`, sealed as the other descriptors are, holding its name, the hooks it defines and how to build it.
+5. Either way the policy becomes a `PolicyDescriptor`, sealed as the other descriptors are, holding its name, the hooks it defines, how to build it and how to call each of its hooks.
 6. `@withStep` and a step's builder attach step policies to a step, and `@workflow` and the workflow builder workflow policies to the workflow, each refusing a policy not declared with its decorator nor put together by a policy's builder, including a policy of the other kind given through a cast. A policy names the roles it requests as its base class's type argument, so each compiles only on a workflow class that implements every role their policies request. Nothing about roles exists at run time.
 
 Where it lives: `policy/hooks.ts`, `policy/declared.ts`, `policy/descriptor.ts`, `policy/builder.ts`, `policy/step-policy/builder.ts`, `policy/workflow-policy/builder.ts`, `step/builder.ts`, `workflow/builder.ts`, `policy/step-policy.ts`, `policy/workflow-policy.ts`, `policy/lifecycle.ts`, `policy/roles.ts`, `workflow/decorators.ts`, `workflow/registry.ts`, `step/descriptor.ts`.
@@ -164,7 +164,7 @@ Where it lives: `step/rescue.ts`, `step/rescue/builder.ts`, `workflow/builder.ts
 ```mermaid
 sequenceDiagram
     accTitle: From a declaration to a journey's result
-    accDescr: The application builds the workflow object and makes an instance, whose creation makes the journey ID. The executor rejects an instance that instance() did not make, and refuses a run while it runs a journey. The engine refuses an instance handed over before, captures the initial data and global metadata, creates a dispatcher, adds each reporter wrapped in a guard, and sets the journey ID and then the initial global metadata, any of which can refuse the instance. Then it runs the journey and the executor resolves to its result, or rejects with a Refusal, or with a TypeError for an instance instance() did not make.
+    accDescr: The application builds the workflow object and makes an instance, whose creation makes the journey ID. The executor rejects an instance that instance() did not make, and refuses a run while it runs a journey. The engine refuses an instance handed over before, captures the initial data and global metadata, builds each workflow policy, creates a dispatcher, adds each reporter wrapped in a guard, and sets the journey ID and then the initial global metadata, any of which can refuse the instance. Then it runs the journey and the executor resolves to its result, or rejects with a Refusal, or with a TypeError for an instance instance() did not make.
     participant App as Application
     participant Exec as LocalExecutor
     participant Engine as Engine
@@ -176,6 +176,7 @@ sequenceDiagram
     Note over Exec: rejects an instance instance() did not make, then refuses while it runs a journey
     Exec->>Engine: run the journey
     Note over Engine: refuses an instance handed over before, then captures the initial data and global metadata
+    Engine->>Engine: build each workflow policy, once for the journey
     Engine->>Factory: create a dispatcher
     Factory-->>Engine: the dispatcher
     Engine->>Dispatcher: add each reporter, wrapped in a guard
@@ -187,45 +188,54 @@ sequenceDiagram
 
 1. The application makes the workflow object with `Orders.build()`, or with the builder, and asks it for an instance. `instance()` makes the journey ID, from the ID generator, which may read the initial data, or as a random UUID.
 2. The application hands the instance to `run` on a `LocalExecutor`. The executor rejects with a `TypeError` an instance that `instance()` did not make, which only a cast lets through. While it runs a journey, it refuses any other.
-3. The engine refuses an instance that was handed to `run` before, refused or not. It captures the initial data and the initial global metadata, and refuses the instance when a value is not a value, or when the global metadata sets `journey_id`.
+3. The engine refuses an instance that was handed to `run` before, refused or not. It captures the initial data and the initial global metadata, and refuses the instance when a value is not a value, or when the global metadata sets `journey_id`. Then it builds each workflow policy, once for the journey, and refuses the instance with `workflow policy failed` when one throws.
 4. It creates the journey's dispatcher with the executor's dispatcher factory, the default one unless the executor was given another, and adds each reporter of the instance, wrapped in a guard.
 5. It sets `journey_id` first, then each entry of the initial global metadata, in order, through the dispatcher.
 6. A failure of the factory, of the dispatcher or of a reporter in steps 4 and 5 refuses the instance. A refusal rejects `run` with a `Refusal`, before any journey and any event.
 7. Then the engine runs the journey, as the next section shows, and `run` resolves to its result: succeeded or failed with its data bag, or aborted. The application reads the result's output with `output`, giving a type for each key, as a typed read of the data bag does; it throws an `OutputError` for an aborted journey, which has no data bag, and for a key that holds no value or a value of another type.
 
-Where it lives: `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts`, `journey/result.ts`, `journey/output.ts`.
+Where it lives: `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts`, `engine/policies.ts`, `journey/result.ts`, `journey/output.ts`.
 
 ### How a journey runs
 
 ```mermaid
 flowchart TD
     accTitle: How the engine runs a journey
-    accDescr: The engine emits journey_started, then attempts each step in order. Each attempt emits attempt_started and resolves the inputs the step's constructor requests, in order, each from the step's input adapter or from the data bag. A required input without a value, a value of another type, or an input adapter that fails aborts the journey. Then the step is built; a constructor that fails aborts the journey too. The step runs with the handles its run requests, which are closed once the attempt and every call it made on them have settled. A success emits step_succeeded and commits what the attempt contributed, then the next step. A skip emits step_skipped and contributions_discarded, then the next step. A failure emits step_failed, and an error or what is not an outcome step_abnormal_termination; either is retried, emitting step_retrying and attempting again, or given up, emitting step_given_up and journey_failed. Once no step is left, the journey emits journey_succeeded. An abort emits journey_aborted.
+    accDescr: The engine emits journey_started, then attempts each step in order. Each attempt emits attempt_started and builds the step's policies; a policy that fails aborts the journey. Then it resolves the inputs the step's constructor requests, in order, each from the step's input adapter or from the data bag. A required input without a value, a value of another type, or an input adapter that fails aborts the journey. Then the step is built; a constructor that fails aborts the journey too. The step runs with the handles its run requests, which are closed once the attempt and every call it made on them have settled. A success emits step_succeeded and commits what the attempt contributed, then calls on step success; FinishWorkflow ends the journey as succeeded, FailWorkflow as failed, and otherwise the next step follows. A skip emits step_skipped and contributions_discarded, then the next step. A failure emits step_failed, and an error or what is not an outcome step_abnormal_termination, then on step abnormal termination, which may give the step up with FailWorkflow. Either is retried, calling on step retry, which may give the step up with FailWorkflow, then emitting step_retrying and attempting again, or given up, emitting step_given_up and calling on step failure. Once the journey has succeeded or failed, the workflow hook on workflow success or on workflow failure runs, then journey_succeeded or journey_failed. A hook that fails, and every other abort, emits journey_aborted.
     started["journey_started"] --> next{"Another step?"}
-    next -->|"no"| succeeded["journey_succeeded, the result succeeded"]
-    next -->|"yes"| attempt["attempt_started"]
+    next -->|"no"| workflowSuccess["on workflow success"]
+    workflowSuccess --> succeeded["journey_succeeded, the result succeeded"]
+    next -->|"yes"| attempt["attempt_started, then the step's policies built"]
+    attempt -->|"a policy fails"| aborted["journey_aborted, the result aborted"]
     attempt --> inputs{"Each input, from the input adapter or the data bag"}
-    inputs -->|"missing, of another type, or the adapter fails"| aborted["journey_aborted, the result aborted"]
+    inputs -->|"missing, of another type, or the adapter fails"| aborted
     inputs -->|"resolved"| build{"The step is built"}
     build -->|"its constructor fails"| aborted
     build -->|"built"| run{"run, with its handles, gives"}
     run -->|"a handle's call aborts the journey"| aborted
-    run -->|"a success"| stepSucceeded["step_succeeded, then each contribution committed"]
-    stepSucceeded --> next
+    run -->|"a success"| stepSucceeded["step_succeeded, each contribution committed, then on step success"]
+    stepSucceeded -->|"no lifecycle"| next
+    stepSucceeded -->|"FinishWorkflow"| workflowSuccess
+    stepSucceeded -->|"FailWorkflow"| workflowFailure["on workflow failure"]
     run -->|"a skip"| skipped["step_skipped, then contributions_discarded"]
     skipped --> next
     run -->|"a failure"| stepFailed["step_failed"]
-    run -->|"a throw, a rejection, or what is not an outcome"| abnormal["step_abnormal_termination"]
+    run -->|"a throw, a rejection, or what is not an outcome"| abnormal["step_abnormal_termination, then on step abnormal termination"]
+    abnormal -->|"FailWorkflow"| givenUpByHook["step_given_up, decided by the hook"]
     stepFailed --> decide{"Retried, with budget left?"}
-    abnormal --> decide
-    decide -->|"yes"| retrying["step_retrying"]
+    abnormal -->|"no lifecycle"| decide
+    decide -->|"yes"| retry["on step retry"]
+    retry -->|"no lifecycle"| retrying["step_retrying"]
+    retry -->|"FailWorkflow"| givenUpByHook
     retrying --> attempt
-    decide -->|"no"| givenUp["step_given_up"]
-    givenUp --> failed["journey_failed, the result failed"]
+    decide -->|"no"| givenUp["step_given_up, then on step failure"]
+    givenUp --> workflowFailure
+    givenUpByHook --> workflowFailure
+    workflowFailure --> failed["journey_failed, the result failed"]
 ```
 
 1. The engine emits `journey_started`, carrying the keys of the initial data, then attempts each step in the order the workflow declares them.
-2. Each attempt emits `attempt_started`, then resolves the requests of the step's constructor, in the order it declares them, before the step exists:
+2. Each attempt emits `attempt_started`, then builds a new object of each of the step's policies, in order; one that throws aborts the journey with `policy could not be built`. Then it resolves the requests of the step's constructor, in the order it declares them, before the step exists:
     1. When an input adapter serves the step, the engine resolves the adapter's own requests, in order, and calls it, once for each input. Its access to the data bag is read-only and shows nothing once the call returns. A value it supplies is captured and emits `input_adapter_supplied`; `fromDataBag()` leaves the input to the data bag. A throw, a rejection, a return that neither `supply()` nor `fromDataBag()` made, or a supplied value that is not a value emits `input_adapter_failed` and aborts the journey with `step could not be built`, naming the adapter and the key.
     2. Otherwise the input is read from the data bag. Each requester gets its own copy, checked by the input's schema through the Standard Schema interface, and made an instance with `fromValue` wherever `classOf` names a class.
     3. A required input without a value aborts the journey with `required data missing`, and a value the schema refuses with `wrong type`, each naming the input adapter when the adapter made the request or supplied the value. An optional input without a value is `None`, and emits `optional_input_absent`.
@@ -240,12 +250,39 @@ flowchart TD
     2. A skip emits `step_skipped`, with its reason if it gave one, then `contributions_discarded`, and the engine goes on to the next step.
     3. A failure emits `step_failed` with its reason. A throw, a rejected promise, or anything returned that is not an outcome made by the helpers, is an abnormal termination, and emits `step_abnormal_termination` with the error's message. Neither commits what the attempt contributed.
     4. A failure or a skip whose reason was given details that are not a value aborts the journey with `not a value`, with no outcome reported.
-5. After a failure or an abnormal termination the engine decides by its own rule. While its retry budget allows another attempt, and, for an abnormal termination, while the step retries those, it emits `step_retrying` and attempts the step again.
-6. Otherwise it emits `step_given_up`: with the cause `failure` or `abnormal termination` when the step has no budget, or does not retry abnormal terminations, and `retries exhausted` when its budget is spent. Then it emits `journey_failed`, and the result is failed, with the last attempt's reason, or its error as it was thrown.
-7. Once no step is left, it emits `journey_succeeded`, and the result is succeeded.
-8. An abort, from an input, a step that cannot be built, a handle's call or a reporter that fails, ends the journey at once: the engine emits `journey_aborted`, and the result is aborted, with no data bag.
+5. Around these, the engine calls the hooks of the step's policies, as the next section shows. After a success, `on step success` runs once the attempt's contributions are committed: `FinishWorkflow` ends the journey as succeeded, and `FailWorkflow` as failed, with the step still succeeded. After an abnormal termination, `on step abnormal termination` runs, given no contributions, and `FailWorkflow` gives the step up at once.
+6. After a failure or an abnormal termination the engine decides by its own rule. While its retry budget allows another attempt, and, for an abnormal termination, while the step retries those, it calls `on step retry`, then emits `step_retrying` and attempts the step again, unless the hook returned `FailWorkflow`, which gives the step up at once, decided by the hook.
+7. Otherwise it emits `step_given_up`: with the cause `failure` or `abnormal termination` when the step has no budget, or does not retry abnormal terminations, and `retries exhausted` when its budget is spent. Then it calls `on step failure`, whose `FailWorkflow` decides the journey's failure with its own reason.
+8. Once the journey has failed, `on workflow failure` runs, then `journey_failed`, and the result is failed, with the last attempt's reason, its error as it was thrown, or the reason of the hook that failed it. Once no step is left, or a hook finished the workflow, `on workflow success` runs, then `journey_succeeded`, and the result is succeeded.
+9. An abort, from an input, a policy or a step that cannot be built, a handle's call, a hook, or a reporter that fails, ends the journey at once: the engine emits `journey_aborted`, and the result is aborted, with no data bag. No hook runs after an abort.
 
-Where it lives: `engine/scan.ts`, `engine/build.ts`, `engine/request.ts`, `engine/adapter.ts`, `engine/order.ts`, `value/read.ts`, `journey/data-bag.ts`, `engine/run.ts`, `engine/handles.ts`, `engine/outcome.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts`.
+Where it lives: `engine/scan.ts`, `engine/policies.ts`, `engine/build.ts`, `engine/request.ts`, `engine/adapter.ts`, `engine/order.ts`, `value/read.ts`, `journey/data-bag.ts`, `engine/run.ts`, `engine/handles.ts`, `engine/outcome.ts`, `engine/outcome/failed.ts`, `engine/commit.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts`.
+
+### How a hook is called
+
+```mermaid
+flowchart TD
+    accTitle: How the engine calls a hook
+    accDescr: The engine finds the one policy of the step, or of the workflow, that defines the hook; when none does, nothing happens. It lends the hook its own contributor and hook reporter, and answers the hook's requests in order, each from the attempt, the data bag, the journey or the workflow object. A request that cannot be answered aborts the journey. It calls the hook's method and awaits it and every call it made on its handles, then closes them. A hook that throws aborts the journey with hook failed. What the hook returned is checked: a lifecycle it may not return aborts the journey with invalid lifecycle, and details that are not a value with not a value. Then the engine emits hook_called with the lifecycle, and commits what the hook contributed.
+    find{"A policy defines the hook?"} -->|"no"| none["nothing happens"]
+    find -->|"yes"| lend["the hook's contributor and hook reporter"]
+    lend --> answers{"Each request, in order"}
+    answers -->|"cannot be answered"| aborted["journey_aborted"]
+    answers -->|"answered"| method{"The hook's method, awaited with every call it made"}
+    method -->|"throws, or a call aborts the journey"| aborted
+    method -->|"returns"| check{"What it returned"}
+    check -->|"a lifecycle it may not return, or details that are not a value"| aborted
+    check -->|"no lifecycle, or one it may return"| called["hook_called, then each contribution committed"]
+```
+
+1. Since no two policies of a step, nor of the workflow, define the same hook, the engine calls a hook on the one policy object that defines it, built for the attempt or for the journey, or calls nothing.
+2. It lends the hook a contributor and a hook reporter of its own, made by the same handles as a step's, which emit `journey_info`, `journey_warning` and `journey_error` and set global metadata in order, as a step reporter does.
+3. It answers the hook's requests in the order they are declared: data from the step, read from what the attempt contributed, a failed attempt's included; data from the workflow, read from the data bag; the failure's reason and its error, each as the hook's own copy, the failure or retry cause, the step's name and the attempt; the journey ID; and, for a role, the workflow object. A required value that is missing, of another type, or a failure's reason or error that does not exist, aborts the journey as an input does; a request a hook of its kind is never answered, which only a cast lets through, aborts it with `hook failed`.
+4. It calls the hook's method through the policy descriptor, awaits it and every call it made on its handles, then closes them, as a step's are closed. A throw or a rejection aborts the journey with `hook failed`, with its error, unless the journey was already aborted while the hook ran, which stands.
+5. It checks what the hook returned, whatever a cast let through: nothing or `KeepDefault` keeps the default, `FinishWorkflow` is accepted only from `on step success`, and `FailWorkflow` only with a reason, from a step hook. Anything else aborts the journey with `invalid lifecycle`, and a reason's details that are not a value with `not a value`.
+6. It emits `hook_called`, with the lifecycle a step hook returned, then commits what the hook contributed, emitting `contribution_committed` with the hook as its source.
+
+Where it lives: `engine/hook.ts`, `engine/hook/answer.ts`, `engine/hook/lifecycle.ts`, `engine/hook/step.ts`, `engine/hook/workflow.ts`, `engine/handles.ts`, `engine/handles/holder.ts`, `engine/commit.ts`, `policy/descriptor.ts`, `policy/lifecycle.ts`.
 
 ### Events and reporters
 
@@ -269,6 +306,6 @@ flowchart LR
 3. A guard passes on the failure of its reporter, and records it in the journey's failures, where the first failure stands.
 4. When the dispatcher fails, or a reporter failed even though the dispatcher swallowed the failure, the journey is aborted with `reporter failed`, naming the step being run, if any.
 5. Once a reporter failed, the guards let nothing through but `journey_aborted`, and nothing at all to a reporter that failed. A failure while `journey_aborted` is delivered is ignored, so it reaches the reporters after it.
-6. Global metadata goes through the same guards, before the journey starts and while it runs, when a step sets an entry. A reporter or the dispatcher that fails on an entry while the journey runs aborts it with `reporter failed`, as on an event.
+6. Global metadata goes through the same guards, before the journey starts and while it runs, when a step or a hook sets an entry. A reporter or the dispatcher that fails on an entry while the journey runs aborts it with `reporter failed`, as on an event.
 
 Where it lives: `engine/journey.ts`, `engine/emitter.ts`, `engine/guard.ts`, `engine/frozen.ts`, `report/default-dispatcher.ts`.
