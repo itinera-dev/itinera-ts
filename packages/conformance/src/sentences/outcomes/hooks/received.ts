@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 import { Then } from "@cucumber/cucumber";
 import { Attempt, None, type Option, Some } from "itinera/unstable";
+import { equalTo } from "../../../equal.js";
 import { json } from "../../../model.js";
 import type { HookRequest } from "../../../model/policy.js";
 import { holds } from "../../../unmet.js";
@@ -167,10 +168,6 @@ function attemptNumbered(number: number): (found: unknown) => boolean {
 
 function isAttemptNumbered(found: unknown, number: number): boolean {
   return found instanceof Attempt && found.number === number;
-}
-
-function equalTo(expected: unknown): (found: unknown) => boolean {
-  return (found) => isDeepStrictEqual(found, expected);
 }
 
 function kindOf(kind: HookRequest["kind"]): (request: HookRequest) => boolean {

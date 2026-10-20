@@ -11,6 +11,7 @@ import {
   input,
   key,
   type ListedStep,
+  service,
   stepName,
   type StepBuilder,
   stepReporter,
@@ -21,6 +22,7 @@ import { type Value } from "itinera/value";
 import { Adapters } from "./adapters.js";
 import { given } from "./given.js";
 import { type AdapterRequest, refuseUnheldAccess } from "./model/adapter.js";
+import type { ProviderScript, ServiceRequest } from "./model/provider.js";
 import type { Input } from "./model/step.js";
 import type { Scripted } from "./model/value.js";
 import type { Model } from "./model.js";
@@ -28,7 +30,9 @@ import type { Recorders } from "./recorders.js";
 import { actingOf } from "./scenario/actions.js";
 import { mockScriptOf } from "./scenario/mock.js";
 import { stepPolicyOf, workflowPolicyOf } from "./scenario/policies.js";
-import { Scenario } from "./scenario/workflow.js";
+import { provideWith } from "./scenario/providers.js";
+import { type Scenario, serving } from "./scenario/workflow.js";
+import { serviceTypeOf } from "./services.js";
 import { requestTypeOf, tokenOf } from "./tokens.js";
 import type { ActingClass, Witness } from "./witness.js";
 
@@ -75,7 +79,8 @@ function builderOf(
   witness: Witness,
 ): WorkflowBuilder<typeof Scenario, true> {
   const { name, steps, adapters, idGenerator } = model.workflow;
-  const builder = Scenario.builder().name(name);
+  const { scripts: providers } = model.providers;
+  const builder = serving(providers.map(nameOf)).builder().name(name);
   for (const step of steps) {
     const script = model.step(step);
     const scripted = witness
@@ -84,10 +89,11 @@ function builderOf(
         mockScriptOf(script),
         actingOf(script),
         script.keepsHandles,
+        script.services,
       )
       .builder(step)
       .needs(...script.inputs.map(inputOf))
-      .run(contributor(), stepReporter())
+      .run(contributor(), stepReporter(), ...script.services.map(serviceOf))
       .retryBudget(script.retries);
     const mock = (script.policies ?? []).reduce(
       (attached, policy) => withPolicy(attached, policy, model, witness),
@@ -109,6 +115,7 @@ function builderOf(
       ...adapter.requests.map(requestOf),
     );
   }
+  provideWith(builder, providers);
   for (const policy of model.policies.workflowHas ?? []) {
     builder.policy(
       workflowPolicyOf(policy, model.policies.policy(policy), witness),
@@ -119,9 +126,17 @@ function builderOf(
   if (idGenerator?.kind === "returns") {
     return builder
       .idGenerator("journeyId")
-      .constructWith(idGenerator.id, played, roles);
+      .constructWith(idGenerator.id, played, roles, witness.providers);
   }
-  return builder.constructWith("", played, roles);
+  return builder.constructWith("", played, roles, witness.providers);
+}
+
+function nameOf({ name }: ProviderScript): string {
+  return name;
+}
+
+function serviceOf({ key, type }: ServiceRequest) {
+  return service<unknown>(key, serviceTypeOf(type));
 }
 
 function inputOf({ key, type, optional }: Input) {

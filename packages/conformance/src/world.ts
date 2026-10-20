@@ -19,8 +19,11 @@ export class World {
   readonly model = new Model();
   /** Every recording reporter of the scenario, by name. */
   readonly recorders = new Recorders(this.model.reporterFailures);
-  /** What the scenario's workflow built and called: steps, hooks and roles. */
-  readonly witness = new Witness(this.model.policies.roles);
+  /** What the scenario's workflow built and called: steps, hooks, roles and providers. */
+  readonly witness = new Witness(
+    this.model.policies.roles,
+    this.model.providers,
+  );
   #admission: Admission | undefined;
   #journeys: readonly Journey[] = [];
   #listing: readonly ListedStep[] | undefined;

@@ -5,6 +5,8 @@
 import { isDeepStrictEqual } from "node:util";
 import type { Event } from "itinera/unstable";
 import { eventKind, json, ModelError, type Row } from "./model.js";
+import { implementationNamed } from "./model/provider.js";
+import { runtimeNameOf } from "./services.js";
 import { type Column, type Data, type Line, lineOf } from "./trace/line.js";
 
 export { carriesMessage, carriesValue } from "./trace/carried.js";
@@ -61,7 +63,20 @@ function cellIn(row: Row): (column: Column) => [Column, string][] {
 
 function cellOf(row: Row, column: Column): [Column, string][] {
   const cell = row.optional(column);
-  return cell === undefined ? [] : [[column, cell]];
+  if (cell === undefined) {
+    return [];
+  }
+  return [
+    [column, column === "implementation" ? implementationIn(cell) : cell],
+  ];
+}
+
+/**
+ * The implementation of `labeller` a cell names, as the language names its
+ * type at run time, which is what `service_provided` carries.
+ */
+function implementationIn(cell: string): string {
+  return runtimeNameOf(implementationNamed(cell));
 }
 
 function dataOf(cell: string | undefined): Data {
