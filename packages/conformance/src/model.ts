@@ -5,6 +5,7 @@
  */
 import { ModelError } from "./model/error.js";
 import { type AdapterScript, unscriptedAdapter } from "./model/adapter.js";
+import { Policies } from "./model/policies.js";
 import type { Dispatching, ReporterFailure } from "./model/report.js";
 import {
   rescueOf,
@@ -46,11 +47,10 @@ export class Model {
   readonly initialData: [string, Scripted][] = [];
   /** The initial global metadata of the workflow instance, in the order written. */
   readonly initialGlobalMetadata: [string, Scripted][] = [];
-  /**
-   * How the scripted reporters fail, whether the workflow lists them or a
-   * dispatcher holds them; a reporter not here never fails.
-   */
+  /** How the scripted reporters fail, wherever they are; others never fail. */
   readonly reporterFailures = new Map<string, ReporterFailure>();
+  /** The policies the scenario declares, and the roles the workflow provides. */
+  readonly policies = new Policies();
 
   /** Declares the workflow, once, with its steps in declaration order. */
   declare(name: string, steps: readonly string[]): void {

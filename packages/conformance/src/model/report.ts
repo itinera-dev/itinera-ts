@@ -1,19 +1,8 @@
 import { EventKind } from "itinera/unstable";
 import { ModelError } from "./error.js";
 
-/**
- * How a scripted reporter fails: on the first event it receives, on every
- * event of a kind, with a message when the case gives one, or on every entry
- * of global metadata under a key.
- */
-export type ReporterFailure =
-  | { readonly kind: "first event" }
-  | {
-      readonly kind: "on event";
-      readonly event: EventKind;
-      readonly message?: string;
-    }
-  | { readonly kind: "on global metadata"; readonly key: string };
+/** How a scripted reporter fails, as test support's failing reporter does. */
+export type { ReporterFailure } from "itinera/unstable";
 
 /**
  * What the executor is given to dispatch events: unstated, which is the

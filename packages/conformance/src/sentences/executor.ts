@@ -1,10 +1,11 @@
 import { isDeepStrictEqual } from "node:util";
-import { Given, Then, When } from "@cucumber/cucumber";
+import { type DataTable, Given, Then, When } from "@cucumber/cucumber";
 import { type Journey, ofJourney } from "../journeys.js";
 import { ModelError } from "../model.js";
 import type { ScenarioReporter } from "../recorders.js";
 import { kindOf, numbered } from "../trace.js";
-import { expectOfStream, holds } from "../unmet.js";
+import { expectOfStream, holds, Unmet } from "../unmet.js";
+import { expectDataBag } from "./outcomes/result.js";
 import type { World } from "../world.js";
 
 Given<World>("step {string} is asynchronous", function (step: string) {
@@ -39,6 +40,23 @@ Then<World>(
       `the second journey's events to be the first's, ${JSON.stringify(firsts.map(kindOf))}`,
       seconds,
     );
+  },
+);
+
+Then<World>(
+  "the second journey's data bag contains:",
+  function (table: DataTable) {
+    const [, second] = two(this);
+    if (second.ended.kind === "refused") {
+      throw new Unmet(
+        `expected a data bag; run was refused: ${second.ended.refusal.message}`,
+      );
+    }
+    const { status } = second.ended.result;
+    if (status.kind === "aborted") {
+      throw new Unmet("expected a data bag; the second journey was aborted");
+    }
+    expectDataBag(status.dataBag, table);
   },
 );
 
