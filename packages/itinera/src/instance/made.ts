@@ -1,6 +1,7 @@
 import type { InstanceOptions, ValuesByKey } from "../instance.js";
 import type { JourneyId } from "../journey.js";
 import type { Reporter } from "../report.js";
+import type { ProviderName } from "../service.js";
 import type { Value } from "../value.js";
 import type { Workflow, WorkflowDescriptor } from "../workflow.js";
 
@@ -12,6 +13,7 @@ let making: <W extends Workflow>(
   handed: Handed,
 ) => WorkflowInstance<W>;
 let made: (given: unknown) => boolean;
+let fakesOf: (instance: WorkflowInstance) => Map<ProviderName, Fake>;
 
 /**
  * One instance of a workflow, for one journey: what the executor is given to
@@ -39,6 +41,7 @@ export class WorkflowInstance<W extends Workflow = Workflow> {
       );
     made = (given) =>
       typeof given === "object" && given !== null && #handed in given;
+    fakesOf = (instance) => instance.#fakes;
   }
 
   /** How the workflow is described to the executor. */
@@ -50,6 +53,7 @@ export class WorkflowInstance<W extends Workflow = Workflow> {
   /** The journey ID, made when the instance was created. */
   readonly journeyId: JourneyId;
   #handed: Handed;
+  readonly #fakes = new Map<ProviderName, Fake>();
 
   private constructor(
     descriptor: WorkflowDescriptor,
@@ -105,6 +109,33 @@ export function instanceOf<W extends Workflow>(
     reporters,
     globalMetadata: mapOf(options.reportersGlobalMetadata ?? []),
   });
+}
+
+/**
+ * A test's function in place of a service provider's: it returns what
+ * `provide` makes, or a promise of it, as a provider does.
+ */
+export type Fake = () => unknown;
+
+/**
+ * Puts `fake` in place of the function of the service provider named
+ * `provider`, for the journey of `instance` alone, replacing any fake given
+ * before for that provider.
+ */
+export function useFake(
+  instance: WorkflowInstance,
+  provider: ProviderName,
+  fake: Fake,
+): void {
+  fakesOf(instance).set(provider, fake);
+}
+
+/** The fake in place of the service provider named `provider`, if any. */
+export function fakeOf(
+  instance: WorkflowInstance,
+  provider: ProviderName,
+): Fake | undefined {
+  return fakesOf(instance).get(provider);
 }
 
 /** Whether `given` is an instance that `instance()` made. */
