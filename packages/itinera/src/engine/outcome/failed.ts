@@ -1,4 +1,4 @@
-import type { GiveUpHook } from "../../event.js";
+import { type GiveUpHook, RescueCause } from "../../event.js";
 import { EventKind } from "../../event/kind.js";
 import { FailureCause } from "../../journey.js";
 import { None, type Option, Some } from "../../option.js";
@@ -27,7 +27,9 @@ export type Failed =
 
 /**
  * Decides what follows an attempt that failed, as `failed` says, having
- * contributed `contributed`. While the executor's own rule allows a retry,
+ * contributed `contributed`. When the executor's own rule rescues the step,
+ * `step_rescuing` is recorded and no hook is called: the attempt and what it
+ * left are handed to the rescue step. While the rule allows a retry,
  * `on step retry` is called before `step_retrying`, and gives the step up
  * when it fails the workflow. Otherwise the step is given up, then
  * `on step failure` is called, and decides why the journey fails when it
@@ -42,6 +44,18 @@ export async function decided(
 ): Promise<Concluded> {
   const { journey, step, attempt } = attempting;
   const decision = afterFailedAttempt(step, attempt, failed.cause);
+  if (decision.kind === "rescue") {
+    const { rescue } = decision;
+    await journey.emit({
+      kind: EventKind.StepRescuing,
+      step: step.name,
+      attempt,
+      cause: rescueCauseOf(failed),
+      rescue: rescue.name,
+      decidedBy: "default",
+    });
+    return { kind: "rescue", rescue, left: leftBy(failed, contributed, None) };
+  }
   if (decision.kind === "retry") {
     const hook = StepHook.OnStepRetry;
     const returned = await stepHookCalled(
@@ -131,6 +145,12 @@ export function leftBy(
   return failed.cause === RetryCause.Failure
     ? { contributed, reason: Some(failed.reason), error: None, cause }
     : { contributed, reason: None, error: Some(failed.error), cause };
+}
+
+function rescueCauseOf({ cause }: Failed): RescueCause {
+  return cause === RetryCause.Failure
+    ? RescueCause.Failure
+    : RescueCause.AbnormalTermination;
 }
 
 function failureOf(cause: GiveUpCause, failed: Failed): FailedByDefault {

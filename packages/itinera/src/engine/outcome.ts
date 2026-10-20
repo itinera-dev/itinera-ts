@@ -4,8 +4,10 @@ import { FailureCause, type FailureWithError } from "../journey.js";
 import { None } from "../option.js";
 import { RetryCause, StepHook } from "../policy.js";
 import type { Reason } from "../step.js";
+import type { Rescue } from "../step/descriptor.js";
 import type { PlainValue } from "../value.js";
 import { committed } from "./commit.js";
+import type { Left } from "./hook.js";
 import { type Attempting, stepHookCalled } from "./hook/step.js";
 import { messageOf } from "./message.js";
 import { decided, givenUpByHook, leftBy } from "./outcome/failed.js";
@@ -37,12 +39,13 @@ interface FailedByHook {
 export type Failing = FailedByDefault | FailedByHook;
 
 /**
- * What follows an attempt: the next step, another attempt of the same step,
- * the journey succeeding at once, or the step given up, with why the journey
- * fails.
+ * What follows an attempt: the next step, the step's rescue step, with what
+ * the attempt left for it, another attempt of the same step, the journey
+ * succeeding at once, or the step given up, with why the journey fails.
  */
 export type Concluded =
   | { readonly kind: "next step" }
+  | { readonly kind: "rescue"; readonly rescue: Rescue; readonly left: Left }
   | { readonly kind: "retry" }
   | {
       readonly kind: "finish";

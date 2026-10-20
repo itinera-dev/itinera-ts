@@ -4,16 +4,11 @@ import { service } from "../../../src/service/request.js";
 import { contributor } from "../../../src/journey/contributor.js";
 import { input } from "../../../src/step/request.js";
 import { Ending } from "../../../src/testing/ending.js";
+import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
 import { integer } from "../../../src/value/token.js";
 import type { ProviderOptions } from "../../../src/service.js";
 import type { Built } from "../../../src/workflow.js";
-import {
-  GATEWAY,
-  kindOf,
-  recorded,
-  serviced,
-  Till,
-} from "../../fixtures/engine.js";
+import { GATEWAY, kindOf, recorded, serviced, Till } from "../../fixtures/engine.js";
 
 const failingOnce = {
   attempts: [Ending.failure("declined"), Ending.success],
@@ -161,4 +156,45 @@ describe("servicesFor", () => {
     await recorded(till);
     expect(till.calls).toEqual([]);
   });
+
+  it.each<
+    [string, readonly [string, ...string[]], boolean, readonly unknown[][]]
+  >([
+    [
+      "attached to it, instead of the provider attached to no step",
+      ["charge_rescue"],
+      true,
+      [[{ label: "main 1" }], [{ label: "spare 1" }], [{ label: "main 2" }]],
+    ],
+    [
+      "of journey scope attached to it and to the step it rescues, the same instance",
+      ["charge", "charge_rescue"],
+      false,
+      [[{ label: "spare 1" }], [{ label: "spare 1" }], [{ label: "spare 1" }]],
+    ],
+  ])(
+    "lends a rescue step the service of the provider %s",
+    async (_, steps, perAttempt, expected) => {
+      const lent: unknown[][] = [];
+      class Lending extends rescueStepMock({ attempts: [Ending.success] }) {
+        override run(...services: unknown[]) {
+          lent.push(services);
+          return super.run();
+        }
+      }
+      const till = orders()
+        .step(
+          serviced(lent, failingOnce)
+            .builder("charge")
+            .run(service("payments", GATEWAY))
+            .rescue(Lending.builder().run(service("payments", GATEWAY))),
+        )
+        .provider("main", GATEWAY, { key: "payments", perAttempt: true })
+        .provider("spare", GATEWAY, { key: "payments", steps, perAttempt })
+        .constructWith()
+        .build();
+      await recorded(till);
+      expect(lent).toEqual(expected);
+    },
+  );
 });
