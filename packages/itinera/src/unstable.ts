@@ -50,7 +50,8 @@
  *   {@link journeyId} and {@link dataBag}, which move to `itinera/journey`.
  * - Test support: {@link RecordingReporter}, {@link EntryRecordingReporter},
  *   {@link FailingReporter}, {@link Ending}, {@link stepMock},
- *   {@link StepMock}, {@link HookEnding}, {@link stepPolicyMock},
+ *   {@link StepMock}, {@link rescueStepMock}, {@link RescueStepMock},
+ *   {@link HookEnding}, {@link stepPolicyMock},
  *   {@link StepPolicyMock}, {@link workflowPolicyMock} and
  *   {@link WorkflowPolicyMock}, which move to `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
@@ -222,6 +223,9 @@ export type {
   HookFails,
   KeepsDefault,
   ReporterFailure,
+  RescueEnding,
+  RescueStepMockClass,
+  RescueStepMockScript,
   StepMockClass,
   StepMockScript,
   StepPolicyMockClass,
@@ -236,6 +240,8 @@ export {
   FailingReporter,
   HookEnding,
   RecordingReporter,
+  RescueStepMock,
+  rescueStepMock,
   StepMock,
   stepMock,
   StepPolicyMock,

@@ -10,6 +10,7 @@ export type {
   EndsInSkip,
   EndsInSuccess,
   Endings,
+  RescueEnding,
 } from "./testing/ending.js";
 export { Ending } from "./testing/ending.js";
 export {
@@ -31,6 +32,11 @@ export type {
 } from "./testing/hook-ending.js";
 export { HookEnding } from "./testing/hook-ending.js";
 export { RecordingReporter } from "./testing/recording-reporter.js";
+export type {
+  RescueStepMockClass,
+  RescueStepMockScript,
+} from "./testing/rescue-step-mock.js";
+export { RescueStepMock, rescueStepMock } from "./testing/rescue-step-mock.js";
 export type { StepMockClass, StepMockScript } from "./testing/step-mock.js";
 export { StepMock, stepMock } from "./testing/step-mock.js";
 export type {

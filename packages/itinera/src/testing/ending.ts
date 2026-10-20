@@ -13,6 +13,14 @@ export type Ending =
   EndsInSuccess | EndsInFailure | EndsInSkip | EndsAbnormally;
 
 /**
+ * How a test says an attempt of a rescue step ends: as a step's, but never
+ * with a skip, which a rescue step cannot report.
+ *
+ * {@includeCode ../../examples/rescue-step-mock.ts}
+ */
+export type RescueEnding = EndsInSuccess | EndsInFailure | EndsAbnormally;
+
+/**
  * The attempt succeeds.
  *
  * {@includeCode ../../examples/ending.ts}
