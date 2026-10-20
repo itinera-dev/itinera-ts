@@ -6,7 +6,7 @@ Every diagram is followed by a numbered list that says everything it shows, and 
 
 ## Tier 1
 
-Tier 1 runs a journey in one process, with steps, retries, rescue steps, policies and their hooks, roles, input adapters, services, events and reporters. So far, a journey builds each step from its inputs, read from the data bag or supplied by its input adapter, lends it the services its service providers make, runs steps that succeed, fail, skip or terminate abnormally, retries or gives them up, calls the hooks of its policies around each decision, with the workflow object as the roles they request, aborts when something illegal happens, with events and reporters, and ends with a result whose output the application reads.
+Tier 1 runs a journey in one process, with steps, retries, rescue steps, policies and their hooks, roles, input adapters, services, events and reporters. So far, a journey builds each step from its inputs, read from the data bag or supplied by its input adapter, lends it the services its service providers make, runs steps that succeed, fail, skip or terminate abnormally, retries them, rescues them or gives them up, calls the hooks of its policies around each decision, with the workflow object as the roles they request, aborts when something illegal happens, with events and reporters, and ends with a result whose output the application reads.
 
 ### The packages
 
@@ -42,7 +42,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
 | `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
 | `service` | Provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter`, and, privately, how the implementation a provider made is named |
-| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `FailingReporter`, `Ending`, `stepMock` and `StepMock`, `HookEnding`, `stepPolicyMock` and `StepPolicyMock`, `workflowPolicyMock` and `WorkflowPolicyMock` |
+| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `FailingReporter`, `Ending`, `stepMock` and `StepMock`, `RescueEnding`, `rescueStepMock` and `RescueStepMock`, `HookEnding`, `stepPolicyMock` and `StepPolicyMock`, `workflowPolicyMock` and `WorkflowPolicyMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
 | `name` | Private: `named`, which refuses an empty name as something is declared |
@@ -202,7 +202,7 @@ Where it lives: `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start
 ```mermaid
 flowchart TD
     accTitle: How the engine runs a journey
-    accDescr: The engine emits journey_started, then attempts each step in order. Each attempt emits attempt_started and builds the step's policies; a policy that fails aborts the journey. Then it resolves the inputs the step's constructor requests, in order, each from the step's input adapter or from the data bag. A required input without a value, a value of another type, or an input adapter that fails aborts the journey. Then it resolves the services the step's run requests, in order, each the instance its provider of journey scope made earlier or a new one from its provider; a provider that fails, or whose requests abort, aborts the journey. Then the step is built; a constructor that fails aborts the journey too. The step runs with the handles and services its run requests; the handles are closed once the attempt and every call it made on them have settled. A success emits step_succeeded and commits what the attempt contributed, then calls on step success; FinishWorkflow ends the journey as succeeded, FailWorkflow as failed, and otherwise the next step follows. A skip emits step_skipped and contributions_discarded, then the next step. A failure emits step_failed, and an error or what is not an outcome step_abnormal_termination, then on step abnormal termination, which may give the step up with FailWorkflow. Either is retried, calling on step retry, which may give the step up with FailWorkflow, then emitting step_retrying and attempting again, or given up, emitting step_given_up and calling on step failure. Once the journey has succeeded or failed, the workflow hook on workflow success or on workflow failure runs, then journey_succeeded or journey_failed. A hook that fails, and every other abort, emits journey_aborted.
+    accDescr: The engine emits journey_started, then attempts each step in order. Each attempt emits attempt_started and builds the step's policies; a policy that fails aborts the journey. Then it resolves the inputs the step's constructor requests, in order, each from the step's input adapter or from the data bag. A required input without a value, a value of another type, or an input adapter that fails aborts the journey. Then it resolves the services the step's run requests, in order, each the instance its provider of journey scope made earlier or a new one from its provider; a provider that fails, or whose requests abort, aborts the journey. Then the step is built; a constructor that fails aborts the journey too. The step runs with the handles and services its run requests; the handles are closed once the attempt and every call it made on them have settled. A success emits step_succeeded and commits what the attempt contributed, then calls on step success; FinishWorkflow ends the journey as succeeded, FailWorkflow as failed, and otherwise the next step follows. A skip emits step_skipped and contributions_discarded, then the next step. A failure emits step_failed, and an error or what is not an outcome step_abnormal_termination, then on step abnormal termination, which may give the step up with FailWorkflow. The first attempt of a step with a rescue step is handed to it with step_rescuing, as the section How a step is rescued shows, and attempted again once the rescue step succeeded; a rescue step that fails or terminates abnormally fails the journey, and one that skips aborts it. Any other is retried, calling on step retry, which may give the step up with FailWorkflow, then emitting step_retrying and attempting again, or given up, emitting step_given_up and calling on step failure. Once the journey has succeeded or failed, the workflow hook on workflow success or on workflow failure runs, then journey_succeeded or journey_failed. A hook that fails, and every other abort, emits journey_aborted.
     started["journey_started"] --> next{"Another step?"}
     next -->|"no"| workflowSuccess["on workflow success"]
     workflowSuccess --> succeeded["journey_succeeded, the result succeeded"]
@@ -225,8 +225,13 @@ flowchart TD
     run -->|"a failure"| stepFailed["step_failed"]
     run -->|"a throw, a rejection, or what is not an outcome"| abnormal["step_abnormal_termination, then on step abnormal termination"]
     abnormal -->|"FailWorkflow"| givenUpByHook["step_given_up, decided by the hook"]
-    stepFailed --> decide{"Retried, with budget left?"}
-    abnormal -->|"no lifecycle"| decide
+    stepFailed --> rescuable{"The first attempt of a step with a rescue step?"}
+    abnormal -->|"no lifecycle"| rescuable
+    rescuable -->|"yes"| rescuing["step_rescuing, then the rescue step, as How a step is rescued shows"]
+    rescuing -->|"it succeeded"| attempt
+    rescuing -->|"it failed or terminated abnormally"| workflowFailure
+    rescuing -->|"it skipped"| aborted
+    rescuable -->|"no"| decide{"Retried, with budget left?"}
     decide -->|"yes"| retry["on step retry"]
     retry -->|"no lifecycle"| retrying["step_retrying"]
     retry -->|"FailWorkflow"| givenUpByHook
@@ -255,12 +260,41 @@ flowchart TD
     3. A failure emits `step_failed` with its reason. A throw, a rejected promise, or anything returned that is not an outcome made by the helpers, is an abnormal termination, and emits `step_abnormal_termination` with the error's message. Neither commits what the attempt contributed.
     4. A failure or a skip whose reason was given details that are not a value aborts the journey with `not a value`, with no outcome reported.
 5. Around these, the engine calls the hooks of the step's policies, as the next section shows. After a success, `on step success` runs once the attempt's contributions are committed: `FinishWorkflow` ends the journey as succeeded, and `FailWorkflow` as failed, with the step still succeeded. After an abnormal termination, `on step abnormal termination` runs, given no contributions, and `FailWorkflow` gives the step up at once.
-6. After a failure or an abnormal termination the engine decides by its own rule. While its retry budget allows another attempt, and, for an abnormal termination, while the step retries those, it calls `on step retry`, then emits `step_retrying` and attempts the step again, unless the hook returned `FailWorkflow`, which gives the step up at once, decided by the hook.
+6. After a failure or an abnormal termination the engine decides by its own rule. The first attempt of a step with a rescue step is handed to its rescue step, as the section "How a step is rescued" shows, and neither `on step retry` nor `on step failure` is called for it. The step is attempted again once its rescue step succeeded; a rescue step that fails or terminates abnormally fails the journey, and one that skips aborts it. Otherwise, while its retry budget allows another attempt, and, for an abnormal termination, while the step retries those, it calls `on step retry`, then emits `step_retrying` and attempts the step again, unless the hook returned `FailWorkflow`, which gives the step up at once, decided by the hook.
 7. Otherwise it emits `step_given_up`: with the cause `failure` or `abnormal termination` when the step has no budget, or does not retry abnormal terminations, and `retries exhausted` when its budget is spent. Then it calls `on step failure`, whose `FailWorkflow` decides the journey's failure with its own reason.
 8. Once the journey has failed, `on workflow failure` runs, then `journey_failed`, and the result is failed, with the last attempt's reason, its error as it was thrown, or the reason of the hook that failed it. Once no step is left, or a hook finished the workflow, `on workflow success` runs, then `journey_succeeded`, and the result is succeeded.
 9. An abort, from an input, a service, a policy or a step that cannot be built, a handle's call, a hook, or a reporter that fails, ends the journey at once: the engine emits `journey_aborted`, and the result is aborted, with no data bag. No hook runs after an abort.
 
-Where it lives: `engine/scan.ts`, `engine/policies.ts`, `engine/build.ts`, `engine/request.ts`, `engine/adapter.ts`, `engine/services.ts`, `engine/order.ts`, `value/read.ts`, `journey/data-bag.ts`, `engine/run.ts`, `engine/handles.ts`, `engine/outcome.ts`, `engine/outcome/failed.ts`, `engine/commit.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts`.
+Where it lives: `engine/scan.ts`, `engine/policies.ts`, `engine/buildable.ts`, `engine/build.ts`, `engine/request.ts`, `engine/adapter.ts`, `engine/services.ts`, `engine/order.ts`, `value/read.ts`, `journey/data-bag.ts`, `engine/run.ts`, `engine/handles.ts`, `engine/outcome.ts`, `engine/outcome/failed.ts`, `engine/commit.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts`.
+
+### How a step is rescued
+
+```mermaid
+flowchart TD
+    accTitle: How the engine rescues a step
+    accDescr: When the first attempt of a step with a rescue step fails, or ends in an abnormal termination that on step abnormal termination does not turn into FailWorkflow, the engine emits step_rescuing and calls no other hook. The rescue step runs as its own attempt 1, named after the step: attempt_started, then its constructor's requests in order, its inputs through the input adapter attached to its own name or from the data bag, and the contributions, failure reason and error the failed attempt left, then its services from the providers serving its own name, then it is built and run. A success emits step_succeeded, commits its contributions and emits step_rescued, and the step runs again as its next attempt, its last. A failure or an abnormal termination of the rescue step emits step_given_up for it, and the journey fails at the rescue step, after on workflow failure. A skip, which only a cast lets through, emits step_skipped and contributions_discarded, then aborts the journey with rescue skipped. An abort while the rescue step is built or runs names it.
+    failed["The step's first attempt fails, or ends in an abnormal termination not given up by its hook"] --> rescuing["step_rescuing"]
+    rescuing --> started["The rescue step's attempt_started, attempt 1"]
+    started --> build{"Its requests in order, its services, then it is built"}
+    build -->|"missing, of another type, or what it needs fails"| aborted["journey_aborted, naming the rescue step"]
+    build -->|"built"| run{"Its run gives"}
+    run -->|"a success"| succeeded["step_succeeded, each contribution committed, then step_rescued"]
+    succeeded --> again["The step's next attempt, its last"]
+    run -->|"a failure or an abnormal termination"| givenUp["step_given_up for the rescue step"]
+    givenUp --> workflowFailure["on workflow failure, then journey_failed at the rescue step"]
+    run -->|"a skip, through a cast"| skipped["step_skipped, contributions_discarded"]
+    skipped --> aborted
+```
+
+1. The engine's own rule hands the first attempt of a step with a rescue step to the rescue step, whether it failed or ended in an abnormal termination, and whatever the step says about retrying abnormal terminations. After an abnormal termination, `on step abnormal termination` runs first, and its `FailWorkflow` gives the step up instead. The workflow refuses a rescued step with a retry budget, so the first attempt is the only one handed over.
+2. It emits `step_rescuing`, with the cause and the rescue step's name, decided by default, and calls neither `on step retry` nor `on step failure`. The failed attempt's contributions are not committed, but kept with its reason or its error for the rescue step.
+3. The rescue step runs as its own attempt 1, under its own name, `<step name>_rescue`, which the journey names in its events and aborts: `attempt_started`, then its constructor's requests in the order it declares them. Its inputs come through the input adapter attached to its own name, which receives that name, or from the data bag, never through the adapter of the step it rescues. Data from the step it rescues is read from what the failed attempt contributed, as an input is, and the failure's reason and the error are given as its own copy; a required one that does not exist aborts the journey with `required data missing`, naming the rescue step. Its services come from the provider attached to its own name, or else the one attached to no step, and a provider of journey scope lends it the instance it made for the journey.
+4. It is built and run as a step is, with no policies, so no step hook is called for it. A success emits `step_succeeded` and commits its contributions, then the engine emits `step_rescued`, naming the step, and attempts the step again as its next attempt, building its policies anew. With no retry budget, that attempt is its last: a failure or an abnormal termination there gives the step up under the ordinary rules, calling `on step failure`.
+5. A rescue step that fails, or ends in an abnormal termination, emits `step_given_up` for itself, with the cause `failure` or `abnormal termination`, decided by default, and the journey fails at the rescue step, after `on workflow failure`, carrying its reason or its error. The step it rescues is never attempted again.
+6. A rescue step that skips, which only a cast lets through, emits `step_skipped` and `contributions_discarded`, then aborts the journey with `rescue skipped`, naming the rescue step.
+7. The engine builds and runs a step and a rescue step through one shape of its own, with the name, the requests, how to build it and, for a rescue step, what the failed attempt left, so building, services and running serve both.
+
+Where it lives: `engine/outcome/failed.ts`, `engine/decision.ts`, `engine/scan.ts`, `engine/rescue.ts`, `engine/rescue/request.ts`, `engine/buildable.ts`, `engine/build.ts`, `engine/services.ts`, `engine/run.ts`, `engine/own-copy.ts`, `engine/request.ts`, `step/descriptor.ts`, `service/serving.ts`, `workflow/adapter.ts`.
 
 ### How a service is lent
 
@@ -314,7 +348,7 @@ flowchart TD
 5. It checks what the hook returned, whatever a cast let through: nothing or `KeepDefault` keeps the default, `FinishWorkflow` is accepted only from `on step success`, and `FailWorkflow` only with a reason, from a step hook. Anything else aborts the journey with `invalid lifecycle`, and a reason's details that are not a value with `not a value`.
 6. It emits `hook_called`, with the lifecycle a step hook returned, then commits what the hook contributed, emitting `contribution_committed` with the hook as its source.
 
-Where it lives: `engine/hook.ts`, `engine/hook/answer.ts`, `engine/hook/lifecycle.ts`, `engine/hook/step.ts`, `engine/hook/workflow.ts`, `engine/handles.ts`, `engine/handles/holder.ts`, `engine/commit.ts`, `policy/descriptor.ts`, `policy/lifecycle.ts`.
+Where it lives: `engine/hook.ts`, `engine/hook/answer.ts`, `engine/own-copy.ts`, `engine/request.ts`, `engine/hook/lifecycle.ts`, `engine/hook/step.ts`, `engine/hook/workflow.ts`, `engine/handles.ts`, `engine/handles/holder.ts`, `engine/commit.ts`, `policy/descriptor.ts`, `policy/lifecycle.ts`.
 
 ### Events and reporters
 
