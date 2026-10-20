@@ -2,16 +2,10 @@ import { describe, expect, it } from "vitest";
 import { failureCause, retryCause } from "../../../../src/policy/request.js";
 import { Ending } from "../../../../src/testing/ending.js";
 import { HookEnding } from "../../../../src/testing/hook-ending.js";
+import { rescueStepMock } from "../../../../src/testing/rescue-step-mock.js";
 import { stepMock } from "../../../../src/testing/step-mock.js";
 import type { StepPolicyMock } from "../../../../src/testing/step-policy-mock.js";
-import {
-  alarm,
-  callsOf,
-  orders,
-  recorded,
-  run,
-  kindOf,
-} from "../../../fixtures/engine.js";
+import { alarm, callsOf, orders, recorded, run, kindOf } from "../../../fixtures/engine.js";
 
 const declined = Ending.failure("declined");
 const crashed = Ending.abnormalTermination("timeout");
@@ -19,6 +13,13 @@ const crashed = Ending.abnormalTermination("timeout");
 /** A step `charge` whose attempts end as `attempts` says, with a retry budget. */
 function chargeWith(retryBudget: number, ...attempts: [Ending, ...Ending[]]) {
   return stepMock({ attempts }).builder("charge").retryBudget(retryBudget);
+}
+
+/** A step `charge` whose attempts end as `attempts` says, rescued by a rescue step that succeeds. */
+function rescuedCharge(...attempts: [Ending, ...Ending[]]) {
+  return stepMock({ attempts })
+    .builder("charge")
+    .rescue(rescueStepMock({ attempts: [Ending.success] }).builder());
 }
 
 describe("decided", () => {
@@ -161,3 +162,92 @@ describe("decided", () => {
     });
   });
 });
+
+describe("decided, for a step with a rescue step", () => {
+  it.each<[string, Ending, string, readonly string[]]>([
+    ["a failure", declined, "failure", []],
+    [
+      "an abnormal termination",
+      crashed,
+      "abnormal termination",
+      ["on step abnormal termination"],
+    ],
+  ])(
+    "hands the first attempt to the rescue step after %s, calling neither on step retry nor on step failure",
+    async (_, ending, cause, hooks) => {
+      const built: StepPolicyMock[] = [];
+      const watched = alarm(built)
+        .onStepAbnormalTermination("onStepAbnormalTermination")
+        .onStepRetry("onStepRetry")
+        .onStepFailure("onStepFailure");
+      const recorder = await recorded(
+        orders(rescuedCharge(ending, Ending.success).policy(watched)),
+      );
+      expect(callsOf(built).map(hookOf)).toEqual(hooks);
+      expect(recorder.events.find(isRescuing)).toMatchObject({
+        step: "charge",
+        cause,
+        rescue: "charge_rescue",
+        decidedBy: "default",
+      });
+    },
+  );
+
+  it("rescues an abnormal termination of a step that never retries those", async () => {
+    const recorder = await recorded(
+      orders(
+        rescuedCharge(crashed, Ending.success).noRetryOnAbnormalTermination(),
+      ),
+    );
+    expect(recorder.path).toEqual([
+      "charge attempt 1 terminated abnormally: timeout",
+      "charge rescuing with charge_rescue",
+      "charge_rescue attempt 1 succeeded",
+      "charge rescued by charge_rescue",
+      "charge attempt 2 succeeded",
+      "journey succeeded",
+    ]);
+  });
+
+  it("gives the step up instead of rescuing it when on step abnormal termination fails the workflow", async () => {
+    const watched = alarm([], {
+      onStepAbnormalTermination: HookEnding.failWorkflow("stop"),
+    }).onStepAbnormalTermination("onStepAbnormalTermination");
+    const recorder = await recorded(
+      orders(rescuedCharge(crashed).policy(watched)),
+    );
+    expect(recorder.path).toEqual([
+      "charge attempt 1 terminated abnormally: timeout",
+      "charge given up: FailWorkflow from alarm",
+      "journey failed at charge: stop",
+    ]);
+  });
+
+  it("gives the step up after the attempt that follows its rescue, calling on step failure once, and never rescues it twice", async () => {
+    const built: StepPolicyMock[] = [];
+    const watched = alarm(built).onStepFailure("onStepFailure", failureCause());
+    const recorder = await recorded(
+      orders(rescuedCharge(declined, Ending.failure("again")).policy(watched)),
+    );
+    expect(recorder.path).toEqual([
+      "charge attempt 1 failed: declined",
+      "charge rescuing with charge_rescue",
+      "charge_rescue attempt 1 succeeded",
+      "charge rescued by charge_rescue",
+      "charge attempt 2 failed: again",
+      "charge given up: failure",
+      "journey failed at charge: again",
+    ]);
+    expect(callsOf(built)).toEqual([
+      { hook: "on step failure", received: ["failure"] },
+    ]);
+  });
+});
+
+function hookOf({ hook }: { readonly hook: string }): string {
+  return hook;
+}
+
+function isRescuing({ kind }: { readonly kind: string }): boolean {
+  return kind === "step_rescuing";
+}

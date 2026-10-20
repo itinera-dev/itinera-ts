@@ -1,39 +1,49 @@
 import type { Input, Request } from "../declaration/request.js";
 import type { WorkflowInstance } from "../instance.js";
 import { AbortReason } from "../journey.js";
-import type { Attempt, Step, StepDescriptor } from "../step.js";
-import { requestsOfDescribed } from "../step/descriptor.js";
+import type { Attempt } from "../step.js";
 import { adapting, type DeclaredAdapter } from "../workflow/adapter.js";
 import { adaptersOf } from "../workflow/descriptor.js";
 import { adapted } from "./adapter.js";
+import type { Buildable, Runs } from "./buildable.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
 import { inOrder } from "./order.js";
 import { byAdapter, byStep, requested } from "./request.js";
+import { fromRescued, isOfRescued } from "./rescue/request.js";
 import { servicesFor } from "./services.js";
 import { JourneyAbortError } from "./signal.js";
 
-/** A step being built for an attempt of a journey of an instance. */
+/**
+ * A step, or a rescue step, being built for an attempt of a journey of an
+ * instance, with the input adapter attached to its name, if any.
+ */
 interface Building {
   readonly journey: Journey;
   readonly instance: WorkflowInstance;
-  readonly step: StepDescriptor;
+  readonly step: Buildable;
   readonly attempt: Attempt;
   readonly adapter: DeclaredAdapter | undefined;
 }
 
-/** A step built for an attempt, with the services lent to its `run`. */
+/**
+ * A step, or a rescue step, built for an attempt, with the services lent to
+ * its `run`.
+ */
 export interface BuiltStep {
   /** The step. */
-  readonly made: Step;
+  readonly made: Runs;
   /** The services its `run` requests, by key. */
   readonly services: ReadonlyMap<string, unknown>;
 }
 
 /**
- * The step built for `attempt`: each of its constructor's requests resolved
- * in the order it declares them, then the services its `run` requests, then
- * its constructor called with its inputs.
+ * The step, or rescue step, built for `attempt`: each of its constructor's
+ * requests resolved in the order it declares them, then the services its
+ * `run` requests, then its constructor called with what they were answered
+ * with. Its inputs come through the input adapter attached to its own name,
+ * and a rescue step's requests of the step it rescues from what that step's
+ * failed attempt left.
  *
  * @throws JourneyAbortError when resolving a request or a service aborts the
  * journey, or with `step could not be built` when its constructor fails.
@@ -41,7 +51,7 @@ export interface BuiltStep {
 export async function built(
   journey: Journey,
   instance: WorkflowInstance,
-  step: StepDescriptor,
+  step: Buildable,
   attempt: Attempt,
 ): Promise<BuiltStep> {
   const building: Building = {
@@ -51,7 +61,7 @@ export async function built(
     attempt,
     adapter: adapting(adaptersOf(instance.descriptor), step.name),
   };
-  const needs = await inOrder(requestsOfDescribed(step).needs, (request) =>
+  const needs = await inOrder(step.requests.needs, (request) =>
     need(building, request),
   );
   const services = await servicesFor(journey, instance, step, attempt);
@@ -66,15 +76,19 @@ export async function built(
 }
 
 async function need(building: Building, request: Request): Promise<unknown> {
-  if (request.kind !== "input") {
-    throw couldNotBeBuilt(
-      building,
-      new TypeError(
-        `the constructor of step ${building.step.name} requests @${request.kind}, which a step's constructor cannot request`,
-      ),
-    );
+  const { journey, step, attempt } = building;
+  if (request.kind === "input") {
+    return input(building, request);
   }
-  return input(building, request);
+  if (step.rescued !== undefined && isOfRescued(request)) {
+    return fromRescued(journey, step.name, attempt, step.rescued, request);
+  }
+  throw couldNotBeBuilt(
+    building,
+    new TypeError(
+      `the constructor of step ${step.name} requests @${request.kind}, which its constructor cannot request`,
+    ),
+  );
 }
 
 /**

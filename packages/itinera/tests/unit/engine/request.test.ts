@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Checked } from "../../../src/declaration/request.js";
+import type { Checked, FailureRequest } from "../../../src/declaration/request.js";
 import type { AdapterName } from "../../../src/workflow.js";
-import { None, Some } from "../../../src/option.js";
+import { None, type Option, Some } from "../../../src/option.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import { Attempt, type StepName } from "../../../src/step.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
@@ -12,6 +12,8 @@ import type { Journey } from "../../../src/engine/journey.js";
 import {
   byAdapter,
   byStep,
+  failureAnswered,
+  type FailureRequesting,
   type Requesting,
   requested,
 } from "../../../src/engine/request.js";
@@ -131,6 +133,63 @@ describe("requested", () => {
         step: "charge",
         key: "amount",
         requester: { kind: "adapter", adapter: "pricing" },
+      });
+    },
+  );
+});
+
+describe("failureAnswered", () => {
+  const reason: FailureRequest = { kind: "failureReason", optional: false };
+  const optionalError: FailureRequest = { kind: "error", optional: true };
+  const left = { code: "declined" };
+
+  /** What `request` receives given `found`, with the journey it ran in. */
+  function answered(
+    request: FailureRequest,
+    found: Option<unknown>,
+  ): [unknown, Journey] {
+    const [journey] = recording();
+    const requesting: FailureRequesting = {
+      step: charge,
+      requester: { kind: "rescue step" },
+    };
+    try {
+      return [failureAnswered(journey, requesting, request, found), journey];
+    } catch (thrown) {
+      return [thrown, journey];
+    }
+  }
+
+  it.each<[string, FailureRequest, Option<unknown>, unknown]>([
+    ["a required request what was left", reason, Some(left), left],
+    [
+      "an optional request Some of what was left",
+      optionalError,
+      Some(left),
+      Some(left),
+    ],
+    [
+      "an optional request None when nothing was left",
+      optionalError,
+      None,
+      None,
+    ],
+  ])("gives %s", (_, request, found, expected) => {
+    expect(answered(request, found)[0]).toEqual(expected);
+  });
+
+  it.each<[string, FailureRequest, string]>([
+    ["the failure's reason", reason, "failure reason"],
+    ["the error", { kind: "error", optional: false }, "error"],
+  ])(
+    "aborts the journey with required data missing, naming the requester, for a required request for %s when nothing was left",
+    (_, request, missing) => {
+      const [thrown, journey] = answered(request, None);
+      expect(thrown).toMatchObject({ abort: journey.recorded });
+      expect(journey.recorded).toEqual({
+        reason: "required data missing",
+        step: "charge",
+        missing: { kind: missing, requester: { kind: "rescue step" } },
       });
     },
   );

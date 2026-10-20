@@ -1,13 +1,17 @@
-import type { FailureRequest, Request } from "../../declaration/request.js";
+import type { Request } from "../../declaration/request.js";
 import type { StepHookSource } from "../../event.js";
 import { AbortReason } from "../../journey.js";
-import { None, type Option } from "../../option.js";
 import type { Handles } from "../handles.js";
 import { actedOn } from "../handles/holder.js";
 import type { Calling, Left } from "../hook.js";
-import type { Journey } from "../journey.js";
 import { messageOf } from "../message.js";
-import { byHook, requested } from "../request.js";
+import { ownCopy } from "../own-copy.js";
+import {
+  byHook,
+  failureAnswered,
+  type FailureRequesting,
+  requested,
+} from "../request.js";
 import type { JourneyAbortError } from "../signal.js";
 
 /**
@@ -56,18 +60,18 @@ export async function answered(
     }
     case "failureReason": {
       const of = ofStepHook(calling, request);
-      return failureAnswer(
+      return failureAnswered(
         journey,
-        of.hook,
+        stepHookOf(of.hook),
         request,
         of.left.reason.map(structuredClone),
       );
     }
     case "error": {
       const of = ofStepHook(calling, request);
-      return failureAnswer(
+      return failureAnswered(
         journey,
-        of.hook,
+        stepHookOf(of.hook),
         request,
         of.left.error.map(ownCopy),
       );
@@ -115,71 +119,9 @@ function ofStepHook(calling: Calling, request: Request): OfStepHook {
   return calling;
 }
 
-/**
- * What a request for the failure's reason or the error receives: it, or for
- * an optional request `Some` of it, or `None` when the attempt left none.
- *
- * @throws JourneyAbortError, aborting the journey with `required data
- * missing` when a required request finds none.
- */
-function failureAnswer(
-  journey: Journey,
-  { policy, hook, step }: StepHookSource,
-  request: FailureRequest,
-  found: Option<unknown>,
-): unknown {
-  if (found.isSome()) {
-    return request.optional ? found : found.value;
-  }
-  if (request.optional) {
-    return None;
-  }
-  throw journey.abort({
-    reason: AbortReason.RequiredDataMissing,
-    step,
-    missing: {
-      kind: request.kind === "failureReason" ? "failure reason" : "error",
-      requester: { kind: "step hook", policy, hook },
-    },
-  });
-}
-
-/**
- * The error as the hook's own copy, so that what the hook changes on it
- * reaches no one else, or the error itself when it cannot be copied, as a
- * proxy whose traps throw cannot. A thrown value that is not an object is
- * given as it is.
- */
-function ownCopy(error: unknown): unknown {
-  if (typeof error !== "object" || error === null) {
-    return error;
-  }
-  try {
-    return copyOf(error);
-  } catch {
-    return error;
-  }
-}
-
-/**
- * An object with the prototype and the own properties of `error`, made as an
- * `Error` when it is one, so that `instanceof`, its message, its stack and its
- * cause hold. Its getters are copied, not called, so one that throws does so
- * only when the hook reads it. The stack is copied as its value, since the
- * runtime's own accessor would read the copy's.
- */
-function copyOf(error: object): object {
-  const copy: object = error instanceof Error ? new Error() : {};
-  Reflect.setPrototypeOf(copy, Reflect.getPrototypeOf(error));
-  Object.defineProperties(copy, Object.getOwnPropertyDescriptors(error));
-  if (error instanceof Error && Object.hasOwn(error, "stack")) {
-    Object.defineProperty(copy, "stack", {
-      value: error.stack,
-      writable: true,
-      configurable: true,
-    });
-  }
-  return copy;
+/** The step hook, requesting what the attempt of the step it acts on left. */
+function stepHookOf({ policy, hook, step }: StepHookSource): FailureRequesting {
+  return { step, requester: { kind: "step hook", policy, hook } };
 }
 
 function notAnswered(

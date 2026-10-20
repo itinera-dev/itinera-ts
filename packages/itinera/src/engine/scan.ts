@@ -3,14 +3,16 @@ import { EventKind } from "../event/kind.js";
 import type { WorkflowInstance } from "../instance.js";
 import { FailureCause, type Failure } from "../journey.js";
 import { StepHook, WorkflowHook } from "../policy.js";
-import { Attempt, type StepDescriptor } from "../step.js";
+import { Attempt, type StepDescriptor, type StepName } from "../step.js";
 import { nextAttempt } from "../step/attempt.js";
 import { built } from "./build.js";
+import { ofStep } from "./buildable.js";
 import type { EventBody } from "./emitter.js";
 import { workflowHookCalled } from "./hook/workflow.js";
 import type { Journey } from "./journey.js";
 import { concluded, type Failing } from "./outcome.js";
 import { stepPolicies, type BuiltPolicy } from "./policies.js";
+import { rescued } from "./rescue.js";
 import { ran } from "./run.js";
 
 /**
@@ -49,7 +51,8 @@ export async function travel(
 
 /**
  * How the steps ended: the journey succeeded, after its last step or through
- * a hook, or a step was given up, and why the journey fails.
+ * a hook, or a step, or a rescue step, was given up, and why the journey
+ * fails.
  */
 type Ended =
   | {
@@ -58,7 +61,7 @@ type Ended =
     }
   | {
       readonly kind: "failed";
-      readonly step: StepDescriptor;
+      readonly step: StepName;
       readonly failing: Failing;
     };
 
@@ -79,6 +82,8 @@ async function scan(
 /**
  * Runs `attempt` of the step, with its step policies built anew, then the
  * attempts after it, until the step is done, given up, or ends the journey.
+ * An attempt handed to the step's rescue step is followed by the rescue
+ * step, then, once it succeeded, by the step's next attempt.
  */
 async function attempted(
   journey: Journey,
@@ -92,8 +97,9 @@ async function attempted(
     attempt,
   });
   const policies = stepPolicies(journey, step);
-  const builtStep = await built(journey, instance, step, attempt);
-  const ended = await ran(journey, step, attempt, builtStep);
+  const buildable = ofStep(step);
+  const builtStep = await built(journey, instance, buildable, attempt);
+  const ended = await ran(journey, buildable, attempt, builtStep);
   const next = await concluded(
     { journey, instance, step, attempt, policies },
     ended,
@@ -101,32 +107,44 @@ async function attempted(
   switch (next.kind) {
     case "next step":
       return undefined;
+    case "rescue": {
+      const { rescue, left } = next;
+      const failing = await rescued(journey, instance, {
+        step,
+        attempt,
+        rescue,
+        left,
+      });
+      return failing === undefined
+        ? attempted(journey, instance, step, nextAttempt(attempt))
+        : { kind: "failed", step: rescue.name, failing };
+    }
     case "retry":
       return attempted(journey, instance, step, nextAttempt(attempt));
     case "finish":
       return { kind: "succeeded", decidedBy: next.decidedBy };
     case "given up":
-      return { kind: "failed", step, failing: next.failing };
+      return { kind: "failed", step: step.name, failing: next.failing };
   }
 }
 
-function journeyFailed(step: StepDescriptor, failing: Failing): EventBody {
+function journeyFailed(step: StepName, failing: Failing): EventBody {
   const kind = EventKind.JourneyFailed;
   if (failing.cause === FailureCause.FailWorkflow) {
     const { cause, reason, decidedBy } = failing;
-    return { kind, step: step.name, cause, reason, decidedBy };
+    return { kind, step, cause, reason, decidedBy };
   }
   return failing.reason !== undefined
     ? {
         kind,
-        step: step.name,
+        step,
         cause: failing.cause,
         reason: failing.reason,
         decidedBy: "default",
       }
     : {
         kind,
-        step: step.name,
+        step,
         cause: failing.cause,
         errorMessage: failing.errorMessage,
         decidedBy: "default",

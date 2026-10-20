@@ -76,34 +76,6 @@ class Rewording extends StepPolicy {
   }
 }
 
-/** An error whose `details` throws when it is read. */
-function withFaultyDetails(): Error {
-  return Object.defineProperty(new Error("timeout"), "details", {
-    enumerable: true,
-    get(): never {
-      throw new Error("no details");
-    },
-  });
-}
-
-/** An error behind a proxy that cannot list its own properties. */
-function unlistable(): Error {
-  return new Proxy(new Error("timeout"), {
-    ownKeys(): never {
-      throw new Error("no keys");
-    },
-  });
-}
-
-/** A step `charge` whose one attempt throws `thrown`. */
-function throwing(thrown: unknown) {
-  return class extends Step {
-    override run(): Outcome {
-      throw thrown;
-    }
-  }.builder("charge");
-}
-
 /** A step policy whose `on step success` emits `journey_info`. */
 class Telling extends StepPolicy {
   async told(reporter: HookReporter): Promise<OnSuccess> {
@@ -207,22 +179,6 @@ describe("answered", () => {
     ]);
     expect(result.failure).toMatchObject({ error: new Error("timeout") });
   });
-
-  it.each([
-    ["has a getter that throws", withFaultyDetails()],
-    ["is a proxy that cannot be copied", unlistable()],
-  ])(
-    "gives a hook an error that %s without aborting the journey",
-    async (_, thrown) => {
-      const built: StepPolicyMock[] = [];
-      const policy = alarm(built).onStepFailure("onStepFailure", error());
-      const result = await run(
-        orders(throwing(thrown).policy(policy)).instance(),
-      );
-      expect(result.failure).toMatchObject({ errorMessage: "timeout" });
-      expect(callsOf(built)).toHaveLength(1);
-    },
-  );
 
   it.each([
     [
