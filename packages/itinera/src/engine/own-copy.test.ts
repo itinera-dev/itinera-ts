@@ -38,8 +38,7 @@ describe("ownCopy", () => {
   it("gives a copy of an error, keeping its class, message, stack, cause and own properties", () => {
     const thrown = new Declined("declined", { cause: "limit" });
     const copy = ownCopy(thrown);
-    // `not.toBe` would read the getter, comparing the two deeply.
-    expect(Object.is(copy, thrown)).toBe(false);
+    expect(copy).not.toBe(thrown);
     expect(copy).toBeInstanceOf(Declined);
     expect(copy).toMatchObject({
       message: "declined",
