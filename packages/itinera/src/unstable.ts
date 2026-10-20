@@ -3,12 +3,12 @@
  * accepted yet, or what itinera does not fully implement yet. Each item moves
  * to the subpath of its concept once itinera implements it fully.
  *
- * - Test support: {@link RecordingReporter}, {@link EntryRecordingReporter},
- *   {@link FailingReporter}, {@link Ending}, {@link stepMock},
- *   {@link StepMock}, {@link rescueStepMock}, {@link RescueStepMock},
- *   {@link HookEnding}, {@link stepPolicyMock},
- *   {@link StepPolicyMock}, {@link workflowPolicyMock} and
- *   {@link WorkflowPolicyMock}, which move to `itinera/testing`.
+ * - Test support, which moves to `itinera/testing`: the recording
+ *   reporters, from {@link RecordingReporter}; the mocks, from
+ *   {@link stepMock}; {@link fakeProvider}; {@link scripted} and its
+ *   {@link ScriptedRun}; the recorders {@link Contributions},
+ *   {@link StepEventReporter} and {@link HookEventReporter};
+ *   {@link TestDataBag}; and {@link TestMistake}.
  *
  * {@includeCode ../examples/recording-reporter.ts}
  *

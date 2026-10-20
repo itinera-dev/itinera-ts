@@ -16,6 +16,7 @@ import { Failures } from "../engine/guard.js";
 import { Handles } from "../engine/handles.js";
 import type { Holder } from "../engine/handles/holder.js";
 import { Journey } from "../engine/journey.js";
+import { named } from "../name.js";
 import { type Emitted, Level } from "./emitted.js";
 
 /**
@@ -40,7 +41,7 @@ export class Lone {
   constructor(borrower: Borrower, failing: boolean) {
     this.#delivered = new Delivered(failing);
     const journey = new Journey(
-      new Emitter("test" as JourneyId, "test" as WorkflowName, now),
+      new Emitter(loneJourney, loneWorkflow, now),
       this.#delivered,
       new Failures(),
       new Map(),
@@ -114,12 +115,20 @@ function emitted(event: EmittedEvent): Emitted {
   };
 }
 
+const loneJourney = named<JourneyId>("test", "a lone journey");
+const loneWorkflow = named<WorkflowName>(
+  "test",
+  "the workflow of a lone journey",
+);
+const step = named<StepName>("step", "the step a recorder lends to");
+const policy = named<PolicyName>("policy", "the policy a recorder lends to");
+
 function holderOf(borrower: Borrower): Holder {
   return borrower === "step"
-    ? { kind: "step", step: "step" as StepName, attempt: Attempt.first }
+    ? { kind: "step", step, attempt: Attempt.first }
     : {
         kind: "workflow hook",
-        policy: "policy" as PolicyName,
+        policy,
         hook: WorkflowHook.OnWorkflowSuccess,
       };
 }

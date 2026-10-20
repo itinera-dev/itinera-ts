@@ -34,7 +34,7 @@ import {
   run,
   Shop,
 } from "../../fixtures/engine.js";
-import type { Script } from "../../../src/engine/script.js";
+import type { Scripting } from "../../../src/engine/script.js";
 
 /** The step `charge`, whose constructor's arguments are kept in `needs`. */
 function charge(needs: unknown[][] = []) {
@@ -91,7 +91,7 @@ describe("built", () => {
   it("tells a script each attempt handed to the construction of its step, with the values its inputs found, before the constructor runs", async () => {
     const told: unknown[][] = [];
     const needs: unknown[][] = [];
-    const script: Script = {
+    const script: Scripting = {
       building: (step, attempt, values) => {
         told.push([step, attempt.number, [...values], needs.length]);
       },
@@ -109,7 +109,7 @@ describe("built", () => {
 
   it("tells a script, for a rescue step, the contributions it requested of the failed attempt", async () => {
     const told: unknown[][] = [];
-    const script: Script = {
+    const script: Scripting = {
       building: (step, _, values) => {
         told.push([step, [...values]]);
       },

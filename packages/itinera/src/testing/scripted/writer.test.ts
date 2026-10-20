@@ -1,11 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { orders } from "../../engine/fixtures.js";
+import { orders, type Orders } from "../../engine/fixtures.js";
 import { LocalExecutor } from "../../executor/local.js";
+import type { WorkflowInstance } from "../../instance.js";
 import { DefaultDispatcherFactory } from "../../report/default-dispatcher.js";
+import type { StepBuilder, StepClass } from "../../step.js";
 import { MistakeKind, TestMistake } from "../mistake.js";
 import { RecordingReporter } from "../recording-reporter.js";
 import { scripted } from "../scripted.js";
 import { charge, rescued, shop } from "./fixtures.js";
+
+/**
+ * An instance of the workflow `orders` of `steps`, and the recording
+ * reporter its journey reports to.
+ */
+function recorded(
+  ...steps: readonly StepBuilder<StepClass>[]
+): [WorkflowInstance<Orders>, RecordingReporter] {
+  const recorder = new RecordingReporter();
+  return [orders(...steps).instance({}, { reporters: [recorder] }), recorder];
+}
 
 describe("Writer", () => {
   it.each([
@@ -34,10 +47,9 @@ describe("Writer", () => {
   });
 
   it("rejects with a test mistake listing everything left out, before any event", async () => {
-    const recorder = new RecordingReporter();
-    const instance = orders(charge().retryBudget(1), rescued("pack")).instance(
-      {},
-      { reporters: [recorder] },
+    const [instance, recorder] = recorded(
+      charge().retryBudget(1),
+      rescued("pack"),
     );
     const run = scripted(instance)
       .step("charge")
@@ -61,11 +73,7 @@ describe("Writer", () => {
   });
 
   it("runs the journey, with a scripted ending's consequences, and the steps not named for real", async () => {
-    const recorder = new RecordingReporter();
-    const instance = orders(charge().retryBudget(1)).instance(
-      {},
-      { reporters: [recorder] },
-    );
+    const [instance, recorder] = recorded(charge().retryBudget(1));
     const run = await scripted(instance)
       .step("charge")
       .willTerminateAbnormally("gateway down")
@@ -82,8 +90,7 @@ describe("Writer", () => {
   });
 
   it("runs a step the script does not name for real", async () => {
-    const recorder = new RecordingReporter();
-    const instance = orders(charge()).instance({}, { reporters: [recorder] });
+    const [instance, recorder] = recorded(charge());
     await scripted(instance).run();
     expect(recorder.path).toEqual([
       "charge attempt 1 succeeded",

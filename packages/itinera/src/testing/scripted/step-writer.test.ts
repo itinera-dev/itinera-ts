@@ -9,6 +9,16 @@ function charging(retries = 0) {
   return scripted(shop(charge().retryBudget(retries))).step("charge");
 }
 
+/** The step `ship` of a shop, just named. */
+function shipping() {
+  return scripted(shop()).step("ship");
+}
+
+/** The rescue step of the step `charge` of a shop, just named. */
+function rescue() {
+  return scripted(shop(rescued())).step("charge_rescue");
+}
+
 function mistaken(mistake: Mistake): TestMistake {
   return new TestMistake([mistake]);
 }
@@ -93,20 +103,14 @@ describe("StepWriter", () => {
   });
 
   it("throws a test mistake for a contribution of a step that declares no contributor", () => {
-    expect(() =>
-      scripted(shop()).step("ship").willContribute("parcel", "box"),
-    ).toThrow(mistaken({ kind: MistakeKind.NoContributor, step: "ship" }));
+    expect(() => shipping().willContribute("parcel", "box")).toThrow(
+      mistaken({ kind: MistakeKind.NoContributor, step: "ship" }),
+    );
   });
 
   it.each([
-    [
-      "an event",
-      () => scripted(shop()).step("ship").willEmit(Level.Info, "shipped"),
-    ],
-    [
-      "global metadata",
-      () => scripted(shop()).step("ship").willSetGlobalMetadata("box", "S"),
-    ],
+    ["an event", () => shipping().willEmit(Level.Info, "shipped")],
+    ["global metadata", () => shipping().willSetGlobalMetadata("box", "S")],
   ])(
     "throws a test mistake for %s of a step that declares no reporter",
     (_, writing) => {
@@ -135,7 +139,3 @@ describe("StepWriter", () => {
     );
   });
 });
-
-function rescue() {
-  return scripted(shop(rescued())).step("charge_rescue");
-}

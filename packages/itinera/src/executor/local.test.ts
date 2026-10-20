@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { charging, orders } from "../engine/fixtures.js";
+import type { Scripting } from "../engine/script.js";
 import { LocalExecutor, Refusal } from "../executor.js";
+import { runScripted } from "./local.js";
 import type { WorkflowInstance } from "../instance.js";
 import type { Dispatcher, DispatcherFactory } from "../report.js";
 import { DefaultDispatcherFactory } from "../report/default-dispatcher.js";
@@ -16,6 +18,16 @@ class Counting implements DispatcherFactory {
     this.made.push(dispatcher);
     return dispatcher;
   }
+}
+
+/** A script that describes no attempt, so that every step runs for real. */
+const playingNothing: Scripting = {
+  building: doNothing,
+  play: doNothing,
+};
+
+function doNothing(): undefined {
+  return undefined;
 }
 
 describe("LocalExecutor", () => {
@@ -45,6 +57,16 @@ describe("LocalExecutor", () => {
     await expect(executor.run(charging())).rejects.toEqual(
       new Refusal({ kind: "journey running" }),
     );
+    expect((await running).isSucceeded()).toBe(true);
+  });
+
+  it("refuses a scripted run while it runs a journey", async () => {
+    const slow = stepMock({ attempts: [Ending.success], asynchronous: true });
+    const executor = new LocalExecutor();
+    const running = executor.run(orders(slow.builder("charge")).instance());
+    await expect(
+      runScripted(executor, charging(), playingNothing),
+    ).rejects.toEqual(new Refusal({ kind: "journey running" }));
     expect((await running).isSucceeded()).toBe(true);
   });
 

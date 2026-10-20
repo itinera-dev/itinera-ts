@@ -59,16 +59,13 @@ export class Contributions {
  * {@includeCode ../../examples/event-reporter-recorders.ts}
  */
 export class StepEventReporter {
-  readonly #lone: Lone;
-
-  /** A recorder that keeps what it is given, or interrupts every call when `failing`. */
-  constructor(failing = false) {
-    this.#lone = new Lone("step", failing);
-  }
+  #lone = new Lone("step", false);
 
   /** A recorder whose reporter interrupts every call and keeps nothing. */
   static failing(): StepEventReporter {
-    return new StepEventReporter(true);
+    const recorder = new StepEventReporter();
+    recorder.#lone = new Lone("step", true);
+    return recorder;
   }
 
   /** The step reporter it lends. */
@@ -95,16 +92,13 @@ export class StepEventReporter {
  * {@includeCode ../../examples/event-reporter-recorders.ts}
  */
 export class HookEventReporter {
-  readonly #lone: Lone;
-
-  /** A recorder that keeps what it is given, or interrupts every call when `failing`. */
-  constructor(failing = false) {
-    this.#lone = new Lone("hook", failing);
-  }
+  #lone = new Lone("hook", false);
 
   /** A recorder whose reporter interrupts every call and keeps nothing. */
   static failing(): HookEventReporter {
-    return new HookEventReporter(true);
+    const recorder = new HookEventReporter();
+    recorder.#lone = new Lone("hook", true);
+    return recorder;
   }
 
   /** The hook reporter it lends. */

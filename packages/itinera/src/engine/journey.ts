@@ -8,7 +8,7 @@ import type { PlainValue } from "../value.js";
 import type { Emitter, EventBody } from "./emitter.js";
 import type { Failures } from "./guard.js";
 import { messageOf } from "./message.js";
-import type { Script } from "./script.js";
+import type { Scripting } from "./script.js";
 import { JourneyAbortError } from "./signal.js";
 
 /**
@@ -35,7 +35,7 @@ export class Journey {
     /** The data bag: values by key, in the order each was first set. */
     readonly data: Map<string, PlainValue>,
     /** The script of a scripted run, which the engine consults. */
-    readonly script?: Script,
+    readonly script?: Scripting,
   ) {}
 
   /** Lets go of every instance of journey scope it kept, once it has ended. */

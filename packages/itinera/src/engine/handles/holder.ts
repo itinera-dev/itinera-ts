@@ -6,6 +6,7 @@ import type {
   ContributionSource,
   ProviderSource,
 } from "../../event.js";
+import type { Level } from "../../event/level.js";
 import { EventKind } from "../../event/kind.js";
 import type { StepName } from "../../step.js";
 import type { PlainValue } from "../../value.js";
@@ -17,9 +18,6 @@ import type { EventBody } from "../emitter.js";
  * for one call, which is lent only a reporter.
  */
 export type Holder = ContributionSource | ProviderSource;
-
-/** The level of an event emitted through a reporter handle. */
-export type Level = "info" | "warning" | "error";
 
 const stepKinds = {
   info: EventKind.StepInfo,

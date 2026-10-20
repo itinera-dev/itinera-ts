@@ -28,10 +28,10 @@ import {
   failingOn,
 } from "../../fixtures/engine.js";
 import type { Journey } from "../../../src/engine/journey.js";
-import type { Lent, Script } from "../../../src/engine/script.js";
+import type { PlayedWith, Scripting } from "../../../src/engine/script.js";
 import { travel } from "../../../src/engine/scan.js";
 
-async function played(lent: Lent): Promise<Outcome> {
+async function played(lent: PlayedWith): Promise<Outcome> {
   lent.contributor.contribute("receipt", "R-2");
   await lent.reporter.info("played");
   return success;
@@ -176,7 +176,7 @@ describe("ran", () => {
 
   it("plays what a script gives an attempt in place of the step's run, lending it the attempt's contributor and reporter", async () => {
     const recorder = new RecordingReporter();
-    const script: Script = {
+    const script: Scripting = {
       building: () => undefined,
       play: () => played,
     };

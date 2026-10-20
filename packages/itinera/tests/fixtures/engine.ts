@@ -53,7 +53,7 @@ import { runJourney } from "../../src/engine.js";
 import { Emitter } from "../../src/engine/emitter.js";
 import { Failures } from "../../src/engine/guard.js";
 import { Journey } from "../../src/engine/journey.js";
-import type { Script } from "../../src/engine/script.js";
+import type { Scripting } from "../../src/engine/script.js";
 
 /** The time every event of the engine's tests carries. */
 export const noon = "2026-10-19T12:00:00.000Z";
@@ -174,7 +174,7 @@ export function charging(
 export function run(
   instance: WorkflowInstance,
   factory: DispatcherFactory = new DefaultDispatcherFactory(),
-  script?: Script,
+  script?: Scripting,
 ): Promise<JourneyResult> {
   return runJourney(instance, factory, atNoon, script);
 }

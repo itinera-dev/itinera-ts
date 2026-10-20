@@ -57,7 +57,7 @@ describe("playing", () => {
     expect(recorder.events.map(kindOf)).not.toContain("contribution_committed");
   });
 
-  it("plays each attempt as described", async () => {
+  it("ends a scripted attempt with its ending, a skip carrying its reason", async () => {
     const { recorder, script } = recorded();
     await script.step("charge").willSkipBecause("paid already").run();
     expect(recorder.path).toEqual([
