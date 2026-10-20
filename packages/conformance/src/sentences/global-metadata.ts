@@ -57,6 +57,9 @@ Then<World>(
       ...[...this.model.workflow.scripts.values()].flatMap((script) =>
         globalMetadataUnder(script, key),
       ),
+      ...this.model.providers.scripts.flatMap((script) =>
+        globalMetadataUnder(script, key),
+      ),
     ]);
   },
 );

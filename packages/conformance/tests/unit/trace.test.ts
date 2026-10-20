@@ -37,6 +37,13 @@ describe("expectedLine", () => {
     );
     expect([...line.cells]).toEqual([["attempt", "1"]]);
   });
+
+  it("compares an implementation as the name its type has at run time", () => {
+    const line = expectedLine(
+      row({ event: "service_provided", implementation: "first labeller" }),
+    );
+    expect([...line.cells]).toEqual([["implementation", "FirstLabeller"]]);
+  });
 });
 
 describe("includesInOrder", () => {

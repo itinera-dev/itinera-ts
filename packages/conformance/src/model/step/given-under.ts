@@ -20,9 +20,9 @@ export function contributedUnder(
   ];
 }
 
-/** Every value the step's script sets as global metadata under `key`, as written. */
+/** Every value the script of a step or a provider sets as global metadata under `key`, as written. */
 export function globalMetadataUnder(
-  script: StepScript,
+  script: { readonly actions: readonly StepAction[] },
   key: string,
 ): PlainValue[] {
   return script.actions.filter(setting(key)).flatMap(valuesOf);
