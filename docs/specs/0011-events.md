@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0011](https://github.com/itinera-dev/spec/blob/main/proposals/0011-events.md), implemented in [#7](https://github.com/itinera-dev/itinera-ts/issues/7). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals; [0040](0040-events-facts-and-decisions.md) holds the decision events, [0063](0063-dispatcher-factory.md) the dispatchers and their factories, and [0102](0102-global-metadata.md) global metadata.
 
-Status: in progress. Stage 1 added the event types, reporters and `DebugReporter`. Stage 3 added the emitter, the guards around reporters (see 0081) and freezing. Stage 5 added the events from steps: their outcomes, retries and giving up, contributions, and what a step reporter emits (see [0008](0008-steps.md)). The events from hooks come in stage 7, which lists the proposal.
+Status: complete, and 11 is listed in `conformance.json`. Stage 1 added the event types, reporters and `DebugReporter`. Stage 3 added the emitter, the guards around reporters (see 0081) and freezing. Stage 5 added the events from steps: their outcomes, retries and giving up, contributions, and what a step reporter emits (see [0008](0008-steps.md)). Stage 7 added the events from hooks, `hook_called` and what a hook reporter emits, and listed the proposal.
 
 ## API
 
-Until 0011 is listed, all of it is exported only from `itinera/unstable`. Each type is defined in the module of its concept, which becomes its subpath then:
+0011 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says. Each type is defined in the module of its concept, which becomes its subpath then:
 
 - `src/event.ts`, later `itinera/event`: `Event`, `EventKind`, each event's type, what only events carry, such as sources and who decided a decision, and `Timestamp`, in private submodules under `src/event/`.
 - `src/report.ts`, later `itinera/report`: `Reporter`, `DebugReporter`, and the dispatchers of 0063.
@@ -57,6 +57,10 @@ TypeDoc shows a closed set as a variable, with its names in alphabetical order a
 
 `DebugReporter` prints each event as JSON, on a line of its own, with `console.log`. The language's declarations of the ES library leave `console` out, and the build loads no `@types/node`, so `src/report/debug-reporter.ts` declares the one method it calls.
 
+## Events from hooks
+
+A hook's hook reporter emits `journey_info`, `journey_warning` and `journey_error`, whose source names the policy and the hook, with the step and attempt for a step hook, as `src/engine/handles/holder.ts` describes it, in the order of its calls, as a step reporter does. Each call of a hook ends with `hook_called`, then the hook's contributions, each `contribution_committed` with the hook as its source (see [0002](0002-foundations.md)).
+
 ## Dependencies
 
 None of its own.
@@ -81,4 +85,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0011` passes, and 11 is listed in `conformance.json`. Planned for stage 7.
+Done in stage 7: every scenario tagged `@proposal-0011` passes, but those that also name a proposal not yet listed, and 11 is listed in `conformance.json`.
