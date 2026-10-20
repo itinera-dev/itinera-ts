@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0108](https://github.com/itinera-dev/spec/blob/main/proposals/0108-test-support.md), implemented in [#36](https://github.com/itinera-dev/itinera-ts/issues/36). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 13 what test support holds and section 14 how the conformance runner uses it.
 
-Status: in progress. Stage 2 added the recording reporter and its path, and started the conformance runner, which uses it. Stage 3 added the step mock and its `Ending`, and made the runner run journeys with them. Stage 5 gave the step mock its inputs and the endings of a failure and a skip, and made the runner build steps with them and play input adapters, then added the reporter that keeps every entry of global metadata, and made the runner play what a step does before it ends. Stage 7 added the policy mocks and their `HookEnding`, and made the runner play policies, hooks and roles with them, and moved the reporter that fails from the runner into test support. Stage 9 added the rescue step mock and its `RescueEnding`. Stage 10 added the subpaths of every concept, then the rest of chapter 8: the mistake in a test, fake providers, scripted runs and recorders. Then the runner played the test support sentences through it.
+Status: complete, and 108 is listed in `conformance.json`. Stage 2 added the recording reporter and its path, and started the conformance runner, which uses it. Stage 3 added the step mock and its `Ending`, and made the runner run journeys with them. Stage 5 gave the step mock its inputs and the endings of a failure and a skip, and made the runner build steps with them and play input adapters, then added the reporter that keeps every entry of global metadata, and made the runner play what a step does before it ends. Stage 7 added the policy mocks and their `HookEnding`, and made the runner play policies, hooks and roles with them, and moved the reporter that fails from the runner into test support. Stage 9 added the rescue step mock and its `RescueEnding`. Stage 10 added the subpaths of every concept, then the rest of chapter 8: the mistake in a test, fake providers, scripted runs and recorders. Then the runner played the test support sentences through it, and the proposal was listed with `testing` claimed.
 
 ## API
 
@@ -110,4 +110,4 @@ Settled in stage 3, as a default the maintainer may change, and built by `stepMo
 
 ## Done when
 
-Every scenario tagged `@proposal-0108` passes, and 108 is listed in `conformance.json` with `testing` among the capabilities. Planned for stage 10.
+Done in stage 10: every scenario tagged `@proposal-0108` passes, and 108 is listed in `conformance.json` with `testing` among the capabilities.
