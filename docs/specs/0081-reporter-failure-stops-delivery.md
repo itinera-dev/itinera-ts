@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0081](https://github.com/itinera-dev/spec/blob/main/proposals/0081-reporter-failure-stops-delivery.md), implemented in [#27](https://github.com/itinera-dev/itinera-ts/issues/27). [0011](0011-events.md) holds reporters and [0063](0063-dispatcher-factory.md) dispatchers, and [architecture.md](../architecture.md) draws how an event reaches the reporters.
 
-Status: in progress. Stage 3 added the guards and the abort when a reporter fails. Events emitted by steps and hooks come in stages 5 and 7, which lists the proposal.
+Status: complete, and 81 is listed in `conformance.json`. Stage 3 added the guards and the abort when a reporter fails. Stage 5 guarded the events steps emit, and stage 7 those hooks emit, and listed the proposal.
 
 ## The guards
 
@@ -28,4 +28,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0081` passes, and 81 is listed in `conformance.json`. Planned for stage 7.
+Done in stage 7: every scenario tagged `@proposal-0081` passes, but those that also name a proposal not yet listed, and 81 is listed in `conformance.json`.
