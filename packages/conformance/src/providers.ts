@@ -1,4 +1,5 @@
-import { type Provided, type ProviderReporter, Some } from "itinera/unstable";
+import { Some } from "itinera/option";
+import type { Provided, ProviderReporter } from "itinera/service";
 import type { PlainValue } from "itinera/value";
 import { given } from "./given.js";
 import { listedUnder } from "./listed.js";

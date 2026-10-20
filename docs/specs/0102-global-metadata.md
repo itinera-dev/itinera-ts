@@ -6,7 +6,7 @@ Status: complete, and 102 is listed in `conformance.json`. Stage 1 added global 
 
 ## API
 
-0102 is listed, but its API stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), whose reporters set global metadata too, as the agents' manual says.
+Since stage 10, its API is exported from the subpaths of its concepts.
 
 - **`Reporter.receiveGlobalMetadata(key, value)`**, chapter 2, 2.1's **receive global metadata**, is optional. A reporter without it accepts every entry and does nothing with it. The value is a `PlainValue`, captured before it reaches any reporter (see [0056](0056-data-bag-values.md)).
 - **`Dispatcher.setGlobalMetadata(key, value)`** passes one entry to its reporters; `DefaultDispatcher` does so in the order they were added, and stops at the first that fails.

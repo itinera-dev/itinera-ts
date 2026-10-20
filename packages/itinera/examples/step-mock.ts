@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
+import { LocalExecutor } from "itinera/executor";
+import { input } from "itinera/step";
 import {
   Ending,
-  input,
-  LocalExecutor,
   RecordingReporter,
   type StepMock,
   stepMock,
-  Workflow,
 } from "itinera/unstable";
+import { Workflow } from "itinera/workflow";
 import { string } from "itinera/value";
 
 class Orders extends Workflow {}

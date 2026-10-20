@@ -1,27 +1,28 @@
 import assert from "node:assert/strict";
 import {
-  inputAdapter,
-  key,
-  type ListedStep,
   type OnSuccess,
   onStepSuccess,
+  StepPolicy,
+  stepPolicy,
+} from "itinera/policy";
+import { type Provided, provider, service, serviceType } from "itinera/service";
+import {
   type Outcome,
-  type Provided,
-  provider,
   RescueStep,
   rescueStep,
   type RescueOutcome,
-  service,
-  serviceType,
   Step,
   step,
-  StepPolicy,
-  stepPolicy,
+} from "itinera/step";
+import {
+  inputAdapter,
+  key,
+  type ListedStep,
   type Supplied,
   withStep,
   Workflow,
   workflow,
-} from "itinera/unstable";
+} from "itinera/workflow";
 
 interface PaymentGateway {
   take(amount: number): string;

@@ -1,4 +1,4 @@
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 import type { PlainValue } from "itinera/value";
 import { Writing } from "./writing.js";
 

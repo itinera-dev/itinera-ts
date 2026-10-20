@@ -2,13 +2,13 @@
  * The dispatcher factory the runner gives the executor, and the dispatchers
  * it makes, which hold a recording reporter and behave as the scenario says.
  */
+import type { Event } from "itinera/event";
 import {
   DefaultDispatcher,
   type Dispatcher,
   type DispatcherFactory,
-  type Event,
   type Reporter,
-} from "itinera/unstable";
+} from "itinera/report";
 import { type PlainValue } from "itinera/value";
 import type { Holding } from "./model.js";
 

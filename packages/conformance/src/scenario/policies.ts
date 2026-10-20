@@ -3,22 +3,18 @@
  * classes of its policy mocks, each hook given the contributor, the hook
  * reporter, then its scripted requests, in the order written.
  */
+import { contributor, journeyId } from "itinera/journey";
 import {
-  attempt,
-  contributor,
-  error,
   failureCause,
-  failureReason,
   fromStep,
-  fromWorkflow,
   hookReporter,
-  journeyId,
   retryCause,
   role,
   StepHook,
-  stepName,
   WorkflowHook,
-} from "itinera/unstable";
+} from "itinera/policy";
+import { attempt, error, failureReason, stepName } from "itinera/step";
+import { fromWorkflow } from "itinera/workflow";
 import { ModelError } from "../model/error.js";
 import type { HookRequest, PolicyScript } from "../model/policy.js";
 import { requestTypeOf } from "../tokens.js";

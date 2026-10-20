@@ -1,4 +1,4 @@
-import { LocalExecutor } from "itinera/unstable";
+import { LocalExecutor } from "itinera/executor";
 import type { Dispatching } from "./model/report.js";
 import { RecordingDispatcherFactory } from "./record.js";
 import type { Recorders } from "./recorders.js";

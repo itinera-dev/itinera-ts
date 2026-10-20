@@ -2,6 +2,8 @@
  * Steps: the work of a workflow, what a step is called, its attempts, its
  * outcomes, and the reasons it gives.
  *
+ * {@includeCode ../examples/step.ts}
+ *
  * @module
  */
 import { type StepBuilder, stepBuilder } from "./step/builder.js";

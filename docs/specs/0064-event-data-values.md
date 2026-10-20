@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0064](https://github.com/itinera-dev/spec/blob/main/proposals/0064-event-data-values.md), implemented in [#25](https://github.com/itinera-dev/itinera-ts/issues/25). [0056](0056-data-bag-values.md) holds what a value is and the one function that captures it, and [0011](0011-events.md) the events.
 
-Status: complete, and 64 is listed in `conformance.json`. Stage 5 captured the data a step attaches to its events and the details of a reason. Stage 6 listed the proposal. Stage 7 captures the data hooks attach to theirs, in the same way. Its API stays in `itinera/unstable` while it names API of proposals not yet listed, as the agents' manual says.
+Status: complete, and 64 is listed in `conformance.json`. Stage 5 captured the data a step attaches to its events and the details of a reason. Stage 6 listed the proposal. Stage 7 captures the data hooks attach to theirs, in the same way. Since stage 10, its API is exported from the subpaths of its concepts.
 
 ## API
 

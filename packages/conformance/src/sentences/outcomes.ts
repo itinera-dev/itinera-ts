@@ -1,5 +1,6 @@
 import { Then } from "@cucumber/cucumber";
-import type { JourneyStatus, Refusal } from "itinera/unstable";
+import type { Refusal } from "itinera/executor";
+import type { JourneyStatus } from "itinera/journey";
 import { eventKind } from "../model.js";
 import { lineOf } from "../trace.js";
 import { isJourneyAborted } from "../trace/status.js";

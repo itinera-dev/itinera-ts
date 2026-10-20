@@ -2,6 +2,8 @@
  * Reporters, which receive the events and the global metadata of a journey,
  * and dispatchers, which deliver them.
  *
+ * {@includeCode ../examples/reporter.ts}
+ *
  * @module
  */
 import type { Event } from "./event.js";

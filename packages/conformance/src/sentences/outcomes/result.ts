@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 import { type DataTable, Then } from "@cucumber/cucumber";
-import type { Abort, DataBag, Event, Failure } from "itinera/unstable";
+import type { Event } from "itinera/event";
+import type { Abort, DataBag, Failure } from "itinera/journey";
 import { z } from "itinera/schema";
 import { json, rows } from "../../model.js";
 import { abortsAt } from "../../trace/status.js";

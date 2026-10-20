@@ -1,13 +1,11 @@
 /** The classes of mocks the witness makes, and the mocks they build. */
+import type { Contributor } from "itinera/journey";
+import type { Outcome, RescueOutcome, StepReporter } from "itinera/step";
 import type {
-  Contributor,
-  Outcome,
-  RescueOutcome,
   RescueStepMock,
   RescueStepMockClass,
   StepMock,
   StepMockClass,
-  StepReporter,
 } from "itinera/unstable";
 
 /**

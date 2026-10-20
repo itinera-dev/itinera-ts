@@ -29,14 +29,74 @@
         "default": "./dist/index.js"
       }
     },
-    "./unstable": {
+    "./event": {
       "import": {
-        "types": "./dist/unstable.d.mts",
-        "default": "./dist/unstable.mjs"
+        "types": "./dist/event.d.mts",
+        "default": "./dist/event.mjs"
       },
       "require": {
-        "types": "./dist/unstable.d.ts",
-        "default": "./dist/unstable.js"
+        "types": "./dist/event.d.ts",
+        "default": "./dist/event.js"
+      }
+    },
+    "./executor": {
+      "import": {
+        "types": "./dist/executor.d.mts",
+        "default": "./dist/executor.mjs"
+      },
+      "require": {
+        "types": "./dist/executor.d.ts",
+        "default": "./dist/executor.js"
+      }
+    },
+    "./instance": {
+      "import": {
+        "types": "./dist/instance.d.mts",
+        "default": "./dist/instance.mjs"
+      },
+      "require": {
+        "types": "./dist/instance.d.ts",
+        "default": "./dist/instance.js"
+      }
+    },
+    "./journey": {
+      "import": {
+        "types": "./dist/journey.d.mts",
+        "default": "./dist/journey.mjs"
+      },
+      "require": {
+        "types": "./dist/journey.d.ts",
+        "default": "./dist/journey.js"
+      }
+    },
+    "./option": {
+      "import": {
+        "types": "./dist/option.d.mts",
+        "default": "./dist/option.mjs"
+      },
+      "require": {
+        "types": "./dist/option.d.ts",
+        "default": "./dist/option.js"
+      }
+    },
+    "./policy": {
+      "import": {
+        "types": "./dist/policy.d.mts",
+        "default": "./dist/policy.mjs"
+      },
+      "require": {
+        "types": "./dist/policy.d.ts",
+        "default": "./dist/policy.js"
+      }
+    },
+    "./report": {
+      "import": {
+        "types": "./dist/report.d.mts",
+        "default": "./dist/report.mjs"
+      },
+      "require": {
+        "types": "./dist/report.d.ts",
+        "default": "./dist/report.js"
       }
     },
     "./schema": {
@@ -49,6 +109,36 @@
         "default": "./dist/schema.js"
       }
     },
+    "./service": {
+      "import": {
+        "types": "./dist/service.d.mts",
+        "default": "./dist/service.mjs"
+      },
+      "require": {
+        "types": "./dist/service.d.ts",
+        "default": "./dist/service.js"
+      }
+    },
+    "./step": {
+      "import": {
+        "types": "./dist/step.d.mts",
+        "default": "./dist/step.mjs"
+      },
+      "require": {
+        "types": "./dist/step.d.ts",
+        "default": "./dist/step.js"
+      }
+    },
+    "./unstable": {
+      "import": {
+        "types": "./dist/unstable.d.mts",
+        "default": "./dist/unstable.mjs"
+      },
+      "require": {
+        "types": "./dist/unstable.d.ts",
+        "default": "./dist/unstable.js"
+      }
+    },
     "./value": {
       "import": {
         "types": "./dist/value.d.mts",
@@ -57,6 +147,16 @@
       "require": {
         "types": "./dist/value.d.ts",
         "default": "./dist/value.js"
+      }
+    },
+    "./workflow": {
+      "import": {
+        "types": "./dist/workflow.d.mts",
+        "default": "./dist/workflow.mjs"
+      },
+      "require": {
+        "types": "./dist/workflow.d.ts",
+        "default": "./dist/workflow.js"
       }
     },
     "./package.json": "./package.json"

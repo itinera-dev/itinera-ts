@@ -2,14 +2,10 @@
  * The service providers a scenario declares, given to the builder as the
  * methods of the scenario's workflow class that play them.
  */
-import {
-  attempt,
-  fromWorkflow,
-  journeyId,
-  providerReporter,
-  stepName,
-  type WorkflowBuilder,
-} from "itinera/unstable";
+import { journeyId } from "itinera/journey";
+import { providerReporter } from "itinera/service";
+import { attempt, stepName } from "itinera/step";
+import { fromWorkflow, type WorkflowBuilder } from "itinera/workflow";
 import type { ProviderRequest, ProviderScript } from "../model/provider.js";
 import { serviceTypeOf } from "../services.js";
 import { requestTypeOf } from "../tokens.js";

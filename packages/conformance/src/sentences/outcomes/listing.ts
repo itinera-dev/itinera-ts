@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { type DataTable, Then } from "@cucumber/cucumber";
-import type { ListedService, ListedStep } from "itinera/unstable";
+import type { ListedService, ListedStep } from "itinera/workflow";
 import { type Row, rows } from "../../model.js";
 import { holds } from "../../unmet.js";
 import type { World } from "../../world.js";

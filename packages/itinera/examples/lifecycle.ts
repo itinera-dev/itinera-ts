@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { Lifecycle } from "itinera/unstable";
+import type { Lifecycle } from "itinera/policy";
 
 function ends(lifecycle: Lifecycle | undefined): string {
   switch (lifecycle?.kind) {

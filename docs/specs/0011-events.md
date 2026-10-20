@@ -6,10 +6,10 @@ Status: complete, and 11 is listed in `conformance.json`. Stage 1 added the even
 
 ## API
 
-0011 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), as the agents' manual says. Each type is defined in the module of its concept, which becomes its subpath then:
+Since stage 10, each type is exported from the subpath of its concept, defined in the module of the same name:
 
-- `src/event.ts`, later `itinera/event`: `Event`, `EventKind`, each event's type, what only events carry, such as sources and who decided a decision, and `Timestamp`, in private submodules under `src/event/`.
-- `src/report.ts`, later `itinera/report`: `Reporter`, `DebugReporter`, and the dispatchers of 0063.
+- `src/event.ts`, `itinera/event`: `Event`, `EventKind`, each event's type, what only events carry, such as sources and who decided a decision, and `Timestamp`, in private submodules under `src/event/`, and the types of a closed set of names, `ClosedSet`, `EveryValue` and `ValueOf`, from `src/closed-set.ts`.
+- `src/report.ts`, `itinera/report`: `Reporter`, `DebugReporter`, and the dispatchers of 0063.
 - Names and closed sets that events carry, in their own concepts' modules: `JourneyId`, `AbortReason` and `FailureCause` in `src/journey.ts`; `StepName`, `Attempt` and `Reason` in `src/step.ts`; `PolicyName`, `StepHook`, `WorkflowHook`, `RetryCause` and `Lifecycle` in `src/policy.ts`; `WorkflowName` and `AdapterName` in `src/workflow.ts`; `ProviderName` in `src/service.ts`.
 
 ### Event

@@ -1,27 +1,31 @@
 import assert from "node:assert/strict";
+import { LocalExecutor } from "itinera/executor";
 import {
   type DataBag,
   dataBag,
-  type FromDataBag,
-  fromWorkflow,
-  input,
-  inputAdapter,
-  type InputAdapterOptions,
   type JourneyId,
   journeyId,
-  key,
-  LocalExecutor,
+} from "itinera/journey";
+import {
+  input,
   type Outcome,
   type StepName,
   stepName,
   Step,
   step,
+} from "itinera/step";
+import {
+  type FromDataBag,
+  fromWorkflow,
+  inputAdapter,
+  type InputAdapterOptions,
+  key,
   type Supplied,
   type SuppliedValue,
   withStep,
   Workflow,
   workflow,
-} from "itinera/unstable";
+} from "itinera/workflow";
 import { integer, string } from "itinera/value";
 
 @step()

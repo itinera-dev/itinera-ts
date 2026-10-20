@@ -1,4 +1,4 @@
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 import { kindOf } from "./trace.js";
 
 /**

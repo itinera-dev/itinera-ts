@@ -1,4 +1,4 @@
-import type { JourneyId } from "itinera/unstable";
+import type { JourneyId } from "itinera/journey";
 import { describe, expect, it } from "vitest";
 import { ModelError } from "../../src/model/error.js";
 import { Recorders, ScenarioReporter } from "../../src/recorders.js";

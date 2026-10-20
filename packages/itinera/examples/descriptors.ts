@@ -1,21 +1,20 @@
 import assert from "node:assert/strict";
+import { type Provided, provider, service, serviceType } from "itinera/service";
 import {
-  inputAdapter,
-  key,
   type Outcome,
-  type Provided,
-  provider,
-  service,
-  serviceType,
   Step,
   step,
   type StepName,
   stepName,
+} from "itinera/step";
+import {
+  inputAdapter,
+  key,
   type Supplied,
   withStep,
   Workflow,
   workflow,
-} from "itinera/unstable";
+} from "itinera/workflow";
 
 const RECEIPTS = serviceType<string[]>("Receipts");
 

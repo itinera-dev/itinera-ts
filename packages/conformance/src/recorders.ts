@@ -2,11 +2,11 @@
  * The recording reporters of a scenario, each under the name the scenario
  * gives it, failing as the scenario scripts it.
  */
+import type { Event } from "itinera/event";
+import type { JourneyId } from "itinera/journey";
 import {
-  type Event,
   FailingReporter,
   type GlobalMetadataEntry,
-  type JourneyId,
   type ReporterFailure,
 } from "itinera/unstable";
 import { listedUnder } from "./listed.js";
