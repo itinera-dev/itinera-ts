@@ -1,10 +1,10 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { charging } from "../fixtures/engine.js";
-import type { WorkflowInstance } from "../../src/instance.js";
-import type { JourneyId } from "../../src/journey.js";
-import type { Reporter } from "../../src/report.js";
-import type { Value } from "../../src/value.js";
-import type { WorkflowDescriptor } from "../../src/workflow.js";
+import { charging } from "../engine/fixtures.js";
+import type { WorkflowInstance } from "./made.js";
+import type { JourneyId } from "../journey.js";
+import type { Reporter } from "../report.js";
+import type { Value } from "../value.js";
+import type { WorkflowDescriptor } from "../workflow.js";
 
 describe("WorkflowInstance", () => {
   it("is not written by hand, as an object or as a class", () => {
