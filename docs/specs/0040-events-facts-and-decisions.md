@@ -6,7 +6,7 @@ Status: complete, and 40 is listed in `conformance.json`. Stage 1 added the type
 
 ## API
 
-0040 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says. They are defined in `src/event/decision.ts`, re-exported by `src/event.ts`, which becomes the subpath `itinera/event` then.
+0040 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), as the agents' manual says. They are defined in `src/event/decision.ts`, re-exported by `src/event.ts`, which becomes the subpath `itinera/event` then.
 
 - Facts and decisions are members of one union, `Event`, with no marker of their own: the kind tells which it is, as chapter 2 lists them.
 - The decision events are `StepRetrying`, `StepRescuing`, `StepRescued`, `StepGivenUp`, `JourneySucceeded` and `JourneyFailed`.
