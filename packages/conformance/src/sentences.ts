@@ -4,6 +4,8 @@
  */
 import "./sentences/parameters.js";
 import "./sentences/actions.js";
+import "./sentences/alone.js";
+import "./sentences/alone/kept.js";
 import "./sentences/adapters.js";
 import "./sentences/building.js";
 import "./sentences/data.js";
@@ -27,4 +29,6 @@ import "./sentences/policies.js";
 import "./sentences/reporters.js";
 import "./sentences/reporters/carried.js";
 import "./sentences/reporters/received.js";
+import "./sentences/scripted.js";
 import "./sentences/services.js";
+import "./sentences/testing.js";

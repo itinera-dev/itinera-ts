@@ -9,17 +9,25 @@ import type {
 } from "itinera/testing";
 
 /**
+ * What the `run` of a step mock the witness makes is given, by position: the
+ * attempt's contributor and step reporter, then the services it requests,
+ * or nothing when it declares no handles. A rest parameter, so that `run`
+ * declares no parameter that would need a request.
+ */
+export type RunWith = [
+  contributor?: Contributor,
+  reporter?: StepReporter,
+  ...services: unknown[],
+];
+
+/**
  * A class of step mocks whose `run` requests the attempt's contributor and
  * step reporter, then the services the step requests, by position, to play
  * what the scenario's step does before it ends.
  */
 export type ActingClass = StepMockClass &
   (new (...inputs: unknown[]) => StepMock & {
-    run(
-      contributor?: Contributor,
-      reporter?: StepReporter,
-      ...services: unknown[]
-    ): Outcome | Promise<Outcome>;
+    run(...handed: RunWith): Outcome | Promise<Outcome>;
   });
 
 /**
@@ -29,11 +37,7 @@ export type ActingClass = StepMockClass &
  */
 export type ActingRescueClass = RescueStepMockClass &
   (new (...needs: unknown[]) => RescueStepMock & {
-    run(
-      contributor?: Contributor,
-      reporter?: StepReporter,
-      ...services: unknown[]
-    ): RescueOutcome | Promise<RescueOutcome>;
+    run(...handed: RunWith): RescueOutcome | Promise<RescueOutcome>;
   });
 
 /** A step mock, or a rescue step mock, that the scenario's workflow built. */
