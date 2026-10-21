@@ -7,10 +7,12 @@ A workflow is a list of steps. Each step holds one piece of business logic and s
 ## Installing it
 
 ```sh
-npm install itinera reflect-metadata
+npm install itinera@next reflect-metadata
 ```
 
-itinera runs on Node 22.12 and later, and works with `import` and `require` alike. It uses only the language and the web platform, so it also runs on Deno and Bun, and in browsers through a bundler; in a browser, the default journey IDs need a secure context.
+Every version of itinera so far is a pre-release, published under the dist-tag `next`, so `itinera@next` installs the newest one.
+
+itinera runs on Node 22.12 and later, and works with `import` and `require` alike. It uses only the language and the web platform, so it also runs on Deno and Bun, and in browsers through a bundler, though CI tests it on Node alone; in a browser, the default journey IDs need a secure context.
 
 Applications declare their workflows as classes marked with decorators, which need TypeScript 5.5 or later with `strict`, `experimentalDecorators` and `emitDecoratorMetadata` turned on, and a compiler that records decorator metadata, such as `tsc` or swc. An application whose compiler records none, such as esbuild, Vite or tsx, puts the same classes together with the builder instead, `Orders.builder()`, which needs only TypeScript 5.5 or later with `strict`.
 

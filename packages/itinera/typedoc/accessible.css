@@ -6,3 +6,10 @@
 .col-content :is(h1, h2, h3, h4, h5, h6, .tsd-signature) {
   overflow-wrap: anywhere;
 }
+
+.tsd-hierarchy a {
+  display: inline-block;
+  min-width: 24px;
+  min-height: 24px;
+  line-height: 24px;
+}
