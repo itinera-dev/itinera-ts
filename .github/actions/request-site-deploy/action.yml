@@ -1,0 +1,36 @@
+name: Request a site deployment
+description: >-
+  Asks the organisation's site to build and deploy again, through a repository_dispatch event, so that its copy
+  of this repository's API reference follows a release or a change on main.
+
+inputs:
+  site:
+    description: The site's repository, owner/name.
+    default: itinera-dev/itinera-dev.github.io
+  event:
+    description: The event type the site's Pages workflow listens for.
+    default: api-reference
+  token:
+    description: >-
+      Token that can send repository_dispatch events to the site's repository: one with write access to its
+      contents. GitHub's own token for this repository cannot.
+    required: true
+  without-token:
+    description: >-
+      What happens when the token is empty, as when its secret is not set yet: "fail" or "skip", which only warns.
+    default: fail
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.token }}
+        SITE: ${{ inputs.site }}
+        EVENT: ${{ inputs.event }}
+        WITHOUT_TOKEN: ${{ inputs.without-token }}
+        REPO: ${{ github.repository }}
+        REF_NAME: ${{ github.ref_name }}
+        SHA: ${{ github.sha }}
+        PYTHONPATH: ${{ github.action_path }}/..
+      run: python3 "$GITHUB_ACTION_PATH/main.py"
