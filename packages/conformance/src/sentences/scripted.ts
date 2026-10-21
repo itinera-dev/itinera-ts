@@ -1,7 +1,7 @@
 /** The sentences of scripted runs, and of the mistakes that stop a test. */
 import { isDeepStrictEqual } from "node:util";
 import { type DataTable, Given, Then, When } from "@cucumber/cucumber";
-import type { AttemptRecord, Mistake } from "itinera/testing";
+import { type AttemptRecord, type Mistake, TestMistake } from "itinera/testing";
 import { json, rows } from "../model.js";
 import { ModelError } from "../model/error.js";
 import type { Input, RescueRequest } from "../model/step.js";
@@ -79,6 +79,45 @@ Then<World>(
     );
   },
 );
+
+Then<World>(
+  /^reading the scripted run's record of step "([^"]*)" stops the test as the mistake "([^"]*)"$/,
+  function (step: string, mistake: string) {
+    const named = problemsReading(this, step).map(namedBy);
+    holds(
+      eachMatchedOnce(named, [{ mistake, step }]),
+      `reading the record of "${step}" to stop the test as "${mistake}"`,
+      JSON.stringify(named),
+    );
+  },
+);
+
+Then<World>(
+  /^reading attempt (\d+) of step "([^"]*)" in the scripted run's record reads nothing$/,
+  function (attempt: string, step: string) {
+    const read = this.tested.scriptedRun.step(step).attempt(Number(attempt));
+    holds(
+      read.isNone(),
+      `attempt ${attempt} of "${step}" in the record to read nothing`,
+      JSON.stringify(read),
+    );
+  },
+);
+
+/** The problems of the mistake that reading the record of the step stopped the test with. */
+function problemsReading(world: World, step: string): readonly Mistake[] {
+  try {
+    world.tested.scriptedRun.step(step);
+  } catch (error) {
+    if (error instanceof TestMistake) {
+      return error.problems;
+    }
+    throw error;
+  }
+  throw new Unmet(
+    `expected reading the record of "${step}" to stop the test; it did not`,
+  );
+}
 
 /** A mistake as a row of the table names it: its kind, and the step, attempt and provider given. */
 interface Named {
