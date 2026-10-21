@@ -457,7 +457,7 @@ One rule of chapter 3, 3.8 has no tag and cannot be enforced in TypeScript: a st
 
 ### 16. Continuous integration
 
-Each job runs one npm script, as the organisation's automation rule requires: format, lint, type check, tests on Linux on Node 22 and 24, the LTS lines, and on the current Node 26, and on the newest LTS on Windows and macOS, build and package checks, the API reference with warnings as errors, a licence and advisory check of dependencies, type tests on TypeScript 5.5, the oldest applications may use, added by stage 1's first layer (decision 14), the tests of the actions under `.github/actions`, the release actions and `check-book` (section "Release"), conformance through `run-conformance`, the book through `check-book` (stage 12), `pr-has-issue`, `no-cross-repo-closing` and `commit messages`.
+Each job runs one npm script, as the organisation's automation rule requires: format, lint, type check, tests on Linux on Node 22 and 24, the LTS lines, and on the current Node 26, and on the newest LTS on Windows and macOS, build and package checks, the API reference with warnings as errors, a licence and advisory check of dependencies, type tests on TypeScript 5.5, the oldest applications may use, added by stage 1's first layer (decision 14), the tests of the actions under `.github/actions` (section "Release" for the release actions), conformance through `run-conformance`, the book through `check-book` (stage 12), `pr-has-issue`, `no-cross-repo-closing` and `commit messages`.
 
 ## Order of work
 
