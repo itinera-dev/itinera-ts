@@ -69,8 +69,10 @@ class GitHub:
                 tar.extractall(into, filter="data")
         except tarfile.TarError as error:
             raise RequestError(f"The tarball of {repo}@{ref} cannot be extracted: {error}") from error
-        (root,) = pathlib.Path(into).iterdir()
-        return root
+        roots = list(pathlib.Path(into).iterdir())
+        if len(roots) != 1:
+            raise RequestError(f"The tarball of {repo}@{ref} has no single top folder.")
+        return roots[0]
 
     def post(self, path, body):
         """Send `body` as JSON to `path`; fails when GitHub has nothing there."""

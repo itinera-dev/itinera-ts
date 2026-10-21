@@ -85,6 +85,11 @@ class GitHubExtractRepository(unittest.TestCase):
             with self.assertRaisesRegex(RequestError, "cannot be extracted"):
                 GitHub("token").extract_repository("o/r", "0123456", into)
 
+    def test_a_tarball_without_one_top_folder_is_refused(self):
+        with tempfile.TemporaryDirectory() as into, answering(tarball({})):
+            with self.assertRaisesRegex(RequestError, "no single top folder"):
+                GitHub("token").extract_repository("o/r", "0123456", into)
+
     def test_nothing_there_is_an_error(self):
         with tempfile.TemporaryDirectory() as into, failing(404):
             with self.assertRaisesRegex(RequestError, "found nothing"):
