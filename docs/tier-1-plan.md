@@ -551,7 +551,7 @@ The new AGENTS.md carries Rust's rules over where they are not about Rust:
 2. After stage 0, add the "Protect main" ruleset requiring the CI checks, with merge commits only.
 3. Make sure the labels `implements-proposal`, `tier: 1`, `spec update` and `waiting for spec` exist in the new repository.
 4. Before the first release: the `npm` environment, the first publish of `itinera` by hand, then trusted publishing for `release.yml`, and the tag.
-5. Before the first release: a token with write access to the contents of itinera-dev/itinera-dev.github.io, such as a fine-grained personal access token limited to it, stored in itinera-ts as the secret `SITE_DEPLOY_TOKEN`, which lets itinera-ts's workflows ask the site to deploy; and the CI checks `release actions` and `book` added to the "Protect main" ruleset. Once the book's TypeScript stack merges, `book.json` moves from the top of that stack to a commit of the book's `next` branch.
+5. Before the first release: a token with write access to the contents of itinera-dev/itinera-dev.github.io, such as a fine-grained personal access token limited to it, stored in itinera-ts as the secret `SITE_DEPLOY_TOKEN`, which lets itinera-ts's workflows ask the site to deploy; and the CI checks `release actions` and `book` added to the "Protect main" ruleset.
 
 ## Decisions
 
