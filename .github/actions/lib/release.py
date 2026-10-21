@@ -17,6 +17,8 @@ def read_json(name, text):
 
 def package_of(manifest):
     """The name and version a package.json declares; raises ValueError when either is missing."""
+    if not isinstance(manifest, dict):
+        raise ValueError("The package manifest must hold an object.")
     name, version = manifest.get("name"), manifest.get("version")
     if not isinstance(name, str) or not isinstance(version, str):
         raise ValueError('The package manifest must declare its "name" and "version".')
@@ -39,7 +41,9 @@ def tag_problems(ref_type, tag, version):
 
 def lock_problems(lock, directory, version):
     """Why package-lock.json does not record `version` for the workspace package in `directory`."""
-    locked = lock.get("packages", {}).get(directory, {}).get("version")
+    packages = lock.get("packages") if isinstance(lock, dict) else None
+    entry = packages.get(directory) if isinstance(packages, dict) else None
+    locked = entry.get("version") if isinstance(entry, dict) else None
     if locked != version:
         return [f"package-lock.json records {locked or 'no version'} for {directory}, not {version}; run npm install."]
     return []
@@ -51,7 +55,8 @@ def dist_tag_problems(manifest, version):
     npm makes any version it publishes `latest` unless told otherwise, so a pre-release goes under `next`, and any
     other version under `latest`, which is npm's own default.
     """
-    tag = manifest.get("publishConfig", {}).get("tag")
+    publish_config = manifest.get("publishConfig", {})
+    tag = publish_config.get("tag") if isinstance(publish_config, dict) else None
     if is_prerelease(version) and tag != "next":
         return [f'{version} is a pre-release, so publishConfig.tag must be "next", not {json.dumps(tag)}.']
     if not is_prerelease(version) and tag not in (None, "latest"):

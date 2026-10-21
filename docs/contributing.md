@@ -54,7 +54,7 @@ Every one of these is a required check in CI:
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
 - `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented, written to `packages/itinera/api`; what the package takes from Zod and `ts-results-es` links to their own documentation instead of being copied into it, and a plugin of ours, `packages/itinera/typedoc/accessible.mjs`, puts right what axe finds in the markup of TypeDoc's theme, since the organisation's site, which serves the reference, checks its pages with axe;
 - `npm run dependency-check`: `npm audit` for advisories, then [licensee](https://www.npmjs.com/package/licensee) for licences;
-- `npm run release-actions`: the tests of the release actions under `.github/actions`, with Python 3.11 or later, as "Releasing" says.
+- `npm run release-actions`: the tests of the release actions under `.github/actions`, with Python 3.12 or later, as "Releasing" says.
 
 `npm run check` runs them in this order, and stops at the first that fails. CI runs the tests on Linux on Node 22 and 24, the LTS lines, and on Node 26, the current release, and on Windows and macOS on Node 24; the other checks run on Node 24. Each week, CI also tries the type check and the tests on the next TypeScript, and the tests on the newest Node.
 

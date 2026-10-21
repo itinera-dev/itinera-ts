@@ -21,7 +21,8 @@ def _send(request):
     except urllib.error.HTTPError as error:
         if error.code == 404:
             return None
-        raise RequestError(f"{request.get_method()} {request.full_url} failed with {error.code}: {error.read().decode()}") from error
+        failure = f"{request.get_method()} {request.full_url} failed with {error.code}: {error.read().decode()}"
+        raise RequestError(failure) from error
     except urllib.error.URLError as error:
         raise RequestError(f"{request.get_method()} {request.full_url} failed: {error.reason}") from error
 

@@ -48,6 +48,10 @@ class PackageOf(unittest.TestCase):
     def test_a_manifest_gives_its_name_and_version(self):
         self.assertEqual(package_of({"name": "itinera", "version": "0.1.0"}), ("itinera", "0.1.0"))
 
+    def test_a_manifest_that_is_not_an_object_is_refused(self):
+        with self.assertRaisesRegex(ValueError, "must hold an object"):
+            package_of(["itinera"])
+
     def test_a_manifest_without_a_version_is_refused(self):
         with self.assertRaisesRegex(ValueError, '"name" and "version"'):
             package_of({"name": "itinera"})
@@ -82,7 +86,9 @@ class LockProblems(unittest.TestCase):
         self.assertIn("records 0.0.0", lock_problems(lock, "packages/itinera", "0.1.0")[0])
 
     def test_a_lock_without_the_package_is_refused(self):
-        self.assertIn("records no version", lock_problems({}, "packages/itinera", "0.1.0")[0])
+        for lock in ({}, [], {"packages": []}, {"packages": {"packages/itinera": "0.1.0"}}):
+            with self.subTest(lock=lock):
+                self.assertIn("records no version", lock_problems(lock, "packages/itinera", "0.1.0")[0])
 
 
 class DistTagProblems(unittest.TestCase):
@@ -90,7 +96,9 @@ class DistTagProblems(unittest.TestCase):
         self.assertEqual(dist_tag_problems({"publishConfig": {"tag": "next"}}, "0.1.0-beta.1"), [])
 
     def test_a_pre_release_without_a_dist_tag_is_refused(self):
-        self.assertIn('must be "next", not null', dist_tag_problems({}, "0.1.0-beta.1")[0])
+        for manifest in ({}, {"publishConfig": "next"}):
+            with self.subTest(manifest=manifest):
+                self.assertIn('must be "next", not null', dist_tag_problems(manifest, "0.1.0-beta.1")[0])
 
     def test_a_release_without_a_dist_tag_passes(self):
         self.assertEqual(dist_tag_problems({}, "0.1.0"), [])
@@ -107,10 +115,14 @@ class OnBranch(unittest.TestCase):
         self.assertEqual(compare_path("o/r", "abc", "main"), "/repos/o/r/compare/abc...main?per_page=1")
 
     def test_a_branch_ahead_of_the_commit_or_at_it_contains_it(self):
-        self.assertTrue(on_branch("ahead") and on_branch("identical"))
+        for status in ("ahead", "identical"):
+            with self.subTest(status):
+                self.assertTrue(on_branch(status))
 
-    def test_a_branch_that_diverged_does_not_contain_the_commit(self):
-        self.assertFalse(on_branch("diverged") or on_branch("behind"))
+    def test_a_branch_behind_the_commit_or_diverged_from_it_does_not_contain_it(self):
+        for status in ("behind", "diverged"):
+            with self.subTest(status):
+                self.assertFalse(on_branch(status))
 
 
 class ChangelogSection(unittest.TestCase):
@@ -125,6 +137,9 @@ class ChangelogSection(unittest.TestCase):
 
     def test_a_version_without_a_section_has_no_notes(self):
         self.assertIsNone(changelog_section(CHANGELOG, "0.2.0"))
+
+    def test_a_version_named_only_in_a_lower_heading_has_no_section(self):
+        self.assertIsNone(changelog_section("# Changelog\n\n### [0.3.0]\n\n- Nothing.\n", "0.3.0"))
 
 
 class ConformanceProblems(unittest.TestCase):
