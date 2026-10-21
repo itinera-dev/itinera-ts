@@ -457,7 +457,7 @@ One rule of chapter 3, 3.8 has no tag and cannot be enforced in TypeScript: a st
 
 ### 16. Continuous integration
 
-Each job runs one npm script, as the organisation's automation rule requires: format, lint, type check, tests on Linux on Node 22 and 24, the LTS lines, and on the current Node 26, and on the newest LTS on Windows and macOS, build and package checks, the API reference with warnings as errors, a licence and advisory check of dependencies, type tests on TypeScript 5.5, the oldest applications may use, added by stage 1's first layer (decision 14), the tests of the release actions (section "Release"), conformance through `run-conformance`, `pr-has-issue`, `no-cross-repo-closing` and `commit messages`.
+Each job runs one npm script, as the organisation's automation rule requires: format, lint, type check, tests on Linux on Node 22 and 24, the LTS lines, and on the current Node 26, and on the newest LTS on Windows and macOS, build and package checks, the API reference with warnings as errors, a licence and advisory check of dependencies, type tests on TypeScript 5.5, the oldest applications may use, added by stage 1's first layer (decision 14), the tests of the release actions (section "Release"), conformance through `run-conformance`, the book through `check-book` (stage 12), `pr-has-issue`, `no-cross-repo-closing` and `commit messages`.
 
 ## Order of work
 
@@ -551,7 +551,7 @@ The new AGENTS.md carries Rust's rules over where they are not about Rust:
 2. After stage 0, add the "Protect main" ruleset requiring the CI checks, with merge commits only.
 3. Make sure the labels `implements-proposal`, `tier: 1`, `spec update` and `waiting for spec` exist in the new repository.
 4. Before the first release: the `npm` environment, the first publish of `itinera` by hand, then trusted publishing for `release.yml`, and the tag.
-5. Before the first release: a token with write access to the contents of itinera-dev/itinera-dev.github.io, such as a fine-grained personal access token limited to it, stored in itinera-ts as the secret `SITE_DEPLOY_TOKEN`, which lets itinera-ts's workflows ask the site to deploy; and the CI check `release actions` added to the "Protect main" ruleset.
+5. Before the first release: a token with write access to the contents of itinera-dev/itinera-dev.github.io, such as a fine-grained personal access token limited to it, stored in itinera-ts as the secret `SITE_DEPLOY_TOKEN`, which lets itinera-ts's workflows ask the site to deploy; and the CI checks `release actions` and `book` added to the "Protect main" ruleset. Once the book's TypeScript stack merges, `book.json` moves from the top of that stack to a commit of the book's `next` branch.
 
 ## Decisions
 

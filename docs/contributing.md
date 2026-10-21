@@ -54,7 +54,7 @@ Every one of these is a required check in CI:
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
 - `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented, written to `packages/itinera/api`; what the package takes from Zod and `ts-results-es` links to their own documentation instead of being copied into it, and a plugin of ours, `packages/itinera/typedoc/accessible.mjs`, puts right what axe finds in the markup of TypeDoc's theme, since the organisation's site, which serves the reference, checks its pages with axe;
 - `npm run dependency-check`: `npm audit` for advisories, then [licensee](https://www.npmjs.com/package/licensee) for licences;
-- `npm run release-actions`: the tests of the release actions under `.github/actions`, with Python 3.12 or later, as "Releasing" says.
+- `npm run release-actions`: the tests of the actions under `.github/actions`, the release actions and the book's check, with Python 3.12 or later, as "Releasing" says.
 
 `npm run check` runs them in this order, and stops at the first that fails. CI runs the tests on Linux on Node 22 and 24, the LTS lines, and on Node 26, the current release, and on Windows and macOS on Node 24; the other checks run on Node 24. Each week, CI also tries the type check and the tests on the next TypeScript, and the tests on the newest Node.
 
@@ -67,6 +67,14 @@ Every one of these is a required check in CI:
 `conformance.json` pins the conformance cases, lists the proposals implemented and the capabilities claimed, and maps each scenario excluded as impossible to express to the test that proves it. A proposal is listed only by the pull request that completes it.
 
 In CI, the `run-conformance` action of [itinera-dev/actions](https://github.com/itinera-dev/actions) reads `conformance.json`, checks the excluded scenarios, runs the scenarios whose proposals are all listed, and writes the report. While no proposal is listed, it checks the manifest without starting the runner, which arrives in stage 2 as `npm run conformance`.
+
+## The book in CI
+
+The TypeScript edition of [the Itinera book](https://github.com/itinera-dev/book) compiles and runs every program it shows, and this repository runs it against its own code, so a change that breaks the book is seen in its own pull request. `book.json` pins a commit of the book: until the book's TypeScript stack merges, the top of that stack, and then a commit of the book's `next` branch. The CI job `book` runs the `check-book` action, under `.github/actions`, after `npm ci`: it downloads the book at the pinned commit, runs the book's `npm run itinera` with `ITINERA_TS` naming this checkout, so that the book packs this repository's `itinera` as it stands, then `npm install` and `npm test` in the book's `typescript` directory.
+
+A change that breaks the book on purpose comes with a change to the book, as the book's BOOK.md says: the book's pull request updates its examples, and this repository's pull request pins the book's commit.
+
+To run the book against a local checkout, run `ITINERA_TS=<this checkout> npm run itinera`, then `npm install` and `npm test`, in the `typescript` directory of a checkout of the book.
 
 ## Commit messages and the changelog
 
@@ -125,4 +133,4 @@ Sending that event needs a token with write access to the contents of itinera-de
 
 ### The release actions
 
-The three actions the release workflow runs from this repository, under `.github/actions`, are written in Python, for the standard library only, as every action of the organisation is. They live here for now, and move to [itinera-dev/actions](https://github.com/itinera-dev/actions), beside the other actions, later. Their tests run with `npm run release-actions`, one of the checks above.
+The three actions the release workflow runs from this repository, under `.github/actions`, and `check-book`, which runs the book ("The book in CI"), are written in Python, for the standard library only, as every action of the organisation is. They live here for now, and move to [itinera-dev/actions](https://github.com/itinera-dev/actions), beside the other actions, later. Their tests run with `npm run release-actions`, one of the checks above.
