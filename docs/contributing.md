@@ -52,7 +52,7 @@ Every one of these is a required check in CI:
 - `npm run typecheck-oldest`: the same two type checks on TypeScript 5.5, the oldest version applications may use, which `npx` fetches without touching the installed TypeScript; the tests and examples are checked with `tsconfig.oldest.json`, whose library is ES2023, and the package's sources alone, without Node's types and with every declaration they use checked, with `packages/itinera/tsconfig.oldest.json`;
 - `npm test`: Vitest, with its type checking;
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
-- `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented, written to `packages/itinera/api`; what the package takes from Zod and `ts-results-es` links to their own documentation instead of being copied into it;
+- `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented, written to `packages/itinera/api`; what the package takes from Zod and `ts-results-es` links to their own documentation instead of being copied into it, and a plugin of ours, `packages/itinera/typedoc/accessible.mjs`, puts right what axe finds in the markup of TypeDoc's theme, since the organisation's site, which serves the reference, checks its pages with axe;
 - `npm run dependency-check`: `npm audit` for advisories, then [licensee](https://www.npmjs.com/package/licensee) for licences;
 - `npm run release-actions`: the tests of the release actions under `.github/actions`, with Python 3.11 or later, as "Releasing" says.
 

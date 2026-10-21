@@ -24,6 +24,7 @@
     "packages/*/src",
     "packages/*/tests",
     "packages/*/examples",
+    "packages/*/typedoc",
     "*.mjs",
     "*.mts"
   ]

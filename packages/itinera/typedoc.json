@@ -20,6 +20,27 @@
   ],
   "tsconfig": "tsconfig.build.json",
   "out": "api",
+  "plugin": ["./typedoc/accessible.mjs"],
+  "customCss": "typedoc/accessible.css",
+  "navigation": {
+    "includeFolders": false
+  },
+  "navigationLeaves": [
+    "itinera/event",
+    "itinera/executor",
+    "itinera/instance",
+    "itinera/journey",
+    "itinera/option",
+    "itinera/policy",
+    "itinera/report",
+    "itinera/schema",
+    "itinera/service",
+    "itinera/step",
+    "itinera/testing",
+    "itinera/unstable",
+    "itinera/value",
+    "itinera/workflow"
+  ],
   "excludeExternals": true,
   "externalSymbolLinkMappings": {
     "ts-results-es": {
