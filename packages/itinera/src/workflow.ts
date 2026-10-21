@@ -5,7 +5,7 @@
  *
  * {@includeCode ../examples/workflow.ts}
  *
- * @module
+ * @module itinera/workflow
  */
 export {
   withStep,

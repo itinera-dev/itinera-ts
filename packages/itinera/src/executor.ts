@@ -4,7 +4,7 @@
  *
  * {@includeCode ../examples/local-executor.ts}
  *
- * @module
+ * @module itinera/executor
  */
 export type {
   DispatcherFactoryFailed,

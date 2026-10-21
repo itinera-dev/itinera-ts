@@ -11,8 +11,10 @@
  * Zod's declarations name the global `URL`, so a project compiles them with
  * Node's types or the DOM library, or with `skipLibCheck`.
  *
+ * Everything `z` holds is documented by [Zod](https://zod.dev/api).
+ *
  * {@includeCode ../examples/schema.ts}
  *
- * @module
+ * @module itinera/schema
  */
 export { z } from "zod";

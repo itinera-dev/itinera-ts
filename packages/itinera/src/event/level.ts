@@ -15,5 +15,9 @@ export const Level = closedSet({
   Error: "error",
 });
 
-/** One of the values of {@link Level}. */
+/**
+ * One of the values of {@link Level}.
+ *
+ * {@includeCode ../../examples/event-reporter-recorders.ts}
+ */
 export type Level = ValueOf<typeof Level>;

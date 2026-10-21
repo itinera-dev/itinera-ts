@@ -5,7 +5,7 @@
  *
  * {@includeCode ../examples/service.ts}
  *
- * @module
+ * @module itinera/service
  */
 
 export {

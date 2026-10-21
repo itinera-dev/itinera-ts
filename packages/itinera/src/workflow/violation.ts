@@ -92,7 +92,11 @@ export const ViolationKind = closedSet({
   AttemptRequestInJourneyScope: "attempt request in journey scope",
 });
 
-/** One of the values of {@link ViolationKind}. */
+/**
+ * One of the values of {@link ViolationKind}.
+ *
+ * {@includeCode ../../examples/violations.ts}
+ */
 export type ViolationKind = ValueOf<typeof ViolationKind>;
 
 /**

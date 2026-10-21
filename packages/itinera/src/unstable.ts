@@ -4,6 +4,6 @@
  * to the subpath of its concept once itinera implements it fully. Nothing is
  * here now.
  *
- * @module
+ * @module itinera/unstable
  */
 export {};

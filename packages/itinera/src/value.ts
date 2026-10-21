@@ -5,7 +5,7 @@
  *
  * {@includeCode ../examples/value.ts}
  *
- * @module
+ * @module itinera/value
  */
 
 export {
