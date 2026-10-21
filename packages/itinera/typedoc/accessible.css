@@ -3,7 +3,7 @@
   text-decoration: underline;
 }
 
-.col-content :is(h1, h2, h3, h4, h5, h6, .tsd-signature) {
+.col-content {
   overflow-wrap: anywhere;
 }
 
