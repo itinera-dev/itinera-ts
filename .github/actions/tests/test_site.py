@@ -13,7 +13,9 @@ class Dispatch(unittest.TestCase):
 
 class WithoutTokenProblems(unittest.TestCase):
     def test_fail_and_skip_are_accepted(self):
-        self.assertEqual(without_token_problems("fail") + without_token_problems("skip"), [])
+        for choice in ("fail", "skip"):
+            with self.subTest(choice):
+                self.assertEqual(without_token_problems(choice), [])
 
     def test_anything_else_is_refused(self):
         self.assertIn('"fail" or "skip", not "warn"', without_token_problems("warn")[0])
