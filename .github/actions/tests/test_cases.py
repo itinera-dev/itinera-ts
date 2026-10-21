@@ -1,10 +1,8 @@
-import io
 import pathlib
-import tarfile
 import tempfile
 import unittest
 
-from lib.cases import extract, proposals_in, proposals_of_tiers, tier_of
+from lib.cases import proposals_in, proposals_of_tiers, tier_of
 
 FEATURE = """\
 @proposal-0002
@@ -41,18 +39,6 @@ class TierOf(unittest.TestCase):
         self.assertIsNone(tier_of("cases/capabilities/testing.feature"))
 
 
-def archive_of(files):
-    """A repository tarball, as GitHub serves it, holding `files` under one root folder."""
-    buffer = io.BytesIO()
-    with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
-        for path, text in files.items():
-            data = text.encode()
-            info = tarfile.TarInfo(f"conformance-abc/{path}")
-            info.size = len(data)
-            tar.addfile(info, io.BytesIO(data))
-    return buffer.getvalue()
-
-
 class ProposalsOfTiers(unittest.TestCase):
     def test_only_the_tiers_claimed_count(self):
         files = {
@@ -61,8 +47,10 @@ class ProposalsOfTiers(unittest.TestCase):
             "cases/tier-2/switches.feature": "@proposal-0200\nFeature: C",
             "cases/capabilities/testing.feature": "@proposal-0108\nFeature: D",
         }
-        with tempfile.TemporaryDirectory() as into:
-            root = extract(archive_of(files), into)
-            self.assertEqual(root.name, "conformance-abc")
+        with tempfile.TemporaryDirectory() as folder:
+            root = pathlib.Path(folder)
+            for path, text in files.items():
+                root.joinpath(path).parent.mkdir(parents=True, exist_ok=True)
+                root.joinpath(path).write_text(text, encoding="utf-8")
             self.assertEqual(proposals_of_tiers(root, 1), {2, 9})
-            self.assertEqual(proposals_of_tiers(pathlib.Path(root), 2), {2, 9, 200})
+            self.assertEqual(proposals_of_tiers(root, 2), {2, 9, 200})
