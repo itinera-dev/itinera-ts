@@ -1,9 +1,6 @@
 """The conformance cases: which proposals the scenarios of each tier carry."""
 
-import io
-import pathlib
 import re
-import tarfile
 
 PROPOSAL_TAG = re.compile(r"@proposal-(\d+)")
 TIER_PATH = re.compile(r"cases/tier-(\d+)/")
@@ -52,10 +49,3 @@ def proposals_of_tiers(root, highest):
         for proposal in proposals_in(path.read_text(encoding="utf-8"))
     }
 
-
-def extract(archive, into):
-    """Extract a repository tarball, as GitHub serves it, into `into`, returning the repository's root."""
-    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
-        tar.extractall(into, filter="data")
-    (root,) = pathlib.Path(into).iterdir()
-    return root

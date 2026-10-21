@@ -1,7 +1,10 @@
 """Requests to GitHub's REST API and to the npm registry, over urllib."""
 
+import io
 import json
 import os
+import pathlib
+import tarfile
 import urllib.error
 import urllib.request
 
@@ -57,6 +60,17 @@ class GitHub:
         if answer is None:
             raise RequestError(f"GET {self._api_url}{path} found nothing.")
         return answer
+
+    def extract_repository(self, repo, ref, into):
+        """Extract `repo` at `ref` into the folder `into`, returning the repository's root folder inside it."""
+        archive = self.download(f"/repos/{repo}/tarball/{ref}")
+        try:
+            with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
+                tar.extractall(into, filter="data")
+        except tarfile.TarError as error:
+            raise RequestError(f"The tarball of {repo}@{ref} cannot be extracted: {error}") from error
+        (root,) = pathlib.Path(into).iterdir()
+        return root
 
     def post(self, path, body):
         """Send `body` as JSON to `path`; fails when GitHub has nothing there."""

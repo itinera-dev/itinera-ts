@@ -1,9 +1,6 @@
-"""The book's check: the book commit this repository pins, and the book's files at that commit."""
+"""The book's check: the book commit this repository pins."""
 
-import io
-import pathlib
 import re
-import tarfile
 
 COMMIT = re.compile(r"[0-9a-f]{40}")
 
@@ -18,10 +15,3 @@ def pinned_commit(pin):
         raise ValueError('The pin file must hold an object whose "commit" is a full 40-character commit SHA.')
     return commit
 
-
-def extract(archive, into):
-    """Extract `archive`, a repository's tarball as GitHub serves it, into `into`, returning the repository's root."""
-    with tarfile.open(fileobj=io.BytesIO(archive), mode="r:gz") as tar:
-        tar.extractall(into, filter="data")
-    (root,) = pathlib.Path(into).iterdir()
-    return root
