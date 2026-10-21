@@ -4,7 +4,7 @@
  *
  * {@includeCode ../examples/event.ts}
  *
- * @module
+ * @module itinera/event
  */
 import type {
   JourneyFailed,

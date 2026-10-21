@@ -30,7 +30,9 @@ An npm workspace, under `packages/`:
 
 The subpath `itinera/unstable` holds API that the specification has not accepted yet, and, before a proposal is listed in `conformance.json`, that proposal's API. Its items are defined in the modules of their concepts and move to the subpaths of those modules once their proposals are listed, as test support moved from it to `itinera/testing`. It holds nothing now.
 
-Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/step`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/integration/examples.test.ts` runs every one of them.
+Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/step`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/integration/examples.test.ts` runs every one of them. Most are pulled into the API reference with TypeDoc's `@includeCode`; those under `examples/programs` are whole programs, the counterparts of itinera-rs's `orders` examples, which print what their journeys do.
+
+`packages/itinera/README.md` is the package's overview: npm shows it on the package's page, and it is the front page of the API reference. Its example is `examples/first-workflow.ts`, copied as it is, which `tests/integration/readme.test.ts` checks.
 
 ## Building and testing
 
@@ -50,7 +52,7 @@ Every one of these is a required check in CI:
 - `npm run typecheck-oldest`: the same two type checks on TypeScript 5.5, the oldest version applications may use, which `npx` fetches without touching the installed TypeScript; the tests and examples are checked with `tsconfig.oldest.json`, whose library is ES2023, and the package's sources alone, without Node's types and with every declaration they use checked, with `packages/itinera/tsconfig.oldest.json`;
 - `npm test`: Vitest, with its type checking;
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
-- `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented;
+- `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented, written to `packages/itinera/api`; what the package takes from Zod and `ts-results-es` links to their own documentation instead of being copied into it;
 - `npm run dependency-check`: `npm audit` for advisories, then [licensee](https://www.npmjs.com/package/licensee) for licences.
 
 `npm run check` runs them in this order, and stops at the first that fails. CI runs the tests on Linux on Node 22 and 24, the LTS lines, and on Node 26, the current release, and on Windows and macOS on Node 24; the other checks run on Node 24. Each week, CI also tries the type check and the tests on the next TypeScript, and the tests on the newest Node.

@@ -1,7 +1,8 @@
 {
   "$schema": "https://typedoc.org/schema.json",
+  "name": "itinera",
+  "readme": "README.md",
   "entryPoints": [
-    "src/index.ts",
     "src/event.ts",
     "src/executor.ts",
     "src/instance.ts",
@@ -19,6 +20,20 @@
   ],
   "tsconfig": "tsconfig.build.json",
   "out": "api",
+  "excludeExternals": true,
+  "externalSymbolLinkMappings": {
+    "ts-results-es": {
+      "*": "https://github.com/lune-climate/ts-results-es#readme"
+    },
+    "zod": {
+      "*": "https://zod.dev/api"
+    }
+  },
+  "navigationLinks": {
+    "Itinera": "https://itinera-dev.org/",
+    "Specification": "https://github.com/itinera-dev/spec",
+    "GitHub": "https://github.com/itinera-dev/itinera-ts"
+  },
   "treatWarningsAsErrors": true,
   "validation": {
     "notExported": true,

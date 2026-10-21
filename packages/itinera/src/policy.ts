@@ -5,7 +5,7 @@
  *
  * {@includeCode ../examples/policy.ts}
  *
- * @module
+ * @module itinera/policy
  */
 import { closedSet, type ValueOf } from "./closed-set.js";
 import type { FailureCause } from "./journey.js";
@@ -75,7 +75,11 @@ export const StepHook = closedSet({
   OnStepAbnormalTermination: "on step abnormal termination",
 });
 
-/** One of the values of {@link StepHook}. */
+/**
+ * One of the values of {@link StepHook}.
+ *
+ * {@includeCode ../examples/closed-set.ts}
+ */
 export type StepHook = ValueOf<typeof StepHook>;
 
 /**
@@ -92,7 +96,11 @@ export const WorkflowHook = closedSet({
   OnWorkflowFailure: "on workflow failure",
 });
 
-/** One of the values of {@link WorkflowHook}. */
+/**
+ * One of the values of {@link WorkflowHook}.
+ *
+ * {@includeCode ../examples/closed-set.ts}
+ */
 export type WorkflowHook = ValueOf<typeof WorkflowHook>;
 
 /**
@@ -108,7 +116,11 @@ export const RetryCause = closedSet({
   AbnormalTermination: "abnormal termination",
 });
 
-/** One of the values of {@link RetryCause}. */
+/**
+ * One of the values of {@link RetryCause}.
+ *
+ * {@includeCode ../examples/closed-set.ts}
+ */
 export type RetryCause = ValueOf<typeof RetryCause>;
 
 /**
