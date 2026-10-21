@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: itinera-dev/actions/release-gate@v1
+      - uses: ./.github/actions/npm-release-gate
         with:
-          manifest: packages/itinera/package.json
+          package: packages/itinera
           tier: 1
 
   # Checks on main do not block anything once a pull request has merged,
@@ -29,9 +29,27 @@ jobs:
     needs: gate
     uses: ./.github/workflows/ci.yml
 
+  reference:
+    name: API reference
+    needs: ci
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run reference
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: api-reference
+          path: packages/itinera/api-reference.tar.gz
+          if-no-files-found: error
+
   publish:
     name: npm
-    needs: ci
+    needs: reference
     runs-on: ubuntu-latest
     environment: npm
     permissions:
@@ -46,7 +64,9 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
       - run: npm ci
-      - run: npm publish --workspace packages/itinera
+      - uses: ./.github/actions/npm-publish
+        with:
+          package: packages/itinera
 
   release:
     name: GitHub release
@@ -56,9 +76,26 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      # CI's conformance job uploads this report.
+      # CI's conformance job uploads the report, and the reference job the
+      # API reference, which the site serves from the release.
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: conformance-report
-          path: conformance-report/
+          path: release-assets/
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: api-reference
+          path: release-assets/
       - uses: itinera-dev/actions/create-release@v1
+        with:
+          assets: release-assets/
+
+  site:
+    name: API reference on the site
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/request-site-deploy
+        with:
+          token: ${{ secrets.SITE_DEPLOY_TOKEN }}

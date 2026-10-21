@@ -53,7 +53,8 @@ Every one of these is a required check in CI:
 - `npm test`: Vitest, with its type checking;
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
 - `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented, written to `packages/itinera/api`; what the package takes from Zod and `ts-results-es` links to their own documentation instead of being copied into it;
-- `npm run dependency-check`: `npm audit` for advisories, then [licensee](https://www.npmjs.com/package/licensee) for licences.
+- `npm run dependency-check`: `npm audit` for advisories, then [licensee](https://www.npmjs.com/package/licensee) for licences;
+- `npm run release-actions`: the tests of the release actions under `.github/actions`, with Python 3.11 or later, as "Releasing" says.
 
 `npm run check` runs them in this order, and stops at the first that fails. CI runs the tests on Linux on Node 22 and 24, the LTS lines, and on Node 26, the current release, and on Windows and macOS on Node 24; the other checks run on Node 24. Each week, CI also tries the type check and the tests on the next TypeScript, and the tests on the newest Node.
 
@@ -95,15 +96,33 @@ Pull requests merge with a merge commit, never squashed, because a squash folds 
 
 ## Releasing
 
-Only `itinera` is published. A maintainer requests a release by pushing, on `main`, an annotated tag `v` followed by its version, such as `v0.1.0-beta.1`, with the message `itinera <version>`, after the pull request that sets the version and adds its section to `CHANGELOG.md` has merged. The release workflow, `.github/workflows/release.yml`, then runs four jobs, each waiting for the one before:
+Only `itinera` is published. A maintainer requests a release by pushing, on `main`, an annotated tag `v` followed by its version, such as `v0.1.0-beta.1`, with the message `itinera <version>`, after the pull request that sets the version and adds its section to `CHANGELOG.md` has merged. The release workflow, `.github/workflows/release.yml`, then runs six jobs, each waiting for the one before:
 
-1. **release gate**: the `release-gate` action refuses the tag unless it matches the version in `packages/itinera/package.json`, the commit is on `main`, `CHANGELOG.md` has a section for the version, and `conformance.json` lists every tier 1 proposal of the pinned cases;
+1. **release gate**: the `npm-release-gate` action refuses the tag unless it matches the version in `packages/itinera/package.json`, `package-lock.json` records that version, `publishConfig.tag` suits it, the commit is on `main`, `CHANGELOG.md` has a section for the version, and `conformance.json` lists every tier 1 proposal of the pinned cases;
 2. **CI**: the whole of `.github/workflows/ci.yml` runs again on the tagged commit, since its run on `main` after a merge blocks nothing, and its conformance job keeps the report;
-3. **npm**: in the `npm` environment, which only tags `v*` may use, `npm publish --workspace packages/itinera` builds the package and publishes it through trusted publishing, which exchanges the workflow's identity for a short-lived token and adds provenance;
-4. **GitHub release**: the `create-release` action creates the release with the notes of the version's changelog section, as a pre-release for a version such as `0.1.0-beta.1`, and attaches the conformance report.
+3. **API reference**: `npm run reference` builds the API reference, with the version on its front page, and packs it as `api-reference.tar.gz`, which the job keeps;
+4. **npm**: in the `npm` environment, which only tags `v*` may use, the `npm-publish` action runs `npm publish --workspace packages/itinera`, which builds the package and publishes it through trusted publishing, exchanging the workflow's identity for a short-lived token and adding provenance; when the version is on npm already, as the first one is, it publishes nothing;
+5. **GitHub release**: the `create-release` action of [itinera-dev/actions](https://github.com/itinera-dev/actions) creates the release with the notes of the version's changelog section, as a pre-release for a version such as `0.1.0-beta.1`, and attaches the conformance report and the API reference;
+6. **API reference on the site**: the `request-site-deploy` action asks the organisation's site to deploy again, which is how the reference is published, as the next section says.
 
 npm makes any version it publishes `latest` unless told otherwise, so a version with a pre-release part is published under the dist-tag `next`, which `publishConfig.tag` in `packages/itinera/package.json` sets. The release pull request sets it for such a version and removes it for any other.
 
-Before pushing the tag, the maintainer runs `npm publish --workspace packages/itinera --dry-run` at the commit to be tagged, since a tag whose publish job fails has no release. npm trusts only `release.yml` in this repository, running in the `npm` environment, so no token is stored anywhere. npm configures trusted publishing only on a package that already exists, so the maintainer publishes the first version by hand, and the workflow publishes every later one. If the publish job fails, the maintainer publishes the version by hand from the tagged commit, and creates the GitHub release by hand with the notes of the version's changelog section and the conformance report the workflow kept.
+Before pushing the tag, the maintainer runs `npm publish --workspace packages/itinera --dry-run` at the commit to be tagged, since a tag whose publish job fails has no release. npm trusts only `release.yml` in this repository, running in the `npm` environment, so no npm token is stored anywhere. npm configures trusted publishing only on a package that already exists, so the maintainer publishes the first version by hand, from the commit to be tagged, before pushing its tag; the workflow then finds it on npm, publishes nothing, and does everything else. It publishes every later version itself. If the publish job fails, the maintainer publishes the version by hand from the tagged commit and re-runs the workflow, which then goes on from the GitHub release.
 
 npm packs only a package's own directory, so `packages/itinera` holds its own copy of `LICENSE-MIT` and `LICENSE-APACHE`. A change to either file at the root of the repository is made to every copy.
+
+### The API reference on the site
+
+npm has no counterpart of docs.rs, so the organisation's site, [itinera-dev.org](https://itinera-dev.org/), serves the API reference, in editions as the book is:
+
+- the newest release at `/api/typescript/`;
+- `main` at `/api/typescript/next/`;
+- a frozen copy of each release at `/api/typescript/VERSION/`, such as `/api/typescript/0.1.0-beta.1/`.
+
+Each deployment of the site builds `next/` from `main`, and takes each release's edition from the `api-reference.tar.gz` attached to its GitHub release, so a release's reference never changes once it is out. The site deploys again when itinera-ts asks it to, through a `repository_dispatch` event of type `api-reference` sent by the `request-site-deploy` action: the release workflow asks once the GitHub release exists, and `.github/workflows/reference.yml` asks after every change on `main`.
+
+Sending that event needs a token with write access to the contents of itinera-dev/itinera-dev.github.io, such as a fine-grained personal access token limited to that repository, stored in this repository as the secret `SITE_DEPLOY_TOKEN`; GitHub's own token for a workflow reaches only its own repository. Until the secret is set, a change on `main` only warns, and the release workflow's last job fails, so the secret is set before the first release.
+
+### The release actions
+
+The three actions the release workflow runs from this repository, under `.github/actions`, are written in Python, for the standard library only, as every action of the organisation is. They live here for now, and move to [itinera-dev/actions](https://github.com/itinera-dev/actions), beside the other actions, later. Their tests run with `npm run release-actions`, one of the checks above.
