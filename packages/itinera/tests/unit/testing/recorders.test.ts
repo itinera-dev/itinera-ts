@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { integer } from "../value/token.js";
-import { Level } from "./emitted.js";
+import { integer } from "../../../src/value/token.js";
+import { Level } from "../../../src/testing/emitted.js";
 import {
   Contributions,
   HookEventReporter,
   StepEventReporter,
-} from "./recorders.js";
+} from "../../../src/testing/recorders.js";
 
 describe("Contributions", () => {
   it("keeps the keys contributed under, in the order first contributed, and reads the last value of each", () => {

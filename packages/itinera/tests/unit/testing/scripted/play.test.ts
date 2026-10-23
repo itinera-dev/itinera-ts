@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { orders } from "../../engine/fixtures.js";
-import { integer } from "../../value/token.js";
-import { Level } from "../emitted.js";
-import { RecordingReporter } from "../recording-reporter.js";
-import { scripted } from "../scripted.js";
-import { charge } from "./fixtures.js";
+import { orders } from "../../../fixtures/engine.js";
+import { integer } from "../../../../src/value/token.js";
+import { Level } from "../../../../src/testing/emitted.js";
+import { RecordingReporter } from "../../../../src/testing/recording-reporter.js";
+import { scripted } from "../../../../src/testing/scripted.js";
+import { charge } from "../../../fixtures/testing/scripted.js";
 
 function recorded() {
   const recorder = new RecordingReporter();

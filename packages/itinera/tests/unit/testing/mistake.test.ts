@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { type Mistake, MistakeKind, TestMistake } from "./mistake.js";
+import {
+  type Mistake,
+  MistakeKind,
+  TestMistake,
+} from "../../../src/testing/mistake.js";
 
 describe("TestMistake", () => {
   it.each<{ mistake: Mistake; described: string }>([

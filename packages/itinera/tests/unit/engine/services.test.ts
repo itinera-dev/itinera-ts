@@ -10,7 +10,14 @@ import { useFake } from "../../../src/instance/made.js";
 import type { ProviderName, ProviderOptions } from "../../../src/service.js";
 import { provided as made } from "../../../src/service/provider/provided.js";
 import type { Built } from "../../../src/workflow.js";
-import { GATEWAY, kindOf, recorded, run, serviced, Till } from "../../fixtures/engine.js";
+import {
+  GATEWAY,
+  kindOf,
+  recorded,
+  run,
+  serviced,
+  Till,
+} from "../../fixtures/engine.js";
 
 const failingOnce = {
   attempts: [Ending.failure("declined"), Ending.success],

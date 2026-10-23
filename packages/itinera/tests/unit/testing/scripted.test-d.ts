@@ -1,11 +1,11 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { Level } from "./emitted.js";
+import { Level } from "../../../src/testing/emitted.js";
 import type {
   AttemptScript,
   NamedStep,
   Script,
   StepScript,
-} from "./scripted.js";
+} from "../../../src/testing/scripted.js";
 
 declare const script: Script;
 declare const named: NamedStep;

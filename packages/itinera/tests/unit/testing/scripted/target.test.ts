@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { StepDescriptor } from "../../step.js";
-import { charge, rescued, shop } from "./fixtures.js";
-import { everyName, targetNamed } from "./target.js";
+import type { StepDescriptor } from "../../../../src/step.js";
+import { charge, rescued, shop } from "../../../fixtures/testing/scripted.js";
+import {
+  everyName,
+  targetNamed,
+} from "../../../../src/testing/scripted/target.js";
 
 function stepsOf(
   charging: Parameters<typeof shop>[0],

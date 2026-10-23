@@ -1,7 +1,7 @@
 import { describe, it } from "vitest";
-import type { WorkflowInstance } from "../instance.js";
-import { serviceType } from "../service/request.js";
-import { fakeProvider } from "./fake-provider.js";
+import type { WorkflowInstance } from "../../../src/instance.js";
+import { serviceType } from "../../../src/service/request.js";
+import { fakeProvider } from "../../../src/testing/fake-provider.js";
 
 interface Gateway {
   readonly label: string;

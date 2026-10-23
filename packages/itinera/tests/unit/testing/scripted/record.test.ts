@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { keeping, orders } from "../../engine/fixtures.js";
-import { input } from "../../step/request.js";
-import { fromRescuedStep } from "../../step/rescue.js";
-import { integer, string } from "../../value/token.js";
-import { MistakeKind, TestMistake } from "../mistake.js";
-import { scripted } from "../scripted.js";
-import { stepMock } from "../step-mock.js";
-import { Ending } from "../ending.js";
-import { rescueStepMock } from "../rescue-step-mock.js";
-import { charge, rescued, shop } from "./fixtures.js";
-import type { AttemptRecord } from "./record.js";
+import { keeping, orders } from "../../../fixtures/engine.js";
+import { input } from "../../../../src/step/request.js";
+import { fromRescuedStep } from "../../../../src/step/rescue.js";
+import { integer, string } from "../../../../src/value/token.js";
+import { MistakeKind, TestMistake } from "../../../../src/testing/mistake.js";
+import { scripted } from "../../../../src/testing/scripted.js";
+import { stepMock } from "../../../../src/testing/step-mock.js";
+import { Ending } from "../../../../src/testing/ending.js";
+import { rescueStepMock } from "../../../../src/testing/rescue-step-mock.js";
+import { charge, rescued, shop } from "../../../fixtures/testing/scripted.js";
+import type { AttemptRecord } from "../../../../src/testing/scripted/record.js";
 
 function charging() {
   return keeping([])

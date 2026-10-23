@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { type Mistake, MistakeKind, TestMistake } from "../mistake.js";
-import { Level } from "../emitted.js";
-import { scripted } from "../scripted.js";
-import { charge, rescued, shop } from "./fixtures.js";
+import {
+  type Mistake,
+  MistakeKind,
+  TestMistake,
+} from "../../../../src/testing/mistake.js";
+import { Level } from "../../../../src/testing/emitted.js";
+import { scripted } from "../../../../src/testing/scripted.js";
+import { charge, rescued, shop } from "../../../fixtures/testing/scripted.js";
 
 /** The step `charge` of a shop, retried `retries` times, just named. */
 function charging(retries = 0) {

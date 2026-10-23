@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { integer, object, string } from "../value/token.js";
-import { TestDataBag } from "./test-data-bag.js";
+import { integer, object, string } from "../../../src/value/token.js";
+import { TestDataBag } from "../../../src/testing/test-data-bag.js";
 
 describe("TestDataBag", () => {
   it("lends read access to the values it was given, in order", () => {
