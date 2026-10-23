@@ -1,12 +1,12 @@
-import { orders, serviced } from "../../engine/fixtures.js";
-import type { WorkflowInstance } from "../../instance.js";
-import { contributor } from "../../journey.js";
-import type { StepClass } from "../../step.js";
-import type { StepBuilder } from "../../step/builder.js";
-import { stepReporter } from "../../step/request.js";
-import { Ending } from "../ending.js";
-import { rescueStepMock } from "../rescue-step-mock.js";
-import { stepMock } from "../step-mock.js";
+import { orders, serviced } from "../engine.js";
+import type { WorkflowInstance } from "../../../src/instance.js";
+import { contributor } from "../../../src/journey.js";
+import type { StepClass } from "../../../src/step.js";
+import type { StepBuilder } from "../../../src/step/builder.js";
+import { stepReporter } from "../../../src/step/request.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
 
 /**
  * The step `name`, `charge` unless named, which succeeds when it runs for

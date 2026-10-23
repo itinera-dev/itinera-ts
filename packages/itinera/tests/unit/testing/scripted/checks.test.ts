@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { StepClass } from "../../step.js";
-import type { StepBuilder } from "../../step/builder.js";
-import { Ending } from "../ending.js";
-import { MistakeKind } from "../mistake.js";
-import { leftOut } from "./checks.js";
-import { charge, rescued, shop } from "./fixtures.js";
-import { type Described, type Target, targetNamed } from "./target.js";
+import type { StepClass } from "../../../../src/step.js";
+import type { StepBuilder } from "../../../../src/step/builder.js";
+import { Ending } from "../../../../src/testing/ending.js";
+import { MistakeKind } from "../../../../src/testing/mistake.js";
+import { leftOut } from "../../../../src/testing/scripted/checks.js";
+import { charge, rescued, shop } from "../../../fixtures/testing/scripted.js";
+import {
+  type Described,
+  type Target,
+  targetNamed,
+} from "../../../../src/testing/scripted/target.js";
 
 const realRun: Described = { kind: "real run" };
 

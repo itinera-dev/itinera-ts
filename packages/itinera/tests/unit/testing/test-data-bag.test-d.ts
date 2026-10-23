@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { TestDataBag } from "./test-data-bag.js";
+import { TestDataBag } from "../../../src/testing/test-data-bag.js";
 
 describe("TestDataBag", () => {
   it("holds only values", () => {

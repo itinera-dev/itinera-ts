@@ -8,12 +8,15 @@ import {
   orders,
   run,
   type Till,
-} from "../engine/fixtures.js";
-import type { Provided } from "../service.js";
-import { serviceType } from "../service/request.js";
-import type { Built } from "../workflow.js";
-import { fakeProvider, type Provide } from "./fake-provider.js";
-import { MistakeKind, TestMistake } from "./mistake.js";
+} from "../../fixtures/engine.js";
+import type { Provided } from "../../../src/service.js";
+import { serviceType } from "../../../src/service/request.js";
+import type { Built } from "../../../src/workflow.js";
+import {
+  fakeProvider,
+  type Provide,
+} from "../../../src/testing/fake-provider.js";
+import { MistakeKind, TestMistake } from "../../../src/testing/mistake.js";
 
 /** The workflow `orders` of a till whose provider `main` counts its calls. */
 function countingTill(): Built<Till> {

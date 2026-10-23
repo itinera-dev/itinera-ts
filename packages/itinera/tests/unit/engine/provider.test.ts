@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import type { Event } from "../../../src/event.js";
 import { EventKind } from "../../../src/event/kind.js";
 import { useFake, type WorkflowInstance } from "../../../src/instance/made.js";
-import type { Provided, ProviderName, ProviderReporter } from "../../../src/service.js";
+import type {
+  Provided,
+  ProviderName,
+  ProviderReporter,
+} from "../../../src/service.js";
 import { provided } from "../../../src/service/provider/provided.js";
 import { providerReporter } from "../../../src/service/reporter.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";

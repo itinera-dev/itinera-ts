@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { orders, type Orders } from "../../engine/fixtures.js";
-import { LocalExecutor } from "../../executor/local.js";
-import type { WorkflowInstance } from "../../instance.js";
-import { DefaultDispatcherFactory } from "../../report/default-dispatcher.js";
-import type { StepBuilder, StepClass } from "../../step.js";
-import { MistakeKind, TestMistake } from "../mistake.js";
-import { RecordingReporter } from "../recording-reporter.js";
-import { scripted } from "../scripted.js";
-import { charge, rescued, shop } from "./fixtures.js";
+import { orders, type Orders } from "../../../fixtures/engine.js";
+import { LocalExecutor } from "../../../../src/executor/local.js";
+import type { WorkflowInstance } from "../../../../src/instance.js";
+import { DefaultDispatcherFactory } from "../../../../src/report/default-dispatcher.js";
+import type { StepBuilder, StepClass } from "../../../../src/step.js";
+import { MistakeKind, TestMistake } from "../../../../src/testing/mistake.js";
+import { RecordingReporter } from "../../../../src/testing/recording-reporter.js";
+import { scripted } from "../../../../src/testing/scripted.js";
+import { charge, rescued, shop } from "../../../fixtures/testing/scripted.js";
 
 /**
  * An instance of the workflow `orders` of `steps`, and the recording

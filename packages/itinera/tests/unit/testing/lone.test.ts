@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { None, Some } from "../option.js";
-import { Level } from "./emitted.js";
-import { Lone } from "./lone.js";
+import { None, Some } from "../../../src/option.js";
+import { Level } from "../../../src/testing/emitted.js";
+import { Lone } from "../../../src/testing/lone.js";
 
 describe("Lone", () => {
   it("keeps what a step's reporter emits, with its level, message and data, in order", async () => {
