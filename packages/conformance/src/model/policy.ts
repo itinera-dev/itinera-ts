@@ -1,7 +1,7 @@
 import { StepHook, WorkflowHook } from "itinera/policy";
 import { ModelError } from "./error.js";
 import type { Level } from "./step.js";
-import type { Scripted, ValueType } from "./value.js";
+import type { Scripted, CaseType } from "./value.js";
 
 /** A hook of either kind, by the name the cases give it. */
 export type Hook = StepHook | WorkflowHook;
@@ -36,7 +36,7 @@ export type HookRequest =
   | {
       readonly kind: "step data" | "data from the workflow";
       readonly key: string;
-      readonly type: ValueType;
+      readonly type: CaseType;
       readonly optional: boolean;
     }
   | { readonly kind: "failure reason"; readonly optional: boolean }

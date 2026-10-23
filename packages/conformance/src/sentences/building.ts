@@ -6,7 +6,7 @@ import {
   scripted,
   succeeds,
   type Row,
-  type ValueType,
+  type CaseType,
 } from "../model.js";
 import type { World } from "../world.js";
 
@@ -23,14 +23,14 @@ function stepName(row: Row): string {
 
 Given<World>(
   "step {string} requests input {string} of type {type}",
-  function (step: string, key: string, type: ValueType) {
+  function (step: string, key: string, type: CaseType) {
     this.model.step(step).inputs.push({ key, type, optional: false });
   },
 );
 
 Given<World>(
   "step {string} requests optional input {string} of type {type}",
-  function (step: string, key: string, type: ValueType) {
+  function (step: string, key: string, type: CaseType) {
     this.model.step(step).inputs.push({ key, type, optional: true });
   },
 );
@@ -90,7 +90,7 @@ Given<World>("step {string} has a rescue step", function (step: string) {
 
 Given<World>(
   "step {string} requests rescued step data {string} of type {type}",
-  function (step: string, key: string, type: ValueType) {
+  function (step: string, key: string, type: CaseType) {
     this.model.rescueStep(step).rescueRequests.push({
       kind: "data",
       input: { key, type, optional: false },
@@ -100,7 +100,7 @@ Given<World>(
 
 Given<World>(
   "step {string} requests optional rescued step data {string} of type {type}",
-  function (step: string, key: string, type: ValueType) {
+  function (step: string, key: string, type: CaseType) {
     this.model.rescueStep(step).rescueRequests.push({
       kind: "data",
       input: { key, type, optional: true },

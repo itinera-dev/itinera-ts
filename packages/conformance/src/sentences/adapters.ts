@@ -1,5 +1,5 @@
 import { Given } from "@cucumber/cucumber";
-import { answerOf, scripted, type ValueType } from "../model.js";
+import { answerOf, scripted, type CaseType } from "../model.js";
 import type { World } from "../world.js";
 
 Given<World>(
@@ -30,7 +30,7 @@ Given<World>(
 
 Given<World>(
   "the input adapter {string} requests data from the workflow {string} of type {type}",
-  function (adapter: string, key: string, type: ValueType) {
+  function (adapter: string, key: string, type: CaseType) {
     this.model
       .adapter(adapter)
       .requests.push({ kind: "data from the workflow", key, type });
@@ -66,7 +66,7 @@ Given<World>(
     adapter: string,
     kept: string,
     key: string,
-    type: ValueType,
+    type: CaseType,
     input: string,
     step: string,
   ) {

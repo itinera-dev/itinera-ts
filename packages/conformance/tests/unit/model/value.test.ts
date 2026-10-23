@@ -1,21 +1,38 @@
 import { describe, expect, it } from "vitest";
 import { ModelError } from "../../../src/model/error.js";
 import {
+  aThrowingRecord,
+  caseType,
+  convertedTypes,
   entries,
   json,
-  valueType,
+  nonValue,
+  type Scripted,
   valueTypes,
+  written,
 } from "../../../src/model/value.js";
 
 describe("values and types", () => {
   it.each(valueTypes)("reads %s, a type of the neutral vocabulary", (name) => {
-    expect(valueType(name)).toBe(name);
+    expect(caseType(name)).toBe(name);
   });
 
-  it("refuses a type outside the neutral vocabulary", () => {
-    expect(() => valueType("float")).toThrow(
-      new ModelError('"float" is not a type of the neutral vocabulary'),
+  it.each(convertedTypes)("reads %s, a converted type", (name) => {
+    expect(caseType(name)).toBe(name);
+  });
+
+  it("refuses a type the cases do not name", () => {
+    expect(() => caseType("float")).toThrow(
+      new ModelError('"float" is not a type the cases name'),
     );
+  });
+
+  it.each<[string, string, Scripted]>([
+    ["a non-value", "a non-value", nonValue],
+    ["a throwing record", "a throwing record", aThrowingRecord],
+    ["a value written as JSON", "[1]", { kind: "value", value: [1] }],
+  ])("reads what is written in the place of a value: %s", (_, text, read) => {
+    expect(written(text)).toEqual(read);
   });
 
   it.each([

@@ -1,6 +1,7 @@
 import { DataBag } from "itinera/journey";
 import { None, type Option, Some } from "itinera/option";
 import { type PlainValue } from "itinera/value";
+import { ThrowingRecord } from "./converted.js";
 import { given } from "./given.js";
 import {
   adapterOf,
@@ -10,7 +11,11 @@ import {
   isForTheDataBag,
   isForTheStepName,
 } from "./model/adapter.js";
-import type { Scripted, ValueType } from "./model/value.js";
+import {
+  aThrowingRecord,
+  type CaseType,
+  type Scripted,
+} from "./model/value.js";
 import { tokenOf } from "./tokens.js";
 
 /**
@@ -97,7 +102,7 @@ function stepNameIn(
 function readThrough(
   access: DataBag | undefined,
   key: string,
-  type: ValueType,
+  type: CaseType,
 ): Option<Scripted> {
   return heldBy(access).read(key, tokenOf(type)).option().map(asScripted);
 }
@@ -118,6 +123,8 @@ function writeThrough(access: DataBag, key: string, value: Scripted): void {
   Reflect.set(access, key, given(value));
 }
 
-function asScripted(value: PlainValue): Scripted {
-  return { kind: "value", value };
+function asScripted(value: PlainValue | ThrowingRecord): Scripted {
+  return value instanceof ThrowingRecord
+    ? aThrowingRecord
+    : { kind: "value", value };
 }
