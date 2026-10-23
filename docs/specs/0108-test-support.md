@@ -36,7 +36,7 @@ Stage 2 started the runner in `packages/conformance`, on cucumber-js 13.3.0, wit
 - `tests/unit/testing/recording-reporter.test.ts`: events kept in order, the latest value of each entry of global metadata in the order first set, the path made from the events, and copies on every read.
 - `tests/unit/testing/recording-reporter/path.test.ts`: the line of every event of the flow, each as chapter 8, 8.3 writes it, and no line for events outside the flow.
 - `examples/recording-reporter.ts`: a recording reporter added to a dispatcher, keeping the latest value of each entry.
-- `packages/conformance/src/*.test.ts` and the tests beside the model's submodules: the environment, the model and what each sentence may declare only once, tables, values and types, attempts, contributions, events a step emits, event kinds and the recording dispatcher factory.
+- `packages/conformance/tests/unit`, mirroring `src`: the environment, the model and what each sentence may declare only once, tables, values and types, attempts, contributions, events a step emits, event kinds and the recording dispatcher factory.
 - `packages/conformance/tests/integration/runner.test.ts`: the built runner run on its own cases in `tests/fixtures/cases`, passing a scenario of sentences it defines and reporting it as Cucumber JSON, running only what the tag expression selects, failing on an undefined sentence and on a case in error, and refusing to run without its environment.
 
 ## Open points
