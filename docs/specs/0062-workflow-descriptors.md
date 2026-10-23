@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0062](https://github.com/itinera-dev/spec/blob/main/proposals/0062-workflow-descriptors.md), implemented in [#23](https://github.com/itinera-dev/itinera-ts/issues/23). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals: section 4 the decorators, section 5 the registration, the builder and the descriptors, and decisions 11 and 12. [0008](0008-steps.md) holds the steps and [0061](0061-instance-carries-journey-id-and-reporters.md) the instance.
 
-Status: in progress. Stage 3 added the base class `Workflow`, the descriptor interfaces, the registry, `@workflow`, `@withStep` and `@idGenerator`, the metadata check, the first violation, the static `build()` and the builder with `name`, `step`, `reporter`, `idGenerator`, `constructWith` and `build`. Stage 4 adds the type tokens, the request decorators, every other base class and declaring decorator, every other list, the tokens by position, every violation, the listing and `run`'s check of a descriptor written by hand, and lists the proposal. Its first layer has added the type tokens and `itinera/schema`, the table of requests, and the requests of steps; its second, the policies attached by `@withStep` and `@workflow` (see [0010](0010-hooks-lifecycles-and-roles.md)); its third, rescue steps attached by `@withStep`, the input adapters and service providers of a workflow class (see [0003](0003-rescue-steps.md), [0060](0060-input-adapters-attached-to-steps.md) and [0095](0095-services-provided-to-steps.md)), and the guard on `strictNullChecks`; its fourth, a builder per step, `Charge.builder(name)`, given to the workflow builder's `step`.
+Status: in progress. Stage 3 added the base class `Workflow`, the descriptor interfaces, the registry, `@workflow`, `@withStep` and `@idGenerator`, the metadata check, the first violation, the static `build()` and the builder with `name`, `step`, `reporter`, `idGenerator`, `constructWith` and `build`. Stage 4 adds the type tokens, the request decorators, every other base class and declaring decorator, every other list, the tokens by position, every violation and the listing, and lists the proposal. Its first layer has added the type tokens and `itinera/schema`, the table of requests, and the requests of steps; its second, the policies attached by `@withStep` and `@workflow` (see [0010](0010-hooks-lifecycles-and-roles.md)); its third, rescue steps attached by `@withStep`, the input adapters and service providers of a workflow class (see [0003](0003-rescue-steps.md), [0060](0060-input-adapters-attached-to-steps.md) and [0095](0095-services-provided-to-steps.md)), and the guard on `strictNullChecks`; its fourth, a builder per step, `Charge.builder(name)`, given to the workflow builder's `step`; its fifth, the sealed descriptors and instances.
 
 ## API
 
@@ -10,12 +10,13 @@ Until 0062 is listed, everything here is exported only from `itinera/unstable`. 
 
 ### The descriptors, the executor's contract
 
-- **`WorkflowDescriptor<W>`**, in `src/workflow/descriptor.ts`, is an object of its own, never the workflow object, as decision 12 says. `W` is the type of the workflow object its calls take. Its members so far:
+- **Sealed.** `WorkflowDescriptor`, `StepDescriptor` and `WorkflowInstance` are classes with ECMAScript private `#` fields and private constructors, exported as types only, as the plan's decision 15 says. Each class's static block hands its module the one function that makes one, so only `assemble`, `describeStep` and `instanceOf` make them, and an object or a class written by hand with the same members does not compile where one is expected. `run` rejects with a `TypeError` an instance that `instance()` did not make, told apart by its private field, which only a cast lets through, before it refuses anything. Each is frozen once made, but for an instance's reporters and global metadata, which it hands over once.
+- **`WorkflowDescriptor`**, in `src/workflow/descriptor.ts`, is an object of its own, never the workflow object, as decision 12 says. Its members so far:
   - `name`, the `WorkflowName`;
   - `steps()`, the step descriptors in the order they run, the same frozen array on every call;
   - `reporters()`, a new reporter of each listed class for every call, which `instance()` calls when it creates an instance, so that each instance has reporters of its own;
-  - `generateJourneyId(workflow, data)`, which calls the method `@idGenerator` marked with the workflow object as `this`, or makes a random UUID v4 with `crypto.randomUUID()` when there is none. `data` is the instance's initial data, which the method will read through `@dataBag()` once stage 5 resolves requests; until then `IdGeneratorDecorator` takes only a method with no parameter, so no request on it compiles. The parameter is there now so that the executor's contract does not change then. A returned value that is not a string throws a `TypeError`, since a cast can slip one past the types.
-- **`StepDescriptor`**, in `src/step/descriptor.ts`: `name`, `retryBudget`, `retryOnAbnormalTermination` and `build()`, which makes a new step for each attempt. Its requests join it in stage 4.
+  - `generateJourneyId(workflow)`, which calls the method `@idGenerator` marked with the workflow object as `this`, or makes a random UUID v4 with `crypto.randomUUID()` when there is none. Stage 5 gives it the instance's initial data too, which the method will read through `@dataBag()` once requests are resolved; until then `IdGeneratorDecorator` takes only a method with no parameter, so no request on it compiles. Since only itinera makes a descriptor, adding the parameter then changes no application's code. A returned value that is not a string throws a `TypeError`, since a cast can slip one past the types.
+- **`StepDescriptor`**, in `src/step/descriptor.ts`: `name`, `retryBudget`, `retryOnAbnormalTermination` and `build()`, which makes a new step for each attempt. It keeps the policies and the rescue step attached to the step in a private field, which `policiesOf` and `rescueOf` read. Its requests join it in stage 4.
 - Stage 4 adds `policies()`, `adapt(...)`, `provide(...)` and `listing()`, and `PolicyDescriptor`.
 
 ### How declarations become descriptors
@@ -76,6 +77,7 @@ Until 0062 is listed, everything here is exported only from `itinera/unstable`. 
 - `tests/unit/workflow/decorators.test.ts`: steps in written order, a rescue step attached, and every refusal when a class is defined.
 - `tests/unit/workflow/id-generator.test.ts`: the ID generator recorded as a reference to its method, refused on what is not a method, refused twice, refused with a parameter, and refused without metadata.
 - `tests/unit/declaration/parameter.test.ts`: a request decorator compiles with `strictNullChecks` and does not without it, compiled through the TypeScript compiler's API.
+- `tests/unit/workflow/descriptor.test-d.ts`, `tests/unit/step/descriptor.test-d.ts` and `tests/unit/instance.test-d.ts`: a workflow descriptor, a step descriptor or an instance written by hand, as an object or as a class, does not compile.
 - `tests/unit/workflow/descriptor.test.ts`: no name, violations, steps kept whatever happens to the list given, new reporters on every call, a random UUID v4, the ID generator called on the workflow object, and an ID that is not a string.
 - `tests/unit/workflow/violation.test.ts`: each repeated name once, in order, case-sensitive names, and the message.
 - `tests/unit/workflow.test.ts`: `build()` with the constructor's arguments, one descriptor per class, a class without `@workflow`, an object made with `new`, and what the helpers of input adapters and providers make.
@@ -91,8 +93,8 @@ Until 0062 is listed, everything here is exported only from `itinera/unstable`. 
 
 ## Open points
 
-- **Names for descriptors written by hand.** `WorkflowDescriptor`, `StepDescriptor` and `WorkflowInstance` may be written by hand, as chapter 5, 5.9 allows, but `WorkflowName`, `StepName` and `JourneyId` are branded, so such code needs a cast to make one. Public makers checked as `named` checks, like itinera-rs's `StepName::new`, `WorkflowName::from` and `JourneyId::from`, are settled before stage 4 adds `run`'s check of a descriptor written by hand.
+None.
 
 ## Done when
 
-The builder's every list and check, every violation, the listing and `run`'s check of a descriptor written by hand are in, and 62 is listed in `conformance.json`. No scenario is tagged `@proposal-0062`. Planned for stage 4.
+The builder's every list and check, every violation and the listing are in, and 62 is listed in `conformance.json`. No scenario is tagged `@proposal-0062`. Planned for stage 4.

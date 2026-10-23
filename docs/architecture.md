@@ -80,7 +80,8 @@ flowchart TD
 2. It holds the workflow's name and its step descriptors in the order they run. Its `reporters` makes a new reporter of each class the workflow lists, and its `generateJourneyId` asks the ID generator for a journey ID, or makes a random UUID when the workflow has none.
 3. Each `StepDescriptor` holds the step's name, its retry budget, whether it retries an abnormal termination, which it does unless that is turned off, and `build`, which makes a new step for each attempt.
 4. A `WorkflowInstance` holds the descriptor beside the workflow object, the journey ID, the initial data, the reporters made for this journey, the workflow's first and the instance's own after them, and the initial global metadata.
-5. The local executor runs an instance. It reads only the `WorkflowInstance` interface, so it runs any instance, however it was made.
+5. The local executor runs an instance, reading only what `WorkflowInstance` holds.
+6. All three are sealed: only the decorators, the builder and `instance()` make them, so one written by hand does not compile where one is expected.
 
 Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `step/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
 
@@ -152,7 +153,7 @@ Where it lives: `step/rescue.ts`, `workflow/adapter.ts`, `service/provider.ts`, 
 ```mermaid
 sequenceDiagram
     accTitle: From a declaration to a journey's result
-    accDescr: The application builds the workflow object and makes an instance, whose creation makes the journey ID. The executor refuses a run while it runs a journey. The engine refuses an instance handed over before, captures the initial data and global metadata, creates a dispatcher, adds each reporter wrapped in a guard, and sets the journey ID and then the initial global metadata, any of which can refuse the instance. Then it runs the journey and the executor resolves to its result.
+    accDescr: The application builds the workflow object and makes an instance, whose creation makes the journey ID. The executor rejects an instance that instance() did not make, and refuses a run while it runs a journey. The engine refuses an instance handed over before, captures the initial data and global metadata, creates a dispatcher, adds each reporter wrapped in a guard, and sets the journey ID and then the initial global metadata, any of which can refuse the instance. Then it runs the journey and the executor resolves to its result, or rejects with a Refusal, or with a TypeError for an instance instance() did not make.
     participant App as Application
     participant Exec as LocalExecutor
     participant Engine as Engine
@@ -161,7 +162,7 @@ sequenceDiagram
     App->>App: Orders.build() or the builder, then instance()
     Note over App: instance() makes the journey ID
     App->>Exec: run the instance
-    Note over Exec: refuses while it runs a journey
+    Note over Exec: rejects an instance instance() did not make, then refuses while it runs a journey
     Exec->>Engine: run the journey
     Note over Engine: refuses an instance handed over before, then captures the initial data and global metadata
     Engine->>Factory: create a dispatcher
@@ -170,11 +171,11 @@ sequenceDiagram
     Engine->>Dispatcher: set journey_id, then each entry of initial global metadata
     Engine->>Engine: run the journey
     Engine-->>Exec: the result
-    Exec-->>App: the result, or a Refusal as a rejection
+    Exec-->>App: the result, or a rejection: a Refusal, or a TypeError for an instance instance() did not make
 ```
 
 1. The application makes the workflow object with `Orders.build()`, or with the builder, and asks it for an instance. `instance()` makes the journey ID, from the ID generator or as a random UUID.
-2. The application hands the instance to `run` on a `LocalExecutor`. While the executor runs a journey, it refuses any other.
+2. The application hands the instance to `run` on a `LocalExecutor`. The executor rejects with a `TypeError` an instance that `instance()` did not make, which only a cast lets through. While it runs a journey, it refuses any other.
 3. The engine refuses an instance that was handed to `run` before, refused or not. It captures the initial data and the initial global metadata, and refuses the instance when a value is not a value, or when the global metadata sets `journey_id`.
 4. It creates the journey's dispatcher with the executor's dispatcher factory, the default one unless the executor was given another, and adds each reporter of the instance, wrapped in a guard.
 5. It sets `journey_id` first, then each entry of the initial global metadata, in order, through the dispatcher.

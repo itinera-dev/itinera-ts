@@ -39,6 +39,10 @@ class Orders extends Workflow {
 }
 
 describe("an instance", () => {
+  it("cannot be changed", () => {
+    expect(Object.isFrozen(Orders.build().instance())).toBe(true);
+  });
+
   it("is made with the journey ID from the workflow's ID generator", () => {
     expect(Orders.build().instance().journeyId).toBe("order-1");
   });
