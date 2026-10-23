@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { Workflow } from "../../workflow.js";
-import { isProvided, type Provided } from "./provided.js";
+import { Workflow } from "../../../../src/workflow.js";
+import {
+  isProvided,
+  type Provided,
+} from "../../../../src/service/provider/provided.js";
 
 interface PaymentGateway {
   take(amount: number): string;

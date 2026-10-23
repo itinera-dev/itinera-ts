@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { describeStep } from "../../step/descriptor.js";
-import { Ship } from "../../step/fixtures.js";
-import type { WorkflowName } from "../../workflow.js";
-import { Violations } from "../violation.js";
-import { assemble, type Parts } from "./assemble.js";
+import { describeStep } from "../../../../src/step/descriptor.js";
+import { Ship } from "../../../fixtures/step.js";
+import type { WorkflowName } from "../../../../src/workflow.js";
+import { Violations } from "../../../../src/workflow/violation.js";
+import {
+  assemble,
+  type Parts,
+} from "../../../../src/workflow/descriptor/assemble.js";
 
 const nothing: Parts = {
   name: "orders" as WorkflowName,

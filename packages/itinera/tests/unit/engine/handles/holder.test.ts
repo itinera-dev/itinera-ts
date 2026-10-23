@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { PolicyName } from "../../../../src/policy.js";
 import type { ProviderName } from "../../../../src/service.js";
 import { Attempt, type StepName } from "../../../../src/step.js";
-import { blamed, described, type Holder, setter } from "../../../../src/engine/handles/holder.js";
+import {
+  blamed,
+  described,
+  type Holder,
+  setter,
+} from "../../../../src/engine/handles/holder.js";
 
 const step = "charge" as StepName;
 const policy = "audit" as PolicyName;

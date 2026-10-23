@@ -5,10 +5,17 @@ import type { Value } from "../../../src/value.js";
 import type { Reporter } from "../../../src/report.js";
 import { describeStep } from "../../../src/step/descriptor.js";
 import { Ship } from "../../fixtures/step.js";
-import { Workflow, workflow, type WorkflowName } from "../../../src/workflow.js";
+import {
+  Workflow,
+  workflow,
+  type WorkflowName,
+} from "../../../src/workflow.js";
 import type { StepName } from "../../../src/step.js";
 import type { DeclaredAdapter } from "../../../src/workflow/adapter.js";
-import { assemble, type Parts } from "../../../src/workflow/descriptor/assemble.js";
+import {
+  assemble,
+  type Parts,
+} from "../../../src/workflow/descriptor/assemble.js";
 import { adapter, provider } from "../../fixtures/workflow.js";
 import type { DeclaredIdGenerator } from "../../../src/workflow/id-generator.js";
 

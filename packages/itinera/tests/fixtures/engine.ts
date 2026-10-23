@@ -6,7 +6,11 @@ import type { WorkflowInstance } from "../../src/instance.js";
 import type { JourneyId, JourneyResult } from "../../src/journey.js";
 import type { StepPolicyBuilder } from "../../src/policy/step-policy/builder.js";
 import type { WorkflowPolicyBuilder } from "../../src/policy/workflow-policy/builder.js";
-import type { Dispatcher, DispatcherFactory, Reporter } from "../../src/report.js";
+import type {
+  Dispatcher,
+  DispatcherFactory,
+  Reporter,
+} from "../../src/report.js";
 import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
 import {
   type Outcome,

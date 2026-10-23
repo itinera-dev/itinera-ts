@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { implementationOf } from "./implementation.js";
-import { serviceType } from "./request.js";
+import { implementationOf } from "../../../src/service/implementation.js";
+import { serviceType } from "../../../src/service/request.js";
 
 const GATEWAY = serviceType<unknown>("Gateway");
 

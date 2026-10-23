@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { journeyId } from "../../journey/request.js";
-import { None } from "../../option.js";
-import { attempt, stepName } from "../../step/request.js";
-import { optional, string } from "../../value/token.js";
-import { fromWorkflow } from "../../workflow/request.js";
-import { chargingTill, counted, run, travelled } from "../fixtures.js";
+import { journeyId } from "../../../../src/journey/request.js";
+import { None } from "../../../../src/option.js";
+import { attempt, stepName } from "../../../../src/step/request.js";
+import { optional, string } from "../../../../src/value/token.js";
+import { fromWorkflow } from "../../../../src/workflow/request.js";
+import {
+  chargingTill,
+  counted,
+  run,
+  travelled,
+} from "../../../fixtures/engine.js";
 
 describe("answer", () => {
   it("answers each request of the provider, in the order it declares them", async () => {
