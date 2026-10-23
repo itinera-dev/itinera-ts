@@ -1,9 +1,9 @@
-import type { Event } from "../event.js";
-import type { JourneyId } from "../journey.js";
-import { Attempt, type StepName } from "../step.js";
-import type { WorkflowName } from "../workflow.js";
-import type { JourneyAborted } from "./fact.js";
-import type { Timestamp } from "./fields.js";
+import type { Event } from "../../src/event.js";
+import type { JourneyId } from "../../src/journey.js";
+import { Attempt, type StepName } from "../../src/step.js";
+import type { WorkflowName } from "../../src/workflow.js";
+import type { JourneyAborted } from "../../src/event/fact.js";
+import type { Timestamp } from "../../src/event/fields.js";
 
 const fixed = {
   timestamp: "2026-10-19T12:00:00.000Z" as Timestamp,

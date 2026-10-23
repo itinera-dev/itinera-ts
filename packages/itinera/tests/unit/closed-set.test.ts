@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { closedSet } from "./closed-set.js";
+import { closedSet } from "../../src/closed-set.js";
 
 const Colour = closedSet({ Red: "red", DarkBlue: "dark blue" });
 

@@ -22,7 +22,7 @@ None of its own.
 
 ## Tests
 
-- `src/report/default-dispatcher.test.ts`: delivery to every reporter in order, waiting for a reporter that returns a promise, stopping at a reporter that fails and passing its failure on, `journey_aborted` past failing reporters with the first failure passed on, global metadata in order, waiting for a reporter that receives it asynchronously, over reporters that do not take it, stopping at a failure and passed as given; the factory creating a new dispatcher each time, sharing no reporter.
+- `tests/unit/report/default-dispatcher.test.ts`: delivery to every reporter in order, waiting for a reporter that returns a promise, stopping at a reporter that fails and passing its failure on, `journey_aborted` past failing reporters with the first failure passed on, global metadata in order, waiting for a reporter that receives it asynchronously, over reporters that do not take it, stopping at a failure and passed as given; the factory creating a new dispatcher each time, sharing no reporter.
 - `examples/dispatcher.ts` and `examples/dispatcher-factory.ts`: a dispatcher and a factory an application writes.
 - Stage 3: the scenario "A dispatcher factory that fails is a refusal, with no event".
 

@@ -1,7 +1,7 @@
 import { describe, it } from "vitest";
-import type { StepName } from "../../step.js";
-import type { ByProvider, ByStepHook } from "../source.js";
-import type { NotAValue } from "./not-a-value.js";
+import type { StepName } from "../../../../src/step.js";
+import type { ByProvider, ByStepHook } from "../../../../src/event/source.js";
+import type { NotAValue } from "../../../../src/event/abort/not-a-value.js";
 
 declare function aborting(abort: NotAValue): void;
 declare const step: StepName;

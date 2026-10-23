@@ -1,6 +1,6 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { Event } from "./event.js";
-import type { Reporter } from "./report.js";
+import type { Event } from "../../src/event.js";
+import type { Reporter } from "../../src/report.js";
 
 describe("Reporter", () => {
   it("need not take global metadata", () => {

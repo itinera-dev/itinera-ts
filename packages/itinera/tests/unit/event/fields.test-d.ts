@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import type { Timestamp } from "./fields.js";
+import type { Timestamp } from "../../../src/event/fields.js";
 
 declare function stamping(timestamp: Timestamp): void;
 

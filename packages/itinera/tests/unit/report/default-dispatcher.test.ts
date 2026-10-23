@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import type { Event } from "../event.js";
+import type { Event } from "../../../src/event.js";
 import {
   journeyAborted,
   journeyStarted,
   stepSucceeded,
-} from "../event/fixtures.js";
-import type { Reporter } from "../report.js";
-import type { PlainValue } from "../value.js";
+} from "../../fixtures/event.js";
+import type { Reporter } from "../../../src/report.js";
+import type { PlainValue } from "../../../src/value.js";
 import {
   DefaultDispatcher,
   DefaultDispatcherFactory,
-} from "./default-dispatcher.js";
+} from "../../../src/report/default-dispatcher.js";
 
 class Recording implements Reporter {
   constructor(

@@ -63,16 +63,16 @@ None of its own.
 
 ## Tests
 
-- `src/event/kind.test.ts`: every event kind is written in snake case, over `EventKind` itself.
-- `src/event.test-d.ts`: `Event` has one member per kind, narrows by kind, and cannot be changed.
-- `src/event/fact.test-d.ts`: a lifecycle only from a step hook.
-- `src/event/abort.test-d.ts` and `src/event/abort/not-a-value.test-d.ts`: only `journey_id` is a reserved key; `service_provided` names only a provider's data; a key and an event kind never together.
-- `src/event/fields.test-d.ts`, `src/step.test-d.ts`, `src/journey.test-d.ts`, `src/policy.test-d.ts`, `src/workflow.test-d.ts` and `src/service.test-d.ts`: a plain string is none of the names, the journey ID or a timestamp; an attempt cannot be constructed or changed; each closed set's type is only its values.
-- `src/closed-set.test-d.ts`: a closed set's type is only its values, and the set cannot be changed.
-- `src/report.test-d.ts`: a reporter need not receive global metadata, and may report asynchronously.
-- `src/report/debug-reporter.test.ts`: each event printed as JSON on a line of its own.
-- `src/step.test.ts`: attempts counted from 1, each after the one before, `isFirst`, written as their number as text and in JSON, and frozen.
-- `src/closed-set.test.ts`: names and values, values in order, `has` reading back only a value written exactly, and frozen.
+- `tests/unit/event/kind.test.ts`: every event kind is written in snake case, over `EventKind` itself.
+- `tests/unit/event.test-d.ts`: `Event` has one member per kind, narrows by kind, and cannot be changed.
+- `tests/unit/event/fact.test-d.ts`: a lifecycle only from a step hook.
+- `tests/unit/event/abort.test-d.ts` and `tests/unit/event/abort/not-a-value.test-d.ts`: only `journey_id` is a reserved key; `service_provided` names only a provider's data; a key and an event kind never together.
+- `tests/unit/event/fields.test-d.ts`, `tests/unit/step.test-d.ts`, `tests/unit/journey.test-d.ts`, `tests/unit/policy.test-d.ts`, `tests/unit/workflow.test-d.ts` and `tests/unit/service.test-d.ts`: a plain string is none of the names, the journey ID or a timestamp; an attempt cannot be constructed or changed; each closed set's type is only its values.
+- `tests/unit/closed-set.test-d.ts`: a closed set's type is only its values, and the set cannot be changed.
+- `tests/unit/report.test-d.ts`: a reporter need not receive global metadata, and may report asynchronously.
+- `tests/unit/report/debug-reporter.test.ts`: each event printed as JSON on a line of its own.
+- `tests/unit/step.test.ts`: attempts counted from 1, each after the one before, `isFirst`, written as their number as text and in JSON, and frozen.
+- `tests/unit/closed-set.test.ts`: names and values, values in order, `has` reading back only a value written exactly, and frozen.
 - Later stages: property-based tests with fast-check of the first and last events, increasing sequence numbers, one outcome fact per attempt, and no data bag values in engine events.
 
 ## Done when

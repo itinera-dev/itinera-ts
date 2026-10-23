@@ -20,7 +20,7 @@ None of its own.
 
 ## Tests
 
-- `src/event/decision.test-d.ts`: a deciding hook and a reason only when a hook gave the step up, and only `on step retry` or `on step abnormal termination` as that hook; only `on step success` deciding `journey_succeeded`; retries and rescues decided by the default alone; a reason, never an error, when a failure fails the journey, and never both when retries are exhausted.
+- `tests/unit/event/decision.test-d.ts`: a deciding hook and a reason only when a hook gave the step up, and only `on step retry` or `on step abnormal termination` as that hook; only `on step success` deciding `journey_succeeded`; retries and rescues decided by the default alone; a reason, never an error, when a failure fails the journey, and never both when retries are exhausted.
 - Later stages: the decision logic as a pure function inside the engine, with property-based tests with fast-check of one outcome fact per attempt and one decision per failed attempt.
 
 ## Done when

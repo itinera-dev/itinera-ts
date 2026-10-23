@@ -1,6 +1,6 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { PolicyName } from "../policy.js";
-import type { Reason } from "../step.js";
+import type { PolicyName } from "../../../src/policy.js";
+import type { Reason } from "../../../src/step.js";
 import type {
   JourneyFailed,
   JourneySucceeded,
@@ -8,7 +8,7 @@ import type {
   StepRescued,
   StepRescuing,
   StepRetrying,
-} from "./decision.js";
+} from "../../../src/event/decision.js";
 
 declare const policy: PolicyName;
 declare const reason: Reason;

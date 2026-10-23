@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { journeyAborted, stepSucceeded } from "../event/fixtures.js";
-import { DebugReporter } from "./debug-reporter.js";
+import { journeyAborted, stepSucceeded } from "../../fixtures/event.js";
+import { DebugReporter } from "../../../src/report/debug-reporter.js";
 
 describe("DebugReporter", () => {
   afterEach(() => {

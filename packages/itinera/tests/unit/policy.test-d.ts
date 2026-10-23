@@ -4,7 +4,7 @@ import type {
   RetryCause,
   StepHook,
   WorkflowHook,
-} from "./policy.js";
+} from "../../src/policy.js";
 
 declare function naming(policy: PolicyName): void;
 declare function hooking(hook: StepHook | WorkflowHook): void;

@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { Attempt, type StepName } from "./step.js";
+import { Attempt, type StepName } from "../../src/step.js";
 
 declare function naming(step: StepName): void;
 

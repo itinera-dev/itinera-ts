@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import type { AdapterName, WorkflowName } from "./workflow.js";
+import type { AdapterName, WorkflowName } from "../../src/workflow.js";
 
 declare function naming(workflow: WorkflowName): void;
 declare function adapting(adapter: AdapterName): void;

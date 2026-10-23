@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import { closedSet, type ValueOf } from "./closed-set.js";
+import { closedSet, type ValueOf } from "../../src/closed-set.js";
 
 const Colour = closedSet({ Red: "red", Blue: "blue" });
 declare function painting(colour: ValueOf<typeof Colour>): void;

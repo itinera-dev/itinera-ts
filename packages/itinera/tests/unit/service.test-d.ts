@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import type { ProviderName } from "./service.js";
+import type { ProviderName } from "../../src/service.js";
 
 declare function providing(provider: ProviderName): void;
 

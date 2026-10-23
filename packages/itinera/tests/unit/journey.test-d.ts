@@ -1,5 +1,9 @@
 import { describe, it } from "vitest";
-import type { AbortReason, FailureCause, JourneyId } from "./journey.js";
+import type {
+  AbortReason,
+  FailureCause,
+  JourneyId,
+} from "../../src/journey.js";
 
 declare function identifying(journeyId: JourneyId): void;
 declare function aborting(reason: AbortReason): void;

@@ -19,8 +19,8 @@ None of its own.
 
 ## Tests
 
-- `src/event/abort.test-d.ts`: only `journey_id` is a reserved key.
-- `src/report/default-dispatcher.test.ts`: global metadata in order, waiting for a reporter that receives it asynchronously, over reporters that do not take it, stopping at a failure, and passed as given.
+- `tests/unit/event/abort.test-d.ts`: only `journey_id` is a reserved key.
+- `tests/unit/report/default-dispatcher.test.ts`: global metadata in order, waiting for a reporter that receives it asynchronously, over reporters that do not take it, stopping at a failure, and passed as given.
 - `examples/dispatcher.ts`: a reporter that keeps an entry and a dispatcher that passes it on.
 
 ## Done when

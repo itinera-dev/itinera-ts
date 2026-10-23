@@ -1,5 +1,5 @@
 import { describe, it } from "vitest";
-import type { JourneyAbort } from "./abort.js";
+import type { JourneyAbort } from "../../../src/event/abort.js";
 
 declare function aborting(abort: JourneyAbort): void;
 declare const source: Extract<

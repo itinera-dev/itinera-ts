@@ -1,5 +1,5 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { Event, EventKind } from "./event.js";
+import type { Event, EventKind } from "../../src/event.js";
 
 declare const event: Event;
 
