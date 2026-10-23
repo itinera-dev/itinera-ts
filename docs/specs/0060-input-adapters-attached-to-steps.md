@@ -19,9 +19,9 @@ None of its own.
 
 ## Tests
 
-- `src/workflow/adapter.test.ts`: each adapter recorded in order with its steps and requests, an empty name, a request an adapter may not make, a parameter with no request, a class extending another workflow, and `isSupplied` with what the helpers make and what a cast makes.
-- `src/workflow/adapter.test-d.ts`: a method returning a `Supplied` or a promise of one with every request it may make, an empty list of steps, a method returning anything else, a method outside a workflow, a value that is not one, and `@key` and `@dataBag` on a parameter of another type or outside a workflow.
-- `src/workflow.test.ts`: what `this.supply(value)` and `this.fromDataBag()` make.
+- `tests/unit/workflow/adapter.test.ts`: each adapter recorded in order with its steps and requests, an empty name, a request an adapter may not make, a parameter with no request, a class extending another workflow, and `isSupplied` with what the helpers make and what a cast makes.
+- `tests/unit/workflow/adapter.test-d.ts`: a method returning a `Supplied` or a promise of one with every request it may make, an empty list of steps, a method returning anything else, a method outside a workflow, a value that is not one, and `@key` and `@dataBag` on a parameter of another type or outside a workflow.
+- `tests/unit/workflow.test.ts`: what `this.supply(value)` and `this.fromDataBag()` make.
 - `examples/input-adapter.ts`.
 
 ## Done when

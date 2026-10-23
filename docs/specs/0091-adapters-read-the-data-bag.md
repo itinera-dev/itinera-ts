@@ -16,8 +16,8 @@ None of its own.
 
 ## Tests
 
-- `src/journey/request.test.ts`: what `@dataBag` records.
-- `src/workflow/adapter.test-d.ts`: `@dataBag` on a parameter of another type or outside a workflow.
+- `tests/unit/journey/request.test.ts`: what `@dataBag` records.
+- `tests/unit/workflow/adapter.test-d.ts`: `@dataBag` on a parameter of another type or outside a workflow.
 - `examples/input-adapter.ts`.
 
 ## Done when

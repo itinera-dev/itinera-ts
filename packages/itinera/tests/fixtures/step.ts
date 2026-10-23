@@ -1,5 +1,9 @@
 import { type Outcome, Step, step } from "../../src/step.js";
-import { RescueStep, rescueStep, type RescueOutcome } from "../../src/step/rescue.js";
+import {
+  RescueStep,
+  rescueStep,
+  type RescueOutcome,
+} from "../../src/step/rescue.js";
 
 /** A step declared with `@step` that always succeeds. */
 @step()

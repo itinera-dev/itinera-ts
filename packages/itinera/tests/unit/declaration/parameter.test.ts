@@ -5,9 +5,9 @@ import { describe, expect, it } from "vitest";
 const loose = resolve(__dirname, "loose.ts");
 
 const valueRequest = `
-import { input } from "../step/request.js";
-import { Step } from "../step.js";
-import { integer } from "../value/token.js";
+import { input } from "../../../src/step/request.js";
+import { Step } from "../../../src/step.js";
+import { integer } from "../../../src/value/token.js";
 
 export class Charge extends Step {
   constructor(@input("amount", integer) readonly amount: number) {
@@ -21,8 +21,8 @@ export class Charge extends Step {
 `;
 
 const request = `
-import { stepReporter, type StepReporter } from "../step/request.js";
-import { Step } from "../step.js";
+import { stepReporter, type StepReporter } from "../../../src/step/request.js";
+import { Step } from "../../../src/step.js";
 
 export class Ship extends Step {
   override run(@stepReporter() reporter: StepReporter): never {
