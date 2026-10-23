@@ -147,7 +147,11 @@ Then<World>(
 );
 
 Then<World>("the result's data bag contains:", function (table: DataTable) {
-  const bag = dataBag(this);
+  expectDataBag(dataBag(this), table);
+});
+
+/** Holds when the data bag has at least the keys of the table, with their values. */
+export function expectDataBag(bag: DataBag, table: DataTable): void {
   for (const row of rows(table)) {
     const key = row.required("key");
     const expected = json(row.required("value"));
@@ -158,7 +162,7 @@ Then<World>("the result's data bag contains:", function (table: DataTable) {
       JSON.stringify(read),
     );
   }
-});
+}
 
 /** The data bag of the scenario's journey, which must have one. */
 function dataBag(world: World): DataBag {

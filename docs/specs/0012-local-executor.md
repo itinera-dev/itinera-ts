@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0012](https://github.com/itinera-dev/spec/blob/main/proposals/0012-local-executor.md), implemented in [#8](https://github.com/itinera-dev/itinera-ts/issues/8). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, decision 1 the single asynchronous executor and decision 6 refusals, and [architecture.md](../architecture.md) draws how a journey runs.
 
-Status: complete, and 12 is listed in `conformance.json`. Stage 3 added `LocalExecutor`, its refusals and the private engine. Stage 4 added the rejection of an instance that `instance()` did not make, and stage 6 listed the proposal. Stage 7 adds the workflow policies built before the journey, which no scenario of 0012 needs.
+Status: complete, and 12 is listed in `conformance.json`. Stage 3 added `LocalExecutor`, its refusals and the private engine. Stage 4 added the rejection of an instance that `instance()` did not make, and stage 6 listed the proposal. Stage 7 added the workflow policies built before the journey, which no scenario of 0012 needs.
 
 ## API
 
@@ -10,7 +10,7 @@ Everything here is exported only from `itinera/unstable` while it names API of p
 
 - **`new LocalExecutor(dispatcherFactory?)`** takes the dispatcher factory as its one optional argument, `DefaultDispatcherFactory` without it. This was the open point of #8; a constructor argument mirrors Rust's `LocalExecutor::with_dispatcher_factory` without a second way to say the same thing, and an options object can be added later without breaking it.
 - **`await executor.run(instance)`** resolves to the journey's `JourneyResult` (see 0065), whatever happens inside the journey. It takes a `WorkflowInstance` that `instance()` made; one that a cast lets through is rejected with a `TypeError` (see "Before the journey").
-- **`Refusal`**, an `Error` named `Refusal`, is what `run` rejects with before any journey and any event. Its `refused` is a discriminated union on `kind`: `instance ran`, `journey running`, `initial values` with the keys refused, in order, of the initial data and of the initial global metadata, and `dispatcher factory failed`, `dispatcher failed` and `global metadata not set`, each with the `error` thrown and its `errorMessage`. When failing custom code caused it, that error is also the standard `cause` of the `Refusal` (see 0083).
+- **`Refusal`**, an `Error` named `Refusal`, is what `run` rejects with before any journey and any event. Its `refused` is a discriminated union on `kind`: `instance ran`, `journey running`, `initial values` with the keys refused, in order, of the initial data and of the initial global metadata, and `dispatcher factory failed`, `dispatcher failed`, `global metadata not set` and `workflow policy failed`, the last with the `policy` too, each with the `error` thrown and its `errorMessage`. When failing custom code caused it, that error is also the standard `cause` of the `Refusal` (see 0083).
 
 ## Before the journey
 

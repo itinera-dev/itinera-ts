@@ -33,6 +33,8 @@ export interface StepScript {
   ignoresFailedEmits: boolean;
   /** Whether it keeps its contributor and step reporter after its attempt. */
   keepsHandles: boolean;
+  /** The step policies it has, in order, once stated. */
+  policies?: readonly string[];
 }
 
 /** An input a step requests, of a type of the vocabulary. */

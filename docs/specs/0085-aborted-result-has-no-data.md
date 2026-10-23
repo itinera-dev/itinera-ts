@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0085](https://github.com/itinera-dev/spec/blob/main/proposals/0085-aborted-result-has-no-data.md), implemented in [#29](https://github.com/itinera-dev/itinera-ts/issues/29). [0065](0065-business-result.md) holds the result.
 
-Status: in progress. Stage 3 added the aborted status with no data bag, and made every abort final. Stage 7 lists the proposal.
+Status: complete, and 85 is listed in `conformance.json`. Stage 3 added the aborted status with no data bag, and made every abort final. Stage 7 listed the proposal.
 
 ## API
 
@@ -25,4 +25,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0085` passes, and 85 is listed in `conformance.json`. Planned for stage 7.
+Done in stage 7: every scenario tagged `@proposal-0085` passes, but those that also name a proposal not yet listed, and 85 is listed in `conformance.json`.

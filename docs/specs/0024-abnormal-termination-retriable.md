@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0024](https://github.com/itinera-dev/spec/blob/main/proposals/0024-abnormal-termination-retriable.md), implemented in [#9](https://github.com/itinera-dev/itinera-ts/issues/9). [0009](0009-running-a-workflow.md) holds the scan, and [0062](0062-workflow-descriptors.md) the step descriptor's `noRetryOnAbnormalTermination`.
 
-Status: in progress. Stage 3 added the abnormal termination and the executor's decision after it. Hooks around the decision come in stage 7, which lists the proposal.
+Status: complete, and 24 is listed in `conformance.json`. Stage 3 added the abnormal termination and the executor's decision after it. Stage 7 added the hooks around the decision, and listed the proposal.
 
 ## What is an abnormal termination
 
@@ -13,6 +13,10 @@ The journey-abort error is never one: when the engine recorded an abort while th
 ## The decision
 
 `afterFailedAttempt`, in `src/engine/decision.ts`, given the cause `abnormal termination`: retry while `retryOnAbnormalTermination` is on and the retry budget allows another attempt; otherwise give up, with `abnormal termination` when the budget is 0 or the setting is off, and `retries exhausted` when a budget greater than 0 is spent, as chapter 5, 5.6 says. Stage 5 made it decide after a failure too (see [0008](0008-steps.md)). An abnormal termination commits nothing the attempt contributed.
+
+## The hook
+
+Right after `step_abnormal_termination`, `on step abnormal termination` runs, in `terminated` in `src/engine/outcome.ts`, given no contributions, since an abnormal termination carries none, and the error through `@error()`. `FailWorkflow` gives the step up at once, decided by the hook; otherwise the decision follows, and the retry or failure hook after it (see [0009](0009-running-a-workflow.md)).
 
 ## Dependencies
 
@@ -27,4 +31,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0024` passes, and 24 is listed in `conformance.json`. Planned for stage 7.
+Done in stage 7: every scenario tagged `@proposal-0024` passes, but those that also name a proposal not yet listed, and 24 is listed in `conformance.json`.
