@@ -11,6 +11,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "isolatedModules": true,
+    "resolveJsonModule": true,
     "skipLibCheck": true,
     "types": ["node"],
     "noEmit": true,
@@ -18,5 +19,9 @@
       "itinera/*": ["./packages/itinera/src/*.ts"]
     }
   },
-  "include": ["packages/itinera/src", "packages/itinera/examples"]
+  "include": [
+    "packages/itinera/src",
+    "packages/itinera/tests",
+    "packages/itinera/examples"
+  ]
 }

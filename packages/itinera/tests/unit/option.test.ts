@@ -1,7 +1,7 @@
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- compares the re-exports with the originals
 import * as results from "ts-results-es";
 import { describe, expect, it } from "vitest";
-import * as option from "./option.js";
+import * as option from "../../src/option.js";
 
 describe("option", () => {
   it.each([

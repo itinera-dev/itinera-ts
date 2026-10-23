@@ -39,14 +39,14 @@ For each item, the reviewer lists every place in the diff where the item applies
 8. Every union carrying data, every `switch` and every closed set of names, against the bullet on discriminated unions, `ts-pattern` and `enum-plus`.
 9. Every declaration an application writes, in code, tests and examples, against the bullet on base classes, decorators and the builder.
 10. Every new type's module, against "Modules follow concepts", "Each public module is a subpath" and "Every module is a file of its own", and every new subpath, against the bullet on its ESM layer.
-11. Every file the diff adds or makes longer, against "A file past 200 lines holds one thing". Count its lines, documentation included, test files and files that only tests import excluded. Past 200, list what it holds, and unless it is all one class, interface or type, propose the private submodules it splits into.
+11. Every file the diff adds or makes longer, against "A file past 200 lines holds one thing". Count its lines, documentation included, files under `tests` excluded. Past 200, list what it holds, and unless it is all one class, interface or type, propose the private submodules it splits into.
 12. Every arrow function, including those bound with `const` before a chain, against "A chain of array methods reads as a sentence of names".
 13. Every `for` loop, against "Iterating to get a result uses array methods". Asserting in a test acts on each item.
 14. Every `export`, against "Nothing is exported from a module unless", and the `itinera/unstable` subpath, against "Public API of a proposal not yet listed".
 15. Every `eslint-disable` comment, `@ts-ignore`, `@ts-expect-error` outside a type test, cast with `as` and non-null assertion, against "A lint rule is turned off only on the line that needs it" and "Types hold every constraint". Ask for each that a type could make unnecessary to go.
 16. Every exported item and its example, against "Every exported item has documentation" and "Documentation is written where an item is defined".
 17. Every new or rewritten test, against "Test names state the rule", the bullet on several inputs, and "A chain that three or more tests". Check also that no coverage is lost.
-18. Every test the diff adds or moves, against "Unit tests live with the code they check". Name the module whose code decides what each test checks, and the module whose test file it is in.
+18. Every test and fixture the diff adds or moves, against "Tests live in each package's `tests` folder". For a unit test, name the module whose code decides what it checks, and check that the test's path under `tests/unit` mirrors that module's path under `src`. For an integration test, check that its name says the flow it checks and that it imports no `src`. Check that every fixture is under `tests/fixtures` and that nothing under `src` imports from `tests`.
 19. Every line of code, test and example, against "Every line does something". For each line that changes nothing, say so and ask for it to be removed.
 
 **Comments**

@@ -1,5 +1,10 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { AsValue, PlainValue, SerialisesItself, Value } from "./value.js";
+import type {
+  AsValue,
+  PlainValue,
+  SerialisesItself,
+  Value,
+} from "../../src/value.js";
 
 class Payment implements SerialisesItself {
   constructor(readonly cents: number) {}

@@ -30,7 +30,7 @@ An npm workspace, under `packages/`:
 
 The subpath `itinera/unstable` holds API that the specification has not accepted yet, and, before a proposal is listed in `conformance.json`, that proposal's API. Its items are defined in the modules of their concepts, such as `src/value.ts`, which become subpaths of their own once their proposals are listed.
 
-Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/unstable`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/examples.test.ts` runs every one of them.
+Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/unstable`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/integration/examples.test.ts` runs every one of them.
 
 ## Building and testing
 
@@ -39,6 +39,8 @@ Examples, under `packages/itinera/examples`, import from the subpaths applicatio
 TypeScript is pinned at 6.0, because typescript-eslint, whose type-aware rules matter for an asynchronous engine, supports only versions below 6.1. Moving to TypeScript 7 waits until it supports that. Applications may use TypeScript 5.5 or later, the oldest version that compiles the declarations of Zod, which itinera re-exports.
 
 Vitest runs the tests through its swc plugin, `unplugin-swc`, since esbuild records no decorator metadata. It reads the compiler options from `tsconfig.json`, and runs the type tests, `*.test-d.ts`, with `tsc`.
+
+Each package keeps its tests in `tests`, beside `src`: unit tests in `tests/unit`, mirroring `src`, integration tests in `tests/integration`, named after the flows they check and importing only the package's subpaths, and the fixtures tests share in `tests/fixtures`. The build compiles `src` alone, so nothing under `tests` reaches the package, and lint keeps `src` from importing it.
 
 Every one of these is a required check in CI:
 

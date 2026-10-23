@@ -58,8 +58,8 @@ Changing the walk changes `src/value/capture.ts` alone.
 
 ## Tests
 
-- `src/value/capture.test.ts`: every JSON value is captured as it is, a property-based test with fast-check; the copy shares nothing with what was given; a key named `__proto__` stays a key; an object without a prototype is accepted; a getter is read once; objects that serialise themselves are captured at any depth, and `toValue()` is called once, its result captured in turn; `toValue` is read once; an object reached twice is accepted; one named case for each kind of non-value, a revoked proxy included; a value nested too deeply; the path of the problem, and of a proxy or a getter that throws.
-- `src/value.test-d.ts`: what `Value`, `PlainValue` and `AsValue` accept and refuse, one test each, run on TypeScript 6.0 and 5.5.
+- `tests/unit/value/capture.test.ts`: every JSON value is captured as it is, a property-based test with fast-check; the copy shares nothing with what was given; a key named `__proto__` stays a key; an object without a prototype is accepted; a getter is read once; objects that serialise themselves are captured at any depth, and `toValue()` is called once, its result captured in turn; `toValue` is read once; an object reached twice is accepted; one named case for each kind of non-value, a revoked proxy included; a value nested too deeply; the path of the problem, and of a proxy or a getter that throws.
+- `tests/unit/value.test-d.ts`: what `Value`, `PlainValue` and `AsValue` accept and refuse, one test each, run on TypeScript 6.0 and 5.5.
 
 ## Done when
 

@@ -1,6 +1,6 @@
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
-import { capture, type NotAValue } from "./capture.js";
+import { capture, type NotAValue } from "../../../src/value/capture.js";
 
 class Payment {
   constructor(readonly cents: number) {}
