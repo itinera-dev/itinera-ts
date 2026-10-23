@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { fixtureListing, fixtureNamed, fixtures } from "./fixture.js";
-import { ModelError } from "./model.js";
+import { fixtureListing, fixtureNamed, fixtures } from "../../src/fixture.js";
+import { ModelError } from "../../src/model.js";
 
 describe("the hand-written workflows", () => {
   it.each(fixtures)("are found by the name the scenarios give: %s", (name) => {
