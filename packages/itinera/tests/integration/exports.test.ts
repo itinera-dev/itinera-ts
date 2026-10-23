@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import manifest from "../package.json";
+import manifest from "../../package.json";
 
 const modules = Object.entries(manifest.exports).filter(isModule);
 
@@ -25,7 +25,7 @@ describe.each(modules)("the subpath %s", (subpath, target) => {
 
   it("has an ESM layer that only re-exports its CommonJS module", () => {
     const layer = readFileSync(
-      join(__dirname, "..", "src", `${name}.mts`),
+      join(__dirname, "..", "..", "src", `${name}.mts`),
       "utf8",
     );
     expect(layer).toBe(`export * from "./${name}.js";\n`);

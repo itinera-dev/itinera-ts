@@ -28,7 +28,9 @@ An npm workspace, under `packages/`:
 
 `itinera` is one CommonJS build, with a thin ESM layer that only re-exports it, so `import` and `require` both work and an application never loads two copies. Each subpath is a module `src/<name>.ts`, built to `dist/<name>.js`, and its layer `src/<name>.mts`, built to `dist/<name>.mjs`; the `exports` map of `packages/itinera/package.json` gives each its condition.
 
-The subpath `itinera/unstable` holds API that the specification has not accepted yet, and, before a proposal is listed in `conformance.json`, that proposal's API. It does not exist yet.
+The subpath `itinera/unstable` holds API that the specification has not accepted yet, and, before a proposal is listed in `conformance.json`, that proposal's API. Its items are defined in the modules of their concepts, such as `src/value.ts`, which become subpaths of their own once their proposals are listed.
+
+Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/unstable`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/integration/examples.test.ts` runs every one of them.
 
 ## Building and testing
 
@@ -38,11 +40,14 @@ TypeScript is pinned at 6.0, because typescript-eslint, whose type-aware rules m
 
 Vitest runs the tests through its swc plugin, `unplugin-swc`, since esbuild records no decorator metadata. It reads the compiler options from `tsconfig.json`, and runs the type tests, `*.test-d.ts`, with `tsc`.
 
+Each package keeps its tests in `tests`, beside `src`: unit tests in `tests/unit`, mirroring `src`; integration tests in `tests/integration`, named after the flows they check and importing only the package's subpaths, together with the tests of the package as a whole, such as its exports and examples; and the fixtures tests share in `tests/fixtures`. The build compiles `src` alone, so nothing under `tests` reaches the package, and lint keeps `src` from importing it.
+
 Every one of these is a required check in CI:
 
 - `npm run format`: Prettier, without configuration, checks the formatting of every file but Markdown;
 - `npm run lint`: ESLint with typescript-eslint's strict type-checked rules, with no warning allowed;
 - `npm run typecheck`: `tsc` over the whole repository with `tsconfig.json`, then over the package's sources alone, without Node's types, since the package uses only the language and the web platform;
+- `npm run typecheck-oldest`: the same two type checks on TypeScript 5.5, the oldest version applications may use, which `npx` fetches without touching the installed TypeScript; the tests and examples are checked with `tsconfig.oldest.json`, whose library is ES2023, and the package's sources alone, without Node's types and with every declaration they use checked, with `packages/itinera/tsconfig.oldest.json`;
 - `npm test`: Vitest, with its type checking;
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
 - `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented;

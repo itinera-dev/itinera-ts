@@ -1,0 +1,8 @@
+{
+  "extends": "../../tsconfig.oldest.json",
+  "compilerOptions": {
+    "skipLibCheck": false,
+    "types": []
+  },
+  "include": ["src"]
+}

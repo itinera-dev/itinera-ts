@@ -15,7 +15,16 @@
     "allowJs": true,
     "checkJs": true,
     "types": ["node"],
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "itinera/*": ["./packages/itinera/src/*.ts"]
+    }
   },
-  "include": ["packages/*/src", "packages/*/tests", "*.mjs", "*.mts"]
+  "include": [
+    "packages/*/src",
+    "packages/*/tests",
+    "packages/*/examples",
+    "*.mjs",
+    "*.mts"
+  ]
 }
