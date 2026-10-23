@@ -4,10 +4,10 @@ import {
   type Abort,
   type Contributor,
   contributor,
-} from "../journey.js";
-import type { Event } from "../event.js";
-import type { Reporter } from "../report.js";
-import { DefaultDispatcher } from "../report/default-dispatcher.js";
+} from "../../../src/journey.js";
+import type { Event } from "../../../src/event.js";
+import type { Reporter } from "../../../src/report.js";
+import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import {
   type Outcome,
   Step,
@@ -15,18 +15,18 @@ import {
   type StepName,
   stepReporter,
   type StepReporter,
-} from "../step.js";
-import { failureReason } from "../step/request.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
+} from "../../../src/step.js";
+import { failureReason } from "../../../src/step/request.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import {
   FailingOn,
   journeyThrough,
   orders,
   recorded,
   run,
-} from "./fixtures.js";
-import type { Journey } from "./journey.js";
-import { travel } from "./scan.js";
+} from "../../fixtures/engine.js";
+import type { Journey } from "../../../src/engine/journey.js";
+import { travel } from "../../../src/engine/scan.js";
 
 class Lending extends Step {
   override async run(
