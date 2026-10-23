@@ -1,9 +1,9 @@
 import { describe, it } from "vitest";
-import { stepPolicy, workflowPolicy } from "./declared.js";
-import { onStepSuccess, onWorkflowSuccess } from "./hooks.js";
-import type { OnSuccess } from "./lifecycle.js";
-import { StepPolicy } from "./step-policy.js";
-import { WorkflowPolicy } from "./workflow-policy.js";
+import { stepPolicy, workflowPolicy } from "../../../src/policy/declared.js";
+import { onStepSuccess, onWorkflowSuccess } from "../../../src/policy/hooks.js";
+import type { OnSuccess } from "../../../src/policy/lifecycle.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
 
 describe("stepPolicy and workflowPolicy", () => {
   it("compile on a policy of their kind whose constructor takes nothing", () => {

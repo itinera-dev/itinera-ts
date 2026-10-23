@@ -1,9 +1,9 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { JourneyId } from "../journey.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import { WorkflowPolicy } from "../policy/workflow-policy.js";
-import { type Outcome, Step, type StepClass } from "../step.js";
-import { journeyId } from "./request.js";
+import type { JourneyId } from "../../../src/journey.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
+import { type Outcome, Step, type StepClass } from "../../../src/step.js";
+import { journeyId } from "../../../src/journey/request.js";
 
 describe("journeyId", () => {
   it("compiles in either kind of policy on a parameter typed as a journey ID", () => {

@@ -1,18 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { contributor } from "../journey/contributor.js";
-import type { Contributor } from "../journey.js";
-import { declarationOfPolicy, stepPolicy, workflowPolicy } from "./declared.js";
+import { contributor } from "../../../src/journey/contributor.js";
+import type { Contributor } from "../../../src/journey.js";
+import {
+  declarationOfPolicy,
+  stepPolicy,
+  workflowPolicy,
+} from "../../../src/policy/declared.js";
 import {
   onStepFailure,
   onStepRetry,
   onStepSuccess,
   onWorkflowSuccess,
-} from "./hooks.js";
-import type { OnFailure, OnSuccess } from "./lifecycle.js";
-import { failureCause, retryCause } from "./request.js";
-import { StepPolicy } from "./step-policy.js";
-import { WorkflowPolicy } from "./workflow-policy.js";
-import type { RetryCause, StepFailureCause } from "../policy.js";
+} from "../../../src/policy/hooks.js";
+import type { OnFailure, OnSuccess } from "../../../src/policy/lifecycle.js";
+import { failureCause, retryCause } from "../../../src/policy/request.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
+import type { RetryCause, StepFailureCause } from "../../../src/policy.js";
 
 describe("stepPolicy", () => {
   it("records the policy's name and each hook with its requests", () => {

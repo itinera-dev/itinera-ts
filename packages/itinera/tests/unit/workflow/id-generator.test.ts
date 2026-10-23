@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Workflow } from "../workflow.js";
-import { idGenerator } from "./id-generator.js";
-import { declarationOf } from "./registry.js";
+import { Workflow } from "../../../src/workflow.js";
+import { idGenerator } from "../../../src/workflow/id-generator.js";
+import { declarationOf } from "../../../src/workflow/registry.js";
 
 describe("idGenerator", () => {
   it("records the method it marks", () => {

@@ -1,9 +1,9 @@
-import { onStepSuccess, onWorkflowSuccess } from "./hooks.js";
-import { stepPolicy, workflowPolicy } from "./declared.js";
-import type { OnSuccess } from "./lifecycle.js";
-import { role } from "./request.js";
-import { StepPolicy } from "./step-policy.js";
-import { WorkflowPolicy } from "./workflow-policy.js";
+import { onStepSuccess, onWorkflowSuccess } from "../../src/policy/hooks.js";
+import { stepPolicy, workflowPolicy } from "../../src/policy/declared.js";
+import type { OnSuccess } from "../../src/policy/lifecycle.js";
+import { role } from "../../src/policy/request.js";
+import { StepPolicy } from "../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../src/policy/workflow-policy.js";
 
 /** A role a workflow provides: telling a customer something. */
 export interface Messages {

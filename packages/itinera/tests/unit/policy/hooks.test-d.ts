@@ -6,10 +6,10 @@ import {
   onStepSuccess,
   onWorkflowFailure,
   onWorkflowSuccess,
-} from "./hooks.js";
-import type { OnFailure, OnSuccess } from "./lifecycle.js";
-import { StepPolicy } from "./step-policy.js";
-import { WorkflowPolicy } from "./workflow-policy.js";
+} from "../../../src/policy/hooks.js";
+import type { OnFailure, OnSuccess } from "../../../src/policy/lifecycle.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
 
 describe("the step hooks", () => {
   it("compile on methods returning their lifecycles, or promises of them", () => {

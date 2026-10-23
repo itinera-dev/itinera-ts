@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { requestsOf } from "../declaration.js";
-import type { Option } from "../option.js";
-import { WorkflowPolicy } from "../policy/workflow-policy.js";
-import { integer, optional, string } from "../value/token.js";
-import { fromWorkflow } from "./request.js";
+import { requestsOf } from "../../../src/declaration.js";
+import type { Option } from "../../../src/option.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
+import { integer, optional, string } from "../../../src/value/token.js";
+import { fromWorkflow } from "../../../src/workflow/request.js";
 
 class Notify extends WorkflowPolicy {
   paid(

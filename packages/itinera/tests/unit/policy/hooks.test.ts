@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { hooksOf, onStepFailure, onStepRetry, onStepSuccess } from "./hooks.js";
-import type { OnFailure, OnSuccess } from "./lifecycle.js";
-import { StepPolicy } from "./step-policy.js";
+import {
+  hooksOf,
+  onStepFailure,
+  onStepRetry,
+  onStepSuccess,
+} from "../../../src/policy/hooks.js";
+import type { OnFailure, OnSuccess } from "../../../src/policy/lifecycle.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
 
 describe("the hook decorators", () => {
   it("record which method implements each hook", () => {

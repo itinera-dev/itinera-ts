@@ -1,12 +1,17 @@
 import { describe, it } from "vitest";
-import type { Option } from "../option.js";
-import type { RetryCause, StepFailureCause } from "../policy.js";
-import { type Outcome, Step } from "../step.js";
-import { integer, optional } from "../value/token.js";
-import type { Messages } from "./fixtures.js";
-import { failureCause, fromStep, retryCause, role } from "./request.js";
-import { StepPolicy } from "./step-policy.js";
-import { WorkflowPolicy } from "./workflow-policy.js";
+import type { Option } from "../../../src/option.js";
+import type { RetryCause, StepFailureCause } from "../../../src/policy.js";
+import { type Outcome, Step } from "../../../src/step.js";
+import { integer, optional } from "../../../src/value/token.js";
+import type { Messages } from "../../fixtures/policy.js";
+import {
+  failureCause,
+  fromStep,
+  retryCause,
+  role,
+} from "../../../src/policy/request.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
 
 interface Payments {
   refund(amount: number): void;

@@ -1,13 +1,13 @@
 import { describe, it } from "vitest";
-import { Audit, type Messages, Notify, Quiet } from "../policy/fixtures.js";
-import { onStepSuccess } from "../policy/hooks.js";
-import type { OnSuccess } from "../policy/lifecycle.js";
-import { role } from "../policy/request.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import type { StepPolicyClass } from "../policy.js";
-import { Charge } from "../step/fixtures.js";
-import { Workflow } from "../workflow.js";
-import { withStep, workflow } from "./decorators.js";
+import { Audit, type Messages, Notify, Quiet } from "../../fixtures/policy.js";
+import { onStepSuccess } from "../../../src/policy/hooks.js";
+import type { OnSuccess } from "../../../src/policy/lifecycle.js";
+import { role } from "../../../src/policy/request.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import type { StepPolicyClass } from "../../../src/policy.js";
+import { Charge } from "../../fixtures/step.js";
+import { Workflow } from "../../../src/workflow.js";
+import { withStep, workflow } from "../../../src/workflow/decorators.js";
 
 interface Payments {
   refund(amount: number): void;

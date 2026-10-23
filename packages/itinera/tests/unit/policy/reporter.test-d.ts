@@ -1,8 +1,11 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { type Outcome, Step, type StepClass } from "../step.js";
-import type { StepReporter } from "../step/request.js";
-import { type HookReporter, hookReporter } from "./reporter.js";
-import { StepPolicy } from "./step-policy.js";
+import { type Outcome, Step, type StepClass } from "../../../src/step.js";
+import type { StepReporter } from "../../../src/step/request.js";
+import {
+  type HookReporter,
+  hookReporter,
+} from "../../../src/policy/reporter.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
 
 declare const reporter: HookReporter;
 

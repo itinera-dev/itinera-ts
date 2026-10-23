@@ -16,8 +16,8 @@ None of its own.
 
 ## Tests
 
-- `src/workflow/request.test.ts`: the key and a type written, optional or read from the metadata.
-- `src/workflow/request.test-d.ts`: either kind of policy, an optional value on a parameter that is not an `Option`, and a step.
+- `tests/unit/workflow/request.test.ts`: the key and a type written, optional or read from the metadata.
+- `tests/unit/workflow/request.test-d.ts`: either kind of policy, an optional value on a parameter that is not an `Option`, and a step.
 - `examples/policy.ts`.
 
 ## Done when

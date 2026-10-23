@@ -1,11 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { requestsOf } from "../declaration.js";
-import type { RetryCause, StepFailureCause } from "../policy.js";
-import { integer, number, optional } from "../value/token.js";
-import type { Option } from "../option.js";
-import type { Messages } from "./fixtures.js";
-import { failureCause, fromStep, retryCause, role } from "./request.js";
-import { StepPolicy } from "./step-policy.js";
+import { requestsOf } from "../../../src/declaration.js";
+import type { RetryCause, StepFailureCause } from "../../../src/policy.js";
+import { integer, number, optional } from "../../../src/value/token.js";
+import type { Option } from "../../../src/option.js";
+import type { Messages } from "../../fixtures/policy.js";
+import {
+  failureCause,
+  fromStep,
+  retryCause,
+  role,
+} from "../../../src/policy/request.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
 
 class Audit extends StepPolicy<Messages> {
   audited(

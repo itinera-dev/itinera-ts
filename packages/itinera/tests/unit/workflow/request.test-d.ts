@@ -1,10 +1,10 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { Option } from "../option.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import { WorkflowPolicy } from "../policy/workflow-policy.js";
-import { type Outcome, Step, type StepClass } from "../step.js";
-import { integer, optional } from "../value/token.js";
-import { fromWorkflow } from "./request.js";
+import type { Option } from "../../../src/option.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
+import { type Outcome, Step, type StepClass } from "../../../src/step.js";
+import { integer, optional } from "../../../src/value/token.js";
+import { fromWorkflow } from "../../../src/workflow/request.js";
 
 describe("fromWorkflow", () => {
   it("compiles in either kind of policy on a parameter of the type it gives", () => {
