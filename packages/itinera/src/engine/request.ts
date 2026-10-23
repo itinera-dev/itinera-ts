@@ -1,8 +1,13 @@
-import type { HookSource, Requester, RequestSource } from "../event.js";
+import type {
+  FailureRequester,
+  HookSource,
+  Requester,
+  RequestSource,
+} from "../event.js";
 import { EventKind } from "../event/kind.js";
-import type { Checked } from "../declaration/request.js";
+import type { Checked, FailureRequest } from "../declaration/request.js";
 import { AbortReason } from "../journey.js";
-import { None } from "../option.js";
+import { None, type Option } from "../option.js";
 import type { ProviderName } from "../service.js";
 import type { Attempt, StepName } from "../step.js";
 import type { PlainValue } from "../value.js";
@@ -119,4 +124,46 @@ export async function requested(
 /** The step a request is for, as an abort names it, if there is one. */
 function stepOf({ step }: Requesting): { readonly step?: StepName } {
   return step === undefined ? {} : { step };
+}
+
+/**
+ * Who requests what a failed attempt left, the failure's reason or the error,
+ * as its abort names them: the step the attempt was of, or the rescue step,
+ * and who requested it.
+ */
+export interface FailureRequesting {
+  /** The step the abort names. */
+  readonly step: StepName;
+  /** Who requested it. */
+  readonly requester: FailureRequester;
+}
+
+/**
+ * What a request for the failure's reason or the error receives, given
+ * `found`, what the failed attempt left of it: it, or for an optional request
+ * `Some` of it, or `None` when the attempt left none, with no event.
+ *
+ * @throws JourneyAbortError, aborting the journey with `required data
+ * missing` when a required request finds none.
+ */
+export function failureAnswered(
+  journey: Journey,
+  { step, requester }: FailureRequesting,
+  request: FailureRequest,
+  found: Option<unknown>,
+): unknown {
+  if (found.isSome()) {
+    return request.optional ? found : found.value;
+  }
+  if (request.optional) {
+    return None;
+  }
+  throw journey.abort({
+    reason: AbortReason.RequiredDataMissing,
+    step,
+    missing: {
+      kind: request.kind === "failureReason" ? "failure reason" : "error",
+      requester,
+    },
+  });
 }

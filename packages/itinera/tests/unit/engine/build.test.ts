@@ -9,11 +9,14 @@ import {
 } from "../../../src/step.js";
 import { failureReason, input, stepName } from "../../../src/step/request.js";
 import type { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
 import { stepMock } from "../../../src/testing/step-mock.js";
 import { Ending } from "../../../src/testing/ending.js";
 import { integer, string } from "../../../src/value/token.js";
 import { key } from "../../../src/workflow/adapter.js";
+import type { Supplied } from "../../../src/workflow/adapter/supplied.js";
 import { built } from "../../../src/engine/build.js";
+import { ofStep } from "../../../src/engine/buildable.js";
 import {
   type Adapting,
   caught,
@@ -172,7 +175,7 @@ describe("built", () => {
         reason: "step could not be built",
         source: { kind: "step" },
         errorMessage:
-          "the constructor of step charge requests @failureReason, which a step's constructor cannot request",
+          "the constructor of step charge requests @failureReason, which its constructor cannot request",
       },
     });
   });
@@ -193,9 +196,57 @@ describe("built", () => {
     }
     const instance = orders(AbortingWhileBuilt.builder("charge")).instance();
     const step = instance.descriptor.steps().at(0) as StepDescriptor;
-    const thrown = await built(journey, instance, step, Attempt.first).catch(
-      caught,
-    );
+    const thrown = await built(
+      journey,
+      instance,
+      ofStep(step),
+      Attempt.first,
+    ).catch(caught);
     expect(thrown).toBe(raised);
   });
+
+  it.each<[string, readonly [string, ...string[]], string]>([
+    [
+      "the step and its rescue step",
+      ["charge", "charge_rescue"],
+      "charge_rescue",
+    ],
+    ["only the step", ["charge"], "from the data bag"],
+  ])(
+    "asks the input adapter attached to %s for the rescue step's inputs only under the rescue step's own name",
+    async (_, steps, rescueReceived) => {
+      const needs: unknown[][] = [];
+      class Charge extends stepMock({
+        attempts: [Ending.failure("expired"), Ending.success],
+      }) {
+        constructor(...given: unknown[]) {
+          super(...given);
+          needs.push(given);
+        }
+      }
+      class Rescue extends rescueStepMock({ attempts: [Ending.success] }) {
+        constructor(...given: unknown[]) {
+          super(...given);
+          needs.push(given);
+        }
+      }
+      const workflow = Shop.builder()
+        .name("orders")
+        .step(
+          Charge.builder("charge")
+            .needs(input("caller", string))
+            .rescue(Rescue.builder().needs(input("caller", string))),
+        )
+        .inputAdapter("adapt", { steps, name: "callers" }, stepName())
+        .constructWith(namedBy)
+        .build();
+      await recorded(workflow, { caller: "from the data bag" });
+      expect(needs).toEqual([["charge"], [rescueReceived], ["charge"]]);
+    },
+  );
 });
+
+/** Supplies the name of the step being built. */
+function namedBy(shop: Shop, step: unknown): Supplied {
+  return shop.supplying(String(step));
+}

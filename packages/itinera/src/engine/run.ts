@@ -1,10 +1,10 @@
 import type { Request } from "../declaration/request.js";
 import { AbortReason } from "../journey.js";
-import type { Attempt, Outcome, StepDescriptor } from "../step.js";
-import { requestsOfDescribed } from "../step/descriptor.js";
+import type { Attempt, Outcome } from "../step.js";
 import { hasDetailsRefused, isOutcome } from "../step/outcome.js";
 import type { PlainValue } from "../value.js";
 import type { BuiltStep } from "./build.js";
+import type { Buildable } from "./buildable.js";
 import { Handles } from "./handles.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
@@ -24,11 +24,11 @@ export type Ran =
   | { readonly kind: "abnormal termination"; readonly error: unknown };
 
 /**
- * Runs the step built for `attempt`, lending its `run` the handles and the
- * services it requests, in order, and closes the handles once the attempt
- * and every call it made on them have settled. An error escaping `run`, or
- * what it returned that is not an outcome, ends the attempt in an abnormal
- * termination.
+ * Runs the step, or rescue step, built for `attempt`, lending its `run` the
+ * handles and the services it requests, in order, and closes the handles
+ * once the attempt and every call it made on them have settled. An error
+ * escaping `run`, or what it returned that is not an outcome, ends the
+ * attempt in an abnormal termination.
  *
  * @throws JourneyAbortError when the journey was aborted while the step ran,
  * whatever it did afterwards, or with `not a value` when its outcome's
@@ -36,7 +36,7 @@ export type Ran =
  */
 export async function ran(
   journey: Journey,
-  step: StepDescriptor,
+  step: Buildable,
   attempt: Attempt,
   { made, services }: BuiltStep,
 ): Promise<Ran> {
@@ -46,7 +46,7 @@ export async function ran(
     attempt,
   });
   const lends: Lent = { handles, services };
-  const lent = requestsOfDescribed(step).run.map((request) =>
+  const lent = step.requests.run.map((request) =>
     lending(journey, step, lends, request),
   );
   let ended: Ran;
@@ -75,7 +75,7 @@ interface Lent {
 
 function lending(
   journey: Journey,
-  step: StepDescriptor,
+  step: Buildable,
   { handles, services }: Lent,
   request: Request,
 ): unknown {
@@ -93,7 +93,7 @@ function lending(
 
 function notLent(
   journey: Journey,
-  step: StepDescriptor,
+  step: Buildable,
   request: Request,
 ): JourneyAbortError {
   const error = new TypeError(
@@ -108,11 +108,7 @@ function notLent(
   });
 }
 
-function endedWith(
-  step: StepDescriptor,
-  returned: unknown,
-  handles: Handles,
-): Ran {
+function endedWith(step: Buildable, returned: unknown, handles: Handles): Ran {
   return isOutcome(returned)
     ? { kind: "outcome", outcome: returned, contributed: handles.contributed }
     : {
@@ -121,6 +117,6 @@ function endedWith(
       };
 }
 
-function notAnOutcome(step: StepDescriptor, returned: unknown): string {
+function notAnOutcome(step: Buildable, returned: unknown): string {
   return `step ${step.name} returned ${typeof returned}, not an outcome made with its helpers`;
 }
