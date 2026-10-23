@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { integer } from "../../value/token.js";
-import { describedBy } from "../builder.js";
-import { rescueOf } from "../descriptor.js";
-import { Ship } from "../fixtures.js";
-import { type RescueOutcome, RescueStep } from "../rescue.js";
-import { input } from "../request.js";
+import { integer } from "../../../../src/value/token.js";
+import { describedBy } from "../../../../src/step/builder.js";
+import { rescueOf } from "../../../../src/step/descriptor.js";
+import { Ship } from "../../../fixtures/step.js";
+import { type RescueOutcome, RescueStep } from "../../../../src/step/rescue.js";
+import { input } from "../../../../src/step/request.js";
 
 class Weigh extends RescueStep {
   constructor(readonly grams: number) {

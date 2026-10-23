@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { kindOf } from "../descriptor.js";
-import { Close, Notify } from "../fixtures.js";
-import { workflowPolicyGiven } from "./builder.js";
+import { kindOf } from "../../../../src/policy/descriptor.js";
+import { Close, Notify } from "../../../fixtures/policy.js";
+import { workflowPolicyGiven } from "../../../../src/policy/workflow-policy/builder.js";
 
 describe("a workflow policy's builder", () => {
   it("describes the hooks it is given", () => {

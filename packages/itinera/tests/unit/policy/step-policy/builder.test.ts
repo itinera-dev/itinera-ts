@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { contributor } from "../../journey/contributor.js";
-import { string } from "../../value/token.js";
-import { hookOf, kindOf } from "../descriptor.js";
-import { Audit, Tally } from "../fixtures.js";
-import { failureCause, fromStep } from "../request.js";
-import { stepPolicyGiven } from "./builder.js";
+import { contributor } from "../../../../src/journey/contributor.js";
+import { string } from "../../../../src/value/token.js";
+import { hookOf, kindOf } from "../../../../src/policy/descriptor.js";
+import { Audit, Tally } from "../../../fixtures/policy.js";
+import { failureCause, fromStep } from "../../../../src/policy/request.js";
+import { stepPolicyGiven } from "../../../../src/policy/step-policy/builder.js";
 
 describe("a step policy's builder", () => {
   it("describes the hooks it is given, with their methods and requests", () => {
