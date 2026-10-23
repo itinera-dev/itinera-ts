@@ -16,8 +16,8 @@ None of its own.
 
 ## Tests
 
-- `src/engine/decision.test.ts`: the decision for every budget, cause and setting.
-- `src/engine/outcome/failed.test.ts`: the retry hook called only before a retry, with its cause, and `FailWorkflow` giving the step up.
+- `tests/unit/engine/decision.test.ts`: the decision for every budget, cause and setting.
+- `tests/unit/engine/outcome/failed.test.ts`: the retry hook called only before a retry, with its cause, and `FailWorkflow` giving the step up.
 
 ## Done when
 

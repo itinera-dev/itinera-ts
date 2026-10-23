@@ -16,7 +16,7 @@ None of its own.
 
 ## Tests
 
-- `src/engine/handles.test.ts`: closed handles throwing and changing nothing, for every kind of holder.
+- `tests/unit/engine/handles.test.ts`: closed handles throwing and changing nothing, for every kind of holder.
 
 ## Done when
 

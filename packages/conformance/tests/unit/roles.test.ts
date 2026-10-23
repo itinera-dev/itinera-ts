@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Role } from "./model/policy.js";
-import { isPerformer, Roles } from "./roles.js";
+import type { Role } from "../../src/model/policy.js";
+import { isPerformer, Roles } from "../../src/roles.js";
 
 /** The roles of a workflow providing `notifier`, whose `page` throws. */
 function notifier(): Roles {

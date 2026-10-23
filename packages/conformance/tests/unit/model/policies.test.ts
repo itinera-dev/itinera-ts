@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./error.js";
-import { Policies } from "./policies.js";
+import { ModelError } from "../../../src/model/error.js";
+import { Policies } from "../../../src/model/policies.js";
 
 /** The policies of a scenario declaring the step policy `audit` with one hook. */
 function auditing(): Policies {

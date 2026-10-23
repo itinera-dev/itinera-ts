@@ -20,9 +20,9 @@ None of its own.
 
 ## Tests
 
-- `src/engine/request.test.ts` and `src/engine/build.test.ts`: a copy for every requester.
-- `src/engine/handles.test.ts`: a contribution captured when it is made.
-- `src/engine/hook/answer.test.ts`: a hook's own copy of the step's data, of the reason and of the error.
+- `tests/unit/engine/request.test.ts` and `tests/unit/engine/build.test.ts`: a copy for every requester.
+- `tests/unit/engine/handles.test.ts`: a contribution captured when it is made.
+- `tests/unit/engine/hook/answer.test.ts`: a hook's own copy of the step's data, of the reason and of the error.
 
 ## Done when
 

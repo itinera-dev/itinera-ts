@@ -31,7 +31,7 @@ None of its own.
 
 ## Tests
 
-- `src/engine/hook.test.ts` and `src/engine/hook/answer.test.ts`: requests answered in order, a request a hook is never answered, `hook_called`, and the hook's contributions committed after it.
+- `tests/unit/engine/hook.test.ts` and `tests/unit/engine/hook/answer.test.ts`: requests answered in order, a request a hook is never answered, `hook_called`, and the hook's contributions committed after it.
 - The tests of each proposal named above.
 - `examples/policy-mock.ts`, and every example of a workflow.
 
