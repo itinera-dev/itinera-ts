@@ -47,7 +47,11 @@ export const RescueCause = closedSet({
   AbnormalTermination: "abnormal termination",
 });
 
-/** One of the values of {@link RescueCause}. */
+/**
+ * One of the values of {@link RescueCause}.
+ *
+ * {@includeCode ../../examples/closed-set.ts}
+ */
 export type RescueCause = ValueOf<typeof RescueCause>;
 
 /**

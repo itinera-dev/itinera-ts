@@ -1,0 +1,18 @@
+name: npm publish
+description: >-
+  Publishes a workspace package's version to npm through trusted publishing, unless that version is on npm
+  already, such as the first version of a package, which its maintainer publishes by hand.
+
+inputs:
+  package:
+    description: The directory of the workspace package published, holding its package.json.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        PACKAGE: ${{ inputs.package }}
+        PYTHONPATH: ${{ github.action_path }}/..
+      run: python3 "$GITHUB_ACTION_PATH/main.py"

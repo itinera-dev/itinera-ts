@@ -1,0 +1,27 @@
+name: API reference
+
+# The organisation's site serves the API reference of main at
+# /api/typescript/next/, so each change on main asks it to deploy again.
+# Until the token's secret is set, it only warns.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: reference
+  cancel-in-progress: true
+
+jobs:
+  site:
+    name: API reference of main on the site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/request-site-deploy
+        with:
+          token: ${{ secrets.SITE_DEPLOY_TOKEN }}
+          without-token: skip

@@ -4,7 +4,7 @@
  *
  * {@includeCode ../examples/instance.ts}
  *
- * @module
+ * @module itinera/instance
  */
 import type { JourneyId } from "./journey.js";
 import type { Reporter } from "./report.js";

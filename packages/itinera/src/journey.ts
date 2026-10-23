@@ -4,7 +4,7 @@
  *
  * {@includeCode ../examples/journey-result.ts}
  *
- * @module
+ * @module itinera/journey
  */
 import { closedSet, type ValueOf } from "./closed-set.js";
 
@@ -79,7 +79,11 @@ export const AbortReason = closedSet({
   ReservedMetadataKey: "reserved metadata key",
 });
 
-/** One of the values of {@link AbortReason}. */
+/**
+ * One of the values of {@link AbortReason}.
+ *
+ * {@includeCode ../examples/closed-set.ts}
+ */
 export type AbortReason = ValueOf<typeof AbortReason>;
 
 /**
@@ -99,5 +103,9 @@ export const FailureCause = closedSet({
   FailWorkflow: "FailWorkflow",
 });
 
-/** One of the values of {@link FailureCause}. */
+/**
+ * One of the values of {@link FailureCause}.
+ *
+ * {@includeCode ../examples/closed-set.ts}
+ */
 export type FailureCause = ValueOf<typeof FailureCause>;

@@ -41,7 +41,11 @@ export const MistakeKind = closedSet({
   AnotherService: "another service",
 });
 
-/** One of the values of {@link MistakeKind}. */
+/**
+ * One of the values of {@link MistakeKind}.
+ *
+ * {@includeCode ../../examples/test-mistake.ts}
+ */
 export type MistakeKind = ValueOf<typeof MistakeKind>;
 
 /**

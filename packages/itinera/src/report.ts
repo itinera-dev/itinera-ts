@@ -4,7 +4,7 @@
  *
  * {@includeCode ../examples/reporter.ts}
  *
- * @module
+ * @module itinera/report
  */
 import type { Event } from "./event.js";
 import type { PlainValue } from "./value.js";
