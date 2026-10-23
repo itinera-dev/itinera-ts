@@ -1,6 +1,5 @@
-import type { Checked, Request } from "./declaration/request.js";
-import { recordedTypes, typeFromMetadata } from "./declaration/metadata.js";
-import { type RequestType, unwrapped } from "./value/token.js";
+import type { Request } from "./declaration/request.js";
+import { recordedTypes } from "./declaration/metadata.js";
 
 /** A class, whose constructor or methods carry requests. */
 export type Owner = abstract new (...args: never[]) => unknown;
@@ -17,7 +16,7 @@ const table = new WeakMap<object, Map<Key, Map<number, Request>>>();
  *
  * @throws Error if the parameter carries a request already.
  */
-function record(
+export function record(
   target: object,
   key: Key,
   index: number,
@@ -34,20 +33,6 @@ function record(
     );
   }
   byIndex.set(index, request);
-}
-
-/**
- * A parameter decorator, typed as `D`, that records the request `requested`
- * makes of the parameter it marks.
- */
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- the caller names the decorator's type, which the compiler checks where it is applied
-export function marking<D>(
-  requested: (target: object, key: Key, index: number) => Request,
-): D {
-  const mark = (target: object, key: Key, index: number): void => {
-    record(target, key, index, requested(target, key, index));
-  };
-  return mark as D;
 }
 
 /**
@@ -71,34 +56,19 @@ export function requestsOf(owner: Owner, key: Key): readonly Request[] {
   );
 }
 
+/**
+ * Whether the decorators of `owner` declare a request on a parameter of its
+ * constructor, when `key` is `undefined`, or of its method `key`.
+ */
+export function declaresRequests(owner: Owner, key: Key): boolean {
+  return (table.get(owner)?.get(key)?.size ?? 0) > 0;
+}
+
 /** The methods of `owner` whose parameters carry a request. */
 export function methodsWithRequests(
   owner: Owner,
 ): readonly (string | symbol)[] {
   return [...(table.get(owner)?.keys() ?? [])].filter(isMethod);
-}
-
-/**
- * The type a request for a value checks: `type`, when it is written, or else
- * the declared type of the parameter at `index`, read from the metadata the
- * compiler records.
- *
- * @throws Error if no type is written and the metadata cannot say it.
- */
-export function checkedOf(
-  type: RequestType | undefined,
-  target: object,
-  key: Key,
-  index: number,
-): Checked {
-  if (type === undefined) {
-    const owner = ownerOf(target, key);
-    return {
-      schema: typeFromMetadata(owner, key, index, where(owner, key)),
-      optional: false,
-    };
-  }
-  return unwrapped(type);
 }
 
 /**
@@ -133,7 +103,23 @@ export function requestsMadeBy(
 ): readonly Request[] {
   requireMetadata(prototype, key);
   const owner = ownerOf(prototype, key);
-  const requests = requestsOf(owner, key);
+  return onlyAllowed(requestsOf(owner, key), owner, key, allowed, what);
+}
+
+/**
+ * `requests`, the requests of the method `key` of `owner`, which `what`
+ * names in a message, such as "an input adapter", once checked against the
+ * kinds of request it may make.
+ *
+ * @throws Error if one makes a request not `allowed`.
+ */
+export function onlyAllowed(
+  requests: readonly Request[],
+  owner: Owner,
+  key: string | symbol,
+  allowed: readonly Request["kind"][],
+  what: string,
+): readonly Request[] {
   const refused = requests.find((request) => isRefused(request, allowed));
   if (refused !== undefined) {
     throw new Error(
@@ -150,11 +136,20 @@ export function where(owner: { readonly name: string }, key: Key): string {
     : `${owner.name}.${String(key)}`;
 }
 
-function ownerOf(target: object, key: Key): Owner {
+/**
+ * The class a decorator was applied to, from the `target` TypeScript gives
+ * it: the class itself for its constructor, its prototype for a method.
+ */
+export function ownerOf(target: object, key: Key): Owner {
   return (key === undefined ? target : target.constructor) as Owner;
 }
 
-function declaredParameters(owner: Owner, key: Key): number {
+/**
+ * How many parameters the constructor of `owner`, or its method `key`,
+ * declares: as the compiler's metadata records them, or else as the
+ * function's length counts them.
+ */
+export function declaredParameters(owner: Owner, key: Key): number {
   const recorded = recordedTypes(owner, key);
   if (recorded !== undefined) {
     return recorded.length;

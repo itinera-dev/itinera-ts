@@ -1,6 +1,8 @@
+import type { RetryCause, StepFailureCause } from "../../src/policy.js";
+import type { Contributor } from "../../src/journey.js";
 import { onStepSuccess, onWorkflowSuccess } from "../../src/policy/hooks.js";
 import { stepPolicy, workflowPolicy } from "../../src/policy/declared.js";
-import type { OnSuccess } from "../../src/policy/lifecycle.js";
+import type { OnFailure, OnSuccess } from "../../src/policy/lifecycle.js";
 import { role } from "../../src/policy/request.js";
 import { StepPolicy } from "../../src/policy/step-policy.js";
 import { WorkflowPolicy } from "../../src/policy/workflow-policy.js";
@@ -42,4 +44,32 @@ export class Notify extends WorkflowPolicy<Messages> {
 export class Quiet extends WorkflowPolicy {
   @onWorkflowSuccess()
   paid(): void {}
+}
+
+/**
+ * A step policy declared without decorators, for a policy's builder: each
+ * of its methods may implement a hook, and it has a field that is not one.
+ */
+export class Tally extends StepPolicy {
+  readonly field = "not a method";
+
+  counted(note: string, contributing: Contributor): OnSuccess {
+    contributing.contribute("note", note);
+    return this.keepDefault();
+  }
+
+  failed(cause: StepFailureCause): OnFailure {
+    return this.failWorkflow(cause);
+  }
+
+  retried(cause: RetryCause): OnFailure {
+    return this.failWorkflow(cause);
+  }
+}
+
+/** A workflow policy declared without decorators, for a policy's builder. */
+export class Close extends WorkflowPolicy {
+  closed(): void {}
+
+  failed(): void {}
 }

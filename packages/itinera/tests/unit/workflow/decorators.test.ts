@@ -11,7 +11,8 @@ import {
 import type { OnSuccess } from "../../../src/policy/lifecycle.js";
 import { StepPolicy } from "../../../src/policy/step-policy.js";
 import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
-import { policiesOf, rescueOf } from "../../../src/step/descriptor.js";
+import { rescueOf } from "../../../src/step/descriptor.js";
+import type { PolicyDescriptor } from "../../../src/policy/descriptor.js";
 import { Charge, Refund, Ship } from "../../fixtures/step.js";
 import { RescueStep, type RescueOutcome } from "../../../src/step/rescue.js";
 import type { JourneyId } from "../../../src/journey.js";
@@ -139,7 +140,9 @@ describe("withStep", () => {
     @workflow({ name: "orders" })
     @withStep(Charge, { name: "charge", rescue: Refund })
     class Orders extends Workflow {}
-    expect(declarationOf(Orders).steps.map(rescueOf)).toEqual([Refund]);
+    expect(declarationOf(Orders).steps.map(rescueOf)).toMatchObject([
+      { name: "charge_rescue", step: Refund },
+    ]);
   });
 
   it("refuses a rescue step not declared with @rescueStep", () => {
@@ -178,8 +181,11 @@ describe("the policies of a workflow", () => {
       }
     }
     const declaration = declarationOf(Orders);
-    expect(declaration.policies).toEqual([Notify, Quiet]);
-    expect(declaration.steps.map(policiesOf)).toEqual([[Ledger, Audit]]);
+    expect(declaration.policies.map(nameOf)).toEqual(["notify", "quiet"]);
+    expect(declaration.steps[0]?.policies().map(nameOf)).toEqual([
+      "ledger",
+      "audit",
+    ]);
   });
 
   it("refuse a step policy not declared with @stepPolicy", () => {
@@ -232,3 +238,7 @@ describe("the policies of a workflow", () => {
     }).toThrow("Audit is not declared with @workflowPolicy");
   });
 });
+
+function nameOf(described: PolicyDescriptor): string {
+  return described.name;
+}

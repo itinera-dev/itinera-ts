@@ -22,14 +22,17 @@
  * - Steps: {@link Step}, {@link step}, {@link input}, {@link stepReporter},
  *   {@link StepReporter}, {@link Outcome}, {@link StepDescriptor} and
  *   {@link StepBuilder}, the rescue steps' {@link RescueStep},
- *   {@link rescueStep} and {@link fromRescuedStep}, and the requests of a
+ *   {@link rescueStep}, {@link fromRescuedStep} and
+ *   {@link RescueStepBuilder}, and the requests of a
  *   step hook about its step, such as {@link stepName}, {@link attempt},
  *   {@link failureReason} and {@link error}, which move to `itinera/step`.
  * - Policies: {@link StepPolicy}, {@link WorkflowPolicy}, {@link stepPolicy},
  *   {@link workflowPolicy}, the hooks' decorators, such as
  *   {@link onStepSuccess}, what a hook returns, such as {@link OnSuccess},
- *   and the requests only hooks make, such as {@link fromStep},
- *   {@link role} and {@link hookReporter}, which move to `itinera/policy`.
+ *   the requests only hooks make, such as {@link fromStep},
+ *   {@link role} and {@link hookReporter}, the policies' builders,
+ *   {@link StepPolicyBuilder} and {@link WorkflowPolicyBuilder}, and
+ *   {@link PolicyDescriptor}, which move to `itinera/policy`.
  * - Services: {@link service}, {@link serviceType} and {@link ServiceType},
  *   and the service providers' {@link provider}, {@link Provided} and
  *   {@link providerReporter}, which move to `itinera/service`.
@@ -37,8 +40,9 @@
  *   {@link idGenerator}, {@link fromWorkflow}, the input adapters'
  *   {@link inputAdapter}, {@link key} and {@link Supplied},
  *   {@link WorkflowBuilder},
- *   {@link WorkflowDescriptor}, {@link Violations} and the types of the
- *   request decorators, such as {@link RequestDecorator}, which move to
+ *   {@link WorkflowDescriptor}, {@link Violations}, the types of the
+ *   request decorators, such as {@link RequestDecorator}, and of the
+ *   requests a builder is given by position, such as {@link Tokens}, which move to
  *   `itinera/workflow`, and {@link WorkflowInstance}, which moves to
  *   `itinera/instance`.
  * - Executors: {@link LocalExecutor}, {@link Refusal} and why `run` refuses
@@ -101,12 +105,16 @@ export type {
   Lifecycle,
   OnFailure,
   OnSuccess,
+  PolicyDescriptor,
   PolicyName,
   PolicyOptions,
+  Provides,
   RolesOf,
   RolesOfOne,
   StepFailureCause,
+  StepPolicyBuilder,
   StepPolicyClass,
+  WorkflowPolicyBuilder,
   WorkflowPolicyClass,
 } from "./policy.js";
 export {
@@ -160,6 +168,7 @@ export type {
   Outcome,
   Reason,
   RescueOutcome,
+  RescueStepBuilder,
   RescueStepClass,
   StepBuilder,
   StepClass,
@@ -219,18 +228,23 @@ export type {
   Built,
   DuplicateStepName,
   FromDataBag,
+  Given,
   IdGeneratorDecorator,
   IdGeneratorKey,
   InputAdapterDecorator,
   InputAdapterOptions,
   KeyIn,
+  MethodKey,
   ParameterOf,
+  ParametersOf,
   Place,
   ReadFromMetadata,
   RequestDecorator,
   Strict,
   Supplied,
   SuppliedValue,
+  Token,
+  Tokens,
   ValueRequestDecorator,
   Violation,
   WorkflowBuilder,

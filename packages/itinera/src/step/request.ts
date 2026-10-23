@@ -1,4 +1,4 @@
-import { checkedOf, marking } from "../declaration.js";
+import { marking, markingValue } from "../declaration/marking.js";
 import type {
   Place,
   RequestDecorator,
@@ -31,11 +31,7 @@ export function input<T extends RequestType | undefined = undefined>(
   key: string,
   type?: T,
 ): ValueRequestDecorator<T, Place<StepClass | RescueStepClass, undefined>> {
-  return marking((target, method, index) => ({
-    kind: "input",
-    key,
-    type: checkedOf(type, target, method, index),
-  }));
+  return markingValue("input", key, type);
 }
 
 /**
@@ -48,7 +44,7 @@ export function stepReporter(): RequestDecorator<
   StepReporter,
   Place<Step | RescueStep, "run">
 > {
-  return marking(() => ({ kind: "stepReporter" }));
+  return marking({ kind: "stepReporter" });
 }
 
 /**
@@ -61,7 +57,7 @@ export function stepName(): RequestDecorator<
   StepName,
   Place<StepPolicy | Workflow, string | symbol>
 > {
-  return marking(() => ({ kind: "stepName" }));
+  return marking({ kind: "stepName" });
 }
 
 /**
@@ -74,7 +70,7 @@ export function attempt(): RequestDecorator<
   Attempt,
   Place<StepPolicy | Workflow, string | symbol>
 > {
-  return marking(() => ({ kind: "attempt" }));
+  return marking({ kind: "attempt" });
 }
 
 /**
@@ -114,10 +110,10 @@ export function failureReason<O extends boolean = false>(
   FromFailure<Reason, O>,
   Place<StepPolicy, string | symbol> | Place<RescueStepClass, undefined>
 > {
-  return marking(() => ({
+  return marking({
     kind: "failureReason",
     optional: options.optional === true,
-  }));
+  });
 }
 
 /**
@@ -133,10 +129,10 @@ export function error<O extends boolean = false>(
   FromFailure<unknown, O>,
   Place<StepPolicy, string | symbol> | Place<RescueStepClass, undefined>
 > {
-  return marking(() => ({
+  return marking({
     kind: "error",
     optional: options.optional === true,
-  }));
+  });
 }
 
 /**

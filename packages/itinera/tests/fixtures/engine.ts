@@ -8,9 +8,9 @@ import type {
   Reporter,
 } from "../../src/report.js";
 import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
-import type { StepBuilder } from "../../src/step.js";
+import type { StepBuilder, StepClass } from "../../src/step.js";
 import { Ending } from "../../src/testing/ending.js";
-import { stepMock } from "../../src/testing/step-mock.js";
+import { type StepMockClass, stepMock } from "../../src/testing/step-mock.js";
 import type { PlainValue } from "../../src/value.js";
 import { type Built, Workflow, type WorkflowName } from "../../src/workflow.js";
 import { runJourney } from "../../src/engine.js";
@@ -29,7 +29,9 @@ function atNoon(): Date {
 export class Orders extends Workflow {}
 
 /** The workflow `orders`, with these steps in order. */
-export function orders(...steps: readonly StepBuilder[]): Built<Orders> {
+export function orders(
+  ...steps: readonly StepBuilder<StepClass>[]
+): Built<Orders> {
   return steps.reduce(withStep, named()).build();
 }
 
@@ -39,13 +41,13 @@ function named() {
 
 function withStep(
   builder: ReturnType<typeof named>,
-  step: StepBuilder,
+  step: StepBuilder<StepClass>,
 ): ReturnType<typeof named> {
   return builder.step(step);
 }
 
 /** A step `charge` that succeeds. */
-export function charge(): StepBuilder {
+export function charge(): StepBuilder<StepMockClass> {
   return stepMock({ attempts: [Ending.success] }).builder("charge");
 }
 

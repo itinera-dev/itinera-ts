@@ -1,6 +1,9 @@
 import type { JourneyId } from "../journey.js";
+import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { Reporter, ReporterClass } from "../report.js";
+import type { DeclaredProvider } from "../service/provider.js";
 import type { StepDescriptor } from "../step.js";
+import type { DeclaredAdapter } from "./adapter.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
 import type { IdGenerator } from "./registry.js";
 import { Violations, violationsOf } from "./violation.js";
@@ -8,10 +11,11 @@ import { Violations, violationsOf } from "./violation.js";
 declare const crypto: { randomUUID(): string };
 
 let describing: (name: WorkflowName, parts: Parts) => WorkflowDescriptor;
+let partsOf: (described: WorkflowDescriptor) => Parts;
 
 /**
  * How a workflow is described to the executor: its name, its steps, its
- * reporters, and how it makes a journey ID. The executor reads this and
+ * policies, its reporters, and how it makes a journey ID. The executor reads this and
  * nothing else about the workflow, and passes the workflow object to the
  * calls that need it.
  *
@@ -26,25 +30,38 @@ let describing: (name: WorkflowName, parts: Parts) => WorkflowDescriptor;
 export class WorkflowDescriptor {
   static {
     describing = (name, parts) => new WorkflowDescriptor(name, parts);
+    partsOf = (described) => described.#parts;
   }
 
   /** The workflow's name, which every event of its journeys carries. */
   readonly name: WorkflowName;
-  readonly #steps: readonly StepDescriptor[];
-  readonly #reporters: readonly ReporterClass[];
-  readonly #idGenerator: IdGenerator | undefined;
+  readonly #parts: Parts;
 
   private constructor(name: WorkflowName, parts: Parts) {
     this.name = name;
-    this.#steps = Object.freeze([...parts.steps]);
-    this.#reporters = Object.freeze([...parts.reporters]);
-    this.#idGenerator = parts.idGenerator;
+    this.#parts = Object.freeze({
+      name,
+      steps: Object.freeze([...parts.steps]),
+      reporters: Object.freeze([...parts.reporters]),
+      policies: Object.freeze([...parts.policies]),
+      adapters: Object.freeze([...parts.adapters]),
+      providers: Object.freeze([...parts.providers]),
+      idGenerator: parts.idGenerator,
+    });
     Object.freeze(this);
   }
 
   /** The workflow's steps, in the order they run. */
   steps(): readonly StepDescriptor[] {
-    return this.#steps;
+    return this.#parts.steps;
+  }
+
+  /**
+   * The workflow policies attached to the workflow, in the order their
+   * hooks are looked up.
+   */
+  policies(): readonly PolicyDescriptor[] {
+    return this.#parts.policies;
   }
 
   /**
@@ -52,7 +69,7 @@ export class WorkflowDescriptor {
    * instance.
    */
   reporters(): readonly Reporter[] {
-    return this.#reporters.map(build);
+    return this.#parts.reporters.map(build);
   }
 
   /**
@@ -63,10 +80,11 @@ export class WorkflowDescriptor {
    * @throws Whatever the ID generator throws.
    */
   generateJourneyId(workflow: Workflow): JourneyId {
+    const { idGenerator } = this.#parts;
     const id: unknown =
-      this.#idGenerator === undefined
+      idGenerator === undefined
         ? crypto.randomUUID()
-        : this.#idGenerator.call(workflow);
+        : idGenerator.call(workflow);
     if (typeof id !== "string") {
       throw new TypeError(
         `the ID generator of workflow ${this.name} returned ${typeof id}, not a string`,
@@ -84,6 +102,12 @@ export interface Parts {
   readonly steps: readonly StepDescriptor[];
   /** The classes of the workflow's own reporters. */
   readonly reporters: readonly ReporterClass[];
+  /** The workflow policies attached to the workflow, in order. */
+  readonly policies: readonly PolicyDescriptor[];
+  /** The input adapters, in order. */
+  readonly adapters: readonly DeclaredAdapter[];
+  /** The service providers, in order. */
+  readonly providers: readonly DeclaredProvider[];
   /** The method that makes each instance's journey ID, if there is one. */
   readonly idGenerator: IdGenerator | undefined;
 }
@@ -106,6 +130,20 @@ export function assemble(parts: Parts, className: string): WorkflowDescriptor {
     throw new Violations([first, ...more]);
   }
   return describing(parts.name, parts);
+}
+
+/** The input adapters of the workflow `described`, in order. */
+export function adaptersOf(
+  described: WorkflowDescriptor,
+): readonly DeclaredAdapter[] {
+  return partsOf(described).adapters;
+}
+
+/** The service providers of the workflow `described`, in order. */
+export function providersOf(
+  described: WorkflowDescriptor,
+): readonly DeclaredProvider[] {
+  return partsOf(described).providers;
 }
 
 function build(reporter: ReporterClass): Reporter {

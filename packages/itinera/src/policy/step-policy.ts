@@ -1,3 +1,7 @@
+import {
+  type StepPolicyBuilder,
+  stepPolicyBuilder,
+} from "./step-policy/builder.js";
 import type { Reason } from "../step.js";
 import type { FailWorkflow, FinishWorkflow, KeepDefault } from "./lifecycle.js";
 
@@ -31,6 +35,23 @@ export abstract class StepPolicy<R = unknown> {
    * workflow it is attached to must provide them.
    */
   declare readonly [roles]: R;
+
+  /**
+   * Starts putting a step policy of this class together, for a class
+   * declared without decorators, named `name`, or else after the class, as
+   * `Audit.builder("audit")`.
+   *
+   * {@includeCode ../../examples/policy-builder.ts}
+   *
+   * @throws Error if the name is empty, or if the class is declared with a
+   * policy's decorator.
+   */
+  static builder<C extends StepPolicyClass>(
+    this: C,
+    name?: string,
+  ): StepPolicyBuilder<C> {
+    return stepPolicyBuilder(this, name);
+  }
 
   /** What a hook returns to keep the default. */
   protected keepDefault(): KeepDefault {

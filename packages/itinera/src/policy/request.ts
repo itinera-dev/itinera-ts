@@ -1,4 +1,4 @@
-import { checkedOf, marking } from "../declaration.js";
+import { marking, markingValue } from "../declaration/marking.js";
 import type {
   Place,
   RequestDecorator,
@@ -27,11 +27,7 @@ export function fromStep<T extends RequestType | undefined = undefined>(
   key: string,
   type?: T,
 ): ValueRequestDecorator<T, Place<StepPolicy, string | symbol>> {
-  return marking((target, method, index) => ({
-    kind: "fromStep",
-    key,
-    type: checkedOf(type, target, method, index),
-  }));
+  return markingValue("fromStep", key, type);
 }
 
 /**
@@ -48,7 +44,7 @@ export function role<R>(): RequestDecorator<
   R,
   Place<StepPolicy<R> | WorkflowPolicy<R>, string | symbol>
 > {
-  return marking(() => ({ kind: "role" }));
+  return marking({ kind: "role" });
 }
 
 /**
@@ -60,7 +56,7 @@ export function failureCause(): RequestDecorator<
   StepFailureCause,
   Place<StepPolicy, string | symbol>
 > {
-  return marking(() => ({ kind: "failureCause" }));
+  return marking({ kind: "failureCause" });
 }
 
 /**
@@ -72,5 +68,5 @@ export function retryCause(): RequestDecorator<
   RetryCause,
   Place<StepPolicy, string | symbol>
 > {
-  return marking(() => ({ kind: "retryCause" }));
+  return marking({ kind: "retryCause" });
 }

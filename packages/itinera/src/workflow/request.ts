@@ -1,4 +1,4 @@
-import { checkedOf, marking } from "../declaration.js";
+import { markingValue } from "../declaration/marking.js";
 import type { Place, ValueRequestDecorator } from "../declaration/parameter.js";
 import type { StepPolicy, WorkflowPolicy } from "../policy.js";
 import type { Workflow } from "../workflow.js";
@@ -25,9 +25,5 @@ export function fromWorkflow<T extends RequestType | undefined = undefined>(
   T,
   Place<StepPolicy | WorkflowPolicy | Workflow, string | symbol>
 > {
-  return marking((target, method, index) => ({
-    kind: "fromWorkflow",
-    key,
-    type: checkedOf(type, target, method, index),
-  }));
+  return markingValue("fromWorkflow", key, type);
 }
