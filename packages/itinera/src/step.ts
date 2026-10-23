@@ -11,6 +11,7 @@ export { Attempt } from "./step/attempt.js";
 export { step } from "./step/declared.js";
 export type { StepDescriptor, StepOptions } from "./step/descriptor.js";
 export type { Outcome, Success } from "./step/outcome.js";
+export { input, stepReporter, type StepReporter } from "./step/request.js";
 
 declare const stepName: unique symbol;
 

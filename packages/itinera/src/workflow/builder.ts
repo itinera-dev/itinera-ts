@@ -1,8 +1,8 @@
-import { refuseMethodParameters } from "../declaration.js";
+import { requestsOf } from "../declaration.js";
 import { named } from "../name.js";
 import type { ReporterClass } from "../report.js";
 import type { StepClass, StepDescriptor, StepOptions } from "../step.js";
-import { checkParameters } from "../step/declared.js";
+import { requestsOfStep } from "../step/declared.js";
 import { describeStep } from "../step/descriptor.js";
 import type { Built, Workflow, WorkflowName } from "../workflow.js";
 import { assemble, type WorkflowDescriptor } from "./descriptor.js";
@@ -78,7 +78,7 @@ export class WorkflowBuilder<
    * `run` has no request.
    */
   step(step: StepClass, options: StepOptions): this {
-    checkParameters(step);
+    requestsOfStep(step);
     this.#steps.push(describeStep(step, options));
     return this;
   }
@@ -108,7 +108,7 @@ export class WorkflowBuilder<
         `${this.#workflow.name}.${String(key)} is not a method of the class`,
       );
     }
-    refuseMethodParameters(prototype, key);
+    requestsOf(this.#workflow, key);
     this.#idGenerator = generate as IdGenerator;
     return this;
   }

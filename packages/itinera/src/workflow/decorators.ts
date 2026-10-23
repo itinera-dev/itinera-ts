@@ -1,4 +1,4 @@
-import { refuseMethodParameters, requireMetadata } from "../declaration.js";
+import { type Owner, requestsOf, requireMetadata } from "../declaration.js";
 import { named } from "../name.js";
 import type { ReporterClass } from "../report.js";
 import type { StepClass, StepOptions } from "../step.js";
@@ -103,7 +103,7 @@ export function idGenerator(): IdGeneratorDecorator {
     if (generate === undefined) {
       throw new Error(`@idGenerator marks a method, not ${String(key)}`);
     }
-    refuseMethodParameters(prototype, key);
+    requestsOf(prototype.constructor as Owner, key);
     const declaration = declarationOn(prototype.constructor);
     if (declaration.idGenerator !== undefined) {
       throw new Error(

@@ -1,6 +1,6 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["src/index.ts", "src/unstable.ts"],
+  "entryPoints": ["src/index.ts", "src/schema.ts", "src/unstable.ts"],
   "tsconfig": "tsconfig.build.json",
   "out": "api",
   "treatWarningsAsErrors": true,

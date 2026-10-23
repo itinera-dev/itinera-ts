@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { type Outcome, Step, step } from "../../../src/step.js";
-import { isDeclared } from "../../../src/step/declared.js";
+import { integer } from "../../../src/value/token.js";
+import { isDeclared, requestsOfStep } from "../../../src/step/declared.js";
+import { input } from "../../../src/step/request.js";
 import { Ship } from "../../fixtures/step.js";
 
 class Undeclared extends Step {
@@ -16,6 +18,29 @@ describe("step", () => {
 
   it("leaves a class it does not mark undeclared", () => {
     expect(isDeclared(Undeclared)).toBe(false);
+  });
+
+  it("records what the constructor and run request", () => {
+    @step()
+    class Weigh extends Step {
+      constructor(@input("grams", integer) readonly grams: number) {
+        super();
+      }
+
+      override run(): Outcome {
+        return this.succeed();
+      }
+    }
+    expect(requestsOfStep(Weigh)).toEqual({
+      needs: [
+        {
+          kind: "input",
+          key: "grams",
+          type: { schema: integer, optional: false },
+        },
+      ],
+      run: [],
+    });
   });
 
   it("refuses a class that extends another step", () => {
@@ -43,7 +68,7 @@ describe("step", () => {
     }
     expect(() => {
       step()(Weigh);
-    }).toThrow("the constructor of Weigh has a parameter with no request");
+    }).toThrow("the constructor of Weigh: parameter 1 carries no request");
   });
 
   it("refuses a parameter of run with no request", () => {
@@ -54,6 +79,6 @@ describe("step", () => {
     }
     expect(() => {
       step()(Pack);
-    }).toThrow("Pack.run has a parameter with no request");
+    }).toThrow("Pack.run: parameter 1 carries no request");
   });
 });

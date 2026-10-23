@@ -142,7 +142,7 @@ describe("idGenerator", () => {
         }
       }
       return Orders;
-    }).toThrow("Orders.orderId has a parameter with no request");
+    }).toThrow("Orders.orderId: parameter 1 carries no request");
   });
 
   it("needs the compiler to record the types of parameters", () => {

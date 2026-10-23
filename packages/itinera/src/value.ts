@@ -5,6 +5,23 @@
  * @module
  */
 
+export {
+  boolean,
+  classOf,
+  guard,
+  integer,
+  list,
+  listOf,
+  number,
+  object,
+  objectOf,
+  optional,
+  type Optional,
+  type RequestType,
+  string,
+  type ValueClass,
+} from "./value/token.js";
+
 /**
  * A value in the plain form itinera keeps: `null`, a boolean, a finite number,
  * a string, a list of plain values, or a plain object of them.

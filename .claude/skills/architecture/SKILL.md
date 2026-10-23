@@ -19,6 +19,7 @@ Paths under `engine/`, `step/` and the like are in `packages/itinera/src/`.
 |---|---|---|
 | The packages | `packages/`, and each module in `packages/itinera/src/` | a package, a subpath or a module is added, removed or renamed, or a module's contents move |
 | What a workflow is made of | `workflow/decorators.ts`, `workflow/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts` | a decorator, a builder method, or a member of `WorkflowDescriptor`, `StepDescriptor` or `WorkflowInstance` is added, removed or renamed |
+| How requests are declared | `declaration.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `service/request.ts` | a request decorator, a type token, a `Request` kind or a type read from the metadata is added, removed or renamed |
 | From declaration to result | `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts` | a refusal is added or removed, or what happens before a journey changes order |
 | How a journey runs | `engine/scan.ts`, `engine/decision.ts`, `engine.ts`, `step/outcome.ts`, `journey/result.ts` | an outcome, a decision, an event of the flow, an abort reason or a status is added, or the scan changes |
 | Events and reporters | `engine/journey.ts`, `engine/emitter.ts`, `engine/guard.ts`, `engine/frozen.ts`, `report/default-dispatcher.ts` | what every event carries, or the rules on a reporter or dispatcher that fails, change |

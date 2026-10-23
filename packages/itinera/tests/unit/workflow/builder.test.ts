@@ -141,7 +141,7 @@ describe("the builder", () => {
       }
     }
     expect(() => shop().step(Weigh, { name: "weigh" })).toThrow(
-      "the constructor of Weigh has a parameter with no request",
+      "the constructor of Weigh: parameter 1 carries no request",
     );
   });
 
@@ -169,7 +169,7 @@ describe("the builder", () => {
 
   it("refuses an ID generator with a parameter that a cast let through", () => {
     expect(() => shop().idGenerator("withPrefix" as "orderId")).toThrow(
-      "Shop.withPrefix has a parameter with no request",
+      "Shop.withPrefix: parameter 1 carries no request",
     );
   });
 });

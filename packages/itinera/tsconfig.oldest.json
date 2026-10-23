@@ -2,7 +2,8 @@
   "extends": "../../tsconfig.oldest.json",
   "compilerOptions": {
     "skipLibCheck": false,
-    "types": []
+    "types": ["node"],
+    "lib": ["ES2023"]
   },
   "include": ["src"]
 }

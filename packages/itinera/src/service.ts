@@ -1,8 +1,11 @@
 /**
- * Services: what a service provider is called.
+ * Services: objects of operations a workflow lends its steps, what a service
+ * provider is called, and how a step requests a service.
  *
  * @module
  */
+
+export { service, serviceType, type ServiceType } from "./service/request.js";
 
 declare const providerName: unique symbol;
 
