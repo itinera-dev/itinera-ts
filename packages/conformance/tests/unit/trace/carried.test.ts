@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { carriesMessage, carriesValue } from "./carried.js";
-import { abortedAt, stepInfo, stepSucceeded } from "./fixtures.js";
-import { lineOf } from "./line.js";
+import { carriesMessage, carriesValue } from "../../../src/trace/carried.js";
+import { abortedAt, stepInfo, stepSucceeded } from "../../fixtures/trace.js";
+import { lineOf } from "../../../src/trace/line.js";
 
 describe("carriesMessage", () => {
   it.each([

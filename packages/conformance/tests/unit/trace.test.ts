@@ -1,13 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./model.js";
-import { Row } from "./model/table.js";
-import { areExactly, expectedLine, includesInOrder, lineOf } from "./trace.js";
+import { ModelError } from "../../src/model.js";
+import { Row } from "../../src/model/table.js";
+import {
+  areExactly,
+  expectedLine,
+  includesInOrder,
+  lineOf,
+} from "../../src/trace.js";
 import {
   attemptStarted,
   started,
   stepInfo,
   stepSucceeded,
-} from "./trace/fixtures.js";
+} from "../fixtures/trace.js";
 
 function row(cells: Record<string, string>): Row {
   return new Row(new Map(Object.entries(cells)));

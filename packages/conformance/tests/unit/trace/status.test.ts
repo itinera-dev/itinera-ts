@@ -7,8 +7,8 @@ import {
   stepRescuing,
   stepSkipped,
   stepSucceeded,
-} from "./fixtures.js";
-import { attemptsOf, statusOf } from "./status.js";
+} from "../../fixtures/trace.js";
+import { attemptsOf, statusOf } from "../../../src/trace/status.js";
 
 describe("statusOf", () => {
   it.each([

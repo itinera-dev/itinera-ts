@@ -7,8 +7,8 @@ import {
   stepGivenUp,
   stepRescuing,
   stepSkipped,
-} from "./fixtures.js";
-import { type Column, lineOf } from "./line.js";
+} from "../../fixtures/trace.js";
+import { type Column, lineOf } from "../../../src/trace/line.js";
 
 describe("lineOf", () => {
   it.each<[string, Event, [Column, string][]]>([

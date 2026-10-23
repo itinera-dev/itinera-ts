@@ -1,8 +1,8 @@
 import type { Event, PlainValue } from "itinera/unstable";
 import { describe, expect, it } from "vitest";
-import type { ReporterFailure } from "./model/report.js";
-import { ScenarioReporter } from "./recorders.js";
-import { attemptStarted, started } from "./trace/fixtures.js";
+import type { ReporterFailure } from "../../src/model/report.js";
+import { ScenarioReporter } from "../../src/recorders.js";
+import { attemptStarted, started } from "../fixtures/trace.js";
 
 type Receive = (reporter: ScenarioReporter) => void;
 

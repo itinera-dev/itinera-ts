@@ -1,9 +1,9 @@
 import type { Event } from "itinera/unstable";
 import { describe, expect, it } from "vitest";
-import { admitted, type Journey, ran, streamOf } from "./journeys.js";
-import { Model, ModelError } from "./model.js";
-import { Recorders } from "./recorders.js";
-import { Witness } from "./witness.js";
+import { admitted, type Journey, ran, streamOf } from "../../src/journeys.js";
+import { Model, ModelError } from "../../src/model.js";
+import { Recorders } from "../../src/recorders.js";
+import { Witness } from "../../src/witness.js";
 
 /** A workflow of one step listing the reporters, under the default dispatcher. */
 function listing(...reporters: string[]): Model {
