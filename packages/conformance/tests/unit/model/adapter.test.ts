@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./error.js";
+import { ModelError } from "../../../src/model/error.js";
 import {
   adapterOf,
   type AdapterScript,
@@ -8,8 +8,8 @@ import {
   answerOf,
   refuseUnheldAccess,
   unscriptedAdapter,
-} from "./adapter.js";
-import { nonValue } from "./value.js";
+} from "../../../src/model/adapter.js";
+import { nonValue } from "../../../src/model/value.js";
 
 describe("what a returns sentence says an adapter answers", () => {
   it.each([

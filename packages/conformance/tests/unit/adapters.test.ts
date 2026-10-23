@@ -11,13 +11,13 @@ import {
   Workflow,
 } from "itinera/unstable";
 import { describe, expect, it } from "vitest";
-import { Adapters } from "./adapters.js";
+import { Adapters } from "../../src/adapters.js";
 import {
   type Answer,
   type AdapterScript,
   unscriptedAdapter,
-} from "./model/adapter.js";
-import type { Scripted } from "./model/value.js";
+} from "../../src/model/adapter.js";
+import type { Scripted } from "../../src/model/value.js";
 
 class Holding extends Workflow {}
 
