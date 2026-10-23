@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, expect, it } from "vitest";
-import type { Event } from "../../event.js";
+import type { Event } from "../../../../src/event.js";
 import {
   type Abort,
   type Contributor,
   contributor,
   journeyId,
-} from "../../journey.js";
-import { None, Some } from "../../option.js";
+} from "../../../../src/journey.js";
+import { None, Some } from "../../../../src/option.js";
 import {
   hookReporter,
   type HookReporter,
@@ -15,24 +15,29 @@ import {
   type OnSuccess,
   retryCause,
   role,
-} from "../../policy.js";
-import { fromStep } from "../../policy/request.js";
-import { StepPolicy } from "../../policy/step-policy.js";
+} from "../../../../src/policy.js";
+import { fromStep } from "../../../../src/policy/request.js";
+import { StepPolicy } from "../../../../src/policy/step-policy.js";
 import {
   Attempt,
   type Outcome,
   type Reason,
   Step,
   stepReporter,
-} from "../../step.js";
-import { attempt, error, failureReason, stepName } from "../../step/request.js";
-import { Ending } from "../../testing/ending.js";
-import { RecordingReporter } from "../../testing/recording-reporter.js";
-import { stepMock } from "../../testing/step-mock.js";
-import type { StepPolicyMock } from "../../testing/step-policy-mock.js";
-import type { WorkflowPolicyMock } from "../../testing/workflow-policy-mock.js";
-import { string } from "../../value/token.js";
-import { fromWorkflow } from "../../workflow.js";
+} from "../../../../src/step.js";
+import {
+  attempt,
+  error,
+  failureReason,
+  stepName,
+} from "../../../../src/step/request.js";
+import { Ending } from "../../../../src/testing/ending.js";
+import { RecordingReporter } from "../../../../src/testing/recording-reporter.js";
+import { stepMock } from "../../../../src/testing/step-mock.js";
+import type { StepPolicyMock } from "../../../../src/testing/step-policy-mock.js";
+import type { WorkflowPolicyMock } from "../../../../src/testing/workflow-policy-mock.js";
+import { string } from "../../../../src/value/token.js";
+import { fromWorkflow } from "../../../../src/workflow.js";
 import {
   alarm,
   audit,
@@ -41,7 +46,7 @@ import {
   guarded,
   orders,
   run,
-} from "../fixtures.js";
+} from "../../../fixtures/engine.js";
 
 const declined = Ending.failure({ code: "declined", details: { limit: 5 } });
 const crashed = Ending.abnormalTermination("timeout");

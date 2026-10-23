@@ -4,7 +4,11 @@ import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import type { StepName } from "../../../src/step.js";
 import { FailingReporter } from "../../../src/testing/failing-reporter.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
-import { journeyThrough, Swallowing, failingOn } from "../../fixtures/engine.js";
+import {
+  journeyThrough,
+  Swallowing,
+  failingOn,
+} from "../../fixtures/engine.js";
 import { Failures, Guard } from "../../../src/engine/guard.js";
 import { JourneyAbortError } from "../../../src/engine/signal.js";
 

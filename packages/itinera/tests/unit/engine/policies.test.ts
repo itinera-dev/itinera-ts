@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Refusal } from "../executor/refusal.js";
-import type { StepPolicyBuilder } from "../policy/step-policy/builder.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
+import { Refusal } from "../../../src/executor/refusal.js";
+import type { StepPolicyBuilder } from "../../../src/policy/step-policy/builder.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import type {
   StepPolicyMock,
   StepPolicyMockClass,
-} from "../testing/step-policy-mock.js";
+} from "../../../src/testing/step-policy-mock.js";
 import {
   alarm,
   audit,
@@ -21,7 +21,7 @@ import {
   orders,
   recorded,
   run,
-} from "./fixtures.js";
+} from "../../fixtures/engine.js";
 
 /** Runs the journey of `orders` with the step {@link loggedCharge} and `policies`. */
 async function loggedJourney(

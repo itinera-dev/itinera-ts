@@ -1,14 +1,21 @@
 import { describe, expect, it } from "vitest";
-import type { Event } from "../event.js";
-import { type Contributor, contributor } from "../journey.js";
-import { type HookReporter, hookReporter, type OnSuccess } from "../policy.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import { Ending } from "../testing/ending.js";
-import { type FailureHookEnding, HookEnding } from "../testing/hook-ending.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import { stepMock } from "../testing/step-mock.js";
-import { stepPolicyMock } from "../testing/step-policy-mock.js";
-import type { Built } from "../workflow.js";
+import type { Event } from "../../../src/event.js";
+import { type Contributor, contributor } from "../../../src/journey.js";
+import {
+  type HookReporter,
+  hookReporter,
+  type OnSuccess,
+} from "../../../src/policy.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { Ending } from "../../../src/testing/ending.js";
+import {
+  type FailureHookEnding,
+  HookEnding,
+} from "../../../src/testing/hook-ending.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
+import { stepPolicyMock } from "../../../src/testing/step-policy-mock.js";
+import type { Built } from "../../../src/workflow.js";
 import {
   alarm,
   audit,
@@ -21,7 +28,7 @@ import {
   run,
   kindOf,
   failingOn,
-} from "./fixtures.js";
+} from "../../fixtures/engine.js";
 
 const declining = stepMock({ attempts: [Ending.failure("declined")] });
 

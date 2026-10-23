@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import type { HookSource, StepHookSource } from "../../event.js";
-import { type PolicyName, StepHook } from "../../policy.js";
+import type { HookSource, StepHookSource } from "../../../../src/event.js";
+import { type PolicyName, StepHook } from "../../../../src/policy.js";
 import {
   failingWorkflow,
   finished,
   keptDefault,
-} from "../../policy/lifecycle.js";
-import { DefaultDispatcher } from "../../report/default-dispatcher.js";
-import { Attempt, type StepName } from "../../step.js";
-import { journeyThrough, Payment } from "../fixtures.js";
-import { JourneyAbortError } from "../signal.js";
-import { lifecycleOf } from "./lifecycle.js";
+} from "../../../../src/policy/lifecycle.js";
+import { DefaultDispatcher } from "../../../../src/report/default-dispatcher.js";
+import { Attempt, type StepName } from "../../../../src/step.js";
+import { journeyThrough, Payment } from "../../../fixtures/engine.js";
+import { JourneyAbortError } from "../../../../src/engine/signal.js";
+import { lifecycleOf } from "../../../../src/engine/hook/lifecycle.js";
 
 /** The hook `hook` of the step policy `alarm`, for the first attempt of `charge`. */
 function stepHook(hook: StepHook): StepHookSource {

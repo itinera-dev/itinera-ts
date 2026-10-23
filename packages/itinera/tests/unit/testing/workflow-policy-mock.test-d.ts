@@ -1,6 +1,6 @@
 import { describe, it } from "vitest";
-import { HookEnding } from "./hook-ending.js";
-import { workflowPolicyMock } from "./workflow-policy-mock.js";
+import { HookEnding } from "../../../src/testing/hook-ending.js";
+import { workflowPolicyMock } from "../../../src/testing/workflow-policy-mock.js";
 
 describe("workflowPolicyMock", () => {
   it("lets a workflow hook neither finish nor fail the workflow", () => {

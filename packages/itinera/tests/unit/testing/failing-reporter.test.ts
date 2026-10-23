@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { journeyStarted, stepSucceeded } from "../event/fixtures.js";
-import { FailingReporter, type ReporterFailure } from "./failing-reporter.js";
+import { journeyStarted, stepSucceeded } from "../../fixtures/event.js";
+import {
+  FailingReporter,
+  type ReporterFailure,
+} from "../../../src/testing/failing-reporter.js";
 
 type Receive = (reporter: FailingReporter) => void;
 

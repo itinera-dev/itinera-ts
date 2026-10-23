@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { WorkflowHook } from "../policy.js";
-import { WorkflowPolicy } from "../policy/workflow-policy.js";
-import { HookEnding } from "./hook-ending.js";
+import { WorkflowHook } from "../../../src/policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
+import { HookEnding } from "../../../src/testing/hook-ending.js";
 import {
   WorkflowPolicyMock,
   type WorkflowPolicyMockScript,
   workflowPolicyMock,
-} from "./workflow-policy-mock.js";
+} from "../../../src/testing/workflow-policy-mock.js";
 
 /** A workflow policy mock whose hooks end as `script` says. */
 function made(script: WorkflowPolicyMockScript = {}): WorkflowPolicyMock {

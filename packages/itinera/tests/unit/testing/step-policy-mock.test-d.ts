@@ -1,6 +1,6 @@
 import { describe, it } from "vitest";
-import { HookEnding } from "./hook-ending.js";
-import { stepPolicyMock } from "./step-policy-mock.js";
+import { HookEnding } from "../../../src/testing/hook-ending.js";
+import { stepPolicyMock } from "../../../src/testing/step-policy-mock.js";
 
 describe("stepPolicyMock", () => {
   it("lets only on step success finish the workflow", () => {

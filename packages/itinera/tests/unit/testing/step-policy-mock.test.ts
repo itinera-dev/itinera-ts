@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { StepHook } from "../policy.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import { HookEnding } from "./hook-ending.js";
+import { StepHook } from "../../../src/policy.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { HookEnding } from "../../../src/testing/hook-ending.js";
 import {
   StepPolicyMock,
   type StepPolicyMockScript,
   stepPolicyMock,
-} from "./step-policy-mock.js";
+} from "../../../src/testing/step-policy-mock.js";
 
 /** A step policy mock whose hooks end as `script` says. */
 function made(script: StepPolicyMockScript = {}): StepPolicyMock {
