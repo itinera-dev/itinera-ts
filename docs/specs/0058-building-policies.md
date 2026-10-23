@@ -19,8 +19,8 @@ None of its own.
 
 ## Tests
 
-- `src/engine/policies.test.ts`: a new step policy for every attempt, a new workflow policy for every journey, and each failure while building.
-- `src/executor/refusal.test.ts`: the refusal's message.
+- `tests/unit/engine/policies.test.ts`: a new step policy for every attempt, a new workflow policy for every journey, and each failure while building.
+- `tests/unit/executor/refusal.test.ts`: the refusal's message.
 
 ## Done when
 

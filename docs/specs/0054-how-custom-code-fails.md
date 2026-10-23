@@ -10,7 +10,7 @@ In TypeScript a recoverable failure is a throw, or a promise that rejects; nothi
 
 ## Rules made impossible to express
 
-Chapter 6, 6.5 lets a language refuse at compile time what it can, and the conformance suite excludes the scenarios of each rule so refused, under `impossible` in `conformance.json`, each with the test that proves it. Every proof is a type test in `packages/itinera/tests/proofs.test-d.ts`, one named test each:
+Chapter 6, 6.5 lets a language refuse at compile time what it can, and the conformance suite excludes the scenarios of each rule so refused, under `impossible` in `conformance.json`, each with the test that proves it. Every proof is a type test in `packages/itinera/tests/integration/proofs.test-d.ts`, one named test each:
 
 - **`invalid-lifecycle`**: a failure hook returning `FinishWorkflow` does not compile, since its decorator and its builder method take only a method returning `OnFailure` (see [0010](0010-hooks-lifecycles-and-roles.md)). The engine still checks what a hook returned, for a cast: `invalid lifecycle`, in `src/engine/hook/lifecycle.ts`.
 - **`role-not-provided`**: a policy requesting a role the workflow does not implement does not compile, on a decorated class and through the builder (see [0010](0010-hooks-lifecycles-and-roles.md)).
@@ -24,8 +24,8 @@ None of its own.
 
 ## Tests
 
-- `tests/proofs.test-d.ts`: the proofs.
-- `src/engine/hook/lifecycle.test.ts`: every lifecycle a hook may not return, through a cast.
+- `tests/integration/proofs.test-d.ts`: the proofs.
+- `tests/unit/engine/hook/lifecycle.test.ts`: every lifecycle a hook may not return, through a cast.
 
 ## Done when
 

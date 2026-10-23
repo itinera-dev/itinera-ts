@@ -24,8 +24,8 @@ None of its own.
 
 ## Tests
 
-- `src/engine/hook.test.ts`: a hook that throws, and an abort recorded while it ran standing.
-- `src/engine/policies.test.ts` and `src/executor/refusal.test.ts`: a policy that throws while it is built, and the refusal's message.
+- `tests/unit/engine/hook.test.ts`: a hook that throws, and an abort recorded while it ran standing.
+- `tests/unit/engine/policies.test.ts` and `tests/unit/executor/refusal.test.ts`: a policy that throws while it is built, and the refusal's message.
 - The tests of [0024](0024-abnormal-termination-retriable.md), [0060](0060-input-adapters-attached-to-steps.md) and [0081](0081-reporter-failure-stops-delivery.md).
 
 ## Done when

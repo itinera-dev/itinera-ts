@@ -16,9 +16,9 @@ None of its own.
 
 ## Tests
 
-- `src/engine/handles.test.ts`: the call that fails and every call after it.
-- `src/engine/run.test.ts`: a step that catches the signal and goes on.
-- `src/engine/hook.test.ts`: a hook that catches the signal and goes on.
+- `tests/unit/engine/handles.test.ts`: the call that fails and every call after it.
+- `tests/unit/engine/run.test.ts`: a step that catches the signal and goes on.
+- `tests/unit/engine/hook.test.ts`: a hook that catches the signal and goes on.
 
 ## Done when
 

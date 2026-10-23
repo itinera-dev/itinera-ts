@@ -12,7 +12,7 @@
         "scenario": "A lifecycle a hook may not return aborts the journey",
         "proof": {
           "test": "a failure hook cannot finish the workflow",
-          "file": "packages/itinera/tests/proofs.test-d.ts"
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
         }
       }
     ],
@@ -22,7 +22,7 @@
         "scenario": "A policy needing a role the workflow does not provide is refused at admission",
         "proof": {
           "test": "a policy cannot be attached to a workflow that does not provide its role",
-          "file": "packages/itinera/tests/proofs.test-d.ts"
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
         }
       }
     ],
@@ -32,7 +32,7 @@
         "scenario": "An adapter that writes through its access leaves the data bag unchanged",
         "proof": {
           "test": "an adapter cannot write through its access to the data bag",
-          "file": "packages/itinera/tests/proofs.test-d.ts"
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
         }
       }
     ]
