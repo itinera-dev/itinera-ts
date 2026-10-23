@@ -24,7 +24,7 @@ flowchart LR
 1. An application depends on one package, `itinera`, and imports each concept from a subpath of it. The package root exports nothing of its own.
 2. Each subpath is a CommonJS module with an ESM layer that only re-exports it, so `import` and `require` reach the same copy.
 3. Until a proposal is listed in `conformance.json`, its API is exported only from `itinera/unstable`. The only other subpath for now is `itinera/schema`, which re-exports Zod's `z`, on which itinera's type tokens are built, so an application uses the same copy of Zod as itinera.
-4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, and `itinera/schema` for Zod, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, given their inputs by position, and its input adapters from one method of the scenario's workflow class that plays their scripts, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
+4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, and `itinera/schema` for Zod, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks, given their inputs by position, each extended to play what the step does before it ends, and its input adapters from one method of the scenario's workflow class that plays their scripts, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
 
 The modules of `packages/itinera/src`, each the module of one concept:
 
@@ -42,7 +42,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
 | `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
 | `service` | Provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter` |
-| `testing` | Test support: `RecordingReporter`, `Ending`, `stepMock` and `StepMock` |
+| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `Ending`, `stepMock` and `StepMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
 | `name` | Private: `named`, which refuses an empty name as something is declared |

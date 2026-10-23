@@ -1,7 +1,8 @@
 import type { Event, PlainValue } from "itinera/unstable";
 import { describe, expect, it } from "vitest";
 import type { ReporterFailure } from "../../src/model/report.js";
-import { ScenarioReporter } from "../../src/recorders.js";
+import { ModelError } from "../../src/model/error.js";
+import { Recorders, ScenarioReporter } from "../../src/recorders.js";
 import { attemptStarted, started } from "../fixtures/trace.js";
 
 type Receive = (reporter: ScenarioReporter) => void;
@@ -73,5 +74,19 @@ describe("a scenario's reporter", () => {
     expect(() => {
       receivingStarted(reporter);
     }).toThrow("disk full");
+  });
+});
+
+describe("the reporters of a scenario", () => {
+  it("gives a sentence the reporters made under a name", () => {
+    const recorders = new Recorders(new Map());
+    const made = recorders.make("audit");
+    expect(recorders.receivers("audit")).toEqual([made]);
+  });
+
+  it("refuses a sentence reading a reporter no journey had, as an error in the case", () => {
+    expect(() => new Recorders(new Map()).receivers("audit")).toThrow(
+      new ModelError('no reporter "audit" was made'),
+    );
   });
 });

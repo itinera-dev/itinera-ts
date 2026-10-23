@@ -2,6 +2,7 @@ import type { Attempts } from "./step/attempt.js";
 import { nonValue, scripted, type Scripted, type ValueType } from "./value.js";
 
 export { attempts, succeeds, type Attempts } from "./step/attempt.js";
+export { contributedUnder, globalMetadataUnder } from "./step/given-under.js";
 
 /**
  * What a scenario says one scripted step does: what it requests, how it is
@@ -54,7 +55,7 @@ type RescueRequest =
 export type Level = "info" | "warning" | "error";
 
 /** Something a scripted step does on every attempt, before it ends. */
-type StepAction =
+export type StepAction =
   | {
       readonly kind: "contribute";
       readonly key: string;

@@ -84,17 +84,26 @@ describe("the conformance runner", () => {
     expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
   });
 
-  it("runs journeys and passes scenarios whose expectations itinera meets", () => {
-    const ran = run("journeys", "@proposal-0009");
-    expect(ran.succeeded, ran.output).toBe(true);
-    expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
-  });
-
-  it("builds steps with their inputs and plays input adapters", () => {
-    const ran = run("inputs", "@proposal-0060");
-    expect(ran.succeeded, ran.output).toBe(true);
-    expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
-  });
+  it.each([
+    ["runs journeys and checks what they did", "journeys", "@proposal-0009"],
+    [
+      "builds steps with their inputs and plays input adapters",
+      "inputs",
+      "@proposal-0060",
+    ],
+    [
+      "plays what a step does before it ends, and how it ends",
+      "steps",
+      "@proposal-0008",
+    ],
+  ])(
+    "passes the scenarios whose expectations itinera meets: it %s",
+    (_, cases, tags) => {
+      const ran = run(cases, tags);
+      expect(ran.succeeded, ran.output).toBe(true);
+      expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
+    },
+  );
 
   it("fails a scenario whose expectation itinera does not meet, saying what it expected", () => {
     const ran = run("unmet", "@tier-1");

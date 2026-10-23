@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 import { Then } from "@cucumber/cucumber";
 import type { Event, EventKind } from "itinera/unstable";
-import { eventKind, ModelError } from "../../model.js";
+import { eventKind } from "../../model.js";
 import { eventsOf as recorded } from "../../recorders.js";
 import { kindOf, type Numbered, numbered } from "../../trace.js";
 import { expectOfStream, holds } from "../../unmet.js";
@@ -39,11 +39,7 @@ function receivedFrom(world: World, name: string): Received {
 
 /** Every event the reporters made under the name received, in order. */
 function received(world: World, name: string): readonly Event[] {
-  const made = world.recorders.made(name);
-  if (made.length === 0) {
-    throw new ModelError(`no reporter "${name}" was made`);
-  }
-  return made.flatMap(recorded);
+  return world.recorders.receivers(name).flatMap(recorded);
 }
 
 Then<World>(

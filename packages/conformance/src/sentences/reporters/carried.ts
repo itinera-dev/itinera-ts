@@ -1,6 +1,6 @@
 import { Then } from "@cucumber/cucumber";
 import type { Event, PlainValue } from "itinera/unstable";
-import { ModelError, type Scripted } from "../../model.js";
+import { contributedUnder, ModelError, type Scripted } from "../../model.js";
 import {
   carriesMessage,
   carriesValue,
@@ -51,20 +51,42 @@ function follows(
 Then<World>(
   "no engine event carries the value of {string}",
   function (key: string) {
-    const values = this.model.initialData.filter(isUnder(key)).flatMap(valueOf);
-    if (values.length === 0) {
-      throw new ModelError(`the scenario gives "${key}" no value`);
-    }
-    const events = this.stream();
-    expectOfStream(
-      !events.filter(isEngineEvent).map(lineOf).some(carryingAny(values)),
-      `no engine event to carry the value of "${key}"`,
-      events,
-    );
+    carriesNone(this, key, "value", [
+      ...this.model.initialData.filter(isUnder(key)).flatMap(valueOf),
+      ...[...this.model.workflow.scripts.values()].flatMap((script) =>
+        contributedUnder(script, key),
+      ),
+    ]);
   },
 );
 
-function isUnder(key: string): (entry: readonly [string, Scripted]) => boolean {
+/**
+ * Holds when no engine event carries any of `values`, which the scenario
+ * gives under `key` as its `what`.
+ *
+ * @throws ModelError when the scenario gives no value under the key.
+ */
+export function carriesNone(
+  world: World,
+  key: string,
+  what: string,
+  values: readonly PlainValue[],
+): void {
+  if (values.length === 0) {
+    throw new ModelError(`the scenario gives "${key}" no ${what}`);
+  }
+  const events = world.stream();
+  expectOfStream(
+    !events.filter(isEngineEvent).map(lineOf).some(carryingAny(values)),
+    `no engine event to carry the ${what} of "${key}"`,
+    events,
+  );
+}
+
+/** Whether an entry the scenario gives, of data or global metadata, is under `key`. */
+export function isUnder(
+  key: string,
+): (entry: readonly [string, Scripted]) => boolean {
   return ([under]) => isKey(under, key);
 }
 
@@ -72,7 +94,8 @@ function isKey(under: string, key: string): boolean {
   return under === key;
 }
 
-function valueOf([, given]: readonly [string, Scripted]): PlainValue[] {
+/** The value of an entry the scenario gives, or none when it is not a value. */
+export function valueOf([, given]: readonly [string, Scripted]): PlainValue[] {
   return given.kind === "value" ? [given.value] : [];
 }
 

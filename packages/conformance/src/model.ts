@@ -20,8 +20,10 @@ export { ModelError } from "./model/error.js";
 export { eventKind, type Holding } from "./model/report.js";
 export {
   attempts,
+  contributedUnder,
   contribution,
   emit,
+  globalMetadataUnder,
   succeeds,
   type Level,
 } from "./model/step.js";
