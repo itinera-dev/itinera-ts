@@ -1,9 +1,15 @@
 import { describe, expectTypeOf, it } from "vitest";
 import { z } from "zod";
-import type { Option } from "../option.js";
-import { Payment } from "../engine/fixtures.js";
-import { classOf, integer, listOf, optional, string } from "../value/token.js";
-import type { JourneyResult } from "./result.js";
+import type { Option } from "../../../src/option.js";
+import { Payment } from "../../fixtures/engine.js";
+import {
+  classOf,
+  integer,
+  listOf,
+  optional,
+  string,
+} from "../../../src/value/token.js";
+import type { JourneyResult } from "../../../src/journey/result.js";
 
 declare const result: JourneyResult;
 

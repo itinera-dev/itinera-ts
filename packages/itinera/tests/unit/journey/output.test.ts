@@ -1,10 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { Payment } from "../engine/fixtures.js";
-import { None, Some } from "../option.js";
-import { classOf, integer, optional, string } from "../value/token.js";
-import type { PlainValue } from "../value.js";
-import { dataBagOf } from "./data-bag.js";
-import { OutputError, outputOf } from "./output.js";
+import { Payment } from "../../fixtures/engine.js";
+import { None, Some } from "../../../src/option.js";
+import {
+  classOf,
+  integer,
+  optional,
+  string,
+} from "../../../src/value/token.js";
+import type { PlainValue } from "../../../src/value.js";
+import { dataBagOf } from "../../../src/journey/data-bag.js";
+import { OutputError, outputOf } from "../../../src/journey/output.js";
 
 const receipt = dataBagOf(
   new Map<string, PlainValue>([
