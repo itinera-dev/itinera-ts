@@ -1,6 +1,9 @@
 /**
  * Values: data that can be serialised, the only data a data bag, an event, a
- * reason's details or global metadata holds.
+ * reason's details or global metadata holds, and the type tokens that name
+ * the type a request or a read of the data bag checks a value against.
+ *
+ * {@includeCode ../examples/value.ts}
  *
  * @module
  */

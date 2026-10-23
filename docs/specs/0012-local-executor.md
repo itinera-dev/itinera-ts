@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0012](https://github.com/itinera-dev/spec/blob/main/proposals/0012-local-executor.md), implemented in [#8](https://github.com/itinera-dev/itinera-ts/issues/8). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, decision 1 the single asynchronous executor and decision 6 refusals, and [architecture.md](../architecture.md) draws how a journey runs.
 
-Status: in progress. Stage 3 added `LocalExecutor`, its refusals and the private engine. Stage 4 added the rejection of an instance that `instance()` did not make; stage 7 adds the workflow policies built before the journey, and stage 6 lists the proposal.
+Status: complete, and 12 is listed in `conformance.json`. Stage 3 added `LocalExecutor`, its refusals and the private engine. Stage 4 added the rejection of an instance that `instance()` did not make, and stage 6 listed the proposal. Stage 7 adds the workflow policies built before the journey, which no scenario of 0012 needs.
 
 ## API
 
-Until 0012 is listed, everything here is exported only from `itinera/unstable`. It is defined in `src/executor.ts`, which becomes the subpath `itinera/executor` then, with the refusals in `src/executor/refusal.ts`.
+Everything here is exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the steps a workflow instance runs, as the agents' manual says. It is defined in `src/executor.ts`, which becomes the subpath `itinera/executor` then, with the refusals in `src/executor/refusal.ts`.
 
 - **`new LocalExecutor(dispatcherFactory?)`** takes the dispatcher factory as its one optional argument, `DefaultDispatcherFactory` without it. This was the open point of #8; a constructor argument mirrors Rust's `LocalExecutor::with_dispatcher_factory` without a second way to say the same thing, and an options object can be added later without breaking it.
 - **`await executor.run(instance)`** resolves to the journey's `JourneyResult` (see 0065), whatever happens inside the journey. It takes a `WorkflowInstance` that `instance()` made; one that a cast lets through is rejected with a `TypeError` (see "Before the journey").
@@ -45,4 +45,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0012` passes, but the one tagged `@capability-sync`, which does not run, and 12 is listed in `conformance.json`. Planned for stage 6.
+Done in stage 6: every scenario tagged `@proposal-0012` passes, but the one tagged `@capability-sync`, which does not run, and 12 is listed in `conformance.json`.

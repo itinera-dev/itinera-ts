@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { PlainValue } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 
 const order: PlainValue = {
   id: "R-1",

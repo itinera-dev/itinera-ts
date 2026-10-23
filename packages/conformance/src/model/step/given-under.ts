@@ -1,4 +1,4 @@
-import type { PlainValue } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import type { StepAction, StepScript } from "../step.js";
 import type { Scripted } from "../value.js";
 import type { AttemptScript } from "./attempt.js";

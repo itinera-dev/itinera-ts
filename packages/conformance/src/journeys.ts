@@ -40,16 +40,9 @@ export interface Journey {
  * Builds the workflow the scenario declares, keeping the violations when the
  * builder refuses it.
  */
-export function admitted(
-  model: Model,
-  recorders: Recorders,
-  witness: Witness,
-): Admission {
+export function admitted(model: Model, witness: Witness): Admission {
   try {
-    return {
-      kind: "admitted",
-      workflow: workflowOf(model, recorders, witness),
-    };
+    return { kind: "admitted", workflow: workflowOf(model, witness) };
   } catch (error) {
     if (error instanceof Violations) {
       return { kind: "refused", violations: error };
@@ -71,7 +64,7 @@ export async function ran(
   const executor = executorOf(model.dispatching, recorders);
   const journeys: Journey[] = [];
   for (let run = 0; run < times; run += 1) {
-    const instance = instanceOf(workflow, model);
+    const instance = instanceOf(workflow, model, recorders);
     journeys.push({
       journeyId: instance.journeyId,
       ended: await endedOf(executor.run(instance)),

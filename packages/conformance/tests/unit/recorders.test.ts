@@ -1,4 +1,5 @@
-import type { Event, PlainValue } from "itinera/unstable";
+import type { Event, JourneyId } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import { describe, expect, it } from "vitest";
 import type { ReporterFailure } from "../../src/model/report.js";
 import { ModelError } from "../../src/model/error.js";
@@ -77,15 +78,27 @@ describe("a scenario's reporter", () => {
   });
 });
 
+/** The reporters of a scenario that scripts no failure. */
+function unscripted(): Recorders {
+  return new Recorders(new Map());
+}
+
 describe("the reporters of a scenario", () => {
   it("gives a sentence the reporters made under a name", () => {
-    const recorders = new Recorders(new Map());
+    const recorders = unscripted();
     const made = recorders.make("audit");
     expect(recorders.receivers("audit")).toEqual([made]);
   });
 
+  it("makes a listed reporter with the journey ID it is given, and keeps it under its name", () => {
+    const recorders = unscripted();
+    const made = recorders.makerOf("audit")("order-7" as JourneyId);
+    expect(made.madeWith).toBe("order-7");
+    expect(recorders.receivers("audit")).toEqual([made]);
+  });
+
   it("refuses a sentence reading a reporter no journey had, as an error in the case", () => {
-    expect(() => new Recorders(new Map()).receivers("audit")).toThrow(
+    expect(() => unscripted().receivers("audit")).toThrow(
       new ModelError('no reporter "audit" was made'),
     );
   });

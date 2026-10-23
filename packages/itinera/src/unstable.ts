@@ -3,10 +3,6 @@
  * accepted yet, or what itinera does not fully implement yet. Each item moves
  * to the subpath of its concept once itinera implements it fully.
  *
- * - Values: {@link Value}, {@link PlainValue}, {@link SerialisesItself} and
- *   {@link AsValue}, and the type tokens a request names, such as
- *   {@link integer}, {@link optional} and {@link classOf}, which move to
- *   `itinera/value`.
  * - `Option`, `Some` and `None`, as `ts-results-es` defines them, which move
  *   to `itinera/option`. An optional request and a typed read of the data bag
  *   give an `Option`: `Some(value)` when present, a stored `null` included,
@@ -225,28 +221,6 @@ export {
   StepMock,
   stepMock,
 } from "./testing.js";
-export type {
-  AsValue,
-  Optional,
-  PlainValue,
-  RequestType,
-  SerialisesItself,
-  Value,
-  ValueClass,
-} from "./value.js";
-export {
-  boolean,
-  classOf,
-  guard,
-  integer,
-  list,
-  listOf,
-  number,
-  object,
-  objectOf,
-  optional,
-  string,
-} from "./value.js";
 export type {
   AdapterName,
   Answer,

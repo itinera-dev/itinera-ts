@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { SerialisesItself } from "itinera/unstable";
+import type { SerialisesItself } from "itinera/value";
 
 class Payment implements SerialisesItself {
   constructor(readonly cents: number) {}

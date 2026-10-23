@@ -4,7 +4,6 @@ import {
   contributor,
   failureCause,
   fromStep,
-  integer,
   type OnFailure,
   type OnSuccess,
   type PolicyDescriptor,
@@ -18,6 +17,7 @@ import {
   WorkflowPolicy,
   type WorkflowPolicyBuilder,
 } from "itinera/unstable";
+import { integer } from "itinera/value";
 
 /** A role the shop provides: telling a customer something. */
 interface Messages {
