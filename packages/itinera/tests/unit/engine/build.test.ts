@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { AbortReason, type Abort } from "../../../src/journey.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
-import { Attempt, Step, type StepDescriptor, type StepName } from "../../../src/step.js";
+import {
+  Attempt,
+  Step,
+  type StepDescriptor,
+  type StepName,
+} from "../../../src/step.js";
 import { failureReason, input, stepName } from "../../../src/step/request.js";
 import type { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";

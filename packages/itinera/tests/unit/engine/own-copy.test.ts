@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, expect, it } from "vitest";
-import { ownCopy } from "./own-copy.js";
+import { ownCopy } from "../../../src/engine/own-copy.js";
 
 class Declined extends Error {
   readonly limit = 5;

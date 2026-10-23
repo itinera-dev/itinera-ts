@@ -8,7 +8,13 @@ import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
 import { integer } from "../../../src/value/token.js";
 import type { ProviderOptions } from "../../../src/service.js";
 import type { Built } from "../../../src/workflow.js";
-import { GATEWAY, kindOf, recorded, serviced, Till } from "../../fixtures/engine.js";
+import {
+  GATEWAY,
+  kindOf,
+  recorded,
+  serviced,
+  Till,
+} from "../../fixtures/engine.js";
 
 const failingOnce = {
   attempts: [Ending.failure("declined"), Ending.success],
