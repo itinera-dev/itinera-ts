@@ -2,7 +2,11 @@ import type { Event } from "../../src/event.js";
 import type { EventKind } from "../../src/event/kind.js";
 import type { WorkflowInstance } from "../../src/instance.js";
 import type { JourneyId, JourneyResult } from "../../src/journey.js";
-import type { Dispatcher, DispatcherFactory, Reporter } from "../../src/report.js";
+import type {
+  Dispatcher,
+  DispatcherFactory,
+  Reporter,
+} from "../../src/report.js";
 import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
 import type { StepBuilder } from "../../src/step.js";
 import { Ending } from "../../src/testing/ending.js";
