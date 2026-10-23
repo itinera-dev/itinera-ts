@@ -32,7 +32,7 @@ export default defineConfig(
           paths: [option],
           patterns: [
             {
-              group: ["**/tests/**"],
+              group: ["**/tests", "**/tests/**"],
               message:
                 "Only tests import from tests, so that the build, which compiles src alone, never needs them.",
             },
@@ -50,7 +50,7 @@ export default defineConfig(
           paths: [option],
           patterns: [
             {
-              group: ["**/src/**"],
+              group: ["**/src", "**/src/**"],
               message:
                 "An integration test imports only the subpaths applications write, such as itinera/step.",
             },
