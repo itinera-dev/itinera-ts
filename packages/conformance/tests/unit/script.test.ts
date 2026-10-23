@@ -1,12 +1,12 @@
 import { MistakeKind, TestMistake } from "itinera/testing";
 import { describe, expect, it } from "vitest";
-import { admitted } from "./journeys.js";
-import { Model, ModelError } from "./model.js";
-import type { ScriptRow } from "./model/testing.js";
-import { Recorders } from "./recorders.js";
-import { instanceOf } from "./scenario.js";
-import { runScript } from "./script.js";
-import { Witness } from "./witness.js";
+import { admitted } from "../../src/journeys.js";
+import { Model, ModelError } from "../../src/model.js";
+import type { ScriptRow } from "../../src/model/testing.js";
+import { Recorders } from "../../src/recorders.js";
+import { instanceOf } from "../../src/scenario.js";
+import { runScript } from "../../src/script.js";
+import { Witness } from "../../src/witness.js";
 
 /** A new instance of the workflow `orders`, whose steps `charge` and `ship` succeed. */
 function shop() {

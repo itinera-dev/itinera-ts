@@ -4,7 +4,7 @@ import {
   StepEventReporter,
 } from "itinera/testing";
 import { describe, expect, it } from "vitest";
-import { type Call, CarryingOn } from "./carrying-on.js";
+import { type Call, CarryingOn } from "../../../src/alone/carrying-on.js";
 
 /** A handle's methods, each called with a key and a value. */
 type Methods = Readonly<

@@ -1,7 +1,7 @@
 import { MistakeKind, TestMistake } from "itinera/testing";
 import { describe, expect, it } from "vitest";
-import { Tested } from "./tested.js";
-import { Unmet } from "./unmet.js";
+import { Tested } from "../../src/tested.js";
+import { Unmet } from "../../src/unmet.js";
 
 const mistake = new TestMistake([
   { kind: MistakeKind.UnknownStep, step: "chrage" },
