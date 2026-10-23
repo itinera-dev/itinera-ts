@@ -1,18 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { AbortReason, type Abort } from "../journey.js";
-import { DefaultDispatcher } from "../report/default-dispatcher.js";
+import { AbortReason, type Abort } from "../../../src/journey.js";
+import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import {
   Step,
   type Outcome,
   type StepDescriptor,
   type StepName,
-} from "../step.js";
-import { Ending } from "../testing/ending.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import { stepMock } from "../testing/step-mock.js";
-import { charge, journeyThrough, noon, orders, run } from "./fixtures.js";
-import type { Journey } from "./journey.js";
-import { travel } from "./scan.js";
+} from "../../../src/step.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
+import {
+  charge,
+  journeyThrough,
+  noon,
+  orders,
+  run,
+} from "../../fixtures/engine.js";
+import type { Journey } from "../../../src/engine/journey.js";
+import { travel } from "../../../src/engine/scan.js";
 
 async function recorded(
   workflow: ReturnType<typeof orders>,

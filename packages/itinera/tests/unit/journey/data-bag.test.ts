@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dataBagOf } from "./data-bag.js";
+import { dataBagOf } from "../../../src/journey/data-bag.js";
 
 describe("DataBag", () => {
   it("lists its keys in the order each was first set", () => {

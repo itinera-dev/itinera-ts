@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { isOutcome } from "../step/outcome.js";
-import { Ending } from "./ending.js";
+import { isOutcome } from "../../../src/step/outcome.js";
+import { Ending } from "../../../src/testing/ending.js";
 
 describe("Ending", () => {
   it("gives the outcome a step returns to succeed", () => {

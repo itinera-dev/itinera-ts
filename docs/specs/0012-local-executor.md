@@ -37,10 +37,10 @@ None of its own.
 
 ## Tests
 
-- `src/executor.test.ts`: the default dispatcher factory, a new dispatcher per journey, `journey running` while a journey runs and the running journey unaffected, and another journey once one ended or was refused.
-- `src/executor/refusal.test.ts`: the message of every refusal, the name `Refusal`, and the standard `cause`.
-- `src/engine.test.ts`: the result of each ending, and no event and no global metadata for a refused instance.
-- `src/engine/start.test.ts`: every refusal before the journey, the order of global metadata, and the initial data captured.
+- `tests/unit/executor.test.ts`: the default dispatcher factory, a new dispatcher per journey, `journey running` while a journey runs and the running journey unaffected, and another journey once one ended or was refused.
+- `tests/unit/executor/refusal.test.ts`: the message of every refusal, the name `Refusal`, and the standard `cause`.
+- `tests/unit/engine.test.ts`: the result of each ending, and no event and no global metadata for a refused instance.
+- `tests/unit/engine/start.test.ts`: every refusal before the journey, the order of global metadata, and the initial data captured.
 - `examples/local-executor.ts` and `examples/refusal.ts`.
 
 ## Done when

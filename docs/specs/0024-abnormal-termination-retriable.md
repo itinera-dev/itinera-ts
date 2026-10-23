@@ -20,8 +20,8 @@ None of its own.
 
 ## Tests
 
-- `src/engine/decision.test.ts`: the decision for each budget and setting.
-- `src/engine/scan.test.ts`: the events of a retried and of a given up step, and an abort while a step runs never taken for an abnormal termination.
+- `tests/unit/engine/decision.test.ts`: the decision for each budget and setting.
+- `tests/unit/engine/scan.test.ts`: the events of a retried and of a given up step, and an abort while a step runs never taken for an abnormal termination.
 - `examples/step-mock.ts`: a step retried after an abnormal termination.
 
 ## Done when

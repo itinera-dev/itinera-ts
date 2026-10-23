@@ -20,10 +20,10 @@ None of its own.
 
 ## Tests
 
-- `src/journey/result.test.ts`: each status's guards, `failure` and `abort`, and the frozen result.
-- `src/journey/data-bag.test.ts`: keys in order, and a copy of what it was made from.
-- `src/journey.test-d.ts`: the data bag reached only through a status that has one.
-- `src/engine.test.ts`: the result of a journey that succeeded, failed or was aborted, and its journey ID.
+- `tests/unit/journey/result.test.ts`: each status's guards, `failure` and `abort`, and the frozen result.
+- `tests/unit/journey/data-bag.test.ts`: keys in order, and a copy of what it was made from.
+- `tests/unit/journey.test-d.ts`: the data bag reached only through a status that has one.
+- `tests/unit/engine.test.ts`: the result of a journey that succeeded, failed or was aborted, and its journey ID.
 - `examples/journey-result.ts`.
 
 ## Still open

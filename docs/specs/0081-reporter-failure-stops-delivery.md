@@ -22,9 +22,9 @@ None of its own.
 
 ## Tests
 
-- `src/engine/guard.test.ts`: every rule of the guards.
-- `src/engine/journey.test.ts`: the abort when a reporter fails, when the dispatcher fails and when it swallows a failure, the first abort standing, and `journey_aborted` delivered whatever fails.
-- `src/engine.test.ts`: `journey_aborted` reaching the other reporters only, and a failure on the last event.
+- `tests/unit/engine/guard.test.ts`: every rule of the guards.
+- `tests/unit/engine/journey.test.ts`: the abort when a reporter fails, when the dispatcher fails and when it swallows a failure, the first abort standing, and `journey_aborted` delivered whatever fails.
+- `tests/unit/engine.test.ts`: `journey_aborted` reaching the other reporters only, and a failure on the last event.
 
 ## Done when
 

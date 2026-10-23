@@ -1,18 +1,22 @@
-import type { Event } from "../event.js";
-import type { EventKind } from "../event/kind.js";
-import type { WorkflowInstance } from "../instance.js";
-import type { JourneyId, JourneyResult } from "../journey.js";
-import type { Dispatcher, DispatcherFactory, Reporter } from "../report.js";
-import { DefaultDispatcherFactory } from "../report/default-dispatcher.js";
-import type { StepClass, StepOptions } from "../step.js";
-import { Ending } from "../testing/ending.js";
-import { stepMock } from "../testing/step-mock.js";
-import type { PlainValue } from "../value.js";
-import { type Built, Workflow, type WorkflowName } from "../workflow.js";
-import { runJourney } from "../engine.js";
-import { Emitter } from "./emitter.js";
-import { Failures } from "./guard.js";
-import { Journey } from "./journey.js";
+import type { Event } from "../../src/event.js";
+import type { EventKind } from "../../src/event/kind.js";
+import type { WorkflowInstance } from "../../src/instance.js";
+import type { JourneyId, JourneyResult } from "../../src/journey.js";
+import type {
+  Dispatcher,
+  DispatcherFactory,
+  Reporter,
+} from "../../src/report.js";
+import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
+import type { StepClass, StepOptions } from "../../src/step.js";
+import { Ending } from "../../src/testing/ending.js";
+import { stepMock } from "../../src/testing/step-mock.js";
+import type { PlainValue } from "../../src/value.js";
+import { type Built, Workflow, type WorkflowName } from "../../src/workflow.js";
+import { runJourney } from "../../src/engine.js";
+import { Emitter } from "../../src/engine/emitter.js";
+import { Failures } from "../../src/engine/guard.js";
+import { Journey } from "../../src/engine/journey.js";
 
 /** The time every event of the engine's tests carries. */
 export const noon = "2026-10-19T12:00:00.000Z";

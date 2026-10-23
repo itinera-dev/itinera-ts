@@ -23,8 +23,8 @@ None of its own.
 
 ## Tests
 
-- `src/engine/scan.test.ts`: the events of a journey of one step, steps in order, retries while the budget lasts, giving up with each cause, what `journey_failed` carries, a step returning what is not an outcome, a thrown value that is not an error, a step that cannot be built, an abort raised while a step is built passed on as it was raised, and an abort while a step runs ending the journey whatever the step returned.
-- `src/engine/decision.test.ts`: the decision for each retry budget and setting.
+- `tests/unit/engine/scan.test.ts`: the events of a journey of one step, steps in order, retries while the budget lasts, giving up with each cause, what `journey_failed` carries, a step returning what is not an outcome, a thrown value that is not an error, a step that cannot be built, an abort raised while a step is built passed on as it was raised, and an abort while a step runs ending the journey whatever the step returned.
+- `tests/unit/engine/decision.test.ts`: the decision for each retry budget and setting.
 - Later stages: property-based tests with fast-check that attempt counts stay within the budget and that each failed attempt has one decision.
 
 ## Done when

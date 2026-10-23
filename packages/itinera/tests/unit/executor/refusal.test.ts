@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Refusal, type Refused } from "./refusal.js";
+import { Refusal, type Refused } from "../../../src/executor/refusal.js";
 
 const failed = { error: new Error("disk full"), errorMessage: "disk full" };
 

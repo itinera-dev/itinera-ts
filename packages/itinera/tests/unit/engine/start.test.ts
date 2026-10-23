@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { Refusal } from "../executor/refusal.js";
+import { Refusal } from "../../../src/executor/refusal.js";
 import {
   DefaultDispatcher,
   DefaultDispatcherFactory,
-} from "../report/default-dispatcher.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
+} from "../../../src/report/default-dispatcher.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import {
   charging,
   factoryOf,
   FailingOnGlobalMetadata,
   Swallowing,
-} from "./fixtures.js";
-import { start } from "./start.js";
+} from "../../fixtures/engine.js";
+import { start } from "../../../src/engine/start.js";
 
 const factory = new DefaultDispatcherFactory();
 

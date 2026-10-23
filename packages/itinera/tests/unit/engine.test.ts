@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { charging, FailingOn, orders, run } from "./engine/fixtures.js";
-import { Step } from "./step.js";
-import { Ending } from "./testing/ending.js";
-import { RecordingReporter } from "./testing/recording-reporter.js";
-import { stepMock } from "./testing/step-mock.js";
+import { charging, FailingOn, orders, run } from "../fixtures/engine.js";
+import { Step } from "../../src/step.js";
+import { Ending } from "../../src/testing/ending.js";
+import { RecordingReporter } from "../../src/testing/recording-reporter.js";
+import { stepMock } from "../../src/testing/step-mock.js";
 
 class Crashing extends Step {
   override run(): never {

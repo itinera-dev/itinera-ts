@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { JourneyId } from "../journey.js";
-import type { WorkflowName } from "../workflow.js";
-import { Emitter } from "./emitter.js";
+import type { JourneyId } from "../../../src/journey.js";
+import type { WorkflowName } from "../../../src/workflow.js";
+import { Emitter } from "../../../src/engine/emitter.js";
 
 function emitter(): Emitter {
   return new Emitter(

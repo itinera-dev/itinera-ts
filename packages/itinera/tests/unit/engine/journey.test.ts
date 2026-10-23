@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { Dispatcher, Reporter } from "../report.js";
-import { DefaultDispatcher } from "../report/default-dispatcher.js";
-import type { StepName } from "../step.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import { FailingOn, journeyThrough, Swallowing } from "./fixtures.js";
-import { Failures, Guard } from "./guard.js";
-import { JourneyAbortError } from "./signal.js";
+import type { Dispatcher, Reporter } from "../../../src/report.js";
+import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
+import type { StepName } from "../../../src/step.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import {
+  FailingOn,
+  journeyThrough,
+  Swallowing,
+} from "../../fixtures/engine.js";
+import { Failures, Guard } from "../../../src/engine/guard.js";
+import { JourneyAbortError } from "../../../src/engine/signal.js";
 
 function guarded<D extends DefaultDispatcher | Swallowing>(
   dispatcher: D,

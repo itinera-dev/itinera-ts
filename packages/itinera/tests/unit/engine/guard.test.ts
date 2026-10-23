@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { Event } from "../event.js";
-import { journeyAborted, journeyStarted } from "../event/fixtures.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import { FailingOn, FailingOnGlobalMetadata } from "./fixtures.js";
-import { Failures, Guard } from "./guard.js";
+import type { Event } from "../../../src/event.js";
+import { journeyAborted, journeyStarted } from "../../fixtures/event.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { FailingOn, FailingOnGlobalMetadata } from "../../fixtures/engine.js";
+import { Failures, Guard } from "../../../src/engine/guard.js";
 
 function kinds(recorder: RecordingReporter): string[] {
   return recorder.events.map((event) => event.kind);

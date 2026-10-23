@@ -22,10 +22,10 @@ None of its own.
 
 ## Tests
 
-- `src/engine/scan.test.ts` and `src/engine.test.ts`: the error as thrown and its message, in the result and on the events, and the text of a thrown value that is not an error.
-- `src/engine/journey.test.ts`: `journey_aborted` without the error.
-- `src/executor/refusal.test.ts`: the standard `cause`.
-- `src/journey.test-d.ts`: the error present on an abort exactly as its message is, and no failure with both a reason and an error.
+- `tests/unit/engine/scan.test.ts` and `tests/unit/engine.test.ts`: the error as thrown and its message, in the result and on the events, and the text of a thrown value that is not an error.
+- `tests/unit/engine/journey.test.ts`: `journey_aborted` without the error.
+- `tests/unit/executor/refusal.test.ts`: the standard `cause`.
+- `tests/unit/journey.test-d.ts`: the error present on an abort exactly as its message is, and no failure with both a reason and an error.
 
 ## Done when
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { JourneyId } from "../journey.js";
-import { dataBagOf } from "./data-bag.js";
-import { resultOf } from "./result.js";
+import type { JourneyId } from "../../../src/journey.js";
+import { dataBagOf } from "../../../src/journey/data-bag.js";
+import { resultOf } from "../../../src/journey/result.js";
 
 const journeyId = "journey-1" as JourneyId;
 const dataBag = dataBagOf(new Map([["order", "A-1"]]));

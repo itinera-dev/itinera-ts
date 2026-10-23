@@ -19,8 +19,8 @@ None of its own.
 
 ## Tests
 
-- `src/engine.test.ts`: an aborted journey's result has its abort and no data bag.
-- `src/journey.test-d.ts`: the data bag reached only through a status that has one.
+- `tests/unit/engine.test.ts`: an aborted journey's result has its abort and no data bag.
+- `tests/unit/journey.test-d.ts`: the data bag reached only through a status that has one.
 
 ## Done when
 

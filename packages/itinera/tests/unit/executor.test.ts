@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { charging, orders } from "./engine/fixtures.js";
-import { LocalExecutor, Refusal } from "./executor.js";
-import type { Dispatcher, DispatcherFactory } from "./report.js";
-import { DefaultDispatcherFactory } from "./report/default-dispatcher.js";
-import { Ending } from "./testing/ending.js";
-import { RecordingReporter } from "./testing/recording-reporter.js";
-import { stepMock } from "./testing/step-mock.js";
+import { charging, orders } from "../fixtures/engine.js";
+import { LocalExecutor, Refusal } from "../../src/executor.js";
+import type { Dispatcher, DispatcherFactory } from "../../src/report.js";
+import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
+import { Ending } from "../../src/testing/ending.js";
+import { RecordingReporter } from "../../src/testing/recording-reporter.js";
+import { stepMock } from "../../src/testing/step-mock.js";
 
 class Counting implements DispatcherFactory {
   readonly made: Dispatcher[] = [];

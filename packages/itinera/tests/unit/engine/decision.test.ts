@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { Attempt, type StepDescriptor, type StepName } from "../step.js";
-import { nextAttempt } from "../step/attempt.js";
+import {
+  Attempt,
+  type StepDescriptor,
+  type StepName,
+} from "../../../src/step.js";
+import { nextAttempt } from "../../../src/step/attempt.js";
 import {
   type AfterAbnormalTermination,
   afterAbnormalTermination,
-} from "./decision.js";
+} from "../../../src/engine/decision.js";
 
 function step(
   retryBudget: number,

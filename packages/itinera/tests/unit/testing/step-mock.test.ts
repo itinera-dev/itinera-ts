@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { Step } from "../step.js";
-import { isOutcome } from "../step/outcome.js";
-import { Ending } from "./ending.js";
-import { StepMock, stepMock } from "./step-mock.js";
+import { Step } from "../../../src/step.js";
+import { isOutcome } from "../../../src/step/outcome.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { StepMock, stepMock } from "../../../src/testing/step-mock.js";
 
 const crashed = Ending.abnormalTermination("timeout");
 

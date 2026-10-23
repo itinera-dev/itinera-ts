@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isOutcome, success } from "./outcome.js";
+import { isOutcome, success } from "../../../src/step/outcome.js";
 
 describe("isOutcome", () => {
   it("accepts an outcome itinera made", () => {
