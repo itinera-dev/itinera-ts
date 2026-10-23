@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { Dispatcher, Reporter } from "../../../src/report.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import type { StepName } from "../../../src/step.js";
+import { FailingReporter } from "../../../src/testing/failing-reporter.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import {
-  FailingOn,
-  FailingOnGlobalMetadata,
   journeyThrough,
   Swallowing,
+  failingOn,
 } from "../../fixtures/engine.js";
 import { Failures, Guard } from "../../../src/engine/guard.js";
 import { JourneyAbortError } from "../../../src/engine/signal.js";
@@ -30,7 +30,7 @@ describe("Journey.emit", () => {
       guarded(
         new DefaultDispatcher(),
         failures,
-        new FailingOn("journey_started", "disk full"),
+        failingOn("journey_started", "disk full"),
       ),
       failures,
     );
@@ -70,7 +70,7 @@ describe("Journey.emit", () => {
       guarded(
         new Swallowing(),
         failures,
-        new FailingOn("journey_started", "disk full"),
+        failingOn("journey_started", "disk full"),
       ),
       failures,
     );
@@ -97,7 +97,11 @@ describe("Journey.setGlobalMetadata", () => {
       guarded(
         new Swallowing(),
         failures,
-        new FailingOnGlobalMetadata("disk full"),
+        new FailingReporter({
+          kind: "on global metadata",
+          key: "tenant",
+          message: "disk full",
+        }),
       ),
       failures,
     );
@@ -160,7 +164,7 @@ describe("Journey.deliverAborted", () => {
 
   it("ignores a failure while journey_aborted is delivered", async () => {
     const dispatcher = new DefaultDispatcher();
-    dispatcher.add(new FailingOn("journey_aborted", "disk full"));
+    dispatcher.add(failingOn("journey_aborted", "disk full"));
     await expect(
       journeyThrough(dispatcher).deliverAborted({
         reason: "reporter failed",

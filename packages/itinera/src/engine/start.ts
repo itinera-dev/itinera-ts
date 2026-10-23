@@ -5,6 +5,7 @@ import type { PlainValue, Value } from "../value.js";
 import { capture } from "../value/capture.js";
 import { Failures, Guard } from "./guard.js";
 import { messageOf } from "./message.js";
+import { type BuiltPolicy, workflowPolicies } from "./policies.js";
 
 /** What a journey starts with, once nothing refused it. */
 interface Started {
@@ -14,6 +15,8 @@ interface Started {
   readonly dispatcher: Dispatcher;
   /** The failures of the guarded reporters. */
   readonly failures: Failures;
+  /** The workflow policies, built for the journey. */
+  readonly policies: readonly BuiltPolicy[];
 }
 
 const handed = new WeakSet<object>();
@@ -24,8 +27,9 @@ export const journeyIdKey = "journey_id";
 /**
  * Does everything that comes before the journey, in order: refuses an
  * instance handed over before, captures the initial data and global
- * metadata, makes the dispatcher, adds the guarded reporters, then sets the
- * journey ID and the initial global metadata.
+ * metadata, builds the workflow policies, makes the dispatcher, adds the
+ * guarded reporters, then sets the journey ID and the initial global
+ * metadata.
  *
  * @throws Refusal when any of it refuses the instance or fails.
  */
@@ -46,6 +50,7 @@ export async function start(
       initialGlobalMetadata: metadata.refused,
     });
   }
+  const policies = workflowPolicies(instance.descriptor);
   const dispatcher = await made(factory);
   const failures = new Failures();
   await added(dispatcher, instance.takeReporters(), failures);
@@ -54,7 +59,7 @@ export async function start(
     [[journeyIdKey, instance.journeyId], ...metadata.values],
     failures,
   );
-  return { data: data.values, dispatcher, failures };
+  return { data: data.values, dispatcher, failures, policies };
 }
 
 /** Values by key once captured, and the keys whose values were refused. */

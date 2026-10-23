@@ -1,12 +1,14 @@
-import type { StepSource } from "../event.js";
+import type { DecidingHook, StepSource } from "../event.js";
 import { EventKind } from "../event/kind.js";
 import { FailureCause, type FailureWithError } from "../journey.js";
-import { RetryCause } from "../policy.js";
-import type { Attempt, Reason, StepDescriptor } from "../step.js";
+import { None } from "../option.js";
+import { RetryCause, StepHook } from "../policy.js";
+import type { Reason } from "../step.js";
 import type { PlainValue } from "../value.js";
-import { afterFailedAttempt, type GiveUpCause } from "./decision.js";
-import type { Journey } from "./journey.js";
+import { committed } from "./commit.js";
+import { type Attempting, stepHookCalled } from "./hook/step.js";
 import { messageOf } from "./message.js";
+import { decided, givenUpByHook, leftBy } from "./outcome/failed.js";
 import type { Ran } from "./run.js";
 
 /**
@@ -21,62 +23,62 @@ export type FailedByDefault =
     }
   | FailureWithError;
 
+/** Why a hook made a journey fail: the reason of its `FailWorkflow`. */
+interface FailedByHook {
+  /** Always `FailWorkflow`. */
+  readonly cause: typeof FailureCause.FailWorkflow;
+  /** The reason `FailWorkflow` carried. */
+  readonly reason: Reason;
+  /** The policy and hook that returned it. */
+  readonly decidedBy: DecidingHook;
+}
+
+/** Why a journey fails, by the executor's own rule or by a hook. */
+export type Failing = FailedByDefault | FailedByHook;
+
 /**
  * What follows an attempt: the next step, another attempt of the same step,
- * or the step given up, with why the journey fails.
+ * the journey succeeding at once, or the step given up, with why the journey
+ * fails.
  */
 export type Concluded =
   | { readonly kind: "next step" }
   | { readonly kind: "retry" }
-  | { readonly kind: "given up"; readonly failure: FailedByDefault };
-
-/** How an attempt failed, with the reason or the error it carries. */
-type Failed =
-  | { readonly cause: typeof RetryCause.Failure; readonly reason: Reason }
   | {
-      readonly cause: typeof RetryCause.AbnormalTermination;
-      readonly error: unknown;
-      readonly errorMessage: string;
-    };
+      readonly kind: "finish";
+      readonly decidedBy: DecidingHook<typeof StepHook.OnStepSuccess>;
+    }
+  | { readonly kind: "given up"; readonly failing: Failing };
 
 /**
- * Reports how `attempt` of the step ended, and acts on it: a success commits
- * what the attempt contributed, a skip discards it, and a failure or an
- * abnormal termination is decided by the executor's own rule.
+ * Reports how the attempt ended, and acts on it, calling the step hooks in
+ * their order: a success commits what the attempt contributed before
+ * `on step success`, a skip discards it and calls no hook, and a failure or
+ * an abnormal termination is decided by the executor's own rule and the
+ * hooks.
  *
  * @throws JourneyAbortError once the journey is aborted.
  */
 export async function concluded(
-  journey: Journey,
-  step: StepDescriptor,
-  attempt: Attempt,
+  attempting: Attempting,
   ran: Ran,
 ): Promise<Concluded> {
-  const source: StepSource = { kind: "step", step: step.name, attempt };
   if (ran.kind === "abnormal termination") {
-    const errorMessage = messageOf(ran.error);
-    await journey.emit({
-      kind: EventKind.StepAbnormalTermination,
-      step: step.name,
-      attempt,
-      errorMessage,
-    });
-    return decided(journey, step, attempt, {
-      cause: RetryCause.AbnormalTermination,
-      error: ran.error,
-      errorMessage,
-    });
+    return terminated(attempting, ran.error);
   }
+  const { journey, step, attempt } = attempting;
   const { outcome, contributed } = ran;
   switch (outcome.kind) {
-    case "success":
+    case "success": {
       await journey.emit({
         kind: EventKind.StepSucceeded,
         step: step.name,
         attempt,
       });
+      const source: StepSource = { kind: "step", step: step.name, attempt };
       await committed(journey, source, contributed);
-      return { kind: "next step" };
+      return succeeded(attempting, contributed);
+    }
     case "skipped":
       await journey.emit({
         kind: EventKind.StepSkipped,
@@ -97,71 +99,72 @@ export async function concluded(
         attempt,
         reason: outcome.reason,
       });
-      return decided(journey, step, attempt, {
-        cause: RetryCause.Failure,
-        reason: outcome.reason,
-      });
+      return decided(
+        attempting,
+        { cause: RetryCause.Failure, reason: outcome.reason },
+        contributed,
+      );
   }
 }
 
 /**
- * Commits each contribution to the data bag, in order, reporting each, and
- * each value it replaced.
+ * Calls `on step success`: the next step by default, or the journey ending
+ * at once as the lifecycle it returned says.
  */
-async function committed(
-  journey: Journey,
-  source: StepSource,
+async function succeeded(
+  attempting: Attempting,
   contributed: ReadonlyMap<string, PlainValue>,
-): Promise<void> {
-  for (const [key, value] of contributed) {
-    const replaced = journey.commit(key, value);
-    await journey.emit({ kind: EventKind.ContributionCommitted, key, source });
-    if (replaced) {
-      await journey.emit({ kind: EventKind.DataOverwritten, key, source });
-    }
+): Promise<Concluded> {
+  const hook = StepHook.OnStepSuccess;
+  const returned = await stepHookCalled(attempting, hook, {
+    contributed,
+    reason: None,
+    error: None,
+    cause: None,
+  });
+  if (returned === undefined) {
+    return { kind: "next step" };
   }
+  const { policy, lifecycle } = returned;
+  const decidedBy = { policy, hook };
+  return lifecycle.kind === "FinishWorkflow"
+    ? { kind: "finish", decidedBy }
+    : {
+        kind: "given up",
+        failing: {
+          cause: FailureCause.FailWorkflow,
+          reason: lifecycle.reason,
+          decidedBy,
+        },
+      };
 }
 
-async function decided(
-  journey: Journey,
-  step: StepDescriptor,
-  attempt: Attempt,
-  failed: Failed,
+/**
+ * Reports the abnormal termination and calls `on step abnormal termination`,
+ * which gives the step up when it fails the workflow; otherwise the
+ * executor's own rule and the hooks decide, as after a failure.
+ */
+async function terminated(
+  attempting: Attempting,
+  error: unknown,
 ): Promise<Concluded> {
-  const decision = afterFailedAttempt(step, attempt, failed.cause);
-  if (decision.kind === "retry") {
-    await journey.emit({
-      kind: EventKind.StepRetrying,
-      step: step.name,
-      attempt,
-      cause: failed.cause,
-      decidedBy: "default",
-    });
-    return { kind: "retry" };
-  }
+  const { journey, step, attempt } = attempting;
+  const errorMessage = messageOf(error);
   await journey.emit({
-    kind: EventKind.StepGivenUp,
+    kind: EventKind.StepAbnormalTermination,
     step: step.name,
     attempt,
-    cause: decision.cause,
-    decidedBy: "default",
+    errorMessage,
   });
-  return { kind: "given up", failure: failureOf(decision.cause, failed) };
-}
-
-function failureOf(cause: GiveUpCause, failed: Failed): FailedByDefault {
-  const exhausted = cause === FailureCause.RetriesExhausted;
-  if (failed.cause === RetryCause.Failure) {
-    return {
-      cause: exhausted ? FailureCause.RetriesExhausted : FailureCause.Failure,
-      reason: failed.reason,
-    };
-  }
-  return {
-    cause: exhausted
-      ? FailureCause.RetriesExhausted
-      : FailureCause.AbnormalTermination,
-    error: failed.error,
-    errorMessage: failed.errorMessage,
-  };
+  const failed = { cause: RetryCause.AbnormalTermination, error, errorMessage };
+  const nothing = new Map<string, PlainValue>();
+  const hook = StepHook.OnStepAbnormalTermination;
+  const returned = await stepHookCalled(
+    attempting,
+    hook,
+    leftBy(failed, nothing, None),
+  );
+  return returned?.lifecycle.kind === "FailWorkflow"
+    ? givenUpByHook(attempting, hook, returned.policy, returned.lifecycle)
+    : decided(attempting, failed, nothing);
 }

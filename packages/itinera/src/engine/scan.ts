@@ -1,101 +1,143 @@
+import type { DecidedBy } from "../event.js";
 import { EventKind } from "../event/kind.js";
 import type { WorkflowInstance } from "../instance.js";
+import { FailureCause, type Failure } from "../journey.js";
+import { StepHook, WorkflowHook } from "../policy.js";
 import { Attempt, type StepDescriptor } from "../step.js";
 import { nextAttempt } from "../step/attempt.js";
 import { built } from "./build.js";
+import type { EventBody } from "./emitter.js";
+import { workflowHookCalled } from "./hook/workflow.js";
 import type { Journey } from "./journey.js";
-import { concluded, type FailedByDefault } from "./outcome.js";
+import { concluded, type Failing } from "./outcome.js";
+import { stepPolicies, type BuiltPolicy } from "./policies.js";
 import { ran } from "./run.js";
 
 /**
  * Runs the journey: starts it, runs its steps in their order, each attempted
- * until it is done or the journey ends, then says how the journey ended.
- * Returns why it failed, when it failed.
+ * until it is done or the journey ends, then calls the workflow hook for how
+ * it ended and says how it ended. Returns why it failed, when it failed.
+ * `policies` are the workflow policies built for the journey.
  *
  * @throws JourneyAbortError once the journey is aborted.
  */
 export async function travel(
   journey: Journey,
   instance: WorkflowInstance,
-): Promise<FailedByDefault | undefined> {
+  policies: readonly BuiltPolicy[],
+): Promise<Failure | undefined> {
   await journey.emit({
     kind: EventKind.JourneyStarted,
     initialKeys: [...journey.data.keys()],
   });
-  const failing = await scan(journey, instance);
+  const ended = await scan(journey, instance);
   journey.step = undefined;
-  if (failing === undefined) {
+  if (ended.kind === "succeeded") {
+    const hook = WorkflowHook.OnWorkflowSuccess;
+    await workflowHookCalled(journey, instance, policies, hook);
     await journey.emit({
       kind: EventKind.JourneySucceeded,
-      decidedBy: "default",
+      decidedBy: ended.decidedBy,
     });
     return undefined;
   }
-  const { step, failure } = failing;
-  await journey.emit(
-    failure.reason !== undefined
-      ? {
-          kind: EventKind.JourneyFailed,
-          step: step.name,
-          cause: failure.cause,
-          reason: failure.reason,
-          decidedBy: "default",
-        }
-      : {
-          kind: EventKind.JourneyFailed,
-          step: step.name,
-          cause: failure.cause,
-          errorMessage: failure.errorMessage,
-          decidedBy: "default",
-        },
-  );
-  return failure;
+  const hook = WorkflowHook.OnWorkflowFailure;
+  await workflowHookCalled(journey, instance, policies, hook);
+  await journey.emit(journeyFailed(ended.step, ended.failing));
+  return failureOf(ended.failing);
 }
 
-/** A step given up, and why the journey fails. */
-interface Failing {
-  readonly step: StepDescriptor;
-  readonly failure: FailedByDefault;
-}
+/**
+ * How the steps ended: the journey succeeded, after its last step or through
+ * a hook, or a step was given up, and why the journey fails.
+ */
+type Ended =
+  | {
+      readonly kind: "succeeded";
+      readonly decidedBy: DecidedBy<typeof StepHook.OnStepSuccess>;
+    }
+  | {
+      readonly kind: "failed";
+      readonly step: StepDescriptor;
+      readonly failing: Failing;
+    };
 
 async function scan(
   journey: Journey,
   instance: WorkflowInstance,
-): Promise<Failing | undefined> {
+): Promise<Ended> {
   for (const step of instance.descriptor.steps()) {
     journey.step = step.name;
-    const failing = await attempted(journey, instance, step, Attempt.first);
-    if (failing !== undefined) {
-      return failing;
+    const ended = await attempted(journey, instance, step, Attempt.first);
+    if (ended !== undefined) {
+      return ended;
     }
   }
-  return undefined;
+  return { kind: "succeeded", decidedBy: "default" };
 }
 
 /**
- * Runs `attempt` of the step, then the attempts after it, until the step
- * is done or given up.
+ * Runs `attempt` of the step, with its step policies built anew, then the
+ * attempts after it, until the step is done, given up, or ends the journey.
  */
 async function attempted(
   journey: Journey,
   instance: WorkflowInstance,
   step: StepDescriptor,
   attempt: Attempt,
-): Promise<Failing | undefined> {
+): Promise<Ended | undefined> {
   await journey.emit({
     kind: EventKind.AttemptStarted,
     step: step.name,
     attempt,
   });
+  const policies = stepPolicies(journey, step);
   const made = await built(journey, instance, step, attempt);
   const ended = await ran(journey, step, attempt, made);
-  const next = await concluded(journey, step, attempt, ended);
+  const next = await concluded(
+    { journey, instance, step, attempt, policies },
+    ended,
+  );
   switch (next.kind) {
     case "next step":
       return undefined;
     case "retry":
       return attempted(journey, instance, step, nextAttempt(attempt));
+    case "finish":
+      return { kind: "succeeded", decidedBy: next.decidedBy };
     case "given up":
-      return { step, failure: next.failure };
+      return { kind: "failed", step, failing: next.failing };
   }
+}
+
+function journeyFailed(step: StepDescriptor, failing: Failing): EventBody {
+  const kind = EventKind.JourneyFailed;
+  if (failing.cause === FailureCause.FailWorkflow) {
+    const { cause, reason, decidedBy } = failing;
+    return { kind, step: step.name, cause, reason, decidedBy };
+  }
+  return failing.reason !== undefined
+    ? {
+        kind,
+        step: step.name,
+        cause: failing.cause,
+        reason: failing.reason,
+        decidedBy: "default",
+      }
+    : {
+        kind,
+        step: step.name,
+        cause: failing.cause,
+        errorMessage: failing.errorMessage,
+        decidedBy: "default",
+      };
+}
+
+/** Why the journey failed, as its result tells it. */
+function failureOf(failing: Failing): Failure {
+  if (failing.cause !== FailureCause.FailWorkflow) {
+    return failing;
+  }
+  const { cause, reason } = failing;
+  return { cause, reason };
 }

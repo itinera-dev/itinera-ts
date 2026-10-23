@@ -1,3 +1,5 @@
+import type { PolicyName } from "../policy.js";
+
 /**
  * Why `run` refused an instance, before any journey and with no event.
  *
@@ -7,6 +9,7 @@ export type Refused =
   | InstanceRan
   | JourneyRunning
   | InitialValues
+  | WorkflowPolicyFailed
   | DispatcherFactoryFailed
   | DispatcherFailed
   | GlobalMetadataNotSet;
@@ -61,6 +64,18 @@ interface CausedByError {
    * otherwise.
    */
   readonly errorMessage: string;
+}
+
+/**
+ * One of the workflow's policies failed while it was built for the journey.
+ *
+ * {@includeCode ../../examples/refusal.ts}
+ */
+export interface WorkflowPolicyFailed extends CausedByError {
+  /** Tells this refusal from the others. */
+  readonly kind: "workflow policy failed";
+  /** The policy's name. */
+  readonly policy: PolicyName;
 }
 
 /**
@@ -128,6 +143,8 @@ function messageOf(refused: Refused): string {
       return "run refused an instance while the executor runs a journey: wait for it, or run on another executor";
     case "initial values":
       return `run refused an instance: ${initialValues(refused)}`;
+    case "workflow policy failed":
+      return `run refused an instance: workflow policy ${refused.policy} failed while it was built: ${refused.errorMessage}`;
     case "dispatcher factory failed":
       return `run refused an instance: the dispatcher factory failed: ${refused.errorMessage}`;
     case "dispatcher failed":

@@ -19,11 +19,11 @@ import {
 import { failureReason } from "../../../src/step/request.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import {
-  FailingOn,
   journeyThrough,
   orders,
   recorded,
   run,
+  failingOn,
 } from "../../fixtures/engine.js";
 import type { Journey } from "../../../src/engine/journey.js";
 import { travel } from "../../../src/engine/scan.js";
@@ -117,7 +117,11 @@ const diskFull: Abort = {
 
 function charging(step: (journey: Journey) => StepClass) {
   const journey = journeyThrough(new DefaultDispatcher());
-  return travel(journey, orders(step(journey).builder("charge")).instance());
+  return travel(
+    journey,
+    orders(step(journey).builder("charge")).instance(),
+    [],
+  );
 }
 
 function abortingWhileRun(journey: Journey): StepClass {
@@ -188,7 +192,9 @@ describe("ran", () => {
     const result = await run(
       reporting(Catching).instance(
         {},
-        { reporters: [recorder, new FailingOn("step_info", "disk full")] },
+        {
+          reporters: [recorder, failingOn("step_info", "disk full")],
+        },
       ),
     );
     expect([kindsOf(recorder), result.abort?.reason]).toEqual([

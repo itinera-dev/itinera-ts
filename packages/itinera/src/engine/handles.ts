@@ -1,40 +1,44 @@
-import type { StepSource } from "../event.js";
 import { EventKind } from "../event/kind.js";
 import { AbortReason, type Abort, type Contributor } from "../journey.js";
+import type { HookReporter } from "../policy.js";
 import type { StepReporter } from "../step.js";
 import type { PlainValue } from "../value.js";
 import { capture } from "../value/capture.js";
+import {
+  blamed,
+  described,
+  emitted,
+  emittedKind,
+  type Holder,
+  type Level,
+  setter,
+} from "./handles/holder.js";
 import type { Journey } from "./journey.js";
 import { JourneyAbortError } from "./signal.js";
 import { journeyIdKey } from "./start.js";
 
-/** The kinds of the events a step emits about its own work. */
-type StepEmittedKind =
-  | typeof EventKind.StepInfo
-  | typeof EventKind.StepWarning
-  | typeof EventKind.StepError;
-
 /**
- * The handles itinera lends one attempt of a step: its contributor and its
- * step reporter. They keep what the attempt contributed, and run every call
- * that emits or sets global metadata in the order the step made it, each
- * once the one before has settled, so a call the step does not await keeps
- * its place. Once the attempt ends they are closed: a call then throws where
- * it is made, and changes nothing.
+ * The handles itinera lends one attempt of a step, or one call of a hook:
+ * its contributor and its reporter, a step reporter or a hook reporter. They
+ * keep what was contributed, and run every call that emits or sets global
+ * metadata in the order it was made, each once the one before has settled,
+ * so a call that is not awaited keeps its place. Once the attempt or the
+ * call ends they are closed: a call then throws where it is made, and
+ * changes nothing.
  */
-export class AttemptHandles {
-  /** What the attempt contributed, by key, in the order first contributed. */
+export class Handles {
+  /** What was contributed, by key, in the order first contributed. */
   readonly contributed = new Map<string, PlainValue>();
-  /** The contributor lent to the attempt. */
+  /** The contributor lent. */
   readonly contributor: Contributor;
-  /** The step reporter lent to the attempt. */
-  readonly reporter: StepReporter;
+  /** The reporter lent: a step's, or a hook's, which have the same calls. */
+  readonly reporter: StepReporter & HookReporter;
   #closed = false;
   #last: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly journey: Journey,
-    private readonly source: StepSource,
+    private readonly holder: Holder,
   ) {
     this.contributor = Object.freeze({
       contribute: (key: string, value: unknown) => {
@@ -43,20 +47,20 @@ export class AttemptHandles {
     });
     this.reporter = Object.freeze({
       info: (message: string, data?: unknown) =>
-        this.#emit(EventKind.StepInfo, message, data),
+        this.#emit("info", message, data),
       warning: (message: string, data?: unknown) =>
-        this.#emit(EventKind.StepWarning, message, data),
+        this.#emit("warning", message, data),
       error: (message: string, data?: unknown) =>
-        this.#emit(EventKind.StepError, message, data),
+        this.#emit("error", message, data),
       setGlobalMetadata: (key: string, value: unknown) =>
         this.#setGlobalMetadata(key, value),
     });
   }
 
   /**
-   * Closes both handles, for good, once every call the attempt made on its
-   * step reporter has settled, those made while earlier ones settled
-   * included, so none is accepted after the engine stopped waiting.
+   * Closes both handles, for good, once every call made on the reporter has
+   * settled, those made while earlier ones settled included, so none is
+   * accepted after the engine stopped waiting.
    */
   async closed(): Promise<void> {
     let last: Promise<void>;
@@ -73,70 +77,73 @@ export class AttemptHandles {
     if (captured.isErr()) {
       throw this.#aborting({
         reason: AbortReason.NotAValue,
-        step: this.source.step,
+        ...blamed(this.holder),
         key,
       });
     }
     this.contributed.set(key, captured.value);
   }
 
-  #emit(kind: StepEmittedKind, message: string, data: unknown): Promise<void> {
-    this.#refuseOnceClosed("step reporter");
-    const { step, attempt } = this.source;
+  #emit(level: Level, message: string, data: unknown): Promise<void> {
+    this.#refuseOnceClosed("reporter");
+    const { holder } = this;
     if (data === undefined) {
       return this.#inTurn(() =>
-        this.journey.emit({ kind, step, attempt, message }),
+        this.journey.emit(emitted(holder, level, message, undefined)),
       );
     }
     const captured = capture(data);
     if (captured.isErr()) {
       return this.#abortInTurn({
         reason: AbortReason.NotAValue,
-        step,
-        eventKind: kind,
+        ...blamed(holder),
+        eventKind: emittedKind(holder, level),
       });
     }
     return this.#inTurn(() =>
-      this.journey.emit({
-        kind,
-        step,
-        attempt,
-        message,
-        data: captured.value,
-      }),
+      this.journey.emit(emitted(holder, level, message, captured.value)),
     );
   }
 
   #setGlobalMetadata(key: string, value: unknown): Promise<void> {
-    this.#refuseOnceClosed("step reporter");
-    const { step } = this.source;
+    this.#refuseOnceClosed("reporter");
+    const { holder } = this;
     if (key === journeyIdKey) {
       return this.#abortInTurn({
         reason: AbortReason.ReservedMetadataKey,
-        step,
+        ...blamed(holder),
         key,
-        source: { kind: "step" },
+        source: setter(holder),
       });
     }
     const captured = capture(value);
     if (captured.isErr()) {
-      return this.#abortInTurn({ reason: AbortReason.NotAValue, step, key });
+      return this.#abortInTurn({
+        reason: AbortReason.NotAValue,
+        ...blamed(holder),
+        key,
+      });
     }
     return this.#inTurn(async () => {
       await this.journey.setGlobalMetadata(key, captured.value);
       await this.journey.emit({
         kind: EventKind.GlobalMetadataSet,
         key,
-        source: this.source,
+        source: holder,
       });
     });
   }
 
-  #refuseOnceClosed(handle: "contributor" | "step reporter"): void {
+  #refuseOnceClosed(handle: "contributor" | "reporter"): void {
     if (this.#closed) {
-      const { step, attempt } = this.source;
+      const { holder } = this;
+      const isStep = holder.kind === "step";
+      const lent =
+        handle === "contributor"
+          ? handle
+          : `${isStep ? "step" : "hook"} reporter`;
       throw new Error(
-        `the ${handle} of attempt ${attempt.toString()} of step ${step} was used after the attempt ended`,
+        `the ${lent} of ${described(holder)} was used after ${isStep ? "the attempt ended" : "it returned"}`,
       );
     }
   }
@@ -144,7 +151,7 @@ export class AttemptHandles {
   /**
    * Runs `call` once every call made before it has settled, unless the
    * journey was aborted by then, and gives what it settles to. The promise
-   * given is handled, so a step that does not await it never leaves a
+   * given is handled, so code that does not await it never leaves a
    * rejection unhandled.
    */
   #inTurn(call: () => Promise<void>): Promise<void> {
@@ -161,7 +168,7 @@ export class AttemptHandles {
   }
 
   /**
-   * The executor's signal for `abort`, thrown at once into the step, the
+   * The executor's signal for `abort`, thrown at once into the code, the
    * abort itself recorded in its turn.
    */
   #aborting(abort: Abort): JourneyAbortError {

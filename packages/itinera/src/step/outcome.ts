@@ -125,7 +125,7 @@ function outcome<O extends Fail | Skip>(reported: O, refused: boolean): O {
 }
 
 /** The reason `given`, and whether its details were refused as not a value. */
-function reasonOf<T>(given: GivenReason<T>): {
+export function reasonOf<T>(given: GivenReason<T>): {
   readonly reason: Reason;
   readonly refused: boolean;
 } {
