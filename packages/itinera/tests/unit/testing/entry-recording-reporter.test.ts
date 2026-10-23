@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { journeyStarted, stepSucceeded } from "../event/fixtures.js";
-import { None, Some } from "../option.js";
-import { EntryRecordingReporter } from "./entry-recording-reporter.js";
+import { journeyStarted, stepSucceeded } from "../../fixtures/event.js";
+import { None, Some } from "../../../src/option.js";
+import { EntryRecordingReporter } from "../../../src/testing/entry-recording-reporter.js";
 
 describe("EntryRecordingReporter", () => {
   it("keeps every entry in order, each with the kind of the event received last before it", () => {
