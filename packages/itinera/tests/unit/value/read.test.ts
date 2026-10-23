@@ -1,9 +1,9 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
-import { None, Some } from "../option.js";
-import type { PlainValue } from "../value.js";
-import { received } from "./read.js";
+import { None, Some } from "../../../src/option.js";
+import type { PlainValue } from "../../../src/value.js";
+import { received } from "../../../src/value/read.js";
 import {
   classOf,
   guard,
@@ -12,7 +12,7 @@ import {
   number,
   objectOf,
   string,
-} from "./token.js";
+} from "../../../src/value/token.js";
 
 class Payment {
   constructor(readonly cents: number) {}

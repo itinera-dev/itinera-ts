@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import { declaredPolicy } from "../../../src/policy/declared.js";
 import { Audit, Ledger } from "../../fixtures/policy.js";
 import { type Outcome, Step } from "../../../src/step.js";
-import { describeStep, requestsOfDescribed, rescueOf } from "../../../src/step/descriptor.js";
+import {
+  describeStep,
+  requestsOfDescribed,
+  rescueOf,
+} from "../../../src/step/descriptor.js";
 import { Refund, Ship } from "../../fixtures/step.js";
 import { rescueGiven } from "../../../src/step/rescue/builder.js";
 

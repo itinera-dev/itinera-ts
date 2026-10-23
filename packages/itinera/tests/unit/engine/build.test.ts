@@ -1,14 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { AbortReason, type Abort } from "../journey.js";
-import { DefaultDispatcher } from "../report/default-dispatcher.js";
-import { Attempt, Step, type StepDescriptor, type StepName } from "../step.js";
-import { failureReason, input, stepName } from "../step/request.js";
-import type { RecordingReporter } from "../testing/recording-reporter.js";
-import { stepMock } from "../testing/step-mock.js";
-import { Ending } from "../testing/ending.js";
-import { integer, string } from "../value/token.js";
-import { key } from "../workflow/adapter.js";
-import { built } from "./build.js";
+import { AbortReason, type Abort } from "../../../src/journey.js";
+import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
+import {
+  Attempt,
+  Step,
+  type StepDescriptor,
+  type StepName,
+} from "../../../src/step.js";
+import { failureReason, input, stepName } from "../../../src/step/request.js";
+import type { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { integer, string } from "../../../src/value/token.js";
+import { key } from "../../../src/workflow/adapter.js";
+import { built } from "../../../src/engine/build.js";
 import {
   type Adapting,
   caught,
@@ -17,7 +22,7 @@ import {
   orders,
   recorded,
   Shop,
-} from "./fixtures.js";
+} from "../../fixtures/engine.js";
 
 /** The step `charge`, whose constructor's arguments are kept in `needs`. */
 function charge(needs: unknown[][] = []) {

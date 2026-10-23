@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
-import type { Place } from "../declaration/parameter.js";
-import type { Tokens } from "../declaration/token.js";
-import type { Event } from "../event.js";
-import type { DataBag } from "../journey.js";
-import { dataBag, journeyId } from "../journey/request.js";
-import { None } from "../option.js";
-import { Attempt } from "../step.js";
-import { input, stepName } from "../step/request.js";
-import { classOf, integer, optional, string } from "../value/token.js";
-import type { Built, Supplied } from "../workflow.js";
-import { key } from "../workflow/adapter.js";
-import { fromWorkflow } from "../workflow/request.js";
+import type { Place } from "../../../src/declaration/parameter.js";
+import type { Tokens } from "../../../src/declaration/token.js";
+import type { Event } from "../../../src/event.js";
+import type { DataBag } from "../../../src/journey.js";
+import { dataBag, journeyId } from "../../../src/journey/request.js";
+import { None } from "../../../src/option.js";
+import { Attempt } from "../../../src/step.js";
+import { input, stepName } from "../../../src/step/request.js";
+import {
+  classOf,
+  integer,
+  optional,
+  string,
+} from "../../../src/value/token.js";
+import type { Built, Supplied } from "../../../src/workflow.js";
+import { key } from "../../../src/workflow/adapter.js";
+import { fromWorkflow } from "../../../src/workflow/request.js";
 import {
   type Adapting,
   keeping,
@@ -18,7 +23,7 @@ import {
   recorded,
   run,
   Shop,
-} from "./fixtures.js";
+} from "../../fixtures/engine.js";
 
 type AdapterRequests = Tokens<unknown[], Place<Shop, "adapt">>;
 
