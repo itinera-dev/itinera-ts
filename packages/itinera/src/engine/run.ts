@@ -28,7 +28,8 @@ export type Ran =
  * handles and the services it requests, in order, and closes the handles
  * once the attempt and every call it made on them have settled. An error
  * escaping `run`, or what it returned that is not an outcome, ends the
- * attempt in an abnormal termination.
+ * attempt in an abnormal termination. For an attempt a scripted run
+ * describes, the script plays in place of `run`, through the same handles.
  *
  * @throws JourneyAbortError when the journey was aborted while the step ran,
  * whatever it did afterwards, or with `not a value` when its outcome's
@@ -49,9 +50,12 @@ export async function ran(
   const lent = step.requests.run.map((request) =>
     lending(journey, step, lends, request),
   );
+  const play = journey.script?.play(step.name, attempt);
   let ended: Ran;
   try {
-    const returned: unknown = await made.run(...(lent as never[]));
+    const returned: unknown = await (play === undefined
+      ? made.run(...(lent as never[]))
+      : play(handles));
     ended = endedWith(step, returned, handles);
   } catch (error) {
     ended = { kind: "abnormal termination", error };

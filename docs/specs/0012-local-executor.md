@@ -6,7 +6,7 @@ Status: complete, and 12 is listed in `conformance.json`. Stage 3 added `LocalEx
 
 ## API
 
-Since stage 10, everything here is exported from the subpath `itinera/executor`. It is defined in `src/executor.ts`, with the refusals in `src/executor/refusal.ts`.
+Since stage 10, everything here is exported from the subpath `itinera/executor`. It is defined in `src/executor/local.ts`, re-exported by `src/executor.ts`, with the refusals in `src/executor/refusal.ts`.
 
 - **`new LocalExecutor(dispatcherFactory?)`** takes the dispatcher factory as its one optional argument, `DefaultDispatcherFactory` without it. This was the open point of #8; a constructor argument mirrors Rust's `LocalExecutor::with_dispatcher_factory` without a second way to say the same thing, and an options object can be added later without breaking it.
 - **`await executor.run(instance)`** resolves to the journey's `JourneyResult` (see 0065), whatever happens inside the journey. It takes a `WorkflowInstance` that `instance()` made; one that a cast lets through is rejected with a `TypeError` (see "Before the journey").
@@ -37,7 +37,7 @@ None of its own.
 
 ## Tests
 
-- `tests/unit/executor.test.ts`: the default dispatcher factory, a new dispatcher per journey, `journey running` while a journey runs and the running journey unaffected, another journey once one ended or was refused, and the rejection of an instance that `instance()` did not make.
+- `tests/unit/executor/local.test.ts`: the default dispatcher factory, a new dispatcher per journey, `journey running` while a journey runs and the running journey unaffected, another journey once one ended or was refused, and the rejection of an instance that `instance()` did not make.
 - `tests/unit/executor/refusal.test.ts`: the message of every refusal, the name `Refusal`, and the standard `cause`.
 - `tests/unit/engine.test.ts`: the result of each ending, and no event and no global metadata for a refused instance.
 - `tests/unit/engine/start.test.ts`: every refusal before the journey, the order of global metadata, and the initial data captured.

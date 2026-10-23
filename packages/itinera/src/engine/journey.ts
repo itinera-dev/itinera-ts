@@ -8,13 +8,15 @@ import type { PlainValue } from "../value.js";
 import type { Emitter, EventBody } from "./emitter.js";
 import type { Failures } from "./guard.js";
 import { messageOf } from "./message.js";
+import type { Scripting } from "./script.js";
 import { JourneyAbortError } from "./signal.js";
 
 /**
  * One journey while it runs: it holds its data bag and the instances of
  * journey scope its service providers made, makes its events and delivers
  * them through its dispatcher, knows the step being run, and records the
- * journey's abort, the first one standing.
+ * journey's abort, the first one standing. A scripted run gives it its
+ * script.
  */
 export class Journey {
   /** The step being run, if any. */
@@ -32,6 +34,8 @@ export class Journey {
     private readonly failures: Failures,
     /** The data bag: values by key, in the order each was first set. */
     readonly data: Map<string, PlainValue>,
+    /** The script of a scripted run, which the engine consults. */
+    readonly script?: Scripting,
   ) {}
 
   /** Lets go of every instance of journey scope it kept, once it has ended. */

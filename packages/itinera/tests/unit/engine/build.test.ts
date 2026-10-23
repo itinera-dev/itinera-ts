@@ -1,13 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { AbortReason, type Abort } from "../../../src/journey.js";
+import {
+  AbortReason,
+  type Abort,
+  type Contributor,
+  contributor,
+} from "../../../src/journey.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import {
   Attempt,
+  type Outcome,
   Step,
   type StepDescriptor,
   type StepName,
 } from "../../../src/step.js";
 import { failureReason, input, stepName } from "../../../src/step/request.js";
+import { fromRescuedStep } from "../../../src/step/rescue.js";
 import type { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
 import { stepMock } from "../../../src/testing/step-mock.js";
@@ -24,8 +31,10 @@ import {
   keeping,
   orders,
   recorded,
+  run,
   Shop,
 } from "../../fixtures/engine.js";
+import type { Scripting } from "../../../src/engine/script.js";
 
 /** The step `charge`, whose constructor's arguments are kept in `needs`. */
 function charge(needs: unknown[][] = []) {
@@ -57,6 +66,13 @@ const diskFull: Abort = {
   error: new Error("disk full"),
 };
 
+class Declining extends Step {
+  override run(contributor: Contributor): Outcome {
+    contributor.contribute("charged", 40);
+    return this.fail("declined");
+  }
+}
+
 describe("built", () => {
   it("gives the constructor each input, in the order it declares them, read from the data bag", async () => {
     const needs: unknown[][] = [];
@@ -70,6 +86,53 @@ describe("built", () => {
       { currency: "EUR", amount: 42 },
     );
     expect(needs).toEqual([[42, "EUR"]]);
+  });
+
+  it("tells a script each attempt handed to the construction of its step, with the values its inputs found, before the constructor runs", async () => {
+    const told: unknown[][] = [];
+    const needs: unknown[][] = [];
+    const script: Scripting = {
+      building: (step, attempt, values) => {
+        told.push([step, attempt.number, [...values], needs.length]);
+      },
+      play: () => undefined,
+    };
+    await run(
+      orders(charge(needs).needs(input("amount", integer))).instance({
+        amount: 42,
+      }),
+      undefined,
+      script,
+    );
+    expect(told).toEqual([["charge", 1, [["amount", 42]], 0]]);
+  });
+
+  it("tells a script, for a rescue step, the contributions it requested of the failed attempt", async () => {
+    const told: unknown[][] = [];
+    const script: Scripting = {
+      building: (step, _, values) => {
+        told.push([step, [...values]]);
+      },
+      play: () => undefined,
+    };
+    await run(
+      orders(
+        Declining.builder("charge")
+          .run(contributor())
+          .rescue(
+            rescueStepMock({ attempts: [Ending.success] })
+              .builder()
+              .needs(fromRescuedStep("charged", integer)),
+          ),
+      ).instance(),
+      undefined,
+      script,
+    );
+    expect(told).toEqual([
+      ["charge", []],
+      ["charge_rescue", [["charged", 40]]],
+      ["charge", []],
+    ]);
   });
 
   it("aborts the journey with required data missing for a required input without a value, before the step is built", async () => {

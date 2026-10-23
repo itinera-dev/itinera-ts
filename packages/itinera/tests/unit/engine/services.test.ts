@@ -6,12 +6,15 @@ import { input } from "../../../src/step/request.js";
 import { Ending } from "../../../src/testing/ending.js";
 import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
 import { integer } from "../../../src/value/token.js";
-import type { ProviderOptions } from "../../../src/service.js";
+import { useFake } from "../../../src/instance/made.js";
+import type { ProviderName, ProviderOptions } from "../../../src/service.js";
+import { provided as made } from "../../../src/service/provider/provided.js";
 import type { Built } from "../../../src/workflow.js";
 import {
   GATEWAY,
   kindOf,
   recorded,
+  run,
   serviced,
   Till,
 } from "../../fixtures/engine.js";
@@ -76,6 +79,23 @@ describe("servicesFor", () => {
     await recorded(till);
     await recorded(till);
     expect(till.callsTo("main")).toBe(2);
+  });
+
+  it("calls the instance's fake of a provider of journey scope once, lending what it makes to every attempt", async () => {
+    const lent: unknown[][] = [];
+    const instance = shop(lent, {}).instance();
+    let calls = 0;
+    useFake(instance, "main" as ProviderName, () => {
+      calls += 1;
+      return made({ label: "fake" }, undefined);
+    });
+    await run(instance);
+    expect(calls).toBe(1);
+    expect(lent).toEqual([
+      [{ label: "fake" }],
+      [{ label: "fake" }],
+      [{ label: "fake" }],
+    ]);
   });
 
   it("calls a provider of attempt scope for every attempt of every step it serves", async () => {
