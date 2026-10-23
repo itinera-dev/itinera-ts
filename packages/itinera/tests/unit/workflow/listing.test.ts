@@ -1,8 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { Alarm, Audit } from "../policy/fixtures.js";
-import { stepPolicyGiven } from "../policy/step-policy/builder.js";
-import { adapter, PAYMENTS, provider, step, STOCK } from "./fixtures.js";
-import { listingOf } from "./listing.js";
+import { Alarm, Audit } from "../../fixtures/policy.js";
+import { stepPolicyGiven } from "../../../src/policy/step-policy/builder.js";
+import {
+  adapter,
+  PAYMENTS,
+  provider,
+  step,
+  STOCK,
+} from "../../fixtures/workflow.js";
+import { listingOf } from "../../../src/workflow/listing.js";
 
 describe("the listing", () => {
   it("lists each step in order, with its position, its policies and its input adapter", () => {

@@ -3,7 +3,11 @@ import { Audit, Ledger } from "../../fixtures/policy.js";
 import { stepPolicyGiven } from "../../../src/policy/step-policy/builder.js";
 import { adapter, PAYMENTS, provider, step } from "../../fixtures/workflow.js";
 import type { StepName } from "../../../src/step.js";
-import { type Violation, Violations, violationsOf } from "../../../src/workflow/violation.js";
+import {
+  type Violation,
+  Violations,
+  violationsOf,
+} from "../../../src/workflow/violation.js";
 
 describe("violationsOf", () => {
   it("finds nothing wrong with a workflow put together rightly", () => {

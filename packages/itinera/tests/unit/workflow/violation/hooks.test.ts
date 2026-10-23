@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { Audit, Close, Ledger, Notify, Quiet } from "../../policy/fixtures.js";
-import { stepPolicyGiven } from "../../policy/step-policy/builder.js";
-import { workflowPolicyGiven } from "../../policy/workflow-policy/builder.js";
-import { step } from "../fixtures.js";
-import { stepHooksDefinedTwice, workflowHooksDefinedTwice } from "./hooks.js";
+import {
+  Audit,
+  Close,
+  Ledger,
+  Notify,
+  Quiet,
+} from "../../../fixtures/policy.js";
+import { stepPolicyGiven } from "../../../../src/policy/step-policy/builder.js";
+import { workflowPolicyGiven } from "../../../../src/policy/workflow-policy/builder.js";
+import { step } from "../../../fixtures/workflow.js";
+import {
+  stepHooksDefinedTwice,
+  workflowHooksDefinedTwice,
+} from "../../../../src/workflow/violation/hooks.js";
 
 describe("stepHooksDefinedTwice", () => {
   it("names the step, the hook and every policy defining it", () => {

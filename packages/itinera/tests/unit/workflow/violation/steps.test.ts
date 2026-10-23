@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { step } from "../fixtures.js";
-import { duplicateStepNames, rescuedStepsRetried, stepNamed } from "./steps.js";
+import { step } from "../../../fixtures/workflow.js";
+import {
+  duplicateStepNames,
+  rescuedStepsRetried,
+  stepNamed,
+} from "../../../../src/workflow/violation/steps.js";
 
 describe("duplicateStepNames", () => {
   it("finds nothing wrong with steps of different names", () => {
