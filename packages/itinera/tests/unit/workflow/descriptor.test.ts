@@ -3,7 +3,11 @@ import type { Event } from "../../../src/event.js";
 import type { Reporter } from "../../../src/report.js";
 import { describeStep } from "../../../src/step/descriptor.js";
 import { Ship } from "../../fixtures/step.js";
-import { Workflow, workflow, type WorkflowName } from "../../../src/workflow.js";
+import {
+  Workflow,
+  workflow,
+  type WorkflowName,
+} from "../../../src/workflow.js";
 import { assemble, type Parts } from "../../../src/workflow/descriptor.js";
 import type { IdGenerator } from "../../../src/workflow/registry.js";
 import { Violations } from "../../../src/workflow/violation.js";
