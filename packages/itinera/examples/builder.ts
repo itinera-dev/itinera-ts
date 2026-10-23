@@ -39,8 +39,8 @@ class Orders extends Workflow {
 
 const orders = Orders.builder()
   .name("orders")
-  .step(Charge, { name: "charge", retryBudget: 1 })
-  .step(Ship, { name: "ship" })
+  .step(Charge.builder("charge").retryBudget(1).noRetryOnAbnormalTermination())
+  .step(Ship.builder("ship"))
   .reporter(Audit)
   .idGenerator("orderId")
   .constructWith("corner")
@@ -53,3 +53,5 @@ assert.deepEqual(
   instance.descriptor.steps().map((described) => described.name),
   ["charge", "ship"],
 );
+assert.equal(instance.descriptor.steps()[0]?.retryBudget, 1);
+assert.equal(instance.descriptor.steps()[0]?.retryOnAbnormalTermination, false);

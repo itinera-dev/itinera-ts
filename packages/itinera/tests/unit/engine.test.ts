@@ -37,7 +37,7 @@ describe("runJourney", () => {
 
   it("gives a journey that failed its failure, with the error as thrown, and its data bag", async () => {
     const result = await run(
-      orders([Crashing, { name: "charge" }]).instance({ order: "A-1" }),
+      orders(Crashing.builder("charge")).instance({ order: "A-1" }),
     );
     expect(result.failure).toEqual({
       cause: "abnormal termination",
@@ -51,10 +51,12 @@ describe("runJourney", () => {
 
   it("gives a journey that was aborted its abort, with the error as thrown, and no data bag", async () => {
     const result = await run(
-      orders([
-        stepMock({ attempts: [Ending.success], buildFailure: "no connection" }),
-        { name: "charge" },
-      ]).instance(),
+      orders(
+        stepMock({
+          attempts: [Ending.success],
+          buildFailure: "no connection",
+        }).builder("charge"),
+      ).instance(),
     );
     expect(result.status).toEqual({
       kind: "aborted",

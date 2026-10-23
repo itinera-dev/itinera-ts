@@ -20,11 +20,11 @@
  *   {@link DefaultDispatcherFactory} and {@link DebugReporter}, which move to
  *   `itinera/report`.
  * - Steps: {@link Step}, {@link step}, {@link input}, {@link stepReporter},
- *   {@link StepReporter}, {@link Outcome} and {@link StepDescriptor}, the
- *   rescue steps' {@link RescueStep}, {@link rescueStep} and
- *   {@link fromRescuedStep}, and the requests of a step hook about its step,
- *   such as {@link stepName}, {@link attempt}, {@link failureReason} and
- *   {@link error}, which move to `itinera/step`.
+ *   {@link StepReporter}, {@link Outcome}, {@link StepDescriptor} and
+ *   {@link StepBuilder}, the rescue steps' {@link RescueStep},
+ *   {@link rescueStep} and {@link fromRescuedStep}, and the requests of a
+ *   step hook about its step, such as {@link stepName}, {@link attempt},
+ *   {@link failureReason} and {@link error}, which move to `itinera/step`.
  * - Policies: {@link StepPolicy}, {@link WorkflowPolicy}, {@link stepPolicy},
  *   {@link workflowPolicy}, the hooks' decorators, such as
  *   {@link onStepSuccess}, what a hook returns, such as {@link OnSuccess},
@@ -161,6 +161,7 @@ export type {
   Reason,
   RescueOutcome,
   RescueStepClass,
+  StepBuilder,
   StepClass,
   StepDescriptor,
   StepName,

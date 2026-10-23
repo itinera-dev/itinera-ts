@@ -36,7 +36,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `event` | `Event`, every kind of event and what each carries |
 | `report` | Reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
 | `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
-| `step` | Step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors and their options |
+| `step` | Step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors, their options and their builders |
 | `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
 | `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
@@ -57,9 +57,9 @@ Where it lives: `packages/`, and each module in `packages/itinera/src/`, with it
 ```mermaid
 flowchart TD
     accTitle: What a workflow descriptor and an instance hold
-    accDescr: A workflow descriptor holds its name, its step descriptors in order, makes the reporters it lists, and generates journey IDs. A step descriptor holds the step's name, its retry budget, whether it retries an abnormal termination, and how to build the step. Decorators and the builder both make the descriptor. An instance holds the descriptor beside the workflow object, its journey ID, its initial data, its reporters and its initial global metadata, and the local executor runs it.
+    accDescr: A workflow descriptor holds its name, its step descriptors in order, makes the reporters it lists, and generates journey IDs. A step descriptor holds the step's name, its retry budget, whether it retries an abnormal termination, and how to build the step. Decorators and the builder, given a builder for each step, both make the descriptor. An instance holds the descriptor beside the workflow object, its journey ID, its initial data, its reporters and its initial global metadata, and the local executor runs it.
     decorators["@workflow, @withStep and @idGenerator"] --> descriptor["WorkflowDescriptor"]
-    builder["Orders.builder()"] --> descriptor
+    builder["Orders.builder(), with Charge.builder(name) for each step"] --> descriptor
     descriptor --> name["WorkflowName"]
     descriptor --> steps["StepDescriptor, one per step, in order"]
     descriptor --> reporters["reporters, which makes the reporters it lists"]
@@ -76,13 +76,13 @@ flowchart TD
     executor["LocalExecutor"] -->|"runs"| instance
 ```
 
-1. A `WorkflowDescriptor` is the workflow's declaration, its own object beside the workflow object. The decorators fill the lists the builder reads, and the builder also puts a workflow together without decorators; either way, `build()` checks it and makes it.
+1. A `WorkflowDescriptor` is the workflow's declaration, its own object beside the workflow object. The decorators fill the lists the builder reads, and the builder also puts a workflow together without decorators, taking each step from a step builder that the step class's `builder(name)` starts; either way, `build()` checks it and makes it.
 2. It holds the workflow's name and its step descriptors in the order they run. Its `reporters` makes a new reporter of each class the workflow lists, and its `generateJourneyId` asks the ID generator for a journey ID, or makes a random UUID when the workflow has none.
 3. Each `StepDescriptor` holds the step's name, its retry budget, whether it retries an abnormal termination, which it does unless that is turned off, and `build`, which makes a new step for each attempt.
 4. A `WorkflowInstance` holds the descriptor beside the workflow object, the journey ID, the initial data, the reporters made for this journey, the workflow's first and the instance's own after them, and the initial global metadata.
 5. The local executor runs an instance. It reads only the `WorkflowInstance` interface, so it runs any instance, however it was made.
 
-Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
+Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `step/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
 
 ### How requests are declared
 

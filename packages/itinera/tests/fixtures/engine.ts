@@ -8,7 +8,7 @@ import type {
   Reporter,
 } from "../../src/report.js";
 import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
-import type { StepClass, StepOptions } from "../../src/step.js";
+import type { StepBuilder } from "../../src/step.js";
 import { Ending } from "../../src/testing/ending.js";
 import { stepMock } from "../../src/testing/step-mock.js";
 import type { PlainValue } from "../../src/value.js";
@@ -29,9 +29,7 @@ function atNoon(): Date {
 export class Orders extends Workflow {}
 
 /** The workflow `orders`, with these steps in order. */
-export function orders(
-  ...steps: readonly (readonly [StepClass, StepOptions])[]
-): Built<Orders> {
+export function orders(...steps: readonly StepBuilder[]): Built<Orders> {
   return steps.reduce(withStep, named()).build();
 }
 
@@ -41,14 +39,14 @@ function named() {
 
 function withStep(
   builder: ReturnType<typeof named>,
-  [step, options]: readonly [StepClass, StepOptions],
+  step: StepBuilder,
 ): ReturnType<typeof named> {
-  return builder.step(step, options);
+  return builder.step(step);
 }
 
 /** A step `charge` that succeeds. */
-export function charge(): readonly [StepClass, StepOptions] {
-  return [stepMock({ attempts: [Ending.success] }), { name: "charge" }];
+export function charge(): StepBuilder {
+  return stepMock({ attempts: [Ending.success] }).builder("charge");
 }
 
 /** A journey of `orders` delivering its events through `dispatcher`, at noon. */

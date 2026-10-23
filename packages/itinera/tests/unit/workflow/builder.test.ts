@@ -47,7 +47,7 @@ class Orders extends Workflow {
 }
 
 function shop() {
-  return Shop.builder().name("shop").step(Ship, { name: "ship" });
+  return Shop.builder().name("shop").step(Ship.builder("ship"));
 }
 
 function stepNames(workflow: Built<Workflow>): string[] {
@@ -69,7 +69,7 @@ describe("the builder", () => {
 
   it("starts from what the decorators declared, and adds to it", () => {
     const built = Orders.builder()
-      .step(Ship, { name: "ship" })
+      .step(Ship.builder("ship"))
       .reporter(Audit)
       .build();
     const { descriptor, journeyId } = built.instance();
@@ -79,13 +79,26 @@ describe("the builder", () => {
   });
 
   it("leaves what the decorators declared as it was", () => {
-    Orders.builder().step(Ship, { name: "ship" }).build();
+    Orders.builder().step(Ship.builder("ship")).build();
     expect(stepNames(Orders.build())).toEqual(["charge"]);
   });
 
   it("names the workflow in place of the name @workflow gave", () => {
     const built = Orders.builder().name("shipping").build();
     expect(built.instance().descriptor.name).toBe("shipping");
+  });
+
+  it("describes a step as its builder had put it together when it was given", () => {
+    const ship = Ship.builder("ship");
+    const built = Shop.builder()
+      .name("shop")
+      .step(ship)
+      .constructWith("corner")
+      .build();
+    ship.retryBudget(2);
+    expect(built.instance().descriptor.steps()).toMatchObject([
+      { retryBudget: 0 },
+    ]);
   });
 
   it("makes a new descriptor every time it builds", () => {
@@ -103,8 +116,8 @@ describe("the builder", () => {
     }
     class Express extends Ship {}
     const built = shop()
-      .step(Pack, { name: "pack" })
-      .step(Express, { name: "express" })
+      .step(Pack.builder("pack"))
+      .step(Express.builder("express"))
       .constructWith("corner")
       .build();
     expect(stepNames(built)).toEqual(["ship", "pack", "express"]);
@@ -125,24 +138,9 @@ describe("the builder", () => {
   it("refuses violations before it calls the constructor", () => {
     const made = Shop.made;
     expect(() =>
-      shop().step(Ship, { name: "ship" }).constructWith("corner").build(),
+      shop().step(Ship.builder("ship")).constructWith("corner").build(),
     ).toThrow(Violations);
     expect(Shop.made).toBe(made);
-  });
-
-  it("refuses a step whose constructor has a parameter with no request", () => {
-    class Weigh extends Step {
-      constructor(readonly grams: number) {
-        super();
-      }
-
-      override run(): Outcome {
-        return this.succeed();
-      }
-    }
-    expect(() => shop().step(Weigh, { name: "weigh" })).toThrow(
-      "the constructor of Weigh: parameter 1 carries no request",
-    );
   });
 
   it("refuses a second ID generator", () => {
