@@ -104,7 +104,11 @@ describe("the conformance runner", () => {
   );
 
   it("plays the hand-written workflows of features/fixtures through the cases' sentences", () => {
-    const ran = run("fixtures", "@fixtures", join(__dirname, "..", "..", "features"));
+    const ran = run(
+      "fixtures",
+      "@fixtures",
+      join(__dirname, "..", "..", "features"),
+    );
     expect(ran.succeeded, ran.output).toBe(true);
     expect(scenarios(ran.report())).toHaveLength(17);
     expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
