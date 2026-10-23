@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { type Outcome, Step } from "../step.js";
-import { describedBy } from "./builder.js";
-import { Ship } from "./fixtures.js";
+import { type Outcome, Step } from "../../../src/step.js";
+import { describedBy } from "../../../src/step/builder.js";
+import { Ship } from "../../fixtures/step.js";
 
 describe("Step.builder", () => {
   it("names the step, gives it no retries, and retries abnormal terminations, unless told otherwise", () => {
