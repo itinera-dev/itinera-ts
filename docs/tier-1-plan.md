@@ -7,9 +7,9 @@ Behaviour comes only from the [specification](https://github.com/itinera-dev/spe
 ## What this plan implements
 
 - **Specification 0.1.0, tier 1**, checked by the conformance cases at **`v0.1.0-rc.16`**, the newest candidate, which adds the cases of proposals 0113, 0116 and 0119 to those of rc.15. That is 64 features and 357 scenarios.
-- **The proposals**, the same 36 itinera-rs lists: 0002, 0003, 0008, 0009, 0010, 0011, 0012, 0024, 0027, 0032, 0040, 0041, 0042, 0049, 0054, 0055, 0056, 0057, 0058, 0060, 0061, 0062, 0063, 0064, 0065, 0081, 0083, 0085, 0091, 0095, 0098, 0102, 0104, 0106 and 0116, which make up tier 1, and 0108, test support, which counts towards no tier and is listed only because this plan claims `testing`. Proposals 0113, value conversions, and 0119, which amends test support, are listed by the layers that complete them. Proposal 0111 has no cases: its suggested names are simply the names this plan uses, in camelCase.
+- **The proposals**, 37 of them: 0002, 0003, 0008, 0009, 0010, 0011, 0012, 0024, 0027, 0032, 0040, 0041, 0042, 0049, 0054, 0055, 0056, 0057, 0058, 0060, 0061, 0062, 0063, 0064, 0065, 0081, 0083, 0085, 0091, 0095, 0098, 0102, 0104, 0106 and 0116, which make up tier 1, and 0108, test support, with 0119, which amends it, which count towards no tier and are listed only because this plan claims `testing`. Proposal 0113, value conversions, is listed by the layer that completes it. Proposal 0111 has no cases: its suggested names are simply the names this plan uses, in camelCase.
 - **Capabilities claimed:** `async` and `testing` (decision 1). The two `@capability-sync` scenarios do not run.
-- **Rules made impossible to express:** five of the nine a conformance tag lets a language exclude, by TypeScript's types, each with a proof that the type check fails on. Three more are enforced at run time or when a class is defined, and their scenarios run, as do those of test support's two; the ninth, `mode-not-accepted`, does not arise (see "Rules made impossible, and rules enforced at run time").
+- **Rules made impossible to express:** five of the nine a conformance tag lets a language exclude, by TypeScript's types, each with a proof that the type check fails on. Three more are enforced at run time or when a class is defined, and their scenarios run, as do those of test support's five; the ninth, `mode-not-accepted`, does not arise (see "Rules made impossible, and rules enforced at run time").
 - **When the cases move.** When the specification and conformance are tagged `v0.1.0`, once itinera-rs closes tier 1, a pull request moves `cases` to `v0.1.0`; any case changed after rc.16 gets a `spec update` issue, as PROCESS.md says.
 - **Cases not yet merged.** Work that needs cases not yet merged in itinera-dev/conformance uses that pull request's branch until it merges and is tagged, for local runs only, while CI keeps running the tag pinned in `conformance.json`, and a proposal is listed only once its cases are at a tag.
 
@@ -433,7 +433,7 @@ The other four cannot be refused by types, so their scenarios run like the other
 | `late-handle` | handles closed when their attempt, hook or call ends |
 | `mode-not-accepted` | does not arise: its two scenarios are also tagged `@capability-sync`, and `sync` is not claimed |
 
-Two more tags, of test support, are enforced at run time: `undeclared-handles` by the mistakes `no contributor` and `no reporter`, and `fake-service-type` by the mistake `another service` (section 13).
+Five more tags, of test support, are enforced at run time: `undeclared-handles` by the mistakes `no contributor` and `no reporter`, `fake-service-type` by the mistake `another service` (section 13), and `attempt-zero`, `attempt-negative` and `attempt-fraction` by the mistake `no such attempt`.
 
 One rule of chapter 3, 3.8 has no tag and cannot be enforced in TypeScript: a step keeping a service after its attempt. Chapter 4, 4.9 point 8.1 allows that, since the executor never lends the service again; the documentation says not to keep one.
 

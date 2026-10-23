@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0119](https://github.com/itinera-dev/spec/blob/main/proposals/0119-attempt-mistakes.md), implemented in [#71](https://github.com/itinera-dev/itinera-ts/issues/71). It amends [0108](0108-test-support.md).
 
-Status: in progress, until proposal 119 is listed in `conformance.json`.
+Status: complete, and 119 is listed in `conformance.json`.
 
 ## API
 
@@ -18,7 +18,7 @@ No exported item is added or removed. `MistakeKind.AttemptScriptedTwice` and `Mi
 | Reading the record of a step the workflow does not have stops the test where it is read | `ScriptedRun.step`, in `src/testing/scripted/record.ts`, throws a `TestMistake` |
 | Reading an attempt the record does not hold reads nothing | `StepRecord.attempt` returns `None` |
 
-A `number` holds negative and fractional numbers, so no scenario is excluded.
+No scenario is excluded. A `number` holds 0, negative numbers and fractions, so the scenarios tagged `@attempt-zero`, `@attempt-negative` and `@attempt-fraction` run: `onAttempt` refuses each such number at run time as `no such attempt`.
 
 ## Tests
 
