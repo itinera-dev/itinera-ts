@@ -21,11 +21,11 @@ None of its own.
 
 ## Tests
 
-- `src/step.test.ts`: the frozen outcome of success.
-- `src/step/declared.test.ts`: what `@step` records and every refusal when a class is defined.
-- `src/step/descriptor.test.ts`: the defaults, the retries given, a new step for every attempt, a frozen descriptor, an empty name and every retry budget that is not a whole number from 0.
-- `src/step/attempt.test.ts`: the attempt, as before.
-- `src/step.test-d.ts`: `Step` is abstract, needs `run`, returns only an outcome or a promise of one, a class that only looks like a step is not one, and `@step` marks only a class extending `Step`.
+- `tests/unit/step.test.ts`: the frozen outcome of success.
+- `tests/unit/step/declared.test.ts`: what `@step` records and every refusal when a class is defined.
+- `tests/unit/step/descriptor.test.ts`: the defaults, the retries given, a new step for every attempt, a frozen descriptor, an empty name and every retry budget that is not a whole number from 0.
+- `tests/unit/step/attempt.test.ts`: the attempt, as before.
+- `tests/unit/step.test-d.ts`: `Step` is abstract, needs `run`, returns only an outcome or a promise of one, a class that only looks like a step is not one, and `@step` marks only a class extending `Step`.
 - `examples/step.ts`, and the steps of every example of a workflow.
 
 ## Done when

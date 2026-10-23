@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { describeStep } from "./descriptor.js";
-import { Ship } from "./fixtures.js";
+import { describeStep } from "../../../src/step/descriptor.js";
+import { Ship } from "../../fixtures/step.js";
 
 describe("describeStep", () => {
   it("gives a step no retries, and retries abnormal terminations, unless told otherwise", () => {

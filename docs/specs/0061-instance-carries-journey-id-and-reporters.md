@@ -20,8 +20,8 @@ None of its own. The random UUID is the platform's `crypto.randomUUID()`, which 
 
 ## Tests
 
-- `src/instance.test.ts`: the ID from the ID generator, a reporter function given the ID, the workflow's reporters before the instance's own, new reporters for each instance, reporters and global metadata handed over once, initial data in the order given as a `Map` or entries, properties set to `undefined` left out, the last value of a key given twice, and a copy of the `Map` given.
-- `src/workflow.test.ts`: the workflow object beside its descriptor, and an object made with `new` refused.
+- `tests/unit/instance.test.ts`: the ID from the ID generator, a reporter function given the ID, the workflow's reporters before the instance's own, new reporters for each instance, reporters and global metadata handed over once, initial data in the order given as a `Map` or entries, properties set to `undefined` left out, the last value of a key given twice, and a copy of the `Map` given.
+- `tests/unit/workflow.test.ts`: the workflow object beside its descriptor, and an object made with `new` refused.
 - `examples/instance.ts`.
 
 ## Done when

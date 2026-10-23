@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Attempt, nextAttempt } from "./attempt.js";
+import { Attempt, nextAttempt } from "../../../src/step/attempt.js";
 
 describe("Attempt", () => {
   it("counts the first attempt as 1", () => {

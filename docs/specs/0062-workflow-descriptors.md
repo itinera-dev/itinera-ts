@@ -43,12 +43,12 @@ Until 0062 is listed, everything here is exported only from `itinera/unstable`. 
 
 ## Tests
 
-- `src/workflow/decorators.test.ts`: steps in written order, every refusal when a class is defined, the ID generator recorded as a reference to its method, refused on what is not a method, refused twice, refused with a parameter, and refused without metadata.
-- `src/workflow/descriptor.test.ts`: no name, violations, steps kept whatever happens to the list given, new reporters on every call, a random UUID v4, the ID generator called on the workflow object, and an ID that is not a string.
-- `src/workflow/violation.test.ts`: each repeated name once, in order, case-sensitive names, and the message.
-- `src/workflow.test.ts`: `build()` with the constructor's arguments, one descriptor per class, a class without `@workflow`, and an object made with `new`.
-- `src/declaration.test.ts`: the metadata check, and parameters counted from the metadata or from `length`.
-- `src/workflow.test-d.ts`: `Built`, the arguments of `build()`, `Workflow.build()`, `instance()` on an object made with `new`, initial data or initial global metadata that is not a value, `@workflow` on a class not extending `Workflow`, a reporter class whose constructor takes arguments, `@withStep` with a class not extending `Step` or on a class not extending `Workflow`, and an ID generator returning a number, a promise, taking a parameter, or on a class not extending `Workflow`.
+- `tests/unit/workflow/decorators.test.ts`: steps in written order, every refusal when a class is defined, the ID generator recorded as a reference to its method, refused on what is not a method, refused twice, refused with a parameter, and refused without metadata.
+- `tests/unit/workflow/descriptor.test.ts`: no name, violations, steps kept whatever happens to the list given, new reporters on every call, a random UUID v4, the ID generator called on the workflow object, and an ID that is not a string.
+- `tests/unit/workflow/violation.test.ts`: each repeated name once, in order, case-sensitive names, and the message.
+- `tests/unit/workflow.test.ts`: `build()` with the constructor's arguments, one descriptor per class, a class without `@workflow`, and an object made with `new`.
+- `tests/unit/declaration.test.ts`: the metadata check, and parameters counted from the metadata or from `length`.
+- `tests/unit/workflow.test-d.ts`: `Built`, the arguments of `build()`, `Workflow.build()`, `instance()` on an object made with `new`, initial data or initial global metadata that is not a value, `@workflow` on a class not extending `Workflow`, a reporter class whose constructor takes arguments, `@withStep` with a class not extending `Step` or on a class not extending `Workflow`, and an ID generator returning a number, a promise, taking a parameter, or on a class not extending `Workflow`.
 - `examples/workflow.ts`, `examples/descriptors.ts`, `examples/id-generator.ts` and `examples/violations.ts`.
 
 ## Open points

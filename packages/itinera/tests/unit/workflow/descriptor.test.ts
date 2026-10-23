@@ -1,13 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { Event } from "../event.js";
-import type { Reporter } from "../report.js";
-import { describeStep } from "../step/descriptor.js";
-import { Ship } from "../step/fixtures.js";
-import type { Value } from "../value.js";
-import { Workflow, workflow, type WorkflowName } from "../workflow.js";
-import { assemble, type Parts } from "./descriptor.js";
-import type { IdGenerator } from "./registry.js";
-import { Violations } from "./violation.js";
+import type { Event } from "../../../src/event.js";
+import type { Reporter } from "../../../src/report.js";
+import { describeStep } from "../../../src/step/descriptor.js";
+import { Ship } from "../../fixtures/step.js";
+import type { Value } from "../../../src/value.js";
+import {
+  Workflow,
+  workflow,
+  type WorkflowName,
+} from "../../../src/workflow.js";
+import { assemble, type Parts } from "../../../src/workflow/descriptor.js";
+import type { IdGenerator } from "../../../src/workflow/registry.js";
+import { Violations } from "../../../src/workflow/violation.js";
 
 class Audit implements Reporter {
   readonly events: Event[] = [];

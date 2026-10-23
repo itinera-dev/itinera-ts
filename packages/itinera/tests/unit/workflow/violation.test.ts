@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { StepName } from "../step.js";
-import { ViolationKind, Violations, violationsOf } from "./violation.js";
+import type { StepName } from "../../../src/step.js";
+import {
+  ViolationKind,
+  Violations,
+  violationsOf,
+} from "../../../src/workflow/violation.js";
 
 function steps(...names: string[]): { readonly name: StepName }[] {
   return names.map(named);

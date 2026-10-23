@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { type Outcome, Step } from "../step.js";
-import { Charge, Ship } from "../step/fixtures.js";
-import { Workflow } from "../workflow.js";
-import { idGenerator, withStep, workflow } from "./decorators.js";
-import { declarationOf } from "./registry.js";
-import { Violations } from "./violation.js";
+import { type Outcome, Step } from "../../../src/step.js";
+import { Charge, Ship } from "../../fixtures/step.js";
+import { Workflow } from "../../../src/workflow.js";
+import {
+  idGenerator,
+  withStep,
+  workflow,
+} from "../../../src/workflow/decorators.js";
+import { declarationOf } from "../../../src/workflow/registry.js";
+import { Violations } from "../../../src/workflow/violation.js";
 
 describe("workflow", () => {
   it("lists the steps in the order their decorators are written", () => {

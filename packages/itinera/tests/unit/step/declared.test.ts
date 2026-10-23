@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { type Outcome, Step, step } from "../step.js";
-import { isDeclared } from "./declared.js";
-import { Ship } from "./fixtures.js";
+import { type Outcome, Step, step } from "../../../src/step.js";
+import { isDeclared } from "../../../src/step/declared.js";
+import { Ship } from "../../fixtures/step.js";
 
 class Undeclared extends Step {
   override run(): Outcome {

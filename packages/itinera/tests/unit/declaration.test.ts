@@ -3,7 +3,7 @@ import {
   refuseConstructorParameters,
   refuseMethodParameters,
   requireMetadata,
-} from "./declaration.js";
+} from "../../src/declaration.js";
 
 function marked(): MethodDecorator {
   return () => undefined;

@@ -1,4 +1,4 @@
-import { type Outcome, Step, step } from "../step.js";
+import { type Outcome, Step, step } from "../../src/step.js";
 
 /** A step declared with `@step` that always succeeds. */
 @step()
