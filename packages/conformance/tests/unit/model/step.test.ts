@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { contribution, emit } from "./step.js";
+import { contribution, emit } from "../../../src/model/step.js";
 
 describe("a step's contribution", () => {
   it("contributes the value written", () => {

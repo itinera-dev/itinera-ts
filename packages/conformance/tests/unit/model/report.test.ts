@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./error.js";
-import { eventKind } from "./report.js";
+import { ModelError } from "../../../src/model/error.js";
+import { eventKind } from "../../../src/model/report.js";
 
 describe("event kinds", () => {
   it("reads only the kinds of the catalogue", () => {

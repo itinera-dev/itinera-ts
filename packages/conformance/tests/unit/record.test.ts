@@ -6,8 +6,8 @@ import {
   type WorkflowName,
 } from "itinera/unstable";
 import { describe, expect, it } from "vitest";
-import type { Holding } from "./model.js";
-import { RecordingDispatcherFactory } from "./record.js";
+import type { Holding } from "../../src/model.js";
+import { RecordingDispatcherFactory } from "../../src/record.js";
 
 const started = {
   kind: "journey_started",

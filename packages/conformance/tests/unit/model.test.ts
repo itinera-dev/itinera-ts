@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Model, ModelError, scripted, succeeds } from "./model.js";
+import { Model, ModelError, scripted, succeeds } from "../../src/model.js";
 
 function orders(...steps: string[]): Model {
   const model = new Model();

@@ -5,7 +5,7 @@ import {
   readEnvironment,
   REPORT,
   TAGS,
-} from "./environment.js";
+} from "../../src/environment.js";
 
 describe("the environment", () => {
   it("says what to run and where to report in three variables", () => {

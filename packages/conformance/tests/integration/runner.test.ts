@@ -4,9 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
 
-const root = join(__dirname, "..", "..", "..");
+const root = join(__dirname, "..", "..", "..", "..");
 const tsc = join(root, "node_modules", "typescript", "bin", "tsc");
-const runner = join(__dirname, "..", "dist", "main.js");
+const runner = join(__dirname, "..", "..", "dist", "main.js");
 const reports = mkdtempSync(join(tmpdir(), "itinera-conformance-"));
 
 interface Report {
@@ -16,13 +16,19 @@ interface Report {
   }[];
 }
 
-/** Runs the runner on its own cases in this directory of `tests/cases`. */
+/** Runs the runner on its own cases in this directory of `tests/fixtures/cases`. */
 function run(cases: string, tags: string) {
   const report = join(reports, `${cases}.json`);
   const ran = spawnSync(process.execPath, [runner], {
     env: {
       ...process.env,
-      ITINERA_CONFORMANCE_CASES: join(__dirname, "cases", cases),
+      ITINERA_CONFORMANCE_CASES: join(
+        __dirname,
+        "..",
+        "fixtures",
+        "cases",
+        cases,
+      ),
       ITINERA_CONFORMANCE_TAGS: tags,
       ITINERA_CONFORMANCE_REPORT: report,
     },
@@ -59,7 +65,7 @@ describe("the conformance runner", () => {
     execFileSync(process.execPath, [
       tsc,
       "-p",
-      join(__dirname, "..", "tsconfig.build.json"),
+      join(__dirname, "..", "..", "tsconfig.build.json"),
     ]);
   }, 120_000);
 

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./error.js";
-import { entries, json, valueType, valueTypes } from "./value.js";
+import { ModelError } from "../../../src/model/error.js";
+import {
+  entries,
+  json,
+  valueType,
+  valueTypes,
+} from "../../../src/model/value.js";
 
 describe("values and types", () => {
   it.each(valueTypes)("reads %s, a type of the neutral vocabulary", (name) => {

@@ -1,7 +1,7 @@
 import { DataTable } from "@cucumber/cucumber";
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./error.js";
-import { keyAndValue, rows } from "./table.js";
+import { ModelError } from "../../../src/model/error.js";
+import { keyAndValue, rows } from "../../../src/model/table.js";
 
 function rowsOf(...lines: string[][]) {
   return rows(new DataTable(lines));
