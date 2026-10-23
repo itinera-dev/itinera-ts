@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { adaptersForUnknownSteps, stepsAdaptedTwice } from "./adapters.js";
-import { adapter, step } from "../fixtures.js";
+import {
+  adaptersForUnknownSteps,
+  stepsAdaptedTwice,
+} from "../../../../src/workflow/violation/adapters.js";
+import { adapter, step } from "../../../fixtures/workflow.js";
 
 const steps = [step("charge", { rescue: [] }), step("ship")];
 

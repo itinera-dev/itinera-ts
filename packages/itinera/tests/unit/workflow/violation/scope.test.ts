@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { provider } from "../fixtures.js";
-import { attemptRequestsInJourneyScope } from "./scope.js";
+import { provider } from "../../../fixtures/workflow.js";
+import { attemptRequestsInJourneyScope } from "../../../../src/workflow/violation/scope.js";
 
 describe("attemptRequestsInJourneyScope", () => {
   it.each([

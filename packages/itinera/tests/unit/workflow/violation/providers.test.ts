@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { provider, step } from "../fixtures.js";
-import { providerViolations } from "./providers.js";
+import { provider, step } from "../../../fixtures/workflow.js";
+import { providerViolations } from "../../../../src/workflow/violation/providers.js";
 
 const steps = [step("charge", { rescue: [] }), step("ship")];
 

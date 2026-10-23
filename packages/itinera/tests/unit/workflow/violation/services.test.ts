@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { PAYMENTS, provider, STOCK, step } from "../fixtures.js";
-import { serviceViolations } from "./services.js";
+import { PAYMENTS, provider, STOCK, step } from "../../../fixtures/workflow.js";
+import { serviceViolations } from "../../../../src/workflow/violation/services.js";
 
 describe("serviceViolations", () => {
   it("finds nothing wrong with every service served with its type", () => {

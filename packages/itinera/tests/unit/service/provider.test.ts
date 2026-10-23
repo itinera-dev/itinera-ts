@@ -7,8 +7,15 @@ import type { StepName } from "../../../src/step.js";
 import { Attempt } from "../../../src/step/attempt.js";
 import { withStep, Workflow, workflow } from "../../../src/workflow.js";
 import { declarationOf } from "../../../src/workflow/registry.js";
-import { isProvided, type Provided, provider } from "../../../src/service/provider.js";
-import { providerReporter, type ProviderReporter } from "../../../src/service/reporter.js";
+import {
+  isProvided,
+  type Provided,
+  provider,
+} from "../../../src/service/provider.js";
+import {
+  providerReporter,
+  type ProviderReporter,
+} from "../../../src/service/reporter.js";
 import { serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {

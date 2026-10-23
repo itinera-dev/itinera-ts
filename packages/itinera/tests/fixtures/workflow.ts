@@ -1,13 +1,13 @@
-import type { Request } from "../declaration/request.js";
-import type { PolicyDescriptor } from "../policy/descriptor.js";
-import type { ProviderName, ServiceType } from "../service.js";
-import type { DeclaredProvider } from "../service/provider.js";
-import { serviceType } from "../service/request.js";
-import type { StepDescriptor } from "../step.js";
-import { describeStep } from "../step/descriptor.js";
-import { Refund, Ship } from "../step/fixtures.js";
-import type { DeclaredAdapter } from "./adapter.js";
-import type { AdapterName } from "./names.js";
+import type { Request } from "../../src/declaration/request.js";
+import type { PolicyDescriptor } from "../../src/policy/descriptor.js";
+import type { ProviderName, ServiceType } from "../../src/service.js";
+import type { DeclaredProvider } from "../../src/service/provider.js";
+import { serviceType } from "../../src/service/request.js";
+import type { StepDescriptor } from "../../src/step.js";
+import { describeStep } from "../../src/step/descriptor.js";
+import { Refund, Ship } from "./step.js";
+import type { DeclaredAdapter } from "../../src/workflow/adapter.js";
+import type { AdapterName } from "../../src/workflow/names.js";
 
 /** A type of service for payments. */
 export const PAYMENTS = serviceType<string>("Payments");
