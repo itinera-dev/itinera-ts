@@ -28,9 +28,9 @@ An npm workspace, under `packages/`:
 
 `itinera` is one CommonJS build, with a thin ESM layer that only re-exports it, so `import` and `require` both work and an application never loads two copies. Each subpath is a module `src/<name>.ts`, built to `dist/<name>.js`, and its layer `src/<name>.mts`, built to `dist/<name>.mjs`; the `exports` map of `packages/itinera/package.json` gives each its condition.
 
-The subpath `itinera/unstable` holds API that the specification has not accepted yet, and, before a proposal is listed in `conformance.json`, that proposal's API. Its items are defined in the modules of their concepts, such as `src/journey.ts`, which become subpaths of their own once their proposals are listed.
+The subpath `itinera/unstable` holds API that the specification has not accepted yet, and, before a proposal is listed in `conformance.json`, that proposal's API. Its items are defined in the modules of their concepts, such as `src/testing.ts`, and move to the subpaths of those modules, such as `itinera/testing`, once their proposals are listed.
 
-Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/unstable`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/integration/examples.test.ts` runs every one of them.
+Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/step`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/integration/examples.test.ts` runs every one of them.
 
 ## Building and testing
 

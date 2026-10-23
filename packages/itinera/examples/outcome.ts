@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { input, type Outcome, Step, step } from "itinera/unstable";
+import { input, type Outcome, Step, step } from "itinera/step";
 
 @step()
 class Charge extends Step {

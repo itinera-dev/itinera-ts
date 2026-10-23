@@ -1,4 +1,5 @@
-import { None, type Provided, Some } from "itinera/unstable";
+import { None, Some } from "itinera/option";
+import type { Provided } from "itinera/service";
 import type { PlainValue } from "itinera/value";
 import { describe, expect, it } from "vitest";
 import { ModelError } from "../../src/model/error.js";

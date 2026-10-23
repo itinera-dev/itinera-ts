@@ -2,14 +2,14 @@
  * The rescue step of a scenario's step, put together with its builder from
  * a class of rescue step mocks the witness makes.
  */
+import { contributor } from "itinera/journey";
 import {
-  contributor,
   error,
   failureReason,
   fromRescuedStep,
   type RescueStepBuilder,
   stepReporter,
-} from "itinera/unstable";
+} from "itinera/step";
 import type { RescueRequest } from "../model/step.js";
 import type { Model } from "../model.js";
 import { requestTypeOf } from "../tokens.js";

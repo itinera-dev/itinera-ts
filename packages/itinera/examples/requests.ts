@@ -1,23 +1,23 @@
 import assert from "node:assert/strict";
+import { None, type Option, Some } from "itinera/option";
 import {
-  type Answer,
   input,
-  type KeyIn,
-  None,
-  type Option,
   type Outcome,
-  type ParameterOf,
-  type Place,
-  type ReadFromMetadata,
-  type RequestDecorator,
-  Some,
   Step,
   step,
   type StepClass,
   stepReporter,
   type StepReporter,
-  type ValueRequestDecorator,
-} from "itinera/unstable";
+} from "itinera/step";
+import type {
+  Answer,
+  KeyIn,
+  ParameterOf,
+  Place,
+  ReadFromMetadata,
+  RequestDecorator,
+  ValueRequestDecorator,
+} from "itinera/workflow";
 import { integer, optional, string } from "itinera/value";
 
 @step()

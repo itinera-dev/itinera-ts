@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
+import { None, type Option, Some } from "itinera/option";
 import {
   failureReason,
   fromRescuedStep,
   input,
-  None,
-  type Option,
   type Outcome,
   type Reason,
   RescueStep,
@@ -12,13 +11,10 @@ import {
   type RescueOutcome,
   type RescueStepBuilder,
   type RescueStepClass,
-  Some,
   Step,
   step,
-  withStep,
-  Workflow,
-  workflow,
-} from "itinera/unstable";
+} from "itinera/step";
+import { withStep, Workflow, workflow } from "itinera/workflow";
 import { integer, optional, string } from "itinera/value";
 
 @rescueStep()

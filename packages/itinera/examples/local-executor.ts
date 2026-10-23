@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
-import {
-  LocalExecutor,
-  type Outcome,
-  RecordingReporter,
-  Step,
-  Workflow,
-} from "itinera/unstable";
+import { LocalExecutor } from "itinera/executor";
+import { type Outcome, Step } from "itinera/step";
+import { RecordingReporter } from "itinera/unstable";
+import { Workflow } from "itinera/workflow";
 
 class Ship extends Step {
   override run(): Outcome {

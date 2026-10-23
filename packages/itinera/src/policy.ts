@@ -3,6 +3,8 @@
  * its hooks, what they request, the lifecycles a step hook returns, and the
  * roles a policy requests of its workflow.
  *
+ * {@includeCode ../examples/policy.ts}
+ *
  * @module
  */
 import { closedSet, type ValueOf } from "./closed-set.js";

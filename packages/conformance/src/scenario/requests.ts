@@ -2,7 +2,8 @@
  * The requests of a scenario's step or rescue step, as its builder takes
  * them.
  */
-import { input, service } from "itinera/unstable";
+import { service } from "itinera/service";
+import { input } from "itinera/step";
 import type { ServiceRequest } from "../model/provider.js";
 import type { Input } from "../model/step.js";
 import { serviceTypeOf } from "../services.js";

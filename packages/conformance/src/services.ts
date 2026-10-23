@@ -2,7 +2,7 @@
  * The service types the cases name, `labeller` and `meter`, and the
  * runner's own implementations of them.
  */
-import { serviceType, type ServiceType } from "itinera/unstable";
+import { serviceType, type ServiceType } from "itinera/service";
 import type { Implementation, ServiceTypeName } from "./model/provider.js";
 
 /** A service whose one operation returns its instance's label. */

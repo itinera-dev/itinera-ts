@@ -1,6 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
 import { Then } from "@cucumber/cucumber";
-import { Attempt, None, type Option, Some } from "itinera/unstable";
+import { None, type Option, Some } from "itinera/option";
+import { Attempt } from "itinera/step";
 import { equalTo } from "../../../equal.js";
 import { json } from "../../../model.js";
 import type { HookRequest } from "../../../model/policy.js";

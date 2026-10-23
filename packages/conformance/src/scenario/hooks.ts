@@ -2,7 +2,9 @@
  * What a scenario's hook does before it ends, as the runner plays it
  * through the handles and the answers itinera gives the hook.
  */
-import type { Contributor, HookReporter, StepReporter } from "itinera/unstable";
+import type { Contributor } from "itinera/journey";
+import type { HookReporter } from "itinera/policy";
+import type { StepReporter } from "itinera/step";
 import { given } from "../given.js";
 import { ModelError } from "../model/error.js";
 import type { HookAction, HookRequest, HookScript } from "../model/policy.js";

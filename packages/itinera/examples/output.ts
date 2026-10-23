@@ -1,12 +1,9 @@
 import assert from "node:assert/strict";
-import {
-  LocalExecutor,
-  None,
-  type Option,
-  OutputError,
-  Step,
-  Workflow,
-} from "itinera/unstable";
+import { LocalExecutor } from "itinera/executor";
+import { OutputError } from "itinera/journey";
+import { None, type Option } from "itinera/option";
+import { Step } from "itinera/step";
+import { Workflow } from "itinera/workflow";
 import { integer, optional, string } from "itinera/value";
 
 class Charge extends Step {

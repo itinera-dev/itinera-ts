@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { Attempt } from "itinera/unstable";
+import { Attempt } from "itinera/step";
 
 function label(attempt: Attempt): string {
   return attempt.isFirst()

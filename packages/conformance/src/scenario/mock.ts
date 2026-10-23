@@ -2,9 +2,9 @@
  * How a scenario's step, or rescue step, ends each attempt, as a step mock
  * or a rescue step mock plays it.
  */
+import type { Reason } from "itinera/step";
 import {
   Ending,
-  type Reason,
   type RescueEnding,
   type RescueStepMockScript,
   type StepMockScript,

@@ -1,11 +1,7 @@
-import {
-  Attempt,
-  type Event,
-  type JourneyId,
-  type StepName,
-  type Timestamp,
-  type WorkflowName,
-} from "itinera/unstable";
+import type { Event, Timestamp } from "itinera/event";
+import type { JourneyId } from "itinera/journey";
+import { Attempt, type StepName } from "itinera/step";
+import type { WorkflowName } from "itinera/workflow";
 import { type PlainValue } from "itinera/value";
 
 const journey = {

@@ -6,7 +6,7 @@ Status: complete, and 3 is listed in `conformance.json`. Stage 4 has added the b
 
 ## API
 
-Until 0003 is listed, everything here is exported only from `itinera/unstable`. It is defined in `src/step/rescue.ts` and re-exported by `src/step.ts`, which becomes the subpath `itinera/step`.
+Since stage 10, its API is exported from the subpaths of its concepts, chiefly `itinera/step`, and its test support from `itinera/unstable` until 0108 is listed. It is defined in `src/step/rescue.ts` and re-exported by `src/step.ts`.
 
 - **`RescueStep`** is abstract, like `Step`, with its own ECMAScript private brand, `#rescueStep`, so a step is not a rescue step nor a rescue step a step, and `RescueStepClass` is a class extending it. Its `run(...requests)` is abstract and returns a `RescueOutcome` or a promise of one. `RescueOutcome` is a success, made with `this.succeed()`, or a failure, made with `this.fail(reason)`, which takes a reason as a step's does (see [0008](0008-steps.md)), and never a skip, since a rescue step cannot skip, so `this.skip()` does not exist on it and a `Skip` is not a `RescueOutcome`.
 - **`@rescueStep()`** takes a class extending `RescueStep` itself and records, in a `WeakMap` keyed by the class, what its constructor and its `run` request, as `@step` does. When the class is defined, it throws if the class extends another rescue step, if it is declared twice, or if a parameter has no request. `requestsOfRescue(class)` reads what it recorded.

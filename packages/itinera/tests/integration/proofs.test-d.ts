@@ -1,31 +1,33 @@
 import { describe, it } from "vitest";
+import { type DataBag, dataBag } from "itinera/journey";
 import {
-  type DataBag,
-  dataBag,
-  inputAdapter,
-  key,
   onStepFailure,
   onStepSuccess,
   onWorkflowSuccess,
   type OnSuccess,
+  role,
+  StepPolicy,
+  stepPolicy,
+  WorkflowPolicy,
+  workflowPolicy,
+} from "itinera/policy";
+import { provider, serviceType } from "itinera/service";
+import {
   type Outcome,
-  provider,
   type RescueOutcome,
   RescueStep,
   rescueStep,
-  role,
-  serviceType,
   Step,
   step,
-  StepPolicy,
-  stepPolicy,
+} from "itinera/step";
+import {
+  inputAdapter,
+  key,
   type Supplied,
   withStep,
   Workflow,
   workflow,
-  WorkflowPolicy,
-  workflowPolicy,
-} from "itinera/unstable";
+} from "itinera/workflow";
 
 interface Gateway {
   take(amount: number): string;

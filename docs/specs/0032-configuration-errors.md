@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0032](https://github.com/itinera-dev/spec/blob/main/proposals/0032-configuration-errors.md), implemented in [#11](https://github.com/itinera-dev/itinera-ts/issues/11). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, [0042](0042-configuration-errors-before-the-journey.md) the configuration errors caught before a journey, [0062](0062-workflow-descriptors.md) the violations, and [0083](0083-what-failures-carry.md) what an abort carries.
 
-Status: complete, and 32 is listed in `conformance.json`. Stage 3 added the aborted result and the journey-abort error, stage 4 every violation, and stage 5 the aborts a step's build and run can raise. Stage 6 listed the proposal. Its API stays in `itinera/unstable` while it names API of proposals not yet listed, as the agents' manual says.
+Status: complete, and 32 is listed in `conformance.json`. Stage 3 added the aborted result and the journey-abort error, stage 4 every violation, and stage 5 the aborts a step's build and run can raise. Stage 6 listed the proposal. Since stage 10, its API is exported from the subpaths of its concepts.
 
 ## When each configuration error is caught
 

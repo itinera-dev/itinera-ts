@@ -6,7 +6,7 @@ Status: complete, and 8 is listed in `conformance.json`. Stage 3 added the base 
 
 ## API
 
-0008 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), as the agents' manual says. It is defined in `src/step.ts`, which becomes the subpath `itinera/step` then, with its submodules in `src/step/`.
+Since stage 10, its API is exported from the subpaths of its concepts, chiefly `itinera/step`. It is defined in `src/step.ts`, with its submodules in `src/step/`.
 
 - **`Step`** is abstract. Its `run(...requests)` is abstract and public, as the plan's note 6 requires for parameter decorators to type its parameters, returning an `Outcome` or a promise of one, so a step without `run`, or whose `run` returns anything else, does not compile. An application compiling with `noImplicitOverride` writes `override run()`.
 - **Only a subclass is a step.** `Step` has the ECMAScript private field `#step`, so a class that only has the same members does not have the type of a step, `StepClass`, which `@step` and `@withStep` take, and whose static `builder(name)` starts a step's builder for the workflow builder (see [0062](0062-workflow-descriptors.md)).

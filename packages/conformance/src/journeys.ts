@@ -2,13 +2,10 @@
  * What the scenario's When sentences do: build the workflow, then run its
  * journeys, keeping what each gave for the Then sentences.
  */
-import {
-  type Built,
-  type Event,
-  type JourneyResult,
-  Refusal,
-  Violations,
-} from "itinera/unstable";
+import type { Event } from "itinera/event";
+import { Refusal } from "itinera/executor";
+import type { JourneyResult } from "itinera/journey";
+import { type Built, Violations } from "itinera/workflow";
 import { ModelError } from "./model/error.js";
 import type { Model } from "./model.js";
 import {

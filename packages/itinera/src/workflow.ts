@@ -3,6 +3,8 @@
  * declared, what a workflow and its parts are called, and how a workflow is
  * described to the executor.
  *
+ * {@includeCode ../examples/workflow.ts}
+ *
  * @module
  */
 export {

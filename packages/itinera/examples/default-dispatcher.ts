@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
-import {
-  DefaultDispatcherFactory,
-  type Event,
-  type Reporter,
-} from "itinera/unstable";
+import type { Event } from "itinera/event";
+import { DefaultDispatcherFactory, type Reporter } from "itinera/report";
 import { type PlainValue } from "itinera/value";
 
 class Keeping implements Reporter {

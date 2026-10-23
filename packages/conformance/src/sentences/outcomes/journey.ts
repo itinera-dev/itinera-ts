@@ -1,5 +1,5 @@
 import { type DataTable, Then } from "@cucumber/cucumber";
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 import { rows, type Row } from "../../model.js";
 import { expectOfStream, holds, Unmet } from "../../unmet.js";
 import type { World } from "../../world.js";

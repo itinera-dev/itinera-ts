@@ -1,4 +1,4 @@
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 import { ModelError } from "../model/error.js";
 
 /** The statuses a step ends a journey in, as the cases name them. */
