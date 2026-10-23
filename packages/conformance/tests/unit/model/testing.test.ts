@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./error.js";
-import { TestSupport } from "./testing.js";
+import { ModelError } from "../../../src/model/error.js";
+import { TestSupport } from "../../../src/model/testing.js";
 
 describe("TestSupport", () => {
   it.each([

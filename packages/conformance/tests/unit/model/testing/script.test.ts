@@ -1,8 +1,11 @@
 import { DataTable } from "@cucumber/cucumber";
 import { describe, expect, it } from "vitest";
-import { ModelError } from "../error.js";
-import { rows } from "../table.js";
-import { type ScriptRow, scriptRows } from "./script.js";
+import { ModelError } from "../../../../src/model/error.js";
+import { rows } from "../../../../src/model/table.js";
+import {
+  type ScriptRow,
+  scriptRows,
+} from "../../../../src/model/testing/script.js";
 
 /** The rows of a script whose table has these columns, then these lines. */
 function scriptOf(

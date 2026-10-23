@@ -2,13 +2,13 @@ import { LocalExecutor } from "itinera/executor";
 import type { JourneyResult } from "itinera/journey";
 import { MistakeKind, TestMistake } from "itinera/testing";
 import { describe, expect, it } from "vitest";
-import { Fakes } from "./fakes.js";
-import { admitted } from "./journeys.js";
-import { Model } from "./model.js";
-import type { Fake } from "./model/testing.js";
-import { Recorders } from "./recorders.js";
-import { instanceOf } from "./scenario.js";
-import { Witness } from "./witness.js";
+import { Fakes } from "../../src/fakes.js";
+import { admitted } from "../../src/journeys.js";
+import { Model } from "../../src/model.js";
+import type { Fake } from "../../src/model/testing.js";
+import { Recorders } from "../../src/recorders.js";
+import { instanceOf } from "../../src/scenario.js";
+import { Witness } from "../../src/witness.js";
 
 /**
  * The workflow `orders`, whose step `charge`, attempted twice, requests the

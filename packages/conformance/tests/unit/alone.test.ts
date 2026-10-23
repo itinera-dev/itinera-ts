@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { Alone } from "./alone.js";
-import { Model, ModelError } from "./model.js";
-import { TestSupport } from "./model/testing.js";
-import { Witness } from "./witness.js";
+import { Alone } from "../../src/alone.js";
+import { Model, ModelError } from "../../src/model.js";
+import { TestSupport } from "../../src/model/testing.js";
+import { Witness } from "../../src/witness.js";
 
 /** The step policy `audit`, defining only `on step success`, with its witness. */
 function audit() {
