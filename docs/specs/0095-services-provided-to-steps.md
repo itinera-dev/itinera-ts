@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0095](https://github.com/itinera-dev/spec/blob/main/proposals/0095-services-provided-to-steps.md), implemented in [#31](https://github.com/itinera-dev/itinera-ts/issues/31). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 8 the service providers, [0008](0008-steps.md) the steps that request services, and [0062](0062-workflow-descriptors.md) the table of requests.
 
-Status: complete, and 95 is listed in `conformance.json`. Stage 4 has added `serviceType` and `@service`, a step's request for a service, then `@provider`, what a provider returns and `@providerReporter`. Its sixth layer has added providers to the builder, its seventh has added the violations about services and the listing, and stage 8 runs the providers while a step is built, lends their instances to its `run`, gives the runner its service sentences and listed the proposal. The scenarios that also name the rescue steps of [0003](0003-rescue-steps.md) run once 0003 is listed, in stage 9.
+Status: complete, and 95 is listed in `conformance.json`. Stage 4 has added `serviceType` and `@service`, a step's request for a service, then `@provider`, what a provider returns and `@providerReporter`. Its sixth layer has added providers to the builder, its seventh has added the violations about services and the listing, and stage 8 runs the providers while a step is built, lends their instances to its `run`, gives the runner its service sentences and listed the proposal. Stage 9 listed [0003](0003-rescue-steps.md), so the scenarios that also name its rescue steps run.
 
 ## API
 
