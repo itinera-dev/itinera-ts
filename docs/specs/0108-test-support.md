@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0108](https://github.com/itinera-dev/spec/blob/main/proposals/0108-test-support.md), implemented in [#36](https://github.com/itinera-dev/itinera-ts/issues/36). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 13 what test support holds and section 14 how the conformance runner uses it.
 
-Status: in progress. Stage 2 added the recording reporter and its path. The step mock and its `Ending` come in stage 3, the policy mock and the two reporter mocks with the first scenarios that need them, the rest of chapter 8 in stage 10, which lists the proposal and claims `testing`.
+Status: in progress. Stage 2 added the recording reporter and its path, and started the conformance runner, which uses it. The step mock and its `Ending` come in stage 3, the policy mock and the two reporter mocks with the first scenarios that need them, the rest of chapter 8 in stage 10, which lists the proposal and claims `testing`.
 
 ## API
 
@@ -20,11 +20,24 @@ Until 0108 is listed, test support is exported only from `itinera/unstable`. It 
 
 None of its own.
 
+## The conformance runner
+
+Stage 2 started the runner in `packages/conformance`, on cucumber-js 13.3.0, with `@cucumber/tag-expressions` 11.0.1 to refuse a tag expression that does not parse before anything runs. It is a package of the workspace that is never published, so neither is a dependency of `itinera`.
+
+- **Compiled, not stripped.** `npm run conformance` builds `itinera` and the runner with `tsc`, then runs `packages/conformance/dist/main.js`, which loads `dist/support.js` into cucumber. The fixtures of later stages use legacy decorators with `emitDecoratorMetadata`, which neither Node's type stripping nor esbuild emits, so the runner is compiled as `itinera` is. It imports `itinera/unstable` through the workspace's link to the built package, the path an application takes.
+- **The environment** is read by `readEnvironment`, in `src/environment.ts`: the three variables are required and none may be empty, and the tag expression must parse.
+- **The scenario model**, in `src/model.ts` and its submodules, holds what the Given sentences declare as plain data: the workflow and its steps' scripts, the initial data and global metadata, how scripted reporters fail, and what the executor is given to dispatch events. A sentence that does not fit the model, such as a step scripted before the workflow is declared, throws a `ModelError`, an error in the case.
+- **The sentences** are those of STEPS.md, registered in `src/sentences/`, one file per section of the catalogue. Stage 2 defines the sentences that only declare: building a workflow, data, journey IDs, the Given sentences of events and reporters and of global metadata, and a step being asynchronous. The sentences of input adapters, policies, hooks and roles, services and test support, and every When and Then sentence, come with the stages that run them. Until then their scenarios are undefined, which fails them, as a strict run does.
+- **The recording dispatcher factory**, `RecordingDispatcherFactory` in `src/record.ts`, makes the dispatchers the executor is given: each delivers through a `DefaultDispatcher` to the reporter it holds first, then to the reporters it accepts, or fails as the scenario scripts it: when it is made, when a reporter is added, or when it dispatches an event of one kind. The reporter it holds is the one it is given; stage 3, which runs the first journey, gives it a `RecordingReporter` that the scenario's world keeps.
+- **The report** is cucumber-js's JSON formatter, writing to `ITINERA_CONFORMANCE_REPORT`, and only the selected scenarios are in it. The summary formatter writes to standard output.
+
 ## Tests
 
 - `tests/unit/testing/recording-reporter.test.ts`: events kept in order, the latest value of each entry of global metadata in the order first set, the path made from the events, and copies on every read.
 - `tests/unit/testing/recording-reporter/path.test.ts`: the line of every event of the flow, each as chapter 8, 8.3 writes it, and no line for events outside the flow.
 - `examples/recording-reporter.ts`: a recording reporter added to a dispatcher, keeping the latest value of each entry.
+- `packages/conformance/tests/unit`, mirroring `src`: the environment, the model and what each sentence may declare only once, tables, values and types, attempts, contributions, events a step emits, event kinds and the recording dispatcher factory.
+- `packages/conformance/tests/integration/runner.test.ts`: the built runner run on its own cases in `tests/fixtures/cases`, passing a scenario of sentences it defines and reporting it as Cucumber JSON, running only what the tag expression selects, failing on an undefined sentence and on a case in error, and refusing to run without its environment.
 
 ## Open points
 
