@@ -1,6 +1,6 @@
 import { describe, it } from "vitest";
-import { Ending } from "./ending.js";
-import { rescueStepMock } from "./rescue-step-mock.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
 
 describe("rescueStepMock", () => {
   it("takes no ending that skips", () => {

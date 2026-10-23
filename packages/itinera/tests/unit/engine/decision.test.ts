@@ -4,7 +4,10 @@ import { Attempt, type StepDescriptor } from "../../../src/step.js";
 import { nextAttempt } from "../../../src/step/attempt.js";
 import { describeStep, rescueOf } from "../../../src/step/descriptor.js";
 import { Charge, Refund } from "../../fixtures/step.js";
-import { type AfterFailedAttempt, afterFailedAttempt } from "../../../src/engine/decision.js";
+import {
+  type AfterFailedAttempt,
+  afterFailedAttempt,
+} from "../../../src/engine/decision.js";
 
 function step(
   retryBudget: number,

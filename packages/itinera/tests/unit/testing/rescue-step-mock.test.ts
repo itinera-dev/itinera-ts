@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { RescueStep } from "../step/rescue.js";
-import { Ending } from "./ending.js";
-import { RescueStepMock, rescueStepMock } from "./rescue-step-mock.js";
+import { RescueStep } from "../../../src/step/rescue.js";
+import { Ending } from "../../../src/testing/ending.js";
+import {
+  RescueStepMock,
+  rescueStepMock,
+} from "../../../src/testing/rescue-step-mock.js";
 
 const crashed = Ending.abnormalTermination("refresh down");
 

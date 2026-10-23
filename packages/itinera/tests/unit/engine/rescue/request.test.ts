@@ -1,16 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { contributor, type Contributor } from "../../journey.js";
-import { None } from "../../option.js";
-import { error, failureReason, input, type Outcome, Step } from "../../step.js";
-import { fromRescuedStep } from "../../step/rescue.js";
-import { Ending } from "../../testing/ending.js";
+import { contributor, type Contributor } from "../../../../src/journey.js";
+import { None } from "../../../../src/option.js";
+import {
+  error,
+  failureReason,
+  input,
+  type Outcome,
+  Step,
+} from "../../../../src/step.js";
+import { fromRescuedStep } from "../../../../src/step/rescue.js";
+import { Ending } from "../../../../src/testing/ending.js";
 import {
   type RescueStepMock,
   rescueStepMock,
-} from "../../testing/rescue-step-mock.js";
-import { stepMock } from "../../testing/step-mock.js";
-import { integer, optional, string } from "../../value/token.js";
-import { kindOf, orders, recorded, run } from "../fixtures.js";
+} from "../../../../src/testing/rescue-step-mock.js";
+import { stepMock } from "../../../../src/testing/step-mock.js";
+import { integer, optional, string } from "../../../../src/value/token.js";
+import { kindOf, orders, recorded, run } from "../../../fixtures/engine.js";
 
 /** A step that contributes `account` = "A-1", then fails as `expired`. */
 class Contributing extends Step {

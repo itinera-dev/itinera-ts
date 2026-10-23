@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { contributor, type Contributor } from "../journey.js";
-import { RescueStep, type RescueOutcome } from "../step/rescue.js";
-import { skipped } from "../step/outcome.js";
-import { Ending, type RescueEnding } from "../testing/ending.js";
-import { rescueStepMock } from "../testing/rescue-step-mock.js";
-import { stepMock } from "../testing/step-mock.js";
-import type { StepPolicyMock } from "../testing/step-policy-mock.js";
-import { string } from "../value/token.js";
-import { input } from "../step.js";
+import { contributor, type Contributor } from "../../../src/journey.js";
+import { RescueStep, type RescueOutcome } from "../../../src/step/rescue.js";
+import { skipped } from "../../../src/step/outcome.js";
+import { Ending, type RescueEnding } from "../../../src/testing/ending.js";
+import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
+import type { StepPolicyMock } from "../../../src/testing/step-policy-mock.js";
+import { string } from "../../../src/value/token.js";
+import { input } from "../../../src/step.js";
 import {
   alarm,
   audit,
@@ -18,7 +18,7 @@ import {
   orders,
   recorded,
   run,
-} from "./fixtures.js";
+} from "../../fixtures/engine.js";
 
 const expired = Ending.failure("expired");
 

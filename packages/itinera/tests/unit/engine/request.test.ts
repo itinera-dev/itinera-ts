@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { Checked, FailureRequest } from "../../../src/declaration/request.js";
+import type {
+  Checked,
+  FailureRequest,
+} from "../../../src/declaration/request.js";
 import type { AdapterName } from "../../../src/workflow.js";
 import { None, type Option, Some } from "../../../src/option.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";

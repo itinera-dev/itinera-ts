@@ -5,7 +5,14 @@ import { HookEnding } from "../../../../src/testing/hook-ending.js";
 import { rescueStepMock } from "../../../../src/testing/rescue-step-mock.js";
 import { stepMock } from "../../../../src/testing/step-mock.js";
 import type { StepPolicyMock } from "../../../../src/testing/step-policy-mock.js";
-import { alarm, callsOf, orders, recorded, run, kindOf } from "../../../fixtures/engine.js";
+import {
+  alarm,
+  callsOf,
+  orders,
+  recorded,
+  run,
+  kindOf,
+} from "../../../fixtures/engine.js";
 
 const declined = Ending.failure("declined");
 const crashed = Ending.abnormalTermination("timeout");
