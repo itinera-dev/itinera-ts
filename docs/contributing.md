@@ -40,7 +40,7 @@ TypeScript is pinned at 6.0, because typescript-eslint, whose type-aware rules m
 
 Vitest runs the tests through its swc plugin, `unplugin-swc`, since esbuild records no decorator metadata. It reads the compiler options from `tsconfig.json`, and runs the type tests, `*.test-d.ts`, with `tsc`.
 
-Each package keeps its tests in `tests`, beside `src`: unit tests in `tests/unit`, mirroring `src`, integration tests in `tests/integration`, named after the flows they check and importing only the package's subpaths, with the tests of the package as a whole, such as its exports and examples, and the fixtures tests share in `tests/fixtures`. The build compiles `src` alone, so nothing under `tests` reaches the package, and lint keeps `src` from importing it.
+Each package keeps its tests in `tests`, beside `src`: unit tests in `tests/unit`, mirroring `src`; integration tests in `tests/integration`, named after the flows they check and importing only the package's subpaths, together with the tests of the package as a whole, such as its exports and examples; and the fixtures tests share in `tests/fixtures`. The build compiles `src` alone, so nothing under `tests` reaches the package, and lint keeps `src` from importing it.
 
 Every one of these is a required check in CI:
 
