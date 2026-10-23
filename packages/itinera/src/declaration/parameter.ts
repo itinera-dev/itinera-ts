@@ -90,9 +90,11 @@ export interface RequestDecorator<A, P extends Place> {
   <T extends P["target"], K extends KeyIn<P, T>, I extends number>(
     target: T,
     key: K,
-    index: [A] extends [ParameterOf<T, K, I>]
-      ? I
-      : "the parameter's type does not accept what the request gives",
+    index: Strict<
+      [A] extends [ParameterOf<T, K, I>]
+        ? I
+        : "the parameter's type does not accept what the request gives"
+    >,
   ): void;
 }
 
@@ -117,13 +119,15 @@ export interface ValueRequestDecorator<
   <X extends P["target"], K extends KeyIn<P, X>, I extends number>(
     target: X,
     key: K,
-    index: T extends RequestType
-      ? [Answer<T>] extends [ParameterOf<X, K, I>]
-        ? I
-        : "the parameter's type does not accept what the request gives"
-      : ReadFromMetadata<ParameterOf<X, K, I>> extends true
-        ? I
-        : "write the request's type: the metadata cannot say this parameter's",
+    index: Strict<
+      T extends RequestType
+        ? [Answer<T>] extends [ParameterOf<X, K, I>]
+          ? I
+          : "the parameter's type does not accept what the request gives"
+        : ReadFromMetadata<ParameterOf<X, K, I>> extends true
+          ? I
+          : "write the request's type: the metadata cannot say this parameter's"
+    >,
   ): void;
 }
 
@@ -135,3 +139,14 @@ export interface ValueRequestDecorator<
  */
 export type KeyIn<P extends Place, T> =
   P extends Place<infer X, infer K> ? (T extends X ? K : never) : never;
+
+/**
+ * `I`, when the compiler option `strictNullChecks` is on. Without it, `null`
+ * belongs to every type, so a request decorator could not refuse a parameter
+ * whose type does not accept what it gives, and none compiles.
+ *
+ * {@includeCode ../../examples/requests.ts}
+ */
+export type Strict<I> = null extends string
+  ? "itinera needs the compiler option strictNullChecks"
+  : I;

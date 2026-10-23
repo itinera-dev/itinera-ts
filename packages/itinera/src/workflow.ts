@@ -11,8 +11,12 @@ import {
   type ValuesByKey,
   type WorkflowInstance,
 } from "./instance.js";
+import { type Provided, provided } from "./service/provider.js";
+import type { AsValue } from "./value.js";
+import { fromBag, type Supplied, supplied } from "./workflow/adapter.js";
 import { WorkflowBuilder } from "./workflow/builder.js";
 import type { WorkflowDescriptor } from "./workflow/descriptor.js";
+import type { Built } from "./workflow/names.js";
 import { declarationOf } from "./workflow/registry.js";
 
 export {
@@ -21,6 +25,15 @@ export {
   type WorkflowClass,
   type WorkflowOptions,
 } from "./workflow/decorators.js";
+export {
+  type FromDataBag,
+  inputAdapter,
+  type InputAdapterDecorator,
+  type InputAdapterOptions,
+  key,
+  type Supplied,
+  type SuppliedValue,
+} from "./workflow/adapter.js";
 export type {
   Answer,
   KeyIn,
@@ -28,6 +41,7 @@ export type {
   Place,
   ReadFromMetadata,
   RequestDecorator,
+  Strict,
   ValueRequestDecorator,
 } from "./declaration/parameter.js";
 export type { IdGeneratorKey, WorkflowBuilder } from "./workflow/builder.js";
@@ -37,52 +51,13 @@ export {
 } from "./workflow/id-generator.js";
 export { fromWorkflow } from "./workflow/request.js";
 export type { WorkflowDescriptor } from "./workflow/descriptor.js";
+export type { AdapterName, Built, WorkflowName } from "./workflow/names.js";
 export {
   type DuplicateStepName,
   type Violation,
   ViolationKind,
   Violations,
 } from "./workflow/violation.js";
-
-declare const workflowName: unique symbol;
-declare const adapterName: unique symbol;
-declare const built: unique symbol;
-
-/**
- * The name of a workflow, which every event of its journeys carries: a
- * string that is never empty, checked when the workflow is declared, so a
- * plain string is not mistaken for one.
- *
- * {@includeCode ../examples/names.ts}
- */
-export type WorkflowName = string & {
-  /** Marks the string as a workflow name made by itinera. */
-  readonly [workflowName]: true;
-};
-
-/**
- * The name of an input adapter, which supplies a step's input in place of the
- * data bag: a string that is never empty, checked when the workflow is
- * declared.
- *
- * {@includeCode ../examples/names.ts}
- */
-export type AdapterName = string & {
-  /** Marks the string as an adapter name made by itinera. */
-  readonly [adapterName]: true;
-};
-
-/**
- * A workflow object made by `build()`, which holds its checked workflow
- * descriptor, and so can make instances. Only itinera makes one: an object
- * made with `new` is not one.
- *
- * {@includeCode ../examples/workflow.ts}
- */
-export type Built<W extends Workflow> = W & {
-  /** Marks the object as made by `build()`. */
-  readonly [built]: true;
-};
 
 /**
  * The base class of every workflow. A class extending it is the workflow's
@@ -171,6 +146,39 @@ export abstract class Workflow {
       );
     }
     return instanceOf<this>(descriptor, this, initialData, options);
+  }
+
+  /**
+   * What an input adapter returns to supply `value` to the input it is asked
+   * for, which compiles only when `value` is a value.
+   *
+   * {@includeCode ../examples/input-adapter.ts}
+   */
+  protected supply<T>(value: T & AsValue<T>): Supplied {
+    return supplied(value);
+  }
+
+  /**
+   * What an input adapter returns to supply nothing, so that the input it is
+   * asked for is read from the data bag under its key.
+   *
+   * {@includeCode ../examples/input-adapter.ts}
+   */
+  protected fromDataBag(): Supplied {
+    return fromBag;
+  }
+
+  /**
+   * What a service provider returns to lend `instance` to the step, with
+   * `data` for reporters, which compiles only when it is a value.
+   *
+   * {@includeCode ../examples/provider.ts}
+   */
+  protected provide<T, D = undefined>(
+    instance: T,
+    data?: D & AsValue<D>,
+  ): Provided<T> {
+    return provided(instance, data);
   }
 
   #init(descriptor: WorkflowDescriptor<Workflow>): void {
