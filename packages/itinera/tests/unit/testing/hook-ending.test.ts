@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { HookEnding } from "./hook-ending.js";
+import { HookEnding } from "../../../src/testing/hook-ending.js";
 
 const endings = [
   ["keeping the default", HookEnding.keepDefault, { kind: "keep default" }],

@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Contributor } from "../journey.js";
-import { contributor } from "../journey/contributor.js";
-import { string } from "../value/token.js";
-import type { StepPolicy } from "./step-policy.js";
-import { Tally } from "./fixtures.js";
-import { failureCause, fromStep } from "./request.js";
-import { stepPolicyGiven } from "./step-policy/builder.js";
+import type { Contributor } from "../../../src/journey.js";
+import { contributor } from "../../../src/journey/contributor.js";
+import { string } from "../../../src/value/token.js";
+import type { StepPolicy } from "../../../src/policy/step-policy.js";
+import { Tally } from "../../fixtures/policy.js";
+import { failureCause, fromStep } from "../../../src/policy/request.js";
+import { stepPolicyGiven } from "../../../src/policy/step-policy/builder.js";
 
 /** The step policy `tally`, whose `on step success` is `counted`. */
 const tally = stepPolicyGiven(

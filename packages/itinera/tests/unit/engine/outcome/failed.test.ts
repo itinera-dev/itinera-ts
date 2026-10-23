@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { failureCause, retryCause } from "../../policy/request.js";
-import { Ending } from "../../testing/ending.js";
-import { HookEnding } from "../../testing/hook-ending.js";
-import { stepMock } from "../../testing/step-mock.js";
-import type { StepPolicyMock } from "../../testing/step-policy-mock.js";
-import { alarm, callsOf, orders, recorded, run, kindOf } from "../fixtures.js";
+import { failureCause, retryCause } from "../../../../src/policy/request.js";
+import { Ending } from "../../../../src/testing/ending.js";
+import { HookEnding } from "../../../../src/testing/hook-ending.js";
+import { stepMock } from "../../../../src/testing/step-mock.js";
+import type { StepPolicyMock } from "../../../../src/testing/step-policy-mock.js";
+import {
+  alarm,
+  callsOf,
+  orders,
+  recorded,
+  run,
+  kindOf,
+} from "../../../fixtures/engine.js";
 
 const declined = Ending.failure("declined");
 const crashed = Ending.abnormalTermination("timeout");
