@@ -3,13 +3,14 @@ import { type DataTable, Given, Then } from "@cucumber/cucumber";
 import type { GlobalMetadataEntry } from "itinera/testing";
 import type { PlainValue } from "itinera/value";
 import {
+  aThrowingRecord,
   globalMetadataUnder,
   json,
   keyAndValue,
   nonValue,
   type Row,
   rows,
-  scripted,
+  written,
 } from "../model.js";
 import { entriesOf } from "../recorders.js";
 import { holds } from "../unmet.js";
@@ -30,14 +31,24 @@ Given<World>(
   },
 );
 
-/** Both sentences of a step setting global metadata, a value or a non-value. */
+Given<World>(
+  "the workflow instance is created with a throwing record as global metadata {string}",
+  function (key: string) {
+    this.model.initialGlobalMetadata.push([key, aThrowingRecord]);
+  },
+);
+
+/**
+ * The sentences of a step setting global metadata: to a value, a non-value or
+ * a throwing record.
+ */
 Given<World>(
   /^step "([^"]*)" sets the global metadata "([^"]*)" to (.+)$/,
-  function (step: string, key: string, written: string) {
+  function (step: string, key: string, value: string) {
     this.model.step(step).actions.push({
       kind: "set global metadata",
       key,
-      value: written === "a non-value" ? nonValue : scripted(written),
+      value: written(value),
     });
   },
 );

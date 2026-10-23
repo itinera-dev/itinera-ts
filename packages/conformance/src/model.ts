@@ -37,13 +37,14 @@ export {
 } from "./model/step.js";
 export { keyAndValue, rows, type Row } from "./model/table.js";
 export {
+  aThrowingRecord,
+  caseType,
+  type CaseType,
   json,
   nonValue,
   scripted,
   type Scripted,
-  valueType,
-  valueTypes,
-  type ValueType,
+  written,
 } from "./model/value.js";
 
 /** Everything a scenario declares before it acts. */

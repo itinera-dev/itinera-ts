@@ -1,5 +1,5 @@
 import { Given } from "@cucumber/cucumber";
-import { emit, eventKind, type Level } from "../model.js";
+import { aThrowingRecord, emit, eventKind, type Level } from "../model.js";
 import type { World } from "../world.js";
 
 Given<World>(
@@ -91,5 +91,15 @@ Given<World>(
   /^step "([^"]*)" emits step_(info|warning|error) "([^"]*)"(?: with data (.+))?$/,
   function (step: string, level: Level, message: string, data: string | null) {
     this.model.step(step).actions.push(emit(level, message, data));
+  },
+);
+
+/** The three sentences of a step emitting a throwing record as data. */
+Given<World>(
+  /^step "([^"]*)" emits step_(info|warning|error) "([^"]*)" with a throwing record as data$/,
+  function (step: string, level: Level, message: string) {
+    this.model
+      .step(step)
+      .actions.push({ kind: "emit", level, message, data: aThrowingRecord });
   },
 );
