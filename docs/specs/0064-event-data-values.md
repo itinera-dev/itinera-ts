@@ -21,9 +21,9 @@ None of its own.
 
 ## Tests
 
-- `src/engine/handles.test.ts`: the step's events with their data captured, and event data that is not a value aborting the journey.
-- `src/step/outcome.test.ts`: details captured when the reason is given, and details that serialise themselves turned into plain data.
-- `src/engine/run.test.ts`: details that are not a value aborting the journey with no outcome reported.
+- `tests/unit/engine/handles.test.ts`: the step's events with their data captured, and event data that is not a value aborting the journey.
+- `tests/unit/step/outcome.test.ts`: details captured when the reason is given, and details that serialise themselves turned into plain data.
+- `tests/unit/engine/run.test.ts`: details that are not a value aborting the journey with no outcome reported.
 
 ## Done when
 
