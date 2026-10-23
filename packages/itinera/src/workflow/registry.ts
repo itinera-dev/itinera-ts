@@ -1,6 +1,6 @@
+import type { ReporterClass } from "../report.js";
 import type { StepDescriptor } from "../step.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
-import type { ReporterClass } from "../report.js";
 import type { WorkflowDescriptor } from "./descriptor.js";
 
 /**

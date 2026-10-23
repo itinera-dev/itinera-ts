@@ -27,10 +27,18 @@ export function step(): (target: StepClass) => void {
     if (declared.has(target)) {
       throw new Error(`${target.name} is declared with @step twice`);
     }
-    refuseConstructorParameters(target);
-    refuseMethodParameters(target.prototype, "run");
+    checkParameters(target);
     declared.add(target);
   };
+}
+
+/**
+ * Throws if a parameter of the constructor of `target` or of its `run` has
+ * no request.
+ */
+export function checkParameters(target: StepClass): void {
+  refuseConstructorParameters(target);
+  refuseMethodParameters(target.prototype, "run");
 }
 
 /** Whether `target` was declared with {@link step}. */
