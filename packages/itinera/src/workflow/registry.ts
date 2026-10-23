@@ -5,6 +5,7 @@ import type { StepDescriptor } from "../step.js";
 import { Workflow, type WorkflowName } from "../workflow.js";
 import type { DeclaredAdapter } from "./adapter.js";
 import type { WorkflowDescriptor } from "./descriptor.js";
+import type { DeclaredIdGenerator } from "./id-generator.js";
 
 /**
  * What the decorators of one workflow class declared so far: the lists a
@@ -25,13 +26,10 @@ export interface Declaration {
   /** The service providers, in the order their methods are written. */
   readonly providers: DeclaredProvider[];
   /** The method that makes each instance's journey ID, if one is marked. */
-  idGenerator: IdGenerator | undefined;
+  idGenerator: DeclaredIdGenerator | undefined;
   /** The workflow descriptor `@workflow` made, once it has. */
   descriptor: WorkflowDescriptor | undefined;
 }
-
-/** A method of a workflow class that makes a journey ID. */
-export type IdGenerator = (this: Workflow) => string;
 
 const declarations = new WeakMap<object, Declaration>();
 

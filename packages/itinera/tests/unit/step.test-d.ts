@@ -83,3 +83,40 @@ describe("step", () => {
     expectTypeOf(Ship).toBeConstructibleWith();
   });
 });
+
+describe("the outcomes of a step", () => {
+  it("fail and skip with reasons whose details are values", () => {
+    interface Limit {
+      readonly limit: number;
+    }
+    class Charge extends Step {
+      constructor(private readonly limit: Limit) {
+        super();
+      }
+
+      override run(): Outcome {
+        return this.limit.limit > 0
+          ? this.fail({ code: "declined", details: this.limit })
+          : this.skipBecause({ code: "empty", message: "nothing to charge" });
+      }
+    }
+    expectTypeOf(Charge).toBeConstructibleWith({ limit: 5 });
+  });
+
+  it("refuse details that are not values", () => {
+    class Charge extends Step {
+      override run(): Outcome {
+        // @ts-expect-error a Date is not a value
+        return this.fail({ code: "declined", details: new Date() });
+      }
+    }
+    class Discount extends Step {
+      override run(): Outcome {
+        // @ts-expect-error a function is not a value
+        return this.skipBecause({ code: "empty", details: () => 1 });
+      }
+    }
+    expectTypeOf(Charge).toBeConstructibleWith();
+    expectTypeOf(Discount).toBeConstructibleWith();
+  });
+});

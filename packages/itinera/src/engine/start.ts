@@ -19,7 +19,7 @@ interface Started {
 const handed = new WeakSet<object>();
 
 /** The key of the journey ID's own entry of global metadata. */
-const journeyIdKey = "journey_id";
+export const journeyIdKey = "journey_id";
 
 /**
  * Does everything that comes before the journey, in order: refuses an

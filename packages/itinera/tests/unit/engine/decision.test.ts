@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { RetryCause } from "../../../src/policy.js";
 import { Attempt, type StepDescriptor } from "../../../src/step.js";
 import { nextAttempt } from "../../../src/step/attempt.js";
 import { describeStep } from "../../../src/step/descriptor.js";
 import { Charge } from "../../fixtures/step.js";
 import {
-  type AfterAbnormalTermination,
-  afterAbnormalTermination,
+  type AfterFailedAttempt,
+  afterFailedAttempt,
 } from "../../../src/engine/decision.js";
 
 function step(
@@ -21,36 +22,68 @@ function step(
 
 const second = nextAttempt(Attempt.first);
 
-describe("afterAbnormalTermination", () => {
-  it.each<[string, StepDescriptor, Attempt, AfterAbnormalTermination]>([
+describe("afterFailedAttempt", () => {
+  it.each<[string, StepDescriptor, Attempt, RetryCause, AfterFailedAttempt]>([
     [
-      "a first attempt with retries left",
+      "a failure with retries left",
       step(1, true),
       Attempt.first,
+      RetryCause.Failure,
       { kind: "retry" },
     ],
     [
-      "a step with no retry budget",
+      "an abnormal termination with retries left",
+      step(1, true),
+      Attempt.first,
+      RetryCause.AbnormalTermination,
+      { kind: "retry" },
+    ],
+    [
+      "a failure of a step with no retry budget",
       step(0, true),
       Attempt.first,
+      RetryCause.Failure,
+      { kind: "give up", cause: "failure" },
+    ],
+    [
+      "an abnormal termination of a step with no retry budget",
+      step(0, true),
+      Attempt.first,
+      RetryCause.AbnormalTermination,
       { kind: "give up", cause: "abnormal termination" },
     ],
     [
-      "a step that never retries abnormal terminations",
+      "an abnormal termination of a step that never retries those",
       step(3, false),
       Attempt.first,
+      RetryCause.AbnormalTermination,
       { kind: "give up", cause: "abnormal termination" },
     ],
     [
-      "the last attempt the budget allows",
+      "a failure of a step that never retries abnormal terminations",
+      step(3, false),
+      Attempt.first,
+      RetryCause.Failure,
+      { kind: "retry" },
+    ],
+    [
+      "a failure on the last attempt the budget allows",
       step(1, true),
       second,
+      RetryCause.Failure,
+      { kind: "give up", cause: "retries exhausted" },
+    ],
+    [
+      "an abnormal termination on the last attempt the budget allows",
+      step(1, true),
+      second,
+      RetryCause.AbnormalTermination,
       { kind: "give up", cause: "retries exhausted" },
     ],
   ])(
     "decides as the retry budget says, for %s",
-    (_, described, attempt, decided) => {
-      expect(afterAbnormalTermination(described, attempt)).toEqual(decided);
+    (_, described, attempt, cause, decided) => {
+      expect(afterFailedAttempt(described, attempt, cause)).toEqual(decided);
     },
   );
 });

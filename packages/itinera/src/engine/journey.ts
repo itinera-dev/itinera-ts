@@ -39,18 +39,32 @@ export class Journey {
    *
    * @throws JourneyAbortError once the journey is aborted.
    */
-  async emit(body: EventBody): Promise<void> {
+  emit(body: EventBody): Promise<void> {
     const event = this.emitter.next(body);
-    const failedBefore = this.failures.first;
-    try {
-      await this.dispatcher.dispatch(event);
-    } catch (thrown) {
-      throw this.#reporterFailed(this.failures.first ?? { error: thrown });
-    }
-    const failed = this.failures.first;
-    if (failed !== undefined && failed !== failedBefore) {
-      throw this.#reporterFailed(failed);
-    }
+    return this.#delivering(() => this.dispatcher.dispatch(event));
+  }
+
+  /**
+   * Sets an entry of global metadata on the dispatcher, for its reporters,
+   * with the same rules as {@link Journey.emit} when a reporter or the
+   * dispatcher fails on it.
+   *
+   * @throws JourneyAbortError once the journey is aborted.
+   */
+  setGlobalMetadata(key: string, value: PlainValue): Promise<void> {
+    return this.#delivering(() =>
+      this.dispatcher.setGlobalMetadata(key, value),
+    );
+  }
+
+  /**
+   * Commits `value` under `key` to the data bag, and says whether it
+   * replaced a value.
+   */
+  commit(key: string, value: PlainValue): boolean {
+    const replaced = this.data.has(key);
+    this.data.set(key, value);
+    return replaced;
   }
 
   /**
@@ -75,6 +89,19 @@ export class Journey {
       await this.dispatcher.dispatch(event);
     } catch {
       // The first abort reason stands, and no further event is emitted.
+    }
+  }
+
+  async #delivering(delivery: () => void | Promise<void>): Promise<void> {
+    const failedBefore = this.failures.first;
+    try {
+      await delivery();
+    } catch (thrown) {
+      throw this.#reporterFailed(this.failures.first ?? { error: thrown });
+    }
+    const failed = this.failures.first;
+    if (failed !== undefined && failed !== failedBefore) {
+      throw this.#reporterFailed(failed);
     }
   }
 

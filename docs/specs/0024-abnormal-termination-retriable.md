@@ -8,11 +8,11 @@ Status: in progress. Stage 3 added the abnormal termination and the executor's d
 
 Anything a step's `run` throws, a promise it returns that rejects, or anything it returns that is not an outcome its helpers made, which a cast or `any` lets through. The engine catches every throw, since JavaScript has no failure code can tell apart from a recoverable one. It emits `step_abnormal_termination` with the error's message (see 0083).
 
-The journey-abort error is never one: when the engine recorded an abort while the step ran, it aborts the journey, whatever the step threw or returned afterwards. Stage 3 records aborts only from reporters, before and after a step runs; from stage 5 a step's own emits can record one while it runs (see 0055).
+The journey-abort error is never one: when the engine recorded an abort while the step ran, it aborts the journey, whatever the step threw or returned afterwards. Stage 3 recorded aborts only from reporters, before and after a step runs; from stage 5 a step's own calls on its handles record one while it runs (see [0008](0008-steps.md)).
 
 ## The decision
 
-`afterAbnormalTermination`, in `src/engine/decision.ts`: retry while `retryOnAbnormalTermination` is on and the retry budget allows another attempt; otherwise give up, with `abnormal termination` when the budget is 0 or the setting is off, and `retries exhausted` when a budget greater than 0 is spent, as chapter 5, 5.6 says.
+`afterFailedAttempt`, in `src/engine/decision.ts`, given the cause `abnormal termination`: retry while `retryOnAbnormalTermination` is on and the retry budget allows another attempt; otherwise give up, with `abnormal termination` when the budget is 0 or the setting is off, and `retries exhausted` when a budget greater than 0 is spent, as chapter 5, 5.6 says. Stage 5 made it decide after a failure too (see [0008](0008-steps.md)). An abnormal termination commits nothing the attempt contributed.
 
 ## Dependencies
 
@@ -21,7 +21,8 @@ None of its own.
 ## Tests
 
 - `tests/unit/engine/decision.test.ts`: the decision for each budget and setting.
-- `tests/unit/engine/scan.test.ts`: the events of a retried and of a given up step, and an abort while a step runs never taken for an abnormal termination.
+- `tests/unit/engine/outcome.test.ts`: the events of a retried and of a given up step, and nothing committed.
+- `tests/unit/engine/run.test.ts`: an abort while a step runs never taken for an abnormal termination.
 - `examples/step-mock.ts`: a step retried after an abnormal termination.
 
 ## Done when

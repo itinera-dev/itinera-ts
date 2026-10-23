@@ -88,7 +88,7 @@ describe("workflow", () => {
 });
 
 describe("workflow, on the methods of its class", () => {
-  it("refuses a method that carries requests but is marked with neither @inputAdapter nor @provider", () => {
+  it("refuses a method that carries requests but is marked with none of @inputAdapter, @provider and @idGenerator", () => {
     expect(() => {
       @workflow({ name: "orders" })
       class Orders extends Workflow {
@@ -98,7 +98,7 @@ describe("workflow, on the methods of its class", () => {
       }
       return Orders;
     }).toThrow(
-      "Orders.tell carries requests, but is marked with neither @inputAdapter nor @provider",
+      "Orders.tell carries requests, but is marked with none of @inputAdapter, @provider and @idGenerator",
     );
   });
 

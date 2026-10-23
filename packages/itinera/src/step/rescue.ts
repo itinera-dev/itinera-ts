@@ -2,19 +2,25 @@ import { requestsOf } from "../declaration.js";
 import { markingValue } from "../declaration/marking.js";
 import type { Place, ValueRequestDecorator } from "../declaration/parameter.js";
 import type { RequestType } from "../value/token.js";
-import { success, type Success } from "./outcome.js";
+import {
+  type Fail,
+  failure,
+  type GivenReason,
+  success,
+  type Success,
+} from "./outcome.js";
 import { type RescueStepBuilder, rescueStepBuilder } from "./rescue/builder.js";
 import type { StepRequests } from "./declared.js";
 
 /**
- * What one attempt of a rescue step reports when it ends normally: never a
- * skip, which a rescue step cannot report. It makes it with the helpers of
- * its base class, such as `this.succeed()`, and reports anything abnormal by
- * throwing instead.
+ * What one attempt of a rescue step reports when it ends normally: a success
+ * or a failure, never a skip, which a rescue step cannot report. It makes it
+ * with the helpers of its base class, such as `this.succeed()`, and reports
+ * anything abnormal by throwing instead.
  *
  * {@includeCode ../../examples/rescue-step.ts}
  */
-export type RescueOutcome = Success;
+export type RescueOutcome = Success | Fail;
 
 /**
  * The base class of every rescue step: the step a workflow runs, as
@@ -50,6 +56,16 @@ export abstract class RescueStep {
   /** The outcome of an attempt that did its work. */
   protected succeed(): RescueOutcome {
     return success;
+  }
+
+  /**
+   * The outcome of an attempt that could not do its work, for a reason, or
+   * only its code, captured as a step's `fail` captures it.
+   *
+   * {@includeCode ../../examples/rescue-step.ts}
+   */
+  protected fail<T>(reason: GivenReason<T>): RescueOutcome {
+    return failure(reason);
   }
 }
 

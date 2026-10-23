@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0011](https://github.com/itinera-dev/spec/blob/main/proposals/0011-events.md), implemented in [#7](https://github.com/itinera-dev/itinera-ts/issues/7). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals; [0040](0040-events-facts-and-decisions.md) holds the decision events, [0063](0063-dispatcher-factory.md) the dispatchers and their factories, and [0102](0102-global-metadata.md) global metadata.
 
-Status: in progress. Stage 1 added the event types, reporters and `DebugReporter`. Stage 3 added the emitter, the guards around reporters (see 0081) and freezing. The events from steps and hooks come in stages 5 and 7, which lists the proposal.
+Status: in progress. Stage 1 added the event types, reporters and `DebugReporter`. Stage 3 added the emitter, the guards around reporters (see 0081) and freezing. Stage 5 added the events from steps: their outcomes, retries and giving up, contributions, and what a step reporter emits (see [0008](0008-steps.md)). The events from hooks come in stage 7, which lists the proposal.
 
 ## API
 

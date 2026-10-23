@@ -58,7 +58,7 @@ class Weigh extends RescueStep {
   }
 
   override run(): RescueOutcome {
-    return this.succeed();
+    return this.grams > 0 ? this.succeed() : this.fail("nothing to weigh");
   }
 }
 
@@ -82,6 +82,10 @@ assert.deepEqual(refund.run(), { kind: "success" });
 assert.deepEqual(refund.refunded, ["A-1: 40 after declined"]);
 unknown.run();
 assert.deepEqual(unknown.refunded, ["B-2: 0 after a throw"]);
+assert.deepEqual(new Weigh(0).run(), {
+  kind: "failure",
+  reason: { code: "nothing to weigh" },
+});
 assert.ok(Orders.build() instanceof Orders);
 assert.deepEqual(
   shipping

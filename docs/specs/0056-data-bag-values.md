@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0056](https://github.com/itinera-dev/spec/blob/main/proposals/0056-data-bag-values.md), implemented in [#18](https://github.com/itinera-dev/itinera-ts/issues/18). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals.
 
-Status: in progress. Stage 1 added the types of values and the function that captures one. Stage 3 gave the data bag its initial data, and stage 5 what input adapters supply, all captured by that function, and the function that reads a value back; stage 5 adds contributions, and stage 6 lists the proposal.
+Status: in progress. Stage 1 added the types of values and the function that captures one. Stage 3 gave the data bag its initial data, and stage 5 what input adapters supply, the contributions, the details of a reason and what a step reporter is given, all captured by that function, and the function that reads a value back; stage 6 lists the proposal.
 
 ## API
 
