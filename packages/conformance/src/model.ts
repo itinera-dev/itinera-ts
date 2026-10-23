@@ -6,10 +6,12 @@
 import { ModelError } from "./model/error.js";
 import { type AdapterScript, unscriptedAdapter } from "./model/adapter.js";
 import { Policies } from "./model/policies.js";
+import { Providers } from "./model/provider.js";
 import type { Dispatching, ReporterFailure } from "./model/report.js";
 import {
   rescueOf,
   unscripted,
+  unscriptedAs,
   type Attempts,
   type StepScript,
 } from "./model/step.js";
@@ -51,6 +53,8 @@ export class Model {
   readonly reporterFailures = new Map<string, ReporterFailure>();
   /** The policies the scenario declares, and the roles the workflow provides. */
   readonly policies = new Policies();
+  /** The service providers the scenario declares. */
+  readonly providers = new Providers();
 
   /** Declares the workflow, once, with its steps in declaration order. */
   declare(name: string, steps: readonly string[]): void {
@@ -187,11 +191,6 @@ export class Model {
     }
     this.#dispatching = dispatching;
   }
-}
-
-/** A step that does nothing yet, under its name. */
-function unscriptedAs(name: string): [string, StepScript] {
-  return [name, unscripted()];
 }
 
 function isNamed(adapter: AdapterScript, name: string): boolean {

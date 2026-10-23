@@ -1,3 +1,4 @@
+import type { ServiceRequest } from "./provider.js";
 import type { Attempts } from "./step/attempt.js";
 import { nonValue, scripted, type Scripted, type ValueType } from "./value.js";
 
@@ -11,6 +12,8 @@ export { contributedUnder, globalMetadataUnder } from "./step/given-under.js";
 export interface StepScript {
   /** The inputs it requests, in the order declared. */
   readonly inputs: Input[];
+  /** The services it requests, in the order declared. */
+  readonly services: ServiceRequest[];
   /** Whether it has a rescue step, scripted under its rescue step's name. */
   hasRescueStep: boolean;
   /** Whether it is a rescue step. */
@@ -90,6 +93,7 @@ export type StepAction =
 export function unscripted(): StepScript {
   return {
     inputs: [],
+    services: [],
     hasRescueStep: false,
     isRescueStep: false,
     rescueRequests: [],
@@ -100,6 +104,11 @@ export function unscripted(): StepScript {
     ignoresFailedEmits: false,
     keepsHandles: false,
   };
+}
+
+/** A step that does nothing yet, under its name. */
+export function unscriptedAs(name: string): [string, StepScript] {
+  return [name, unscripted()];
 }
 
 /** The name of a step's rescue step. */
@@ -133,7 +142,7 @@ export function emit(
   level: Level,
   message: string,
   data: string | null,
-): StepAction {
+): Extract<StepAction, { readonly kind: "emit" }> {
   return data === null
     ? { kind: "emit", level, message }
     : { kind: "emit", level, message, data: emitted(data) };
