@@ -92,8 +92,8 @@ async function attempted(
     attempt,
   });
   const policies = stepPolicies(journey, step);
-  const made = await built(journey, instance, step, attempt);
-  const ended = await ran(journey, step, attempt, made);
+  const builtStep = await built(journey, instance, step, attempt);
+  const ended = await ran(journey, step, attempt, builtStep);
   const next = await concluded(
     { journey, instance, step, attempt, policies },
     ended,

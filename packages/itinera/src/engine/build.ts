@@ -10,6 +10,7 @@ import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
 import { inOrder } from "./order.js";
 import { byAdapter, byStep, requested } from "./request.js";
+import { servicesFor } from "./services.js";
 import { JourneyAbortError } from "./signal.js";
 
 /** A step being built for an attempt of a journey of an instance. */
@@ -21,19 +22,28 @@ interface Building {
   readonly adapter: DeclaredAdapter | undefined;
 }
 
+/** A step built for an attempt, with the services lent to its `run`. */
+export interface BuiltStep {
+  /** The step. */
+  readonly made: Step;
+  /** The services its `run` requests, by key. */
+  readonly services: ReadonlyMap<string, unknown>;
+}
+
 /**
  * The step built for `attempt`: each of its constructor's requests resolved
- * in the order it declares them, then its constructor called with them.
+ * in the order it declares them, then the services its `run` requests, then
+ * its constructor called with its inputs.
  *
- * @throws JourneyAbortError when resolving a request aborts the journey, or
- * with `step could not be built` when its constructor fails.
+ * @throws JourneyAbortError when resolving a request or a service aborts the
+ * journey, or with `step could not be built` when its constructor fails.
  */
 export async function built(
   journey: Journey,
   instance: WorkflowInstance,
   step: StepDescriptor,
   attempt: Attempt,
-): Promise<Step> {
+): Promise<BuiltStep> {
   const building: Building = {
     journey,
     instance,
@@ -44,8 +54,9 @@ export async function built(
   const needs = await inOrder(requestsOfDescribed(step).needs, (request) =>
     need(building, request),
   );
+  const services = await servicesFor(journey, instance, step, attempt);
   try {
-    return step.build(needs);
+    return { made: step.build(needs), services };
   } catch (error) {
     if (error instanceof JourneyAbortError) {
       throw error;

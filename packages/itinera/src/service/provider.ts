@@ -1,32 +1,11 @@
-import { requestsMadeBy } from "../declaration/allowed.js";
-import type { Request } from "../declaration/request.js";
+import { type RequestOf, requestsMadeBy } from "../declaration/allowed.js";
 import { named } from "../name.js";
 import type { ProviderName } from "../service.js";
 import type { Workflow } from "../workflow.js";
+import { isFunction, type Method } from "../workflow/adapter.js";
 import { declarationOn } from "../workflow/registry.js";
+import type { Provided } from "./provider/provided.js";
 import type { ServiceType } from "./request.js";
-
-declare const instanceOf: unique symbol;
-
-/**
- * What a service provider returns: an instance of the service `T`, and,
- * optionally, data for reporters, which `service_provided` carries. A
- * workflow makes it with `this.provide(instance)` or
- * `this.provide(instance, data)`, so a provider that returns nothing does
- * not compile.
- *
- * {@includeCode ../../examples/provider.ts}
- *
- * @typeParam T The type of the service.
- */
-export interface Provided<T> {
-  /** The instance lent to the step. */
-  readonly instance: T;
-  /** The data for reporters, as the provider gave it, if it gave any. */
-  readonly data?: unknown;
-  /** Marks the object as made by `this.provide(...)`, for a service `T`. */
-  readonly [instanceOf]: T;
-}
 
 /**
  * What `@provider` says about a service provider.
@@ -64,11 +43,16 @@ export interface DeclaredProvider {
   readonly scope: "journey" | "attempt";
   /** The steps it serves, by name, or `undefined` when attached to no step. */
   readonly steps: readonly string[] | undefined;
-  /** The method that implements it. */
+  /** The name of the method that implements it. */
   readonly key: string | symbol;
+  /** The method that implements it. */
+  readonly method: Method;
   /** The requests of the method's parameters, in order. */
-  readonly requests: readonly Request[];
+  readonly requests: readonly ProviderRequest[];
 }
+
+/** A request a service provider may make. */
+export type ProviderRequest = RequestOf<(typeof providerRequests)[number]>;
 
 /**
  * The decorator {@link provider} makes, which TypeScript calls once, with the
@@ -92,23 +76,24 @@ export interface ProviderDecorator<T> {
   ): void;
 }
 
-const helpers = new WeakSet<object>();
-
 /** The kinds of request a service provider may make. */
-export const providerRequests: readonly Request["kind"][] = [
+export const providerRequests = [
   "journeyId",
   "fromWorkflow",
   "providerReporter",
   "stepName",
   "attempt",
-];
+] as const;
 
 /**
  * Marks a method of a workflow class as a service provider of the service
  * type `type`: called with the workflow object as `this` while a step it
  * serves is built, once per journey or, with `perAttempt`, for every
  * attempt. It returns `this.provide(instance)` or
- * `this.provide(instance, data)`, and fails by throwing.
+ * `this.provide(instance, data)`, and fails by throwing. `service_provided`
+ * then names the instance's class, or the service type for an instance with
+ * no class of its own, such as a plain object; a bundler that minifies class
+ * names changes the name it reports.
  *
  * Its parameters request what it needs: `@journeyId()`,
  * `@fromWorkflow(key, type)` and `@providerReporter()`, and, for a provider
@@ -124,10 +109,10 @@ export function provider<T>(
   type: ServiceType<T>,
   options: ProviderOptions = {},
 ): ProviderDecorator<T> {
-  return (prototype, key) => {
+  return (prototype, key, method) => {
     const owner = prototype.constructor;
     declarationOn(owner).providers.push(
-      declaredProvider(owner, key, type, options, () =>
+      declaredProvider(owner, key, method.value, type, options, () =>
         requestsMadeBy(prototype, key, providerRequests, "a service provider"),
       ),
     );
@@ -135,28 +120,32 @@ export function provider<T>(
 }
 
 /**
- * The service provider of the service type `type` that the method `key` of
- * the workflow class `owner` implements, as `options` say, its parameters
- * making the requests `requested` gives.
+ * The service provider of the service type `type` that `method`, the
+ * method `key` of the workflow class `owner`, implements, as `options` say,
+ * its parameters making the requests `requested` gives.
  *
- * @throws Error if its name or its key is empty, or whatever `requested`
- * throws.
+ * @throws Error if `method` is not a function, if its name or its key is
+ * empty, or whatever `requested` throws.
  */
 export function declaredProvider(
   owner: { readonly name: string },
   key: string | symbol,
+  method: unknown,
   type: ServiceType<unknown>,
   options: ProviderOptions,
-  requested: () => readonly Request[],
+  requested: () => readonly ProviderRequest[],
 ): DeclaredProvider {
-  const method = `${owner.name}.${String(key)}`;
+  const where = `${owner.name}.${String(key)}`;
+  if (!isFunction(method)) {
+    throw new Error(`@provider marks a method, not ${where}`);
+  }
   const name = named<ProviderName>(
     options.name ?? String(key),
-    `the service provider ${method}`,
+    `the service provider ${where}`,
   );
   const serviceKey = named<string>(
     options.key ?? String(key),
-    `the key of the service provider ${method}`,
+    `the key of the service provider ${where}`,
   );
   return Object.freeze({
     name,
@@ -168,25 +157,7 @@ export function declaredProvider(
         ? undefined
         : Object.freeze([...options.steps]),
     key,
+    method,
     requests: requested(),
   });
-}
-
-/** An instance a provider supplies, as `this.provide(...)` makes it. */
-export function provided<T>(instance: T, data: unknown): Provided<T> {
-  const made = Object.freeze(
-    data === undefined ? { instance } : { instance, data },
-  ) as Provided<T>;
-  helpers.add(made);
-  return made;
-}
-
-/**
- * Whether `returned` is what `this.provide(...)` makes, rather than anything
- * else a cast lets a provider return.
- */
-export function isProvided(returned: unknown): returned is Provided<unknown> {
-  return (
-    typeof returned === "object" && returned !== null && helpers.has(returned)
-  );
 }
