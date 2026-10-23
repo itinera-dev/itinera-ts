@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { Audit, Ledger } from "../../fixtures/policy.js";
-import { describeStep, policiesOf, rescueOf } from "../../../src/step/descriptor.js";
+import {
+  describeStep,
+  policiesOf,
+  rescueOf,
+} from "../../../src/step/descriptor.js";
 import { Refund, Ship } from "../../fixtures/step.js";
 
 describe("describeStep", () => {

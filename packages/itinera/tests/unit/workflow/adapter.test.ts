@@ -1,12 +1,17 @@
 import { describe, expect, it } from "vitest";
-import type { JourneyId } from "../journey.js";
-import { journeyId } from "../journey/request.js";
-import { attempt, stepName } from "../step/request.js";
-import type { Attempt, StepName } from "../step.js";
-import { Charge } from "../step/fixtures.js";
-import { withStep, Workflow, workflow } from "../workflow.js";
-import { inputAdapter, isSupplied, key, type Supplied } from "./adapter.js";
-import { declarationOf } from "./registry.js";
+import type { JourneyId } from "../../../src/journey.js";
+import { journeyId } from "../../../src/journey/request.js";
+import { attempt, stepName } from "../../../src/step/request.js";
+import type { Attempt, StepName } from "../../../src/step.js";
+import { Charge } from "../../fixtures/step.js";
+import { withStep, Workflow, workflow } from "../../../src/workflow.js";
+import {
+  inputAdapter,
+  isSupplied,
+  key,
+  type Supplied,
+} from "../../../src/workflow/adapter.js";
+import { declarationOf } from "../../../src/workflow/registry.js";
 
 @workflow({ name: "prices" })
 @withStep(Charge, { name: "charge" })

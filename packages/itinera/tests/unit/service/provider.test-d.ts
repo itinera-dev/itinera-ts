@@ -1,11 +1,14 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { JourneyId } from "../journey.js";
-import { journeyId } from "../journey/request.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import { Workflow } from "../workflow.js";
-import { type Provided, provider } from "./provider.js";
-import { providerReporter, type ProviderReporter } from "./reporter.js";
-import { serviceType } from "./request.js";
+import type { JourneyId } from "../../../src/journey.js";
+import { journeyId } from "../../../src/journey/request.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { Workflow } from "../../../src/workflow.js";
+import { type Provided, provider } from "../../../src/service/provider.js";
+import {
+  providerReporter,
+  type ProviderReporter,
+} from "../../../src/service/reporter.js";
+import { serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {
   take(amount: number): string;

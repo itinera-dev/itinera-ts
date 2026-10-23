@@ -1,13 +1,17 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { DataBag, JourneyId } from "../journey.js";
-import { dataBag, journeyId } from "../journey/request.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import type { StepName } from "../step.js";
-import { stepName } from "../step/request.js";
-import { string } from "../value/token.js";
-import { Workflow } from "../workflow.js";
-import { inputAdapter, key, type Supplied } from "./adapter.js";
-import { fromWorkflow } from "./request.js";
+import type { DataBag, JourneyId } from "../../../src/journey.js";
+import { dataBag, journeyId } from "../../../src/journey/request.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import type { StepName } from "../../../src/step.js";
+import { stepName } from "../../../src/step/request.js";
+import { string } from "../../../src/value/token.js";
+import { Workflow } from "../../../src/workflow.js";
+import {
+  inputAdapter,
+  key,
+  type Supplied,
+} from "../../../src/workflow/adapter.js";
+import { fromWorkflow } from "../../../src/workflow/request.js";
 
 describe("inputAdapter", () => {
   it("compiles on a method of a workflow that supplies a value or reads the data bag", () => {

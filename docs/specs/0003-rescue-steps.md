@@ -19,9 +19,9 @@ None of its own.
 
 ## Tests
 
-- `src/step/rescue.test.ts`: what the constructor and `run` request, a class not marked, a class extending another rescue step, a class declared twice, a parameter with no request, the success, and what `@fromRescuedStep` records.
-- `src/step/rescue.test-d.ts`: a rescue step with its requests, a rescue step is not a step nor a step a rescue step, a step named as a rescue, and `@fromRescuedStep` on a parameter of another type, in a step or on `run`.
-- `src/step/descriptor.test.ts` and `src/workflow/decorators.test.ts`: the rescue step kept, none unless told, and a rescue step not declared.
+- `tests/unit/step/rescue.test.ts`: what the constructor and `run` request, a class not marked, a class extending another rescue step, a class declared twice, a parameter with no request, the success, and what `@fromRescuedStep` records.
+- `tests/unit/step/rescue.test-d.ts`: a rescue step with its requests, a rescue step is not a step nor a step a rescue step, a step named as a rescue, and `@fromRescuedStep` on a parameter of another type, in a step or on `run`.
+- `tests/unit/step/descriptor.test.ts` and `tests/unit/workflow/decorators.test.ts`: the rescue step kept, none unless told, and a rescue step not declared.
 - `examples/rescue-step.ts`.
 
 ## Done when

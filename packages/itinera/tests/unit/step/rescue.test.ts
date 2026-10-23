@@ -1,17 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { requestsOf } from "../declaration.js";
-import type { Option } from "../option.js";
-import { integer, optional, string } from "../value/token.js";
-import type { Reason } from "../step.js";
-import { failureReason, input, stepReporter } from "./request.js";
-import type { StepReporter } from "./request.js";
+import { requestsOf } from "../../../src/declaration.js";
+import type { Option } from "../../../src/option.js";
+import { integer, optional, string } from "../../../src/value/token.js";
+import type { Reason } from "../../../src/step.js";
+import {
+  failureReason,
+  input,
+  stepReporter,
+} from "../../../src/step/request.js";
+import type { StepReporter } from "../../../src/step/request.js";
 import {
   fromRescuedStep,
   RescueStep,
   rescueStep,
   type RescueOutcome,
   requestsOfRescue,
-} from "./rescue.js";
+} from "../../../src/step/rescue.js";
 
 @rescueStep()
 class Refund extends RescueStep {

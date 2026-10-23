@@ -14,7 +14,7 @@ None of its own.
 
 ## Tests
 
-- `src/workflow/adapter.test.ts` and `src/service/provider.test.ts`: a rescue step's name recorded among the steps.
+- `tests/unit/workflow/adapter.test.ts` and `tests/unit/service/provider.test.ts`: a rescue step's name recorded among the steps.
 
 ## Done when
 

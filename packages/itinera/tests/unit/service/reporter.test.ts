@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { requestsOf } from "../declaration.js";
-import { Workflow } from "../workflow.js";
-import { providerReporter, type ProviderReporter } from "./reporter.js";
+import { requestsOf } from "../../../src/declaration.js";
+import { Workflow } from "../../../src/workflow.js";
+import {
+  providerReporter,
+  type ProviderReporter,
+} from "../../../src/service/reporter.js";
 
 describe("providerReporter", () => {
   it("records a request for a provider reporter", () => {

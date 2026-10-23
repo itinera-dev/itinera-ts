@@ -1,15 +1,22 @@
 import { describe, expect, it } from "vitest";
-import type { DataBag, JourneyId } from "../journey.js";
-import { dataBag, journeyId } from "../journey/request.js";
-import { Charge } from "../step/fixtures.js";
-import { attempt, stepName } from "../step/request.js";
-import type { StepName } from "../step.js";
-import { Attempt } from "../step/attempt.js";
-import { withStep, Workflow, workflow } from "../workflow.js";
-import { declarationOf } from "../workflow/registry.js";
-import { isProvided, type Provided, provider } from "./provider.js";
-import { providerReporter, type ProviderReporter } from "./reporter.js";
-import { serviceType } from "./request.js";
+import type { DataBag, JourneyId } from "../../../src/journey.js";
+import { dataBag, journeyId } from "../../../src/journey/request.js";
+import { Charge } from "../../fixtures/step.js";
+import { attempt, stepName } from "../../../src/step/request.js";
+import type { StepName } from "../../../src/step.js";
+import { Attempt } from "../../../src/step/attempt.js";
+import { withStep, Workflow, workflow } from "../../../src/workflow.js";
+import { declarationOf } from "../../../src/workflow/registry.js";
+import {
+  isProvided,
+  type Provided,
+  provider,
+} from "../../../src/service/provider.js";
+import {
+  providerReporter,
+  type ProviderReporter,
+} from "../../../src/service/reporter.js";
+import { serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {
   take(amount: number): string;
