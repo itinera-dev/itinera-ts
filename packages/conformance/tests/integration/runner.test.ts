@@ -90,6 +90,12 @@ describe("the conformance runner", () => {
     expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
   });
 
+  it("builds steps with their inputs and plays input adapters", () => {
+    const ran = run("inputs", "@proposal-0060");
+    expect(ran.succeeded, ran.output).toBe(true);
+    expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
+  });
+
   it("fails a scenario whose expectation itinera does not meet, saying what it expected", () => {
     const ran = run("unmet", "@tier-1");
     expect(ran.succeeded).toBe(false);

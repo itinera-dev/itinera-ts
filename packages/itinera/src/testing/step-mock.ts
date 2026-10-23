@@ -37,8 +37,11 @@ export interface StepMockScript {
  * {@includeCode ../../examples/step-mock.ts}
  */
 export interface StepMockClass {
-  /** Builds the step mock for its next attempt. */
-  new (): StepMock;
+  /**
+   * Builds the step mock for its next attempt, given the inputs its
+   * constructor requests, in order.
+   */
+  new (...inputs: unknown[]): StepMock;
   /** The prototype every step mock of the class shares. */
   readonly prototype: StepMock;
   /** Starts putting a step of the class together for a workflow's builder. */
@@ -48,19 +51,29 @@ export interface StepMockClass {
 /**
  * The base class of the step mocks {@link stepMock} makes: a step that plays
  * its script, ending each attempt through an {@link Ending}, so that it ends
- * exactly as a real step would.
+ * exactly as a real step would, and keeps the inputs it was built with.
  *
  * {@includeCode ../../examples/step-mock.ts}
  */
 export abstract class StepMock extends Step {
   readonly #ending: Ending;
   readonly #asynchronous: boolean;
+  /**
+   * The inputs it was built with, in the order its constructor requests
+   * them: each input's value, or an `Option` of it for an optional input.
+   */
+  readonly inputs: readonly unknown[];
 
-  /** Builds the step mock that ends its attempt with `ending`. */
-  protected constructor(ending: Ending, asynchronous: boolean) {
+  /** Builds the step mock that ends its attempt with `ending`, given `inputs`. */
+  protected constructor(
+    ending: Ending,
+    asynchronous: boolean,
+    inputs: readonly unknown[],
+  ) {
     super();
     this.#ending = ending;
     this.#asynchronous = asynchronous;
+    this.inputs = inputs;
   }
 
   /** Ends the attempt as its script says. */
@@ -75,7 +88,9 @@ export abstract class StepMock extends Step {
 /**
  * A new class of step mock playing the script, whose `builder(name)` starts a
  * step for a workflow's builder, as any step class's does. The class counts the steps built from it as the
- * attempts of its script, so each workflow takes a class of its own.
+ * attempts of its script, so each workflow takes a class of its own. Its
+ * constructor takes any inputs, which the step's builder requests with
+ * `needs`, and keeps them.
  *
  * {@includeCode ../../examples/step-mock.ts}
  */
@@ -84,13 +99,14 @@ export function stepMock(script: StepMockScript): StepMockClass {
   const endings: readonly [Ending, ...Ending[]] = [...attempts];
   let built = 0;
   return class extends StepMock {
-    constructor() {
+    constructor(...inputs: unknown[]) {
       if (buildFailure !== undefined) {
         throw new Error(buildFailure);
       }
       super(
         endings[Math.min(built, endings.length - 1)] ?? endings[0],
         asynchronous,
+        inputs,
       );
       built += 1;
     }

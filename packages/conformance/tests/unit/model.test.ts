@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Model, ModelError, scripted, succeeds } from "../../src/model.js";
+import {
+  type AdapterScript,
+  Model,
+  ModelError,
+  scripted,
+  succeeds,
+} from "../../src/model.js";
 
 function orders(...steps: string[]): Model {
   const model = new Model();
@@ -109,4 +115,33 @@ describe("the scenario model", () => {
       new ModelError("what the executor dispatches with is already stated"),
     );
   });
+
+  it("declares input adapters in order, each found by its name", () => {
+    const model = orders("charge");
+    model.declareAdapter("pricing", ["charge"]);
+    model.declareAdapter("discounts", ["charge"]);
+    expect(model.workflow.adapters.map(nameOf)).toEqual([
+      "pricing",
+      "discounts",
+    ]);
+    expect(model.adapter("discounts").steps).toEqual(["charge"]);
+  });
+
+  it("refuses an input adapter attached to no step", () => {
+    expect(() => {
+      orders("charge").declareAdapter("pricing", []);
+    }).toThrow(
+      new ModelError('the input adapter "pricing" is attached to no step'),
+    );
+  });
+
+  it("refuses to script an input adapter the workflow does not declare", () => {
+    expect(() => orders("charge").adapter("pricing")).toThrow(
+      new ModelError('the workflow declares no input adapter "pricing"'),
+    );
+  });
 });
+
+function nameOf(adapter: AdapterScript): string {
+  return adapter.name;
+}
