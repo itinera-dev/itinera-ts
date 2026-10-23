@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { type Contributor, contributor } from "../journey.js";
+import { type Contributor, contributor } from "../../../src/journey.js";
 import {
   type Outcome,
   Step,
   type StepBuilder,
   type StepClass,
-} from "../step.js";
-import { Ending } from "../testing/ending.js";
-import { stepMock } from "../testing/step-mock.js";
-import { integer, string } from "../value/token.js";
-import type { PlainValue } from "../value.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import { FailingOn, orders, recorded, run } from "./fixtures.js";
+} from "../../../src/step.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
+import { integer, string } from "../../../src/value/token.js";
+import type { PlainValue } from "../../../src/value.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { FailingOn, orders, recorded, run } from "../../fixtures/engine.js";
 
 /** What one attempt of a {@link contributing} step contributes, and how it ends. */
 interface Attempted {

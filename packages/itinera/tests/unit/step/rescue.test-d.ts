@@ -1,11 +1,20 @@
 import { describe, expectTypeOf, it } from "vitest";
 import type { Option } from "../../../src/option.js";
-import { type Outcome, type Skip, Step, type StepClass } from "../../../src/step.js";
+import {
+  type Outcome,
+  type Skip,
+  Step,
+  type StepClass,
+} from "../../../src/step.js";
 import { Charge } from "../../fixtures/step.js";
 import { integer, optional } from "../../../src/value/token.js";
 import { Workflow } from "../../../src/workflow.js";
 import { withStep, workflow } from "../../../src/workflow/decorators.js";
-import { failureReason, input, stepReporter } from "../../../src/step/request.js";
+import {
+  failureReason,
+  input,
+  stepReporter,
+} from "../../../src/step/request.js";
 import type { StepReporter } from "../../../src/step/request.js";
 import type { Reason } from "../../../src/step.js";
 import {

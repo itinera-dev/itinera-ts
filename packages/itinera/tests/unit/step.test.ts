@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { type Fail, type GivenReason, type Skip, Step } from "../../src/step.js";
+import {
+  type Fail,
+  type GivenReason,
+  type Skip,
+  Step,
+} from "../../src/step.js";
 import { isOutcome } from "../../src/step/outcome.js";
 import { Ship } from "../fixtures/step.js";
 

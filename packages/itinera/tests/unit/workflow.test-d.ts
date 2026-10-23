@@ -1,5 +1,10 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { type DataBag, dataBag, type JourneyId, journeyId } from "../../src/journey.js";
+import {
+  type DataBag,
+  dataBag,
+  type JourneyId,
+  journeyId,
+} from "../../src/journey.js";
 import type { Reporter } from "../../src/report.js";
 import type { Outcome } from "../../src/step.js";
 import { Ship } from "../fixtures/step.js";

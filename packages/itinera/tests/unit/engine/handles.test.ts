@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { Reporter } from "../report.js";
-import { DefaultDispatcher } from "../report/default-dispatcher.js";
-import { Attempt, type StepName } from "../step.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import { FailingOn, journeyThrough } from "./fixtures.js";
-import { Failures, Guard } from "./guard.js";
-import { AttemptHandles } from "./handles.js";
-import type { Journey } from "./journey.js";
-import { JourneyAbortError } from "./signal.js";
+import type { Reporter } from "../../../src/report.js";
+import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
+import { Attempt, type StepName } from "../../../src/step.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { FailingOn, journeyThrough } from "../../fixtures/engine.js";
+import { Failures, Guard } from "../../../src/engine/guard.js";
+import { AttemptHandles } from "../../../src/engine/handles.js";
+import type { Journey } from "../../../src/engine/journey.js";
+import { JourneyAbortError } from "../../../src/engine/signal.js";
 
 const charge = "charge" as StepName;
 
