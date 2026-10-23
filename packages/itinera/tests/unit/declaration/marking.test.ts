@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { checkedOf, marking, markingValue, requestsGiven } from "./marking.js";
-import type { Request } from "./request.js";
-import { integer, optional } from "../value/token.js";
+import {
+  checkedOf,
+  marking,
+  markingValue,
+  requestsGiven,
+} from "../../../src/declaration/marking.js";
+import type { Request } from "../../../src/declaration/request.js";
+import { integer, optional } from "../../../src/value/token.js";
 
 const contributing: Request = { kind: "contributor" };
 

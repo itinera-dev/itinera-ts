@@ -1,12 +1,16 @@
 import { describe, it } from "vitest";
-import type { StepFailureCause } from "../../policy.js";
-import { contributor } from "../../journey/contributor.js";
-import { input } from "../../step/request.js";
-import { integer, string } from "../../value/token.js";
-import { Tally } from "../fixtures.js";
-import type { OnSuccess } from "../lifecycle.js";
-import { failureCause, fromStep, retryCause } from "../request.js";
-import { StepPolicy } from "../step-policy.js";
+import type { StepFailureCause } from "../../../../src/policy.js";
+import { contributor } from "../../../../src/journey/contributor.js";
+import { input } from "../../../../src/step/request.js";
+import { integer, string } from "../../../../src/value/token.js";
+import { Tally } from "../../../fixtures/policy.js";
+import type { OnSuccess } from "../../../../src/policy/lifecycle.js";
+import {
+  failureCause,
+  fromStep,
+  retryCause,
+} from "../../../../src/policy/request.js";
+import { StepPolicy } from "../../../../src/policy/step-policy.js";
 
 describe("a step policy's builder", () => {
   it("compiles with a method of the class and its requests, in order", () => {

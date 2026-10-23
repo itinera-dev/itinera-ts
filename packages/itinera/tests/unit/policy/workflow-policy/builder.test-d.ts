@@ -1,7 +1,7 @@
 import { describe, it } from "vitest";
-import { Close, type Messages } from "../fixtures.js";
-import { role } from "../request.js";
-import { WorkflowPolicy } from "../workflow-policy.js";
+import { Close, type Messages } from "../../../fixtures/policy.js";
+import { role } from "../../../../src/policy/request.js";
+import { WorkflowPolicy } from "../../../../src/policy/workflow-policy.js";
 
 describe("a workflow policy's builder", () => {
   it("compiles with methods of the class", () => {

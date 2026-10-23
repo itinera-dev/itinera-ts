@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { contributor } from "../journey/contributor.js";
-import { string } from "../value/token.js";
-import { Audit, Tally } from "./fixtures.js";
-import { failureCause, fromStep } from "./request.js";
-import type { StepPolicyBuilder } from "./step-policy/builder.js";
-import { stepPolicyGiven } from "./step-policy/builder.js";
+import { contributor } from "../../../src/journey/contributor.js";
+import { string } from "../../../src/value/token.js";
+import { Audit, Tally } from "../../fixtures/policy.js";
+import { failureCause, fromStep } from "../../../src/policy/request.js";
+import type { StepPolicyBuilder } from "../../../src/policy/step-policy/builder.js";
+import { stepPolicyGiven } from "../../../src/policy/step-policy/builder.js";
 
 /** A step policy's builder whose hooks take anything, as a cast lets through. */
 function loosely(builder: StepPolicyBuilder<typeof Tally> = Tally.builder()): {

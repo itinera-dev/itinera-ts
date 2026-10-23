@@ -1,6 +1,11 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { Place } from "./parameter.js";
-import type { MethodKey, ParametersOf, Token, Tokens } from "./token.js";
+import type { Place } from "../../../src/declaration/parameter.js";
+import type {
+  MethodKey,
+  ParametersOf,
+  Token,
+  Tokens,
+} from "../../../src/declaration/token.js";
 
 class Till {
   readonly opened = "today";

@@ -7,7 +7,10 @@ import {
   stepPolicy,
   workflowPolicy,
 } from "../../../src/policy/declared.js";
-import { hookOf, type PolicyDescriptor } from "../../../src/policy/descriptor.js";
+import {
+  hookOf,
+  type PolicyDescriptor,
+} from "../../../src/policy/descriptor.js";
 import type { Hook } from "../../../src/policy/hooks.js";
 import {
   onStepFailure,

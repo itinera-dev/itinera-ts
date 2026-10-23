@@ -1,16 +1,16 @@
 import { describe, it } from "vitest";
-import type { Contributor } from "../journey.js";
-import { contributor } from "../journey/contributor.js";
-import type { Messages } from "../policy/fixtures.js";
-import type { OnSuccess } from "../policy/lifecycle.js";
-import { fromStep, role } from "../policy/request.js";
-import { StepPolicy } from "../policy/step-policy.js";
-import { service, serviceType } from "../service/request.js";
-import { type Outcome, Step } from "../step.js";
-import { integer, string } from "../value/token.js";
-import { Workflow } from "../workflow.js";
-import type { StepBuilder } from "./builder.js";
-import { input } from "./request.js";
+import type { Contributor } from "../../../src/journey.js";
+import { contributor } from "../../../src/journey/contributor.js";
+import type { Messages } from "../../fixtures/policy.js";
+import type { OnSuccess } from "../../../src/policy/lifecycle.js";
+import { fromStep, role } from "../../../src/policy/request.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { service, serviceType } from "../../../src/service/request.js";
+import { type Outcome, Step } from "../../../src/step.js";
+import { integer, string } from "../../../src/value/token.js";
+import { Workflow } from "../../../src/workflow.js";
+import type { StepBuilder } from "../../../src/step/builder.js";
+import { input } from "../../../src/step/request.js";
 
 interface PaymentGateway {
   take(amount: number): string;
