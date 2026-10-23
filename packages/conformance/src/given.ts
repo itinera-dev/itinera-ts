@@ -1,13 +1,22 @@
 /** What the scenario gives, as the language gives it to itinera. */
 import type { PlainValue } from "itinera/value";
+import { ThrowingRecord } from "./converted.js";
 import type { Scripted } from "./model/value.js";
 
 /**
- * What the scenario gives, as a value or as something that is not one,
- * typed as a value as only a cast lets it be.
+ * What the scenario gives: a value, something that is not one, or a new
+ * object of `throwing record`, the last two typed as a plain value as only a
+ * cast lets them be.
  */
 export function given(scripted: Scripted): PlainValue {
-  return scripted.kind === "value" ? scripted.value : notAValue();
+  switch (scripted.kind) {
+    case "value":
+      return scripted.value;
+    case "non-value":
+      return notAValue();
+    case "throwing record":
+      return new ThrowingRecord() as unknown as PlainValue;
+  }
 }
 
 /**
@@ -17,7 +26,7 @@ export function given(scripted: Scripted): PlainValue {
 export function fresh(scripted: Scripted): PlainValue {
   return scripted.kind === "value"
     ? structuredClone(scripted.value)
-    : notAValue();
+    : given(scripted);
 }
 
 /** Something that is not a value: a function, which only a cast lets through. */

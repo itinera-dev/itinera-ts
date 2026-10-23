@@ -88,6 +88,19 @@ Then<World>(
   },
 );
 
+Then<World>("the refusal lists the key {string}", function (key: string) {
+  const { refused } = refusal(this);
+  const keys =
+    refused.kind === "initial values"
+      ? [...refused.initialData, ...refused.initialGlobalMetadata]
+      : [];
+  holds(
+    keys.includes(key),
+    `a refusal listing the key "${key}"`,
+    `a refusal for ${refused.kind} listing ${JSON.stringify(keys)}`,
+  );
+});
+
 /** Why `run` refused the scenario's journey. */
 function refusal(world: World): Refusal {
   const { ended } = world.journey;

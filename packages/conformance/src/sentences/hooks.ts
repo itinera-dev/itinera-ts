@@ -1,5 +1,5 @@
 import { Given } from "@cucumber/cucumber";
-import { nonValue, scripted, valueType, type Level } from "../model.js";
+import { nonValue, scripted, caseType, type Level } from "../model.js";
 import type { HookRequest, HookScript } from "../model/policy.js";
 import type { World } from "../world.js";
 
@@ -32,7 +32,7 @@ Given<World>(
 
 /** The four requests of data, from the step or from the workflow, required or optional. */
 Given<World>(
-  /^the hook "([^"]*)" of policy "([^"]*)" requests (optional )?(step data|data from the workflow) "([^"]*)" of type (\S+)$/,
+  /^the hook "([^"]*)" of policy "([^"]*)" requests (optional )?(step data|data from the workflow) "([^"]*)" of type (.+)$/,
   function (
     hook: string,
     policy: string,
@@ -44,7 +44,7 @@ Given<World>(
     hookOf(this, hook, policy).requests.push({
       kind,
       key,
-      type: valueType(type),
+      type: caseType(type),
       optional: optional !== null,
     });
   },

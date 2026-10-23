@@ -1,6 +1,6 @@
 import type { ServiceRequest } from "./provider.js";
 import type { Attempts } from "./step/attempt.js";
-import { nonValue, scripted, type Scripted, type ValueType } from "./value.js";
+import { nonValue, scripted, type Scripted, type CaseType } from "./value.js";
 
 export { attempts, succeeds, type Attempts } from "./step/attempt.js";
 export { contributedUnder, globalMetadataUnder } from "./step/given-under.js";
@@ -45,7 +45,7 @@ export interface StepScript {
 /** An input a step requests, of a type of the vocabulary. */
 export interface Input {
   readonly key: string;
-  readonly type: ValueType;
+  readonly type: CaseType;
   readonly optional: boolean;
 }
 

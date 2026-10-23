@@ -1,5 +1,6 @@
 import {
   boolean,
+  classOf,
   integer,
   list,
   number,
@@ -8,7 +9,8 @@ import {
   type RequestType,
   string,
 } from "itinera/value";
-import type { ValueType } from "./model.js";
+import { rejectedRecordGuard, ThrowingRecord } from "./converted.js";
+import type { CaseType } from "./model.js";
 
 const tokens = {
   string,
@@ -17,18 +19,23 @@ const tokens = {
   boolean,
   list,
   object,
-} as const satisfies Readonly<Record<ValueType, unknown>>;
+  "throwing record": classOf(ThrowingRecord),
+  "rejected record": rejectedRecordGuard,
+} as const satisfies Readonly<Record<CaseType, unknown>>;
 
-type Token = (typeof tokens)[ValueType];
+type Token = (typeof tokens)[CaseType];
 
-/** The type token of itinera that checks a type of the neutral vocabulary. */
-export function tokenOf(type: ValueType): Token {
+/**
+ * The type token that checks a type the cases name: one of itinera's for a
+ * type of the neutral vocabulary, and the runner's own for a converted type.
+ */
+export function tokenOf(type: CaseType): Token {
   return tokens[type];
 }
 
 /** The type of a request for a value of the type, optional or required. */
 export function requestTypeOf(
-  type: ValueType,
+  type: CaseType,
   isOptional: boolean,
 ): RequestType {
   const token = tokenOf(type);
