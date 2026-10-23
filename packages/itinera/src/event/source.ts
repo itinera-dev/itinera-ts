@@ -38,6 +38,16 @@ export interface ByAdapter {
 }
 
 /**
+ * An input adapter, with the key of the step's input it was resolving.
+ *
+ * {@includeCode ../../examples/journey-abort.ts}
+ */
+export interface ByAdapterForKey extends ByAdapter {
+  /** The key of the input. */
+  readonly key: string;
+}
+
+/**
  * A hook of a step policy, acting on a step.
  *
  * {@includeCode ../../examples/journey-abort.ts}

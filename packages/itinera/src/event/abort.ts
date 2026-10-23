@@ -1,10 +1,10 @@
 import type { AbortReason } from "../journey.js";
 import type { PolicyName } from "../policy.js";
-import type { ProviderName } from "../service.js";
 import type { StepName } from "../step.js";
 import type { NotAValue } from "./abort/not-a-value.js";
 import type { MissingData, Requester } from "./requester.js";
 import type {
+  ByAdapterForKey,
   ByProvider,
   ByStep,
   ByStepHook,
@@ -49,8 +49,11 @@ interface AbortFields<R extends AbortReason> {
 export interface StepCouldNotBeBuilt extends AbortFields<"step could not be built"> {
   /** The step's name. */
   readonly step: StepName;
-  /** The service provider, when it failed or returned nothing. */
-  readonly provider?: ProviderName;
+  /**
+   * What failed: the step's own constructor, an input adapter with the key of
+   * the input it was resolving, or a service provider.
+   */
+  readonly source: ByStep | ByAdapterForKey | ByProvider;
   /** The message of the error, when a constructor, adapter or provider failed. */
   readonly errorMessage?: string;
 }
