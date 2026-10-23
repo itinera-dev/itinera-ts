@@ -1,10 +1,15 @@
 import { describe, expectTypeOf, it } from "vitest";
 import { z } from "zod";
-import type { Option } from "../option.js";
-import type { PlainValue } from "../value.js";
-import { classOf, integer, listOf, optional } from "../value/token.js";
-import type { DataBag } from "./data-bag.js";
-import type { Read } from "./read.js";
+import type { Option } from "../../../src/option.js";
+import type { PlainValue } from "../../../src/value.js";
+import {
+  classOf,
+  integer,
+  listOf,
+  optional,
+} from "../../../src/value/token.js";
+import type { DataBag } from "../../../src/journey/data-bag.js";
+import type { Read } from "../../../src/journey/read.js";
 
 class Payment {
   constructor(readonly cents: number) {}

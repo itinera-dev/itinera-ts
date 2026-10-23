@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { Ship } from "../step/fixtures.js";
-import { type Built, withStep, Workflow, workflow } from "../workflow.js";
+import { Ship } from "../../fixtures/step.js";
+import {
+  type Built,
+  withStep,
+  Workflow,
+  workflow,
+} from "../../../src/workflow.js";
 
 @workflow({ name: "orders" })
 @withStep(Ship, { name: "ship" })

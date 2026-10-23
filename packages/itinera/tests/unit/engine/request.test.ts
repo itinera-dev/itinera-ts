@@ -1,15 +1,20 @@
 import { describe, expect, it } from "vitest";
-import type { Checked } from "../declaration/request.js";
-import type { AdapterName } from "../workflow.js";
-import { None, Some } from "../option.js";
-import { DefaultDispatcher } from "../report/default-dispatcher.js";
-import { Attempt, type StepName } from "../step.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import type { PlainValue } from "../value.js";
-import { integer, listOf, string } from "../value/token.js";
-import { caught, journeyThrough } from "./fixtures.js";
-import type { Journey } from "./journey.js";
-import { byAdapter, byStep, type Requesting, requested } from "./request.js";
+import type { Checked } from "../../../src/declaration/request.js";
+import type { AdapterName } from "../../../src/workflow.js";
+import { None, Some } from "../../../src/option.js";
+import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
+import { Attempt, type StepName } from "../../../src/step.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import type { PlainValue } from "../../../src/value.js";
+import { integer, listOf, string } from "../../../src/value/token.js";
+import { caught, journeyThrough } from "../../fixtures/engine.js";
+import type { Journey } from "../../../src/engine/journey.js";
+import {
+  byAdapter,
+  byStep,
+  type Requesting,
+  requested,
+} from "../../../src/engine/request.js";
 
 const charge = "charge" as StepName;
 const required: Checked = { schema: integer, optional: false };

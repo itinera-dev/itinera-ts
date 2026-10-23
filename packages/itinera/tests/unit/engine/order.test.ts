@@ -1,5 +1,5 @@
 import { describe, expect, it, onTestFinished, vi } from "vitest";
-import { inOrder } from "./order.js";
+import { inOrder } from "../../../src/engine/order.js";
 
 describe("inOrder", () => {
   it("gives what each item gives, in order, starting each once the one before has settled", async () => {

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { Checked } from "../declaration/request.js";
-import { None, Some } from "../option.js";
-import type { PlainValue } from "../value.js";
-import { integer } from "../value/token.js";
-import { readOf } from "./read.js";
+import type { Checked } from "../../../src/declaration/request.js";
+import { None, Some } from "../../../src/option.js";
+import type { PlainValue } from "../../../src/value.js";
+import { integer } from "../../../src/value/token.js";
+import { readOf } from "../../../src/journey/read.js";
 
 const required: Checked = { schema: integer, optional: false };
 const optional: Checked = { schema: integer, optional: true };

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { fromBag, isSupplied, supplied } from "./supplied.js";
+import {
+  fromBag,
+  isSupplied,
+  supplied,
+} from "../../../../src/workflow/adapter/supplied.js";
 
 describe("isSupplied", () => {
   it.each([
