@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { Event } from "../../event.js";
-import { aboutCharge, fixedFields } from "../../event/fixtures.js";
-import type { PolicyName } from "../../policy.js";
-import { Attempt, nextAttempt, type StepName } from "../../step.js";
-import { line } from "./path.js";
+import type { Event } from "../../../../src/event.js";
+import { aboutCharge, fixedFields } from "../../../fixtures/event.js";
+import type { PolicyName } from "../../../../src/policy.js";
+import { Attempt, nextAttempt, type StepName } from "../../../../src/step.js";
+import { line } from "../../../../src/testing/recording-reporter/path.js";
 
 const declined = { code: "declined" };
 const fraudCheck = "fraud_check" as PolicyName;

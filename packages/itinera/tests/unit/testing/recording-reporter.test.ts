@@ -3,8 +3,8 @@ import {
   journeyAborted,
   journeyStarted,
   stepSucceeded,
-} from "../event/fixtures.js";
-import { RecordingReporter } from "./recording-reporter.js";
+} from "../../fixtures/event.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 
 function recorded(): RecordingReporter {
   const recorder = new RecordingReporter();

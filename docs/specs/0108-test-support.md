@@ -22,8 +22,8 @@ None of its own.
 
 ## Tests
 
-- `src/testing/recording-reporter.test.ts`: events kept in order, the latest value of each entry of global metadata in the order first set, the path made from the events, and copies on every read.
-- `src/testing/recording-reporter/path.test.ts`: the line of every event of the flow, each as chapter 8, 8.3 writes it, and no line for events outside the flow.
+- `tests/unit/testing/recording-reporter.test.ts`: events kept in order, the latest value of each entry of global metadata in the order first set, the path made from the events, and copies on every read.
+- `tests/unit/testing/recording-reporter/path.test.ts`: the line of every event of the flow, each as chapter 8, 8.3 writes it, and no line for events outside the flow.
 - `examples/recording-reporter.ts`: a recording reporter added to a dispatcher, keeping the latest value of each entry.
 
 ## Open points
