@@ -16,19 +16,17 @@ interface Report {
   }[];
 }
 
-/** Runs the runner on its own cases in this directory of `tests/fixtures/cases`. */
-function run(cases: string, tags: string) {
+/** Runs the runner on the cases in this directory of `tests/fixtures/cases`, or of `under`. */
+function run(
+  cases: string,
+  tags: string,
+  under = join(__dirname, "..", "fixtures", "cases"),
+) {
   const report = join(reports, `${cases}.json`);
   const ran = spawnSync(process.execPath, [runner], {
     env: {
       ...process.env,
-      ITINERA_CONFORMANCE_CASES: join(
-        __dirname,
-        "..",
-        "fixtures",
-        "cases",
-        cases,
-      ),
+      ITINERA_CONFORMANCE_CASES: join(under, cases),
       ITINERA_CONFORMANCE_TAGS: tags,
       ITINERA_CONFORMANCE_REPORT: report,
     },
@@ -104,6 +102,17 @@ describe("the conformance runner", () => {
       expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
     },
   );
+
+  it("plays the hand-written workflows of features/fixtures through the cases' sentences", () => {
+    const ran = run(
+      "fixtures",
+      "@fixtures",
+      join(__dirname, "..", "..", "features"),
+    );
+    expect(ran.succeeded, ran.output).toBe(true);
+    expect(scenarios(ran.report())).toHaveLength(17);
+    expect(new Set(statuses(ran.report()))).toEqual(new Set(["passed"]));
+  });
 
   it("fails a scenario whose expectation itinera does not meet, saying what it expected", () => {
     const ran = run("unmet", "@tier-1");

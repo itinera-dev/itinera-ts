@@ -44,7 +44,8 @@ function present(
   return reporter === undefined ? [] : [reporter];
 }
 
-function asGiven([key, scripted]: readonly [string, Scripted]): [
+/** An entry the scenario gives, as itinera receives it. */
+export function asGiven([key, scripted]: readonly [string, Scripted]): [
   string,
   Value,
 ] {
