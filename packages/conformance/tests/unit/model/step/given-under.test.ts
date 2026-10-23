@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { contribution, type StepScript, unscripted } from "../step.js";
-import { nonValue, scripted } from "../value.js";
-import { contributedUnder, globalMetadataUnder } from "./given-under.js";
+import {
+  contribution,
+  type StepScript,
+  unscripted,
+} from "../../../../src/model/step.js";
+import { nonValue, scripted } from "../../../../src/model/value.js";
+import {
+  contributedUnder,
+  globalMetadataUnder,
+} from "../../../../src/model/step/given-under.js";
 
 describe("what a step's script gives under a key", () => {
   function scriptUnderKeys(): StepScript {

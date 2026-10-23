@@ -1,14 +1,14 @@
 import type { Contributor, StepReporter } from "itinera/unstable";
 import { describe, expect, it } from "vitest";
-import { ModelError } from "../model/error.js";
+import { ModelError } from "../../../src/model/error.js";
 import {
   contribution,
   emit,
   type StepScript,
   unscripted,
-} from "../model/step.js";
-import { scripted } from "../model/value.js";
-import { actingOf } from "./actions.js";
+} from "../../../src/model/step.js";
+import { scripted } from "../../../src/model/value.js";
+import { actingOf } from "../../../src/scenario/actions.js";
 
 class Kept implements Contributor, StepReporter {
   readonly calls: unknown[][] = [];
