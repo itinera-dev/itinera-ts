@@ -1,8 +1,8 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { Contributor } from "../journey.js";
-import type { Option } from "../option.js";
-import { type Outcome, Step, type StepClass } from "../step.js";
-import type { PlainValue } from "../value.js";
+import type { Contributor } from "../../../src/journey.js";
+import type { Option } from "../../../src/option.js";
+import { type Outcome, Step, type StepClass } from "../../../src/step.js";
+import type { PlainValue } from "../../../src/value.js";
 import {
   classOf,
   integer,
@@ -10,8 +10,12 @@ import {
   objectOf,
   optional,
   string,
-} from "../value/token.js";
-import { input, stepReporter, type StepReporter } from "./request.js";
+} from "../../../src/value/token.js";
+import {
+  input,
+  stepReporter,
+  type StepReporter,
+} from "../../../src/step/request.js";
 
 enum Size {
   Small,

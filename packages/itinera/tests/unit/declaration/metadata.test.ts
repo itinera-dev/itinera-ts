@@ -1,8 +1,13 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { describe, expect, it } from "vitest";
-import { classCarriedBy, boolean, number, string } from "../value/token.js";
-import type { PlainValue } from "../value.js";
-import { typeFromMetadata } from "./metadata.js";
+import {
+  classCarriedBy,
+  boolean,
+  number,
+  string,
+} from "../../../src/value/token.js";
+import type { PlainValue } from "../../../src/value.js";
+import { typeFromMetadata } from "../../../src/declaration/metadata.js";
 
 class Payment {
   constructor(readonly cents: number) {}

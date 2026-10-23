@@ -17,8 +17,8 @@ None of its own.
 
 ## Tests
 
-- `src/service/request.test.ts`: a service type is named as given, is a new object each time, even under the same name, cannot be changed, and refuses an empty name; and what `@service` records.
-- `src/service/request.test-d.ts`: a service type is made only by `serviceType`, and `@service` does not compile on a parameter of another type, on the constructor, on a method other than `run`, or outside a step.
+- `tests/unit/service/request.test.ts`: a service type is named as given, is a new object each time, even under the same name, cannot be changed, and refuses an empty name; and what `@service` records.
+- `tests/unit/service/request.test-d.ts`: a service type is made only by `serviceType`, and `@service` does not compile on a parameter of another type, on the constructor, on a method other than `run`, or outside a step.
 - `examples/service.ts`: a step requesting a payment gateway.
 
 ## Done when

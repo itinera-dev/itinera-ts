@@ -1,7 +1,10 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { type Outcome, Step, type StepClass } from "../step.js";
-import type { StepReporter } from "../step/request.js";
-import { type Contributor, contributor } from "./contributor.js";
+import { type Outcome, Step, type StepClass } from "../../../src/step.js";
+import type { StepReporter } from "../../../src/step/request.js";
+import {
+  type Contributor,
+  contributor,
+} from "../../../src/journey/contributor.js";
 
 declare const given: Contributor;
 

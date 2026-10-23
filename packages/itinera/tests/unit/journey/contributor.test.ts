@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { requestsOf } from "../declaration.js";
-import { type Outcome, Step } from "../step.js";
-import { type Contributor, contributor } from "./contributor.js";
+import { requestsOf } from "../../../src/declaration.js";
+import { type Outcome, Step } from "../../../src/step.js";
+import {
+  type Contributor,
+  contributor,
+} from "../../../src/journey/contributor.js";
 
 describe("contributor", () => {
   it("records a request for the contributor", () => {

@@ -1,6 +1,6 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { type Outcome, Step, type StepClass } from "../step.js";
-import { service, serviceType } from "./request.js";
+import { type Outcome, Step, type StepClass } from "../../../src/step.js";
+import { service, serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {
   take(amount: number): string;

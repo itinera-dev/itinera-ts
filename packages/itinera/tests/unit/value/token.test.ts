@@ -1,6 +1,6 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { describe, expect, it } from "vitest";
-import type { PlainValue } from "../value.js";
+import type { PlainValue } from "../../../src/value.js";
 import {
   boolean,
   classCarriedBy,
@@ -15,7 +15,7 @@ import {
   optional,
   string,
   unwrapped,
-} from "./token.js";
+} from "../../../src/value/token.js";
 
 class Payment {
   constructor(readonly cents: number) {}

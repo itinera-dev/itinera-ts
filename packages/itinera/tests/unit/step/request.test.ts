@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { requestsOf } from "../declaration.js";
-import { Step, type Outcome } from "../step.js";
-import type { PlainValue } from "../value.js";
+import { requestsOf } from "../../../src/declaration.js";
+import { Step, type Outcome } from "../../../src/step.js";
+import type { PlainValue } from "../../../src/value.js";
 import {
   classCarriedBy,
   integer,
   number,
   optional,
   string,
-} from "../value/token.js";
-import { input, stepReporter, type StepReporter } from "./request.js";
+} from "../../../src/value/token.js";
+import {
+  input,
+  stepReporter,
+  type StepReporter,
+} from "../../../src/step/request.js";
 
 class Payment {
   constructor(readonly cents: number) {}

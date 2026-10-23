@@ -1,5 +1,11 @@
 import { describe, expectTypeOf, it } from "vitest";
-import { integer, listOf, objectOf, type Optional, optional } from "./token.js";
+import {
+  integer,
+  listOf,
+  objectOf,
+  type Optional,
+  optional,
+} from "../../../src/value/token.js";
 
 describe("optional", () => {
   it("does not compile inside a list", () => {
