@@ -1,9 +1,9 @@
 import { Ending } from "itinera/unstable";
 import { describe, expect, it } from "vitest";
-import { ModelError } from "../model/error.js";
-import type { AttemptOutcome } from "../model/step/attempt.js";
-import { type StepScript, unscripted } from "../model/step.js";
-import { rescueMockScriptOf } from "./mock.js";
+import { ModelError } from "../../../src/model/error.js";
+import type { AttemptOutcome } from "../../../src/model/step/attempt.js";
+import { type StepScript, unscripted } from "../../../src/model/step.js";
+import { rescueMockScriptOf } from "../../../src/scenario/mock.js";
 
 /** A step whose only attempt ends as `outcome` says. */
 function endingAs(outcome: AttemptOutcome): StepScript {
