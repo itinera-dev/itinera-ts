@@ -6,7 +6,7 @@ import {
   runtimeNameOf,
   ScriptedMeter,
   SecondLabeller,
-} from "./services.js";
+} from "../../src/services.js";
 
 describe("the runner's services", () => {
   it.each([

@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./error.js";
+import { ModelError } from "../../../src/model/error.js";
 import {
   implementationNamed,
   Providers,
   serviceTypeNamed,
-} from "./provider.js";
+} from "../../../src/model/provider.js";
 
 /** The providers `stock`, of journey scope, then `fresh`, of attempt scope, both for `stock`. */
 function stockAndFresh(): Providers {
