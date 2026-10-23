@@ -4,4 +4,12 @@
  *
  * @module
  */
+export type {
+  EndsAbnormally,
+  EndsInSuccess,
+  Endings,
+} from "./testing/ending.js";
+export { Ending } from "./testing/ending.js";
 export { RecordingReporter } from "./testing/recording-reporter.js";
+export type { StepMockClass, StepMockScript } from "./testing/step-mock.js";
+export { StepMock, stepMock } from "./testing/step-mock.js";

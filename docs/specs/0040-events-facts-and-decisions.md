@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0040](https://github.com/itinera-dev/spec/blob/main/proposals/0040-events-facts-and-decisions.md), implemented in [#12](https://github.com/itinera-dev/itinera-ts/issues/12). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, and [0011](0011-events.md) the events themselves.
 
-Status: in progress. Stage 1 added the types of the decision events. The decision logic and the hooks around it come with the engine, from stage 6, and stage 7 lists the proposal.
+Status: in progress. Stage 1 added the types of the decision events. Stage 3 added the executor's decision after an abnormal termination, a pure function (see 0024). The decisions after a failure and a skip come in stage 6, the hooks around them in stage 7, which lists the proposal.
 
 ## API
 

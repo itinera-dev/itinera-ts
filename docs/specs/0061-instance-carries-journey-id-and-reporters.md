@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0061](https://github.com/itinera-dev/spec/blob/main/proposals/0061-instance-carries-journey-id-and-reporters.md), implemented in [#22](https://github.com/itinera-dev/itinera-ts/issues/22). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 9 the instance, and [0062](0062-workflow-descriptors.md) the descriptors and `build()`.
 
-Status: in progress. Stage 3 added `WorkflowInstance` and `instance()`. The executor that runs an instance comes next in stage 3, `@dataBag()` for the ID generator in stage 4, and stage 6 lists the proposal.
+Status: in progress. Stage 3 added `WorkflowInstance`, `instance()` and the executor that runs an instance (see 0012), which hands the reporters to the journey's dispatcher and the journey ID to every event. `@dataBag()` for the ID generator comes in stage 4, and stage 6 lists the proposal.
 
 ## API
 

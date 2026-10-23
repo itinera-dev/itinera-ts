@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0102](https://github.com/itinera-dev/spec/blob/main/proposals/0102-global-metadata.md), implemented in [#33](https://github.com/itinera-dev/itinera-ts/issues/33). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, and [0011](0011-events.md) and [0063](0063-dispatcher-factory.md) the reporters and dispatchers.
 
-Status: in progress. Stage 1 added global metadata on reporters and dispatchers, the event `global_metadata_set` and the abort reason `reserved metadata key`. Setting it before the journey comes in stage 3, from steps in stage 5, from hooks in stage 7 and from providers in stage 8, which lists the proposal.
+Status: in progress. Stage 1 added global metadata on reporters and dispatchers, the event `global_metadata_set` and the abort reason `reserved metadata key`. Stage 3 sets it before the journey: `journey_id` first, then each initial entry in order, a value that is not a value or an entry under `journey_id` refusing the instance with `initial values`, and a reporter or dispatcher that fails refusing it with `global metadata not set` (see 0012). Setting it from steps comes in stage 5, from hooks in stage 7 and from providers in stage 8, which lists the proposal.
 
 ## API
 

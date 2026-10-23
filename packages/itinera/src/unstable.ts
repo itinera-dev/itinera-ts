@@ -23,8 +23,12 @@
  *   {@link idGenerator}, {@link WorkflowBuilder}, {@link WorkflowDescriptor}
  *   and {@link Violations}, which move to `itinera/workflow`, and
  *   {@link WorkflowInstance}, which moves to `itinera/instance`.
- * - Test support: {@link RecordingReporter}, which moves to
- *   `itinera/testing`.
+ * - Executors: {@link LocalExecutor}, {@link Refusal} and why `run` refuses
+ *   an instance, which move to `itinera/executor`.
+ * - Journeys: {@link JourneyResult}, how a journey ends, why it failed or
+ *   was aborted, and its {@link DataBag}, which move to `itinera/journey`.
+ * - Test support: {@link RecordingReporter}, {@link Ending}, {@link stepMock}
+ *   and {@link StepMock}, which move to `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
  *   their concepts: `itinera/journey`, `itinera/workflow`, `itinera/step`,
  *   `itinera/policy` and `itinera/service`.
@@ -36,8 +40,29 @@
 export type { ClosedSet, EveryValue, ValueOf } from "./closed-set.js";
 export type * from "./event.js";
 export { EventKind, RescueCause } from "./event.js";
-export type { JourneyId } from "./journey.js";
-export { AbortReason, FailureCause } from "./journey.js";
+export type {
+  DispatcherFactoryFailed,
+  DispatcherFailed,
+  GlobalMetadataNotSet,
+  InitialValues,
+  InstanceRan,
+  JourneyRunning,
+  Refused,
+} from "./executor.js";
+export { LocalExecutor, Refusal } from "./executor.js";
+export type {
+  Abort,
+  Aborted,
+  Failed,
+  Failure,
+  FailureWithError,
+  FailureWithReason,
+  JourneyId,
+  JourneyResult,
+  JourneyStatus,
+  Succeeded,
+} from "./journey.js";
+export { AbortReason, DataBag, FailureCause } from "./journey.js";
 export { None, Option, Some } from "./option.js";
 export type {
   FailWorkflow,
@@ -73,7 +98,14 @@ export type {
   Success,
 } from "./step.js";
 export { Attempt, Step, step } from "./step.js";
-export { RecordingReporter } from "./testing.js";
+export type {
+  EndsAbnormally,
+  EndsInSuccess,
+  Endings,
+  StepMockClass,
+  StepMockScript,
+} from "./testing.js";
+export { Ending, RecordingReporter, StepMock, stepMock } from "./testing.js";
 export type { AsValue, PlainValue, SerialisesItself, Value } from "./value.js";
 export type {
   AdapterName,

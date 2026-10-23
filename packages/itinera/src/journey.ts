@@ -1,9 +1,25 @@
 /**
- * Journeys: what one run of a workflow is called, and how it ends.
+ * Journeys: what one run of a workflow is called, its data, how it ends,
+ * and the result it gives.
  *
  * @module
  */
 import { closedSet, type ValueOf } from "./closed-set.js";
+
+export type { Abort } from "./journey/abort.js";
+export { DataBag } from "./journey/data-bag.js";
+export type {
+  Failure,
+  FailureWithError,
+  FailureWithReason,
+} from "./journey/failure.js";
+export type {
+  Aborted,
+  Failed,
+  JourneyResult,
+  JourneyStatus,
+  Succeeded,
+} from "./journey/result.js";
 
 declare const journeyId: unique symbol;
 
