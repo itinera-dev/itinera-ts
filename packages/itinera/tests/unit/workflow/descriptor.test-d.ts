@@ -1,8 +1,11 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { JourneyId } from "../journey.js";
-import type { Reporter } from "../report.js";
-import type { StepDescriptor } from "../step.js";
-import type { WorkflowDescriptor, WorkflowName } from "../workflow.js";
+import type { JourneyId } from "../../../src/journey.js";
+import type { Reporter } from "../../../src/report.js";
+import type { StepDescriptor } from "../../../src/step.js";
+import type {
+  WorkflowDescriptor,
+  WorkflowName,
+} from "../../../src/workflow.js";
 
 describe("WorkflowDescriptor", () => {
   it("is not written by hand, as an object or as a class", () => {

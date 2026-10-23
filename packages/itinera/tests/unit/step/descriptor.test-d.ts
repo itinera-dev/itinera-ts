@@ -1,6 +1,6 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { Step, StepDescriptor, StepName } from "../step.js";
-import { Ship } from "./fixtures.js";
+import type { Step, StepDescriptor, StepName } from "../../../src/step.js";
+import { Ship } from "../../fixtures/step.js";
 
 describe("StepDescriptor", () => {
   it("is not written by hand, as an object or as a class", () => {

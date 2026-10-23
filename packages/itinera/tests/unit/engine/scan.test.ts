@@ -1,12 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { AbortReason, type Abort } from "../../../src/journey.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
-import { Step, type Outcome, type StepClass, type StepName } from "../../../src/step.js";
+import {
+  Step,
+  type Outcome,
+  type StepClass,
+  type StepName,
+} from "../../../src/step.js";
 import { describeStep } from "../../../src/step/descriptor.js";
 import { Ending } from "../../../src/testing/ending.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import { stepMock } from "../../../src/testing/step-mock.js";
-import { charge, journeyThrough, noon, orders, run } from "../../fixtures/engine.js";
+import {
+  charge,
+  journeyThrough,
+  noon,
+  orders,
+  run,
+} from "../../fixtures/engine.js";
 import type { Journey } from "../../../src/engine/journey.js";
 import { travel } from "../../../src/engine/scan.js";
 
