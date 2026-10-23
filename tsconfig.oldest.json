@@ -23,5 +23,6 @@
     "packages/itinera/src",
     "packages/itinera/tests",
     "packages/itinera/examples"
-  ]
+  ],
+  "exclude": ["packages/itinera/tests/integration/reference.test.ts"]
 }

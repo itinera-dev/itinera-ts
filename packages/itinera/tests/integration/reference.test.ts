@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { accessible } from "./accessible.mjs";
+import { accessible } from "../../typedoc/accessible.mjs";
 
 describe("an API reference page", () => {
   it("has its content as the main landmark", () => {
