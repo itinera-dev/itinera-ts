@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { equalTo } from "./equal.js";
+import { equalTo } from "../../src/equal.js";
 
 describe("equalTo", () => {
   it.each([

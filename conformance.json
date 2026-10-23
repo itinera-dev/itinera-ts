@@ -42,7 +42,7 @@
         "scenario": "A provider that returns nothing aborts the journey, with no error",
         "proof": {
           "test": "a service provider cannot return what this.provide(...) does not make",
-          "file": "packages/itinera/tests/proofs.test-d.ts"
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
         }
       }
     ]

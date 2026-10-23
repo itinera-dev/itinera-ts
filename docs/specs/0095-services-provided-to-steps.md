@@ -46,7 +46,7 @@ None of its own.
 - `tests/unit/workflow/base.test.ts`: what `this.provide(...)` makes, with and without data.
 - `tests/unit/workflow/violation/services.test.ts`, `providers.test.ts` and `scope.test.ts`: each violation about services and providers. `tests/unit/workflow/listing.test.ts`: the services listed with the provider serving each.
 - `examples/service.ts`: a step requesting a payment gateway. `examples/provider.ts`: providers of both scopes. `examples/descriptors.ts`: `provide`.
-- `tests/proofs.test-d.ts`: a provider returning nothing or a bare instance does not compile, with the decorator or with the builder, the proof of the `@no-instance` exclusion in `conformance.json`.
+- `tests/integration/proofs.test-d.ts`: a provider returning nothing or a bare instance does not compile, with the decorator or with the builder, the proof of the `@no-instance` exclusion in `conformance.json`.
 - `packages/conformance`: the runner's service sentences, its labellers and meters, and its providers, one method of the scenario's workflow class each, playing every scenario of 0095, 0102 and 0104 that runs.
 
 ## Done when

@@ -1,10 +1,14 @@
 import { None, type Provided, Some } from "itinera/unstable";
 import type { PlainValue } from "itinera/value";
 import { describe, expect, it } from "vitest";
-import { ModelError } from "./model/error.js";
-import { Providers, type ProviderScript } from "./model/provider.js";
-import { Played, type Provide } from "./providers.js";
-import { FirstLabeller, type Labeller, SecondLabeller } from "./services.js";
+import { ModelError } from "../../src/model/error.js";
+import { Providers, type ProviderScript } from "../../src/model/provider.js";
+import { Played, type Provide } from "../../src/providers.js";
+import {
+  FirstLabeller,
+  type Labeller,
+  SecondLabeller,
+} from "../../src/services.js";
 
 /** What `provide` was given, as `this.provide(...)` would keep it. */
 interface Kept {
