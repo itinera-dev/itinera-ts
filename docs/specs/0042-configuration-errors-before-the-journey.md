@@ -20,7 +20,7 @@ None of its own.
 
 - `tests/unit/workflow/violation.test.ts`, the tests of each submodule of `src/workflow/violation/`, under `tests/unit/workflow/violation/`, `tests/unit/workflow/builder.test.ts` and `tests/unit/workflow/decorators.test.ts`: every violation, all at once, before any workflow object exists.
 - `tests/unit/workflow/descriptor.test-d.ts`, `tests/unit/step/descriptor.test-d.ts` and `tests/unit/instance/made.test-d.ts`: a descriptor or an instance written by hand does not compile.
-- `tests/unit/executor.test.ts`: an instance `instance()` did not make, rejected before any refusal.
+- `tests/unit/executor/local.test.ts`: an instance `instance()` did not make, rejected before any refusal.
 
 ## Done when
 
