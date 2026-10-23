@@ -71,6 +71,13 @@ export function requestsOf(owner: Owner, key: Key): readonly Request[] {
   );
 }
 
+/** The methods of `owner` whose parameters carry a request. */
+export function methodsWithRequests(
+  owner: Owner,
+): readonly (string | symbol)[] {
+  return [...(table.get(owner)?.keys() ?? [])].filter(isMethod);
+}
+
 /**
  * The type a request for a value checks: `type`, when it is written, or else
  * the declared type of the parameter at `index`, read from the metadata the
@@ -111,7 +118,7 @@ export function requireMetadata(prototype: object, key: string | symbol): void {
 }
 
 /** How a message names the constructor of `owner`, or its method `key`. */
-function where(owner: { readonly name: string }, key: Key): string {
+export function where(owner: { readonly name: string }, key: Key): string {
   return key === undefined
     ? `the constructor of ${owner.name}`
     : `${owner.name}.${String(key)}`;
@@ -148,4 +155,8 @@ function requestAt(
     );
   }
   return request;
+}
+
+function isMethod(key: Key): key is string | symbol {
+  return key !== undefined;
 }

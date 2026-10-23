@@ -72,6 +72,7 @@ export class WorkflowBuilder<
   /**
    * Adds a step after the steps the workflow has so far: a class extending
    * `Step`, declared with `@step` or not, and what the workflow says about it.
+   * The builder attaches no step policies, so `policies`, if given, is empty.
    *
    * @throws Error if the name is empty, if the retry budget is not a whole
    * number from 0, or if a parameter of the step's constructor or of its

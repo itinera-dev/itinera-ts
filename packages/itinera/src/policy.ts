@@ -1,11 +1,44 @@
 /**
- * Policies: what a policy is called, its hooks, and the lifecycles a hook
- * returns.
+ * Policies: step policies and workflow policies, what a policy is called,
+ * its hooks, what they request, the lifecycles a step hook returns, and the
+ * roles a policy requests of its workflow.
  *
  * @module
  */
 import { closedSet, type ValueOf } from "./closed-set.js";
-import type { Reason } from "./step.js";
+import type { FailureCause } from "./journey.js";
+
+export {
+  type PolicyOptions,
+  stepPolicy,
+  workflowPolicy,
+} from "./policy/declared.js";
+export {
+  type HookDecorator,
+  onStepAbnormalTermination,
+  onStepFailure,
+  onStepRetry,
+  onStepSuccess,
+  onWorkflowFailure,
+  onWorkflowSuccess,
+} from "./policy/hooks.js";
+
+export type {
+  FailWorkflow,
+  FinishWorkflow,
+  KeepDefault,
+  Lifecycle,
+  OnFailure,
+  OnSuccess,
+} from "./policy/lifecycle.js";
+export { type HookReporter, hookReporter } from "./policy/reporter.js";
+export { failureCause, fromStep, retryCause, role } from "./policy/request.js";
+export type { RolesOf, RolesOfOne } from "./policy/roles.js";
+export { StepPolicy, type StepPolicyClass } from "./policy/step-policy.js";
+export {
+  WorkflowPolicy,
+  type WorkflowPolicyClass,
+} from "./policy/workflow-policy.js";
 
 declare const policyName: unique symbol;
 
@@ -74,32 +107,10 @@ export const RetryCause = closedSet({
 export type RetryCause = ValueOf<typeof RetryCause>;
 
 /**
- * A lifecycle a step hook returned, which decides what happens next, as the
- * `hook_called` event records it. A hook that keeps the default returns no
- * lifecycle.
+ * Why a step was given up, as `on step failure` is told: its last attempt
+ * reported a failure, ended in an abnormal termination, or spent its retry
+ * budget.
  *
- * {@includeCode ../examples/lifecycle.ts}
+ * {@includeCode ../examples/policy.ts}
  */
-export type Lifecycle = FinishWorkflow | FailWorkflow;
-
-/**
- * The journey succeeds at once.
- *
- * {@includeCode ../examples/lifecycle.ts}
- */
-export interface FinishWorkflow {
-  /** Which lifecycle this is. */
-  readonly kind: "FinishWorkflow";
-}
-
-/**
- * The journey fails at once, with a reason.
- *
- * {@includeCode ../examples/lifecycle.ts}
- */
-export interface FailWorkflow {
-  /** Which lifecycle this is. */
-  readonly kind: "FailWorkflow";
-  /** Why the journey fails. */
-  readonly reason: Reason;
-}
+export type StepFailureCause = Exclude<FailureCause, "FailWorkflow">;

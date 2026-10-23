@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { describeStep } from "../../../src/step/descriptor.js";
+import { Audit, Ledger } from "../../fixtures/policy.js";
+import { describeStep, policiesOf } from "../../../src/step/descriptor.js";
 import { Ship } from "../../fixtures/step.js";
 
 describe("describeStep", () => {
@@ -45,5 +46,17 @@ describe("describeStep", () => {
     expect(() => describeStep(Ship, { name: "ship", retryBudget })).toThrow(
       `step ship has a retry budget of ${String(retryBudget)}, not a whole number from 0`,
     );
+  });
+
+  it("keeps the step policies attached, in order", () => {
+    const described = describeStep(Ship, {
+      name: "ship",
+      policies: [Ledger, Audit],
+    });
+    expect(policiesOf(described)).toEqual([Ledger, Audit]);
+  });
+
+  it("attaches no step policies unless told", () => {
+    expect(policiesOf(describeStep(Ship, { name: "ship" }))).toEqual([]);
   });
 });

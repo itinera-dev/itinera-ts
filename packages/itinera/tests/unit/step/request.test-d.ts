@@ -11,8 +11,16 @@ import {
   optional,
   string,
 } from "../../../src/value/token.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
+import type { Reason, StepName } from "../../../src/step.js";
+import type { Attempt } from "../../../src/step/attempt.js";
 import {
+  attempt,
+  error,
+  failureReason,
   input,
+  stepName,
   stepReporter,
   type StepReporter,
 } from "../../../src/step/request.js";
@@ -197,6 +205,65 @@ describe("stepReporter", () => {
         return reporter;
       }
     }
+    expectTypeOf(Charge).toExtend<StepClass>();
+  });
+});
+
+describe("the requests of a step hook about its step", () => {
+  it("compile in a step policy on parameters of what they give", () => {
+    class Audit extends StepPolicy {
+      failed(
+        @stepName() step: StepName,
+        @attempt() attempt: Attempt,
+        @failureReason() reason: Reason,
+        @failureReason({ optional: true }) maybe: Option<Reason>,
+        @error() thrown: unknown,
+        @error({ optional: true }) caught: Option<unknown>,
+      ): unknown {
+        return [step, attempt, reason, maybe, thrown, caught];
+      }
+    }
+    expectTypeOf(Audit).toBeConstructibleWith();
+  });
+
+  it("do not compile when the optional and the required are swapped", () => {
+    class Audit extends StepPolicy {
+      failed(
+        // @ts-expect-error an optional reason may be absent
+        @failureReason({ optional: true }) reason: Reason,
+        // @ts-expect-error a required reason is never an Option
+        @failureReason() maybe: Option<Reason>,
+      ): unknown {
+        return [reason, maybe];
+      }
+    }
+    expectTypeOf(Audit).toBeConstructibleWith();
+  });
+
+  it("do not compile in a workflow policy or a step", () => {
+    class Notify extends WorkflowPolicy {
+      paid(
+        // @ts-expect-error a workflow policy acts on no step
+        @stepName() step: StepName,
+        // @ts-expect-error a workflow policy acts on no attempt
+        @attempt() attempt: Attempt,
+      ): unknown {
+        return [step, attempt];
+      }
+    }
+    class Charge extends Step {
+      override run(): Outcome {
+        return this.succeed();
+      }
+
+      failure(
+        // @ts-expect-error a step is not given its own failure
+        @error() thrown: unknown,
+      ): unknown {
+        return thrown;
+      }
+    }
+    expectTypeOf(Notify).toBeConstructibleWith();
     expectTypeOf(Charge).toExtend<StepClass>();
   });
 });
