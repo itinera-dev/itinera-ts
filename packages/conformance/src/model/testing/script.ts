@@ -55,11 +55,10 @@ function chosen(written: string): Chosen {
   if (written === "every" || written === "remaining") {
     return written;
   }
-  const number = Number(written);
-  if (!Number.isInteger(number)) {
+  if (!/^-?\d+(\.\d+)?$/.test(written)) {
     throw new ModelError(`"${written}" chooses no attempt`);
   }
-  return number;
+  return Number(written);
 }
 
 function entriesOf(
