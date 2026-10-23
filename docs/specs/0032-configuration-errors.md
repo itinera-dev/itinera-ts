@@ -30,10 +30,10 @@ None of its own.
 
 ## Tests
 
-- `src/workflow/violation.test.ts` and the tests beside each submodule of `src/workflow/violation/`: every violation, all reported at once.
-- `src/workflow/builder.test.ts` and `src/workflow/decorators.test.ts`: violations thrown before the constructor runs, and when a class is defined.
-- `src/engine/start.test.ts` and `src/executor.test.ts`: the refusals, with no event.
-- `src/engine/request.test.ts`, `src/engine/build.test.ts` and `src/engine.test.ts`: aborts found while running, the events before them kept, `journey_aborted` last, and no data bag.
+- `tests/unit/workflow/violation.test.ts` and the tests of each submodule of `src/workflow/violation/`, under `tests/unit/workflow/violation/`: every violation, all reported at once.
+- `tests/unit/workflow/builder.test.ts` and `tests/unit/workflow/decorators.test.ts`: violations thrown before the constructor runs, and when a class is defined.
+- `tests/unit/engine/start.test.ts` and `tests/unit/executor.test.ts`: the refusals, with no event.
+- `tests/unit/engine/request.test.ts`, `tests/unit/engine/build.test.ts` and `tests/unit/engine.test.ts`: aborts found while running, the events before them kept, `journey_aborted` last, and no data bag.
 
 ## Done when
 
