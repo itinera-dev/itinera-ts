@@ -43,9 +43,9 @@ None of its own.
 
 ## Tests
 
-- `src/value/capture.test.ts`: a `toValue` that throws is not a value, as each kind of non-value is.
-- `src/value/read.test.ts`: a read gives nothing for what makes the schema throw, what a guard refuses and what `fromValue` refuses.
-- The runner's `src/converted.test.ts`: both conversions of `throwing record` throw, and `rejected record` refuses every value; `src/model/value.test.ts` and `src/model/adapter.test.ts`: the converted types and an object of `throwing record` as the sentences write them.
+- `tests/unit/value/capture.test.ts`: a `toValue` that throws is not a value, as each kind of non-value is.
+- `tests/unit/value/read.test.ts`: a read gives nothing for what makes the schema throw, what a guard refuses and what `fromValue` refuses.
+- The runner's `tests/unit/converted.test.ts`: both conversions of `throwing record` throw, and `rejected record` refuses every value; `tests/unit/model/value.test.ts` and `tests/unit/model/adapter.test.ts`: the converted types and an object of `throwing record` as the sentences write them.
 
 ## Done when
 

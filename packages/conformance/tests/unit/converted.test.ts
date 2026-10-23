@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rejectedRecordGuard, ThrowingRecord } from "./converted.js";
+import { rejectedRecordGuard, ThrowingRecord } from "../../src/converted.js";
 
 describe("the converted types", () => {
   it("never turns a throwing record into a value", () => {
