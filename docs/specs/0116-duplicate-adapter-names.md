@@ -18,9 +18,9 @@ None of its own.
 
 ## Tests
 
-- `src/workflow/violation/adapters.test.ts`: `duplicateAdapterNames` names each name more than one adapter has, once, and `stepsAdaptedTwice` names a step that one adapter lists twice.
-- `src/workflow/violation/providers.test.ts`: `providerViolations` names a step that one provider lists twice.
-- `src/workflow/violation.test.ts`: each violation's line in the message of `Violations`.
+- `tests/unit/workflow/violation/adapters.test.ts`: `duplicateAdapterNames` names each name more than one adapter has, once, and `stepsAdaptedTwice` names a step that one adapter lists twice.
+- `tests/unit/workflow/violation/providers.test.ts`: `providerViolations` names a step that one provider lists twice.
+- `tests/unit/workflow/violation.test.ts`: each violation's line in the message of `Violations`.
 - The conformance cases tagged `@proposal-0116`.
 
 ## Done when
