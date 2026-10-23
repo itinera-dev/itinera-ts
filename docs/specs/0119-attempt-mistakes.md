@@ -22,5 +22,5 @@ No scenario is excluded. A `number` holds 0, negative numbers and fractions, so 
 
 ## Tests
 
-- `src/testing/scripted/step-writer.test.ts`: every mistake in choosing attempts, and `names an attempt the step can never have rather than one described already`.
+- `tests/unit/testing/scripted/step-writer.test.ts`: every mistake in choosing attempts, and `names an attempt the step can never have rather than one described already`.
 - The runner reads any number in a script's `attempt` column, in `src/model/testing/script.ts`, and the sentences that read the record of a step, stopping the test, and an attempt it does not hold are in `src/sentences/scripted.ts`.
