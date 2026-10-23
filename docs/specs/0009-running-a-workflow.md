@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0009](https://github.com/itinera-dev/spec/blob/main/proposals/0009-running-a-workflow.md), implemented in [#5](https://github.com/itinera-dev/itinera-ts/issues/5). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, [0061](0061-instance-carries-journey-id-and-reporters.md) the instance, [0062](0062-workflow-descriptors.md) the step descriptors, [0012](0012-local-executor.md) the executor and [0065](0065-business-result.md) the result.
 
-Status: in progress. Stage 3 added the scan: steps in their order, each attempted until it succeeds or is given up, with the executor's own decision after an abnormal termination. Stage 5 added the data bag's reads, then the other outcomes, contributions and the decision after a failure; stage 6 adds the statuses, aborts and `output`, and stage 7 the hooks around the decisions and lists the proposal.
+Status: in progress. Stage 3 added the scan: steps in their order, each attempted until it succeeds or is given up, with the executor's own decision after an abnormal termination. Stage 5 added the data bag's reads, then the other outcomes, contributions and the decision after a failure; stage 6 added the property-based tests of the scan and the result's `output`, and stage 7 the hooks around the decisions and lists the proposal.
 
 ## The scan
 
@@ -26,7 +26,7 @@ None of its own.
 - `tests/unit/engine/scan.test.ts`: the events of a journey of one step, steps in order, what `journey_failed` carries, a step that cannot be built, and an abort raised while a step is built passed on as it was raised.
 - `tests/unit/engine/run.test.ts` and `tests/unit/engine/outcome.test.ts`: a step returning what is not an outcome, a thrown value that is not an error, an abort while a step runs ending the journey whatever the step returned, what follows each outcome, retries while the budget lasts and giving up with each cause.
 - `tests/unit/engine/decision.test.ts`: the decision for each retry budget, cause and setting.
-- Later stages: property-based tests with fast-check that attempt counts stay within the budget and that each failed attempt has one decision.
+- `tests/unit/engine/scan.test.ts`, with fast-check, over generated workflows of steps whose attempts succeed, fail, skip or end abnormally, with any retry budget: the journey starts with `journey_started` and ends with `journey_succeeded` or `journey_failed`, sequence numbers count from 1 with no gap, each attempt has exactly one outcome fact and each failed attempt exactly one decision, no step is attempted more often than its budget allows, and steps are attempted in their order up to the one given up; and over generated data, no engine event carries a value of the data bag.
 
 ## Done when
 

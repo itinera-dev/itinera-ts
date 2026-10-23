@@ -35,7 +35,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `option` | `Option`, `Some` and `None` |
 | `event` | `Event`, every kind of event and what each carries |
 | `report` | Reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
-| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag and what reading it gives, `Read`, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
+| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, its output and `OutputError`, the data bag and what reading it gives, `Read`, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
 | `step` | Step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors, their options and their builders |
 | `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, their listing, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
 | `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
@@ -191,9 +191,9 @@ sequenceDiagram
 4. It creates the journey's dispatcher with the executor's dispatcher factory, the default one unless the executor was given another, and adds each reporter of the instance, wrapped in a guard.
 5. It sets `journey_id` first, then each entry of the initial global metadata, in order, through the dispatcher.
 6. A failure of the factory, of the dispatcher or of a reporter in steps 4 and 5 refuses the instance. A refusal rejects `run` with a `Refusal`, before any journey and any event.
-7. Then the engine runs the journey, as the next section shows, and `run` resolves to its result: succeeded or failed with its data bag, or aborted.
+7. Then the engine runs the journey, as the next section shows, and `run` resolves to its result: succeeded or failed with its data bag, or aborted. The application reads the result's output with `output`, giving a type for each key, as a typed read of the data bag does; it throws an `OutputError` for an aborted journey, which has no data bag, and for a key that holds no value or a value of another type.
 
-Where it lives: `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts`.
+Where it lives: `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts`, `journey/result.ts`, `journey/output.ts`.
 
 ### How a journey runs
 
