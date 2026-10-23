@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import type { Event } from "../../../../src/event.js";
 import { aboutCharge, fixedFields } from "../../../fixtures/event.js";
 import type { PolicyName } from "../../../../src/policy.js";
-import { Attempt, nextAttempt, type StepName } from "../../../../src/step.js";
+import { Attempt, nextAttempt } from "../../../../src/step/attempt.js";
+import type { StepName } from "../../../../src/step.js";
 import { line } from "../../../../src/testing/recording-reporter/path.js";
 
 const declined = { code: "declined" };

@@ -58,5 +58,8 @@
   },
   "dependencies": {
     "ts-results-es": "7.1.0"
+  },
+  "peerDependencies": {
+    "reflect-metadata": "^0.2.2"
   }
 }

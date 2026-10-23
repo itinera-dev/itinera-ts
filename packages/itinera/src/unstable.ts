@@ -17,6 +17,12 @@
  *   {@link DispatcherFactory}, {@link DefaultDispatcher},
  *   {@link DefaultDispatcherFactory} and {@link DebugReporter}, which move to
  *   `itinera/report`.
+ * - Steps: {@link Step}, {@link step}, {@link Outcome} and
+ *   {@link StepDescriptor}, which move to `itinera/step`.
+ * - Workflows: {@link Workflow}, {@link workflow}, {@link withStep},
+ *   {@link idGenerator}, {@link WorkflowDescriptor} and {@link Violations},
+ *   which move to `itinera/workflow`, and {@link WorkflowInstance}, which
+ *   moves to `itinera/instance`.
  * - Test support: {@link RecordingReporter}, which moves to
  *   `itinera/testing`.
  * - The names and closed sets events carry, which move to the subpaths of
@@ -40,15 +46,50 @@ export type {
   PolicyName,
 } from "./policy.js";
 export { RetryCause, StepHook, WorkflowHook } from "./policy.js";
-export type { Dispatcher, DispatcherFactory, Reporter } from "./report.js";
+export type {
+  InstanceOptions,
+  ValuesByKey,
+  WorkflowInstance,
+} from "./instance.js";
+export type {
+  Dispatcher,
+  DispatcherFactory,
+  Reporter,
+  ReporterClass,
+} from "./report.js";
 export {
   DebugReporter,
   DefaultDispatcher,
   DefaultDispatcherFactory,
 } from "./report.js";
 export type { ProviderName } from "./service.js";
-export type { Reason, StepName } from "./step.js";
-export { Attempt } from "./step.js";
+export type {
+  Outcome,
+  Reason,
+  StepClass,
+  StepDescriptor,
+  StepName,
+  StepOptions,
+  Success,
+} from "./step.js";
+export { Attempt, Step, step } from "./step.js";
 export { RecordingReporter } from "./testing.js";
 export type { AsValue, PlainValue, SerialisesItself, Value } from "./value.js";
-export type { AdapterName, WorkflowName } from "./workflow.js";
+export type {
+  AdapterName,
+  Built,
+  DuplicateStepName,
+  IdGeneratorDecorator,
+  Violation,
+  WorkflowDescriptor,
+  WorkflowName,
+  WorkflowOptions,
+} from "./workflow.js";
+export {
+  idGenerator,
+  ViolationKind,
+  Violations,
+  withStep,
+  Workflow,
+  workflow,
+} from "./workflow.js";

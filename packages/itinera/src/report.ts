@@ -45,6 +45,14 @@ export interface Reporter {
 }
 
 /**
+ * A class of reporters a workflow lists, which itinera builds with `new`,
+ * without arguments, for every journey.
+ *
+ * {@includeCode ../examples/workflow.ts}
+ */
+export type ReporterClass = new () => Reporter;
+
+/**
  * Delivers the events and the global metadata of one journey to the
  * reporters added to it.
  *
