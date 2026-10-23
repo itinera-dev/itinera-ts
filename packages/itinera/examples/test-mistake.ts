@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { type Outcome, Step, step } from "itinera/step";
-import { MistakeKind, scripted, TestMistake } from "itinera/unstable";
+import { MistakeKind, scripted, TestMistake } from "itinera/testing";
 import { withStep, Workflow, workflow } from "itinera/workflow";
 
 @step()

@@ -2,7 +2,7 @@ import type {
   HookCall,
   StepPolicyMock,
   WorkflowPolicyMock,
-} from "itinera/unstable";
+} from "itinera/testing";
 import type { Hook } from "../model/policy.js";
 
 /** One call of a hook of a scripted policy, in the order calls were made. */

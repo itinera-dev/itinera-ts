@@ -2,7 +2,7 @@ import { EventKind } from "itinera/event";
 import { ModelError } from "./error.js";
 
 /** How a scripted reporter fails, as test support's failing reporter does. */
-export type { ReporterFailure } from "itinera/unstable";
+export type { ReporterFailure } from "itinera/testing";
 
 /**
  * What the executor is given to dispatch events: unstated, which is the

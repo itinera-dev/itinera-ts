@@ -1,6 +1,6 @@
 import type { Event, Timestamp } from "itinera/event";
 import type { JourneyId } from "itinera/journey";
-import { RecordingReporter } from "itinera/unstable";
+import { RecordingReporter } from "itinera/testing";
 import type { WorkflowName } from "itinera/workflow";
 import { describe, expect, it } from "vitest";
 import type { Holding } from "../../src/model.js";

@@ -6,7 +6,7 @@ Status: complete, and 10 is listed in `conformance.json`. Stage 1 added the hook
 
 ## API
 
-Since stage 10, its API is exported from the subpaths of its concepts, chiefly `itinera/policy`, and its test support from `itinera/unstable` until 0108 is listed. It is defined in `src/policy.ts`, with its submodules in `src/policy/`.
+Since stage 10, its API is exported from the subpaths of its concepts, chiefly `itinera/policy`, and its test support from `itinera/testing`. It is defined in `src/policy.ts`, with its submodules in `src/policy/`.
 
 - **`StepPolicy<R>`** and **`WorkflowPolicy<R>`** are abstract. Each has an ECMAScript private brand, `#stepPolicy` or `#workflowPolicy`, so neither is structurally the other, and only a subclass has the type of a policy. `R`, the roles the policy requests, is a covariant phantom, `declare readonly [roles]: R`, under a `unique symbol` only itinera names, as the plan's notes 3 and 7 require: it exists only in the types, and a `protected` member would let every workflow pass. `StepPolicyClass<R>` and `WorkflowPolicyClass<R>` are the classes, constructed with no arguments.
 - **What a hook returns.** `StepPolicy` gives its subclasses `this.keepDefault()`, `this.finishWorkflow()` and `this.failWorkflow(reason)`, where a reason is a `Reason` or only its code, as chapter 6, 6.11 suggests. `keepDefault` and `finishWorkflow` return frozen singletons, and `failWorkflow` a frozen `FailWorkflow`. `KeepDefault` is `{ kind: "KeepDefault" }`, not a lifecycle, so `hook_called` records none. `OnSuccess` is `KeepDefault | FinishWorkflow | FailWorkflow`, and `OnFailure` is `KeepDefault | FailWorkflow`.
@@ -34,7 +34,7 @@ Where each hook runs is in [0009](0009-running-a-workflow.md), and how one is ca
 - **`PolicyDescriptor.call(policy, hook, answers)`**, public, calls the method that implements the hook on a policy object the descriptor built, with the answers in order, and gives what it returned. It throws a `TypeError` when the object has no such method, which only a cast lets happen.
 - **What a hook returned** is checked by `lifecycleOf`, in `src/engine/hook/lifecycle.ts`, whatever a cast let through: nothing, or `KeepDefault`, keeps the default; `FinishWorkflow` only from `on step success`; `FailWorkflow` with a reason whose code is a string and whose message is a string or absent, captured again as `failWorkflow` captures it, gives a frozen lifecycle of its own. Details that are not a value abort the journey with `not a value`, naming the step and the hook; anything else, any lifecycle from a workflow hook, or a getter that throws while it is read, aborts it with `invalid lifecycle`, naming the step of a step hook.
 - **Roles.** A request `@role<R>()` is answered with the workflow object of the instance, which implements every role its policies request, as the types made sure.
-- **Test support.** `stepPolicyMock(script)` and `workflowPolicyMock(script)`, in `src/testing/`, from `itinera/unstable` until stage 10, are policies whose hooks keep what each call received and end as the script says, through `HookEnding` (see [0108](0108-test-support.md)).
+- **Test support.** `stepPolicyMock(script)` and `workflowPolicyMock(script)`, in `src/testing/`, from `itinera/testing`, are policies whose hooks keep what each call received and end as the script says, through `HookEnding` (see [0108](0108-test-support.md)).
 
 ## Dependencies
 

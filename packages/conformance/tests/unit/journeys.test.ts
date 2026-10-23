@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { admitted, type Journey, ran, streamOf } from "../../src/journeys.js";
 import { Model, ModelError } from "../../src/model.js";
 import { Recorders } from "../../src/recorders.js";
+import { Tested } from "../../src/tested.js";
 import { Witness } from "../../src/witness.js";
 
 /** A workflow of one step listing the reporters, under the default dispatcher. */
@@ -26,7 +27,7 @@ async function journeysOf(
   if (admission.kind === "refused") {
     throw admission.violations;
   }
-  return ran(admission.workflow, model, recorders, times);
+  return ran(admission.workflow, model, recorders, new Tested(), times);
 }
 
 function journeyIdOf(event: Event): string {

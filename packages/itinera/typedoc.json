@@ -12,6 +12,7 @@
     "src/schema.ts",
     "src/service.ts",
     "src/step.ts",
+    "src/testing.ts",
     "src/unstable.ts",
     "src/value.ts",
     "src/workflow.ts"

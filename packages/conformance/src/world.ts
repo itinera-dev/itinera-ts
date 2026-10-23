@@ -1,17 +1,20 @@
 import type { Event } from "itinera/event";
 import type { JourneyResult } from "itinera/journey";
 import type { ListedStep } from "itinera/workflow";
+import { Alone } from "./alone.js";
 import {
   admitted,
   type Admission,
   type Journey,
   ran,
+  ranScripted,
   streamOf,
 } from "./journeys.js";
 import { Model } from "./model.js";
 import { ModelError } from "./model/error.js";
 import { Recorders } from "./recorders.js";
 import { listingOf } from "./scenario.js";
+import { Tested } from "./tested.js";
 import { Unmet } from "./unmet.js";
 import { Witness } from "./witness.js";
 
@@ -26,9 +29,12 @@ export class World {
     this.model.policies.roles,
     this.model.providers,
   );
+  /** What the scenario's test support kept. */
+  readonly tested = new Tested();
   #admission: Admission | undefined;
   #journeys: readonly Journey[] = [];
   #listing: readonly ListedStep[] | undefined;
+  #alone: Alone | undefined;
 
   /** Builds the workflow the scenario declares, once. */
   admit(): Admission {
@@ -36,17 +42,60 @@ export class World {
     return this.#admission;
   }
 
-  /** Runs the journeys of the workflow, `times` of them on one executor, once admitted. */
+  /**
+   * Runs the journeys of the workflow, `times` of them on one executor, once
+   * admitted, keeping the test mistake that stops them.
+   */
   async run(times: number): Promise<void> {
     const admission = this.admit();
     if (admission.kind === "admitted") {
-      this.#journeys = await ran(
-        admission.workflow,
-        this.model,
-        this.recorders,
-        times,
-      );
+      await this.tested.caught(async () => {
+        this.#journeys = await ran(
+          admission.workflow,
+          this.model,
+          this.recorders,
+          this.tested,
+          times,
+        );
+      });
     }
+  }
+
+  /**
+   * Runs one journey of the workflow with the scenario's script, once
+   * admitted, keeping the test mistake that stops it.
+   */
+  async runScripted(): Promise<void> {
+    const admission = this.admit();
+    if (admission.kind === "admitted") {
+      await this.tested.caught(async () => {
+        this.#journeys = await ranScripted(
+          admission.workflow,
+          this.model,
+          this.recorders,
+          this.tested,
+        );
+      });
+    }
+  }
+
+  /**
+   * Calls a step, a hook or an input adapter alone, outside any journey, as
+   * `calling` does with the recorders of test support.
+   */
+  async callAlone(
+    calling: (alone: Alone) => Promise<void> | void,
+  ): Promise<void> {
+    this.#alone = new Alone(this.model.testing);
+    await calling(this.#alone);
+  }
+
+  /** What was called alone was lent and gave, once a When sentence called it. */
+  get alone(): Alone {
+    if (this.#alone === undefined) {
+      throw new ModelError("nothing was called alone");
+    }
+    return this.#alone;
   }
 
   /** Lists the workflow the scenario declares, without running anything. */

@@ -1,4 +1,4 @@
-import { Ending } from "itinera/unstable";
+import { Ending } from "itinera/testing";
 import { describe, expect, it } from "vitest";
 import { ModelError } from "../../../src/model/error.js";
 import type { AttemptOutcome } from "../../../src/model/step/attempt.js";

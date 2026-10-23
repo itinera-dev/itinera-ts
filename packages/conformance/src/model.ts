@@ -4,7 +4,11 @@
  * it, through itinera's public API.
  */
 import { ModelError } from "./model/error.js";
-import { type AdapterScript, unscriptedAdapter } from "./model/adapter.js";
+import {
+  adapterNamed,
+  type AdapterScript,
+  unscriptedAdapter,
+} from "./model/adapter.js";
 import { Policies } from "./model/policies.js";
 import { Providers } from "./model/provider.js";
 import type { Dispatching, ReporterFailure } from "./model/report.js";
@@ -15,6 +19,7 @@ import {
   type Attempts,
   type StepScript,
 } from "./model/step.js";
+import { TestSupport } from "./model/testing.js";
 import type { Scripted } from "./model/value.js";
 import type { IdGenerator, WorkflowModel } from "./model/workflow.js";
 
@@ -55,6 +60,8 @@ export class Model {
   readonly policies = new Policies();
   /** The service providers the scenario declares. */
   readonly providers = new Providers();
+  /** The test support the scenario uses. */
+  readonly testing = new TestSupport();
 
   /** Declares the workflow, once, with its steps in declaration order. */
   declare(name: string, steps: readonly string[]): void {
@@ -99,9 +106,7 @@ export class Model {
 
   /** The script of an input adapter the workflow declares. */
   adapter(name: string): AdapterScript {
-    const script = this.workflow.adapters.find((declared) =>
-      isNamed(declared, name),
-    );
+    const script = this.workflow.adapters.find(adapterNamed(name));
     if (script === undefined) {
       throw new ModelError(`the workflow declares no input adapter "${name}"`);
     }
@@ -191,8 +196,4 @@ export class Model {
     }
     this.#dispatching = dispatching;
   }
-}
-
-function isNamed(adapter: AdapterScript, name: string): boolean {
-  return adapter.name === name;
 }

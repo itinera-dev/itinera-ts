@@ -3,7 +3,6 @@
  * API: the workflow, put together with the builder from test support's step
  * mocks, and its instances.
  */
-import type { WorkflowInstance } from "itinera/instance";
 import { contributor, dataBag } from "itinera/journey";
 import { stepName, type StepBuilder, stepReporter } from "itinera/step";
 import {
@@ -13,15 +12,12 @@ import {
   type ListedStep,
   type WorkflowBuilder,
 } from "itinera/workflow";
-import { type Value } from "itinera/value";
 import { Adapters } from "./adapters.js";
-import { given } from "./given.js";
 import { type AdapterRequest, refuseUnheldAccess } from "./model/adapter.js";
 import type { ProviderScript } from "./model/provider.js";
-import { rescueOf } from "./model/step.js";
-import type { Scripted } from "./model/value.js";
+import { ModelError } from "./model/error.js";
+import { rescueOf, type StepScript } from "./model/step.js";
 import type { Model } from "./model.js";
-import type { Recorders } from "./recorders.js";
 import { actingOf } from "./scenario/actions.js";
 import { mockScriptOf } from "./scenario/mock.js";
 import { stepPolicyOf, workflowPolicyOf } from "./scenario/policies.js";
@@ -31,6 +27,8 @@ import { rescueStepOf } from "./scenario/rescue.js";
 import { type Scenario, serving } from "./scenario/workflow.js";
 import { tokenOf } from "./tokens.js";
 import type { ActingClass, Witness } from "./witness.js";
+
+export { type GivenReporter, instanceOf } from "./scenario/instance.js";
 
 /**
  * The workflow the scenario declares, put together with the builder, each
@@ -78,7 +76,7 @@ function builderOf(
   const builder = serving(providers.map(nameOf)).builder().name(name);
   for (const step of steps) {
     const script = model.step(step);
-    const scripted = witness
+    const built = witness
       .classOf(
         step,
         mockScriptOf(script),
@@ -87,9 +85,10 @@ function builderOf(
         script.services,
       )
       .builder(step)
-      .needs(...script.inputs.map(inputOf))
-      .run(contributor(), stepReporter(), ...script.services.map(serviceOf))
-      .retryBudget(script.retries);
+      .needs(...script.inputs.map(inputOf));
+    const scripted = withHandles(built, step, script).retryBudget(
+      script.retries,
+    );
     const rescued = script.hasRescueStep
       ? scripted.rescue(rescueStepOf(rescueOf(step), model, witness))
       : scripted;
@@ -129,6 +128,33 @@ function builderOf(
   return builder.constructWith("", played, roles, witness.providers);
 }
 
+/**
+ * The step's builder, its `run` requesting a contributor, a step reporter,
+ * then its services, unless it declares no handles, when it requests
+ * nothing.
+ *
+ * @throws ModelError when a step that declares no handles requests a service.
+ */
+function withHandles(
+  built: StepBuilder<ActingClass>,
+  step: string,
+  script: StepScript,
+): StepBuilder<ActingClass> {
+  if (script.declaresHandles) {
+    return built.run(
+      contributor(),
+      stepReporter(),
+      ...script.services.map(serviceOf),
+    );
+  }
+  if (script.services.length > 0) {
+    throw new ModelError(
+      `step "${step}" declares no contributor and no reporter, so it cannot request a service`,
+    );
+  }
+  return built;
+}
+
 function nameOf({ name }: ProviderScript): string {
   return name;
 }
@@ -142,28 +168,4 @@ function requestOf(request: AdapterRequest) {
     case "data from the workflow":
       return fromWorkflow(request.key, tokenOf(request.type));
   }
-}
-
-/**
- * A new instance of the workflow, with the initial data and global metadata
- * the scenario gives, which makes each reporter the workflow lists with its
- * journey ID.
- */
-export function instanceOf(
-  workflow: Built<Scenario>,
-  model: Model,
-  recorders: Recorders,
-): WorkflowInstance<Scenario> {
-  const { reporters = [] } = model.workflow;
-  return workflow.instance(model.initialData.map(asGiven), {
-    reporters: reporters.map((name) => recorders.makerOf(name)),
-    reportersGlobalMetadata: model.initialGlobalMetadata.map(asGiven),
-  });
-}
-
-function asGiven([key, scripted]: readonly [string, Scripted]): [
-  string,
-  Value,
-] {
-  return [key, given(scripted)];
 }

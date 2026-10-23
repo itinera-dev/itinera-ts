@@ -1,6 +1,13 @@
 /**
  * Test support: what an application's tests use to run a workflow and check
- * what its journey did, reached only by importing this module.
+ * what its journey did, reached only by importing this subpath, so that
+ * nothing of it is reachable from the rest of itinera. It holds the
+ * recording reporter and its path, fake providers, scripted runs, the
+ * recorders that lend a step, a hook or an input adapter its handles outside
+ * a journey, the mistake in a test, and the mocks that the conformance
+ * runner and an application's tests build workflows from.
+ *
+ * {@includeCode ../examples/scripted.ts}
  *
  * @module
  */
