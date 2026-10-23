@@ -1,5 +1,6 @@
 import { defineParameterType } from "@cucumber/cucumber";
 import { valueType, valueTypes } from "../model.js";
+import { statuses, stepStatus } from "../trace/status.js";
 
 /** One or more names, each in double quotes, separated by commas: `"a", "b"`. */
 defineParameterType({
@@ -13,6 +14,13 @@ defineParameterType({
   name: "type",
   regexp: new RegExp(valueTypes.join("|")),
   transformer: valueType,
+});
+
+/** A step's status at the end of a journey, as the cases name it. */
+defineParameterType({
+  name: "status",
+  regexp: new RegExp(statuses.join("|")),
+  transformer: stepStatus,
 });
 
 function names(text: string): string[] {

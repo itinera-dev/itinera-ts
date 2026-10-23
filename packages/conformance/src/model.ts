@@ -25,8 +25,10 @@ export {
 } from "./model/step.js";
 export { keyAndValue, rows, type Row } from "./model/table.js";
 export {
+  json,
   nonValue,
   scripted,
+  type Scripted,
   valueType,
   valueTypes,
   type ValueType,
