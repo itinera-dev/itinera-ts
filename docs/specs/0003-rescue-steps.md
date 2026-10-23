@@ -37,8 +37,8 @@ None of its own.
 - `tests/unit/engine/request.test.ts`: what `failureAnswered` gives a request for the failure's reason or the error, and the abort naming its requester. `tests/unit/engine/own-copy.test.ts`: the error's own copy, its class, message, stack, cause and properties kept, a getter copied without being called, and what cannot be copied or is no object given as it is.
 - `tests/unit/testing/rescue-step-mock.test.ts` and `.test-d.ts`: the mock's endings, asynchronous run, inputs and build failure, and that it takes no skip.
 - `examples/rescue-step.ts` and `examples/rescue-step-mock.ts`.
-- `tests/proofs.test-d.ts`: a rescue step that skips does not compile, with the decorator or with the builder, the proof of the `@rescue-skip` exclusion in `conformance.json`.
-- `packages/conformance`: the runner's rescue steps, each a rescue step mock given its inputs, then what it requests of the step it rescues, and the sentences on what it received, playing every scenario of 0003 and 0098 but the excluded one; `src/scenario/mock.test.ts`: a rescue step's script played as the step mock's, and one that skips refused.
+- `tests/integration/proofs.test-d.ts`: a rescue step that skips does not compile, with the decorator or with the builder, the proof of the `@rescue-skip` exclusion in `conformance.json`.
+- `packages/conformance`: the runner's rescue steps, each a rescue step mock given its inputs, then what it requests of the step it rescues, and the sentences on what it received, playing every scenario of 0003 and 0098 but the excluded one; `tests/unit/scenario/mock.test.ts`: a rescue step's script played as the step mock's, and one that skips refused.
 
 ## Done when
 

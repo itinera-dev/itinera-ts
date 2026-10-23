@@ -42,7 +42,7 @@
         "scenario": "A rescue step that skips aborts the journey",
         "proof": {
           "test": "a rescue step cannot skip",
-          "file": "packages/itinera/tests/proofs.test-d.ts"
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
         }
       }
     ],
