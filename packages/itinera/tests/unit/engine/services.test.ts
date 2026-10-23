@@ -1,13 +1,19 @@
 import { describe, expect, it } from "vitest";
-import type { Event } from "../event.js";
-import { service } from "../service/request.js";
-import { contributor } from "../journey/contributor.js";
-import { input } from "../step/request.js";
-import { Ending } from "../testing/ending.js";
-import { integer } from "../value/token.js";
-import type { ProviderOptions } from "../service.js";
-import type { Built } from "../workflow.js";
-import { GATEWAY, kindOf, recorded, serviced, Till } from "./fixtures.js";
+import type { Event } from "../../../src/event.js";
+import { service } from "../../../src/service/request.js";
+import { contributor } from "../../../src/journey/contributor.js";
+import { input } from "../../../src/step/request.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { integer } from "../../../src/value/token.js";
+import type { ProviderOptions } from "../../../src/service.js";
+import type { Built } from "../../../src/workflow.js";
+import {
+  GATEWAY,
+  kindOf,
+  recorded,
+  serviced,
+  Till,
+} from "../../fixtures/engine.js";
 
 const failingOnce = {
   attempts: [Ending.failure("declined"), Ending.success],

@@ -19,8 +19,8 @@ None of its own.
 
 ## Tests
 
-- `src/service/implementation.test.ts`: each kind of instance and the name it gives.
-- `src/engine/provider.test.ts`: `service_provided` naming the class or the service type, carrying the data captured, carrying none when none was supplied, and the abort for data that is not a value, with no service event.
+- `tests/unit/service/implementation.test.ts`: each kind of instance and the name it gives.
+- `tests/unit/engine/provider.test.ts`: `service_provided` naming the class or the service type, carrying the data captured, carrying none when none was supplied, and the abort for data that is not a value, with no service event.
 - `examples/provider.ts`: a provider supplying data with its instance.
 
 ## Done when

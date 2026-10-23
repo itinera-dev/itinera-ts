@@ -9,7 +9,10 @@ import { withStep, Workflow, workflow } from "../../../src/workflow.js";
 import { declarationOf } from "../../../src/workflow/registry.js";
 import { provider } from "../../../src/service/provider.js";
 import type { Provided } from "../../../src/service/provider/provided.js";
-import { providerReporter, type ProviderReporter } from "../../../src/service/reporter.js";
+import {
+  providerReporter,
+  type ProviderReporter,
+} from "../../../src/service/reporter.js";
 import { serviceType } from "../../../src/service/request.js";
 
 interface PaymentGateway {

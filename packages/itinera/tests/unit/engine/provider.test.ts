@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { Event } from "../event.js";
-import { EventKind } from "../event/kind.js";
-import type { Provided, ProviderReporter } from "../service.js";
-import { providerReporter } from "../service/reporter.js";
-import { RecordingReporter } from "../testing/recording-reporter.js";
-import { string } from "../value/token.js";
-import { fromWorkflow } from "../workflow/request.js";
+import type { Event } from "../../../src/event.js";
+import { EventKind } from "../../../src/event/kind.js";
+import type { Provided, ProviderReporter } from "../../../src/service.js";
+import { providerReporter } from "../../../src/service/reporter.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { string } from "../../../src/value/token.js";
+import { fromWorkflow } from "../../../src/workflow/request.js";
 import {
   chargingTill,
   counted,
@@ -17,7 +17,7 @@ import {
   run,
   Till,
   travelled,
-} from "./fixtures.js";
+} from "../../fixtures/engine.js";
 
 class Terminal {
   readonly label = "terminal";
