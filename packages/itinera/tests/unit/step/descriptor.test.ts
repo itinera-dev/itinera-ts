@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { declaredPolicy } from "../../../src/policy/declared.js";
 import { Audit, Ledger } from "../../fixtures/policy.js";
+import { type Outcome, Step } from "../../../src/step.js";
 import {
   describeStep,
   requestsOfDescribed,
@@ -31,6 +32,27 @@ describe("describeStep", () => {
     const first = described.build();
     expect(first).toBeInstanceOf(Ship);
     expect(described.build()).not.toBe(first);
+  });
+
+  it("gives the step's constructor what its requests were answered with, in order", () => {
+    class Pack extends Step {
+      constructor(
+        readonly box: string,
+        readonly count: number,
+      ) {
+        super();
+      }
+
+      override run(): Outcome {
+        return this.succeed();
+      }
+    }
+    expect(
+      describeStep(Pack, {
+        name: "pack",
+        requests: { needs: [], run: [] },
+      }).build(["small", 3]),
+    ).toStrictEqual(new Pack("small", 3));
   });
 
   it("cannot be changed", () => {

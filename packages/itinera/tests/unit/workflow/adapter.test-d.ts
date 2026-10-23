@@ -6,11 +6,8 @@ import type { StepName } from "../../../src/step.js";
 import { stepName } from "../../../src/step/request.js";
 import { string } from "../../../src/value/token.js";
 import { Workflow } from "../../../src/workflow.js";
-import {
-  inputAdapter,
-  key,
-  type Supplied,
-} from "../../../src/workflow/adapter.js";
+import { inputAdapter, key } from "../../../src/workflow/adapter.js";
+import type { Supplied } from "../../../src/workflow/adapter/supplied.js";
 import { fromWorkflow } from "../../../src/workflow/request.js";
 
 describe("inputAdapter", () => {

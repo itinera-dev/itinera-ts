@@ -9,7 +9,8 @@ import { type Provided, serviceType } from "../../../src/service.js";
 import type { StepName } from "../../../src/step.js";
 import type { Attempt } from "../../../src/step/attempt.js";
 import { attempt, stepName } from "../../../src/step/request.js";
-import { key, type Supplied } from "../../../src/workflow/adapter.js";
+import { key } from "../../../src/workflow/adapter.js";
+import type { Supplied } from "../../../src/workflow/adapter/supplied.js";
 import type { IdGeneratorKey } from "../../../src/workflow/id-generator.js";
 
 class Shop extends Workflow {

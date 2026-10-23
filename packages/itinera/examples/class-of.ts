@@ -2,11 +2,13 @@ import assert from "node:assert/strict";
 import {
   classOf,
   input,
+  LocalExecutor,
   type Outcome,
   type PlainValue,
   Step,
   step,
   type ValueClass,
+  Workflow,
 } from "itinera/unstable";
 
 class Payment {
@@ -26,6 +28,8 @@ class Payment {
 
 @step()
 class Refund extends Step {
+  static refunded: Payment[] = [];
+
   constructor(
     @input("payment", classOf(Payment)) readonly payment: Payment,
     @input("previous") readonly previous: Payment,
@@ -34,11 +38,29 @@ class Refund extends Step {
   }
 
   override run(): Outcome {
+    Refund.refunded.push(this.payment, this.previous);
     return this.succeed();
   }
 }
 
-const type: ValueClass<Payment> = Payment;
-assert.equal(type.fromValue(1250).cents, 1250);
-assert.ok(classOf(Payment).safeParse(1250).success);
-assert.equal(new Refund(new Payment(1250), new Payment(0)).payment.cents, 1250);
+class Refunds extends Workflow {}
+
+export default (async () => {
+  const refunds = Refunds.builder()
+    .name("refunds")
+    .step(Refund.builder("refund"))
+    .build();
+  const instance = refunds.instance(
+    new Map([
+      ["payment", new Payment(1250)],
+      ["previous", new Payment(0)],
+    ]),
+  );
+
+  await new LocalExecutor().run(instance);
+
+  const type: ValueClass<Payment> = Payment;
+  assert.equal(type.fromValue(1250).cents, 1250);
+  assert.ok(classOf(Payment).safeParse(1250).success);
+  assert.deepEqual(Refund.refunded, [new Payment(1250), new Payment(0)]);
+})();

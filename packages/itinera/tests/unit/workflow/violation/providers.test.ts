@@ -41,6 +41,21 @@ describe("providerViolations", () => {
     ]);
   });
 
+  it("names a step that one provider lists twice", () => {
+    expect(
+      providerViolations(steps, [
+        provider("payments", { steps: ["charge", "charge"] }),
+      ]),
+    ).toEqual([
+      {
+        kind: "service provided twice",
+        key: "payments",
+        step: "charge",
+        providers: ["payments", "payments"],
+      },
+    ]);
+  });
+
   it("names two providers of one key attached to one step", () => {
     expect(
       providerViolations(steps, [

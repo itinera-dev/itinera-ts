@@ -8,7 +8,10 @@ import {
   workflow,
   type WorkflowName,
 } from "../../../src/workflow.js";
+import type { StepName } from "../../../src/step.js";
+import type { DeclaredAdapter } from "../../../src/workflow/adapter.js";
 import { assemble, type Parts } from "../../../src/workflow/descriptor.js";
+import { adapter } from "../../fixtures/workflow.js";
 import type { IdGenerator } from "../../../src/workflow/registry.js";
 import { Violations } from "../../../src/workflow/violation.js";
 
@@ -47,14 +50,14 @@ describe("assemble", () => {
   });
 
   it("refuses a workflow with violations", () => {
-    const ship = describeStep(Ship, { name: "ship" });
+    const ship = shipping();
     expect(() =>
       assemble({ ...nothing, steps: [ship, ship] }, "Orders"),
     ).toThrow(Violations);
   });
 
   it("keeps the steps it was given, though the list given changes afterwards", () => {
-    const steps = [describeStep(Ship, { name: "ship" })];
+    const steps = [shipping()];
     const descriptor = assemble({ ...nothing, steps }, "Orders");
     steps.pop();
     expect(descriptor.steps().map((step) => step.name)).toEqual(["ship"]);
@@ -93,4 +96,44 @@ describe("assemble", () => {
       "the ID generator of workflow orders returned number, not a string",
     );
   });
+
+  it("asks the input adapter attached to a step, with the workflow object as this and the answers in order", () => {
+    const pricing: DeclaredAdapter = {
+      ...adapter("pricing", "ship"),
+      method: shopAndAnswers,
+    };
+    const descriptor = assemble(
+      { ...nothing, steps: [shipping()], adapters: [pricing] },
+      "Orders",
+    );
+    expect(
+      descriptor.adapt(Shop.build(), "ship" as StepName, ["amount", 42]),
+    ).toEqual(["corner", "amount", 42]);
+  });
+
+  it("refuses to adapt a step no input adapter is attached to", () => {
+    const descriptor = assemble(
+      {
+        ...nothing,
+        steps: [shipping()],
+        adapters: [adapter("pricing", "ship")],
+      },
+      "Orders",
+    );
+    expect(() =>
+      descriptor.adapt(Shop.build(), "charge" as StepName, []),
+    ).toThrow(
+      new TypeError(
+        "no input adapter of workflow orders is attached to step charge",
+      ),
+    );
+  });
 });
+
+function shipping() {
+  return describeStep(Ship, { name: "ship" });
+}
+
+function shopAndAnswers(this: Workflow, ...answers: never[]): unknown[] {
+  return [this instanceof Shop ? this.shop : "unknown", ...answers];
+}

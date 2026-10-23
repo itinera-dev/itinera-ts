@@ -8,8 +8,8 @@ import { messageOf } from "./message.js";
 
 /** What a journey starts with, once nothing refused it. */
 interface Started {
-  /** The initial data, captured. */
-  readonly data: ReadonlyMap<string, PlainValue>;
+  /** The initial data, captured, which the journey's data bag starts as. */
+  readonly data: Map<string, PlainValue>;
   /** The journey's dispatcher, holding the instance's reporters, guarded. */
   readonly dispatcher: Dispatcher;
   /** The failures of the guarded reporters. */

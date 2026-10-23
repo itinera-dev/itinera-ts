@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import {
+  inputAdapter,
+  key,
   type Outcome,
   Step,
   step,
+  type Supplied,
   withStep,
   Workflow,
   workflow,
@@ -21,9 +24,14 @@ class Charge extends Step {
   retryBudget: 2,
   noRetryOnAbnormalTermination: true,
 })
-class Payments extends Workflow {}
+class Payments extends Workflow {
+  @inputAdapter({ steps: ["charge"] })
+  price(@key() key: string): Supplied {
+    return this.supply(key.length);
+  }
+}
 
-const { descriptor } = Payments.build().instance();
+const { descriptor, workflow: payments } = Payments.build().instance();
 const [charge] = descriptor.steps();
 assert.ok(charge);
 
@@ -33,3 +41,7 @@ assert.equal(charge.retryBudget, 2);
 assert.equal(charge.retryOnAbnormalTermination, false);
 assert.ok(charge.build() instanceof Charge);
 assert.deepEqual(descriptor.reporters(), []);
+assert.deepEqual(descriptor.adapt(payments, charge.name, ["amount"]), {
+  kind: "supplied",
+  value: 6,
+});

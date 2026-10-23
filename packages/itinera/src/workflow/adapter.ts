@@ -1,43 +1,11 @@
-import { requestsMadeBy } from "../declaration.js";
+import { type RequestOf, requestsMadeBy } from "../declaration/allowed.js";
 import { marking } from "../declaration/marking.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
-import type { Request } from "../declaration/request.js";
 import { named } from "../name.js";
+import type { StepName } from "../step.js";
 import type { AdapterName, Workflow } from "../workflow.js";
+import type { Supplied } from "./adapter/supplied.js";
 import { declarationOn } from "./registry.js";
-
-/**
- * What an input adapter returns for one input of a step: a value it
- * supplies, or nothing, so that the input is read from the data bag. A
- * workflow makes it with `this.supply(value)` or `this.fromDataBag()`.
- *
- * {@includeCode ../../examples/input-adapter.ts}
- */
-export type Supplied = SuppliedValue | FromDataBag;
-
-/**
- * The adapter supplies a value, which the step's input takes, once it is
- * checked to be a value of the input's type.
- *
- * {@includeCode ../../examples/input-adapter.ts}
- */
-export interface SuppliedValue {
-  /** Tells this from reading the data bag. */
-  readonly kind: "supplied";
-  /** The value supplied, as the adapter gave it. */
-  readonly value: unknown;
-}
-
-/**
- * The adapter supplies nothing, so the input is read from the data bag under
- * its key.
- *
- * {@includeCode ../../examples/input-adapter.ts}
- */
-export interface FromDataBag {
-  /** Tells this from a value supplied. */
-  readonly kind: "fromDataBag";
-}
 
 /**
  * What `@inputAdapter` says about an input adapter.
@@ -60,11 +28,24 @@ export interface DeclaredAdapter {
   readonly name: AdapterName;
   /** The steps it adapts the inputs of, by name. */
   readonly steps: readonly string[];
-  /** The method that implements it. */
+  /** The name of the method that implements it. */
   readonly key: string | symbol;
+  /** The method that implements it. */
+  readonly method: Method;
   /** The requests of the method's parameters, in order. */
-  readonly requests: readonly Request[];
+  readonly requests: readonly AdapterRequest[];
 }
+
+/** A method of a workflow class, called with the workflow object as `this`. */
+export type Method = (this: Workflow, ...requests: never[]) => unknown;
+
+/** Whether `value` is a function, which can be called as a method. */
+export function isFunction(value: unknown): value is Method {
+  return typeof value === "function";
+}
+
+/** A request an input adapter may make. */
+export type AdapterRequest = RequestOf<(typeof adapterRequests)[number]>;
 
 /**
  * The decorator {@link inputAdapter} makes, which TypeScript calls once, with
@@ -87,20 +68,14 @@ export interface InputAdapterDecorator {
   ): void;
 }
 
-const helpers = new WeakSet<object>();
-
-/** What `this.fromDataBag()` returns. */
-export const fromBag: FromDataBag = Object.freeze({ kind: "fromDataBag" });
-helpers.add(fromBag);
-
 /** The kinds of request an input adapter may make. */
-export const adapterRequests: readonly Request["kind"][] = [
+export const adapterRequests = [
   "stepName",
   "key",
   "fromWorkflow",
   "journeyId",
   "dataBag",
-];
+] as const;
 
 /**
  * Marks a method of a workflow class as an input adapter: asked for each
@@ -121,10 +96,10 @@ export const adapterRequests: readonly Request["kind"][] = [
 export function inputAdapter(
   options: InputAdapterOptions,
 ): InputAdapterDecorator {
-  return (prototype, key) => {
+  return (prototype, key, method) => {
     const owner = prototype.constructor;
     declarationOn(owner).adapters.push(
-      declaredAdapter(owner, key, options, () =>
+      declaredAdapter(owner, key, method.value, options, () =>
         requestsMadeBy(prototype, key, adapterRequests, "an input adapter"),
       ),
     );
@@ -132,28 +107,47 @@ export function inputAdapter(
 }
 
 /**
- * The input adapter the method `key` of the workflow class `owner`
- * implements, as `options` say, its parameters making the requests
+ * The input adapter `method`, the method `key` of the workflow class
+ * `owner`, implements, as `options` say, its parameters making the requests
  * `requested` gives.
  *
- * @throws Error if its name is empty, or whatever `requested` throws.
+ * @throws Error if `method` is not a function, if its name is empty, or
+ * whatever `requested` throws.
  */
 export function declaredAdapter(
   owner: { readonly name: string },
   key: string | symbol,
+  method: unknown,
   options: InputAdapterOptions,
-  requested: () => readonly Request[],
+  requested: () => readonly AdapterRequest[],
 ): DeclaredAdapter {
+  const where = `${owner.name}.${String(key)}`;
+  if (!isFunction(method)) {
+    throw new Error(`@inputAdapter marks a method, not ${where}`);
+  }
   const name = named<AdapterName>(
     options.name ?? String(key),
-    `the input adapter ${owner.name}.${String(key)}`,
+    `the input adapter ${where}`,
   );
   return Object.freeze({
     name,
     steps: Object.freeze([...options.steps]),
     key,
+    method,
     requests: requested(),
   });
+}
+
+/** The input adapter among `adapters` attached to the step `step`, if one is. */
+export function adapting(
+  adapters: readonly DeclaredAdapter[],
+  step: StepName,
+): DeclaredAdapter | undefined {
+  return adapters.find((attached) => adapts(attached, step));
+}
+
+function adapts(adapter: DeclaredAdapter, step: StepName): boolean {
+  return adapter.steps.includes(step);
 }
 
 /**
@@ -166,21 +160,4 @@ export function key(): RequestDecorator<
   Place<Workflow, string | symbol>
 > {
   return marking({ kind: "key" });
-}
-
-/** A value an input adapter supplies, as `this.supply(value)` makes it. */
-export function supplied(value: unknown): SuppliedValue {
-  const made: SuppliedValue = Object.freeze({ kind: "supplied", value });
-  helpers.add(made);
-  return made;
-}
-
-/**
- * Whether `returned` is what itinera's helpers make for an input adapter,
- * rather than anything else a cast lets an adapter return.
- */
-export function isSupplied(returned: unknown): returned is Supplied {
-  return (
-    typeof returned === "object" && returned !== null && helpers.has(returned)
-  );
 }

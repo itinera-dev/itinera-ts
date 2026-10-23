@@ -87,48 +87,6 @@ export function requireMetadata(prototype: object, key: string | symbol): void {
   }
 }
 
-/**
- * The requests of the method `key` of the class whose prototype is
- * `prototype`, which `what` names in a message, such as "an input adapter",
- * checked against the kinds of request it may make.
- *
- * @throws Error if the compiler recorded no types, if a parameter has no
- * request, or if one makes a request not `allowed`.
- */
-export function requestsMadeBy(
-  prototype: object,
-  key: string | symbol,
-  allowed: readonly Request["kind"][],
-  what: string,
-): readonly Request[] {
-  requireMetadata(prototype, key);
-  const owner = ownerOf(prototype, key);
-  return onlyAllowed(requestsOf(owner, key), owner, key, allowed, what);
-}
-
-/**
- * `requests`, the requests of the method `key` of `owner`, which `what`
- * names in a message, such as "an input adapter", once checked against the
- * kinds of request it may make.
- *
- * @throws Error if one makes a request not `allowed`.
- */
-export function onlyAllowed(
-  requests: readonly Request[],
-  owner: Owner,
-  key: string | symbol,
-  allowed: readonly Request["kind"][],
-  what: string,
-): readonly Request[] {
-  const refused = requests.find((request) => isRefused(request, allowed));
-  if (refused !== undefined) {
-    throw new Error(
-      `${where(owner, key)}: ${what} cannot request @${refused.kind}`,
-    );
-  }
-  return requests;
-}
-
 /** How a message names the constructor of `owner`, or its method `key`. */
 export function where(owner: { readonly name: string }, key: Key): string {
   return key === undefined
@@ -180,11 +138,4 @@ function requestAt(
 
 function isMethod(key: Key): key is string | symbol {
   return key !== undefined;
-}
-
-function isRefused(
-  request: Request,
-  allowed: readonly Request["kind"][],
-): boolean {
-  return !allowed.includes(request.kind);
 }

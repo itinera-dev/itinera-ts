@@ -5,12 +5,8 @@ import { attempt, stepName } from "../../../src/step/request.js";
 import type { Attempt, StepName } from "../../../src/step.js";
 import { Charge, Refund, Ship } from "../../fixtures/step.js";
 import { withStep, Workflow, workflow } from "../../../src/workflow.js";
-import {
-  inputAdapter,
-  isSupplied,
-  key,
-  type Supplied,
-} from "../../../src/workflow/adapter.js";
+import { inputAdapter, key } from "../../../src/workflow/adapter.js";
+import type { Supplied } from "../../../src/workflow/adapter/supplied.js";
 import { declarationOf } from "../../../src/workflow/registry.js";
 
 @workflow({ name: "prices" })
@@ -26,10 +22,6 @@ class Prices extends Workflow {
   address(@journeyId() id: JourneyId): Supplied {
     return this.supply(id);
   }
-
-  made(value: string): readonly Supplied[] {
-    return [this.supply(value), this.fromDataBag()];
-  }
 }
 
 describe("inputAdapter", () => {
@@ -39,12 +31,16 @@ describe("inputAdapter", () => {
         name: "prices",
         steps: ["charge", "charge_rescue"],
         key: "price",
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- compared, never called
+        method: Prices.prototype.price,
         requests: [{ kind: "stepName" }, { kind: "key" }],
       },
       {
         name: "address",
         steps: ["ship"],
         key: "address",
+        // eslint-disable-next-line @typescript-eslint/unbound-method -- compared, never called
+        method: Prices.prototype.address,
         requests: [{ kind: "journeyId" }],
       },
     ]);
@@ -60,6 +56,14 @@ describe("inputAdapter", () => {
       }
       return Orders;
     }).toThrow("the input adapter Orders.price has an empty name");
+  });
+
+  it("refuses what is not a method", () => {
+    expect(() => {
+      inputAdapter({ steps: ["charge"] })(Prices.prototype, "price", {
+        get: () => undefined,
+      } as never);
+    }).toThrow("@inputAdapter marks a method, not Prices.price");
   });
 
   it("refuses a request an input adapter may not make", () => {
@@ -96,19 +100,5 @@ describe("inputAdapter", () => {
       }
       return Orders;
     }).toThrow("Orders must extend Workflow itself");
-  });
-});
-
-describe("isSupplied", () => {
-  it("accepts what the workflow's helpers make", () => {
-    expect(Prices.build().made("A-1").every(isSupplied)).toBe(true);
-  });
-
-  it.each([
-    ["a value a cast makes", { kind: "supplied", value: "A-1" }],
-    ["reading the data bag a cast makes", { kind: "fromDataBag" }],
-    ["nothing", undefined],
-  ])("refuses %s", (_, returned) => {
-    expect(isSupplied(returned)).toBe(false);
   });
 });

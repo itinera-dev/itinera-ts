@@ -1,9 +1,11 @@
 import { EventKind } from "../event/kind.js";
-import { AbortReason, type FailureWithError } from "../journey.js";
+import type { WorkflowInstance } from "../instance.js";
+import type { FailureWithError } from "../journey.js";
 import { RetryCause } from "../policy.js";
 import { Attempt, type Step, type StepDescriptor } from "../step.js";
 import { nextAttempt } from "../step/attempt.js";
 import { isOutcome } from "../step/outcome.js";
+import { built } from "./build.js";
 import { afterAbnormalTermination } from "./decision.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
@@ -18,11 +20,13 @@ import { JourneyAbortError } from "./signal.js";
  */
 export async function travel(
   journey: Journey,
-  steps: readonly StepDescriptor[],
-  initialKeys: readonly string[],
+  instance: WorkflowInstance,
 ): Promise<FailureWithError | undefined> {
-  await journey.emit({ kind: EventKind.JourneyStarted, initialKeys });
-  const failing = await scan(journey, steps);
+  await journey.emit({
+    kind: EventKind.JourneyStarted,
+    initialKeys: [...journey.data.keys()],
+  });
+  const failing = await scan(journey, instance);
   journey.step = undefined;
   if (failing === undefined) {
     await journey.emit({
@@ -49,11 +53,11 @@ interface Failing {
 
 async function scan(
   journey: Journey,
-  steps: readonly StepDescriptor[],
+  instance: WorkflowInstance,
 ): Promise<Failing | undefined> {
-  for (const step of steps) {
+  for (const step of instance.descriptor.steps()) {
     journey.step = step.name;
-    const failing = await attempted(journey, step, Attempt.first);
+    const failing = await attempted(journey, instance, step, Attempt.first);
     if (failing !== undefined) {
       return failing;
     }
@@ -67,6 +71,7 @@ async function scan(
  */
 async function attempted(
   journey: Journey,
+  instance: WorkflowInstance,
   step: StepDescriptor,
   attempt: Attempt,
 ): Promise<Failing | undefined> {
@@ -75,7 +80,8 @@ async function attempted(
     step: step.name,
     attempt,
   });
-  const ended = await ran(journey, step, built(journey, step));
+  const made = await built(journey, instance, step, attempt);
+  const ended = await ran(journey, step, made);
   if (ended === undefined) {
     await journey.emit({
       kind: EventKind.StepSucceeded,
@@ -100,7 +106,7 @@ async function attempted(
       cause: RetryCause.AbnormalTermination,
       decidedBy: "default",
     });
-    return attempted(journey, step, nextAttempt(attempt));
+    return attempted(journey, instance, step, nextAttempt(attempt));
   }
   await journey.emit({
     kind: EventKind.StepGivenUp,
@@ -113,29 +119,6 @@ async function attempted(
     step,
     failure: { cause: decision.cause, error: ended.error, errorMessage },
   };
-}
-
-/**
- * The step built for one attempt.
- *
- * @throws JourneyAbortError, aborting the journey with `step could not be
- * built`, when its constructor fails.
- */
-function built(journey: Journey, step: StepDescriptor): Step {
-  try {
-    return step.build();
-  } catch (error) {
-    if (error instanceof JourneyAbortError) {
-      throw error;
-    }
-    throw journey.abort({
-      reason: AbortReason.StepCouldNotBeBuilt,
-      step: step.name,
-      source: { kind: "step" },
-      errorMessage: messageOf(error),
-      error,
-    });
-  }
 }
 
 /**

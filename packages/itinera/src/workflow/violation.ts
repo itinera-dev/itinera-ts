@@ -5,6 +5,8 @@ import { closedSet, type ValueOf } from "../closed-set.js";
 import type { DeclaredAdapter } from "./adapter.js";
 import {
   adaptersForUnknownSteps,
+  type DuplicateAdapterName,
+  duplicateAdapterNames,
   type InputAdapterForUnknownStep,
   type StepAdaptedTwice,
   stepsAdaptedTwice,
@@ -37,6 +39,7 @@ import {
 
 export type {
   AttemptRequestInJourneyScope,
+  DuplicateAdapterName,
   DuplicateProviderName,
   DuplicateStepName,
   InputAdapterForUnknownStep,
@@ -67,6 +70,8 @@ export const ViolationKind = closedSet({
   DuplicateStepName: "duplicate step name",
   /** Two input adapters are attached to the same step. */
   StepAdaptedTwice: "step adapted twice",
+  /** Two input adapters of one workflow have the same name. */
+  DuplicateAdapterName: "duplicate adapter name",
   /** An input adapter is attached to a step or rescue step the workflow does not have. */
   InputAdapterForUnknownStep: "input adapter for unknown step",
   /** A step has both a rescue step and a retry budget greater than 0. */
@@ -101,6 +106,7 @@ export type Violation =
   | WorkflowHookDefinedTwice
   | DuplicateStepName
   | StepAdaptedTwice
+  | DuplicateAdapterName
   | InputAdapterForUnknownStep
   | RescuedStepRetried
   | ServiceNotProvided
@@ -147,6 +153,7 @@ export function violationsOf(checked: Checked): Violation[] {
     ...rescuedStepsRetried(steps),
     ...steps.flatMap(stepHooksDefinedTwice),
     ...workflowHooksDefinedTwice(policies),
+    ...duplicateAdapterNames(adapters),
     ...adaptersForUnknownSteps(steps, adapters),
     ...stepsAdaptedTwice(steps, adapters),
     ...serviceViolations(steps, providers),
@@ -168,6 +175,8 @@ function subjectOf(violation: Violation): string {
     case "rescued step retried":
     case "step adapted twice":
       return violation.step;
+    case "duplicate adapter name":
+      return violation.adapter;
     case "input adapter for unknown step":
       return `${violation.adapter} on ${violation.step}`;
     case "service not provided":
