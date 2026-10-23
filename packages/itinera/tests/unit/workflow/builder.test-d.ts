@@ -1,8 +1,8 @@
 import { describe, expectTypeOf, it } from "vitest";
-import type { Reporter } from "../report.js";
-import type { Outcome } from "../step.js";
-import { type Built, Workflow } from "../workflow.js";
-import type { IdGeneratorKey } from "./builder.js";
+import type { Reporter } from "../../../src/report.js";
+import type { Outcome } from "../../../src/step.js";
+import { type Built, Workflow } from "../../../src/workflow.js";
+import type { IdGeneratorKey } from "../../../src/workflow/builder.js";
 
 class Shop extends Workflow {
   readonly opened = "today";
