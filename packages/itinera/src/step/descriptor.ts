@@ -3,15 +3,26 @@ import type { StepPolicyClass } from "../policy.js";
 import type { Step, StepClass, StepName } from "../step.js";
 import type { RescueStepClass } from "./rescue.js";
 
+let describing: (step: StepClass, parts: Parts) => StepDescriptor;
+let attachedTo: (described: StepDescriptor) => Attached;
+
 /**
  * How a workflow describes one of its steps to the executor: its name, its
- * retries, and how to build it for an attempt. itinera makes one for each
- * step a workflow lists, with `@withStep` or its builder; the executor reads
- * it and never anything else about the step.
+ * retries, and how to build it for an attempt. The executor reads it and
+ * never anything else about the step.
+ *
+ * Only itinera makes one, for each step a workflow lists with `@withStep` or
+ * its builder: an object written by hand, with the same members, is not a
+ * step descriptor and does not compile where one is expected.
  *
  * {@includeCode ../../examples/descriptors.ts}
  */
-export interface StepDescriptor {
+export class StepDescriptor {
+  static {
+    describing = (step, parts) => new StepDescriptor(step, parts);
+    attachedTo = (described) => described.#attached;
+  }
+
   /** The step's name, unique in its workflow. */
   readonly name: StepName;
   /**
@@ -24,8 +35,22 @@ export interface StepDescriptor {
    * the retry budget lasts: `true` when the workflow says nothing.
    */
   readonly retryOnAbnormalTermination: boolean;
+  readonly #step: StepClass;
+  readonly #attached: Attached;
+
+  private constructor(step: StepClass, parts: Parts) {
+    this.name = parts.name;
+    this.retryBudget = parts.retryBudget;
+    this.retryOnAbnormalTermination = parts.retryOnAbnormalTermination;
+    this.#step = step;
+    this.#attached = parts;
+    Object.freeze(this);
+  }
+
   /** Builds the step for one attempt, as a new object. */
-  build(): Step;
+  build(): Step {
+    return new this.#step();
+  }
 }
 
 /**
@@ -71,7 +96,12 @@ interface Attached {
   readonly rescue: RescueStepClass | undefined;
 }
 
-const attached = new WeakMap<StepDescriptor, Attached>();
+/** What a step descriptor is made from. */
+interface Parts extends Attached {
+  readonly name: StepName;
+  readonly retryBudget: number;
+  readonly retryOnAbnormalTermination: boolean;
+}
 
 /**
  * The descriptor of the step `step`, as `options` describe it.
@@ -84,18 +114,13 @@ export function describeStep(
   options: StepOptions<readonly StepPolicyClass[]>,
 ): StepDescriptor {
   const name = named<StepName>(options.name, `a step of class ${step.name}`);
-  const retryBudget = checkedRetryBudget(name, options.retryBudget ?? 0);
-  const described: StepDescriptor = Object.freeze({
+  return describing(step, {
     name,
-    retryBudget,
+    retryBudget: checkedRetryBudget(name, options.retryBudget ?? 0),
     retryOnAbnormalTermination: options.noRetryOnAbnormalTermination !== true,
-    build: () => new step(),
-  });
-  attached.set(described, {
     policies: Object.freeze([...(options.policies ?? [])]),
     rescue: options.rescue,
   });
-  return described;
 }
 
 /**
@@ -116,12 +141,12 @@ export function checkedRetryBudget(name: StepName, retries: number): number {
 export function policiesOf(
   described: StepDescriptor,
 ): readonly StepPolicyClass[] {
-  return attached.get(described)?.policies ?? [];
+  return attachedTo(described).policies;
 }
 
 /** The class of the rescue step of the step `described`, if it has one. */
 export function rescueOf(
   described: StepDescriptor,
 ): RescueStepClass | undefined {
-  return attached.get(described)?.rescue;
+  return attachedTo(described).rescue;
 }

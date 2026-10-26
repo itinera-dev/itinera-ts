@@ -4,9 +4,10 @@ import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import {
   Step,
   type Outcome,
-  type StepDescriptor,
+  type StepClass,
   type StepName,
 } from "../../../src/step.js";
+import { describeStep } from "../../../src/step/descriptor.js";
 import { Ending } from "../../../src/testing/ending.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import { stepMock } from "../../../src/testing/step-mock.js";
@@ -68,30 +69,22 @@ const diskFull: Abort = {
   error: new Error("disk full"),
 };
 
-function charging(build: (journey: Journey) => Step) {
+function charging(step: (journey: Journey) => StepClass) {
   const journey = journeyThrough(new DefaultDispatcher());
-  const step: StepDescriptor = {
-    name: "charge" as StepName,
-    retryBudget: 0,
-    retryOnAbnormalTermination: true,
-    build: () => build(journey),
-  };
-  return travel(journey, [step], []);
+  return travel(journey, [describeStep(step(journey), { name: "charge" })], []);
 }
 
 function caught(thrown: unknown): unknown {
   return thrown;
 }
 
-class AbortingWhileRun extends Step {
-  constructor(private readonly journey: Journey) {
-    super();
-  }
-
-  override run(): Outcome {
-    this.journey.abort(diskFull);
-    return this.succeed();
-  }
+function abortingWhileRun(journey: Journey): StepClass {
+  return class AbortingWhileRun extends Step {
+    override run(): Outcome {
+      journey.abort(diskFull);
+      return this.succeed();
+    }
+  };
 }
 
 describe("travel", () => {
@@ -241,16 +234,26 @@ describe("travel", () => {
 
   it("passes on an abort raised while a step is built as it was raised", async () => {
     let raised: unknown;
-    const thrown = await charging((journey) => {
-      raised = journey.abort(diskFull);
-      throw raised;
-    }).catch(caught);
+    const thrown = await charging(
+      (journey) =>
+        class AbortingWhileBuilt extends Step {
+          constructor() {
+            super();
+            raised = journey.abort(diskFull);
+            throw raised;
+          }
+
+          override run(): never {
+            throw new Error("never run");
+          }
+        },
+    ).catch(caught);
     expect(thrown).toBe(raised);
   });
 
   it("aborts the journey when it was aborted while a step ran, whatever the step returned", async () => {
-    await expect(
-      charging((journey) => new AbortingWhileRun(journey)),
-    ).rejects.toMatchObject({ abort: diskFull });
+    await expect(charging(abortingWhileRun)).rejects.toMatchObject({
+      abort: diskFull,
+    });
   });
 });

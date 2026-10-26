@@ -5,7 +5,7 @@
  * @module
  */
 import { runJourney } from "./engine.js";
-import type { WorkflowInstance } from "./instance.js";
+import { isInstance, type WorkflowInstance } from "./instance.js";
 import type { JourneyResult } from "./journey.js";
 import type { DispatcherFactory } from "./report.js";
 import { DefaultDispatcherFactory } from "./report/default-dispatcher.js";
@@ -58,8 +58,16 @@ export class LocalExecutor {
    * before, its initial data or global metadata is refused, or the
    * dispatcher factory, the dispatcher or a reporter fails before the
    * journey starts.
+   *
+   * @throws TypeError, as a rejection, when `instance` was not made by
+   * `instance()` on a workflow object, which only a cast lets through.
    */
-  async run<W>(instance: WorkflowInstance<W>): Promise<JourneyResult> {
+  async run(instance: WorkflowInstance): Promise<JourneyResult> {
+    if (!isInstance(instance)) {
+      throw new TypeError(
+        "run was given an instance that instance() did not make: make the workflow object with its class's build(), then call instance() on it",
+      );
+    }
     if (this.#running) {
       throw new Refusal({ kind: "journey running" });
     }

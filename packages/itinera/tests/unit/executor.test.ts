@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { charging, orders } from "../fixtures/engine.js";
 import { LocalExecutor, Refusal } from "../../src/executor.js";
+import type { WorkflowInstance } from "../../src/instance.js";
 import type { Dispatcher, DispatcherFactory } from "../../src/report.js";
 import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
 import { Ending } from "../../src/testing/ending.js";
@@ -45,6 +46,15 @@ describe("LocalExecutor", () => {
       new Refusal({ kind: "journey running" }),
     );
     expect((await running).isSucceeded()).toBe(true);
+  });
+
+  it("rejects an instance that instance() did not make, which a cast let through", async () => {
+    const forged = Object.create(charging()) as WorkflowInstance;
+    await expect(new LocalExecutor().run(forged)).rejects.toThrow(
+      new TypeError(
+        "run was given an instance that instance() did not make: make the workflow object with its class's build(), then call instance() on it",
+      ),
+    );
   });
 
   it("runs another journey once the one it ran has ended", async () => {

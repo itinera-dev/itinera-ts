@@ -143,7 +143,4 @@ export class WorkflowBuilder<
 }
 
 /** Gives a workflow object its checked descriptor, as `build()` does. */
-type Attach = (
-  workflow: Workflow,
-  descriptor: WorkflowDescriptor<Workflow>,
-) => void;
+type Attach = (workflow: Workflow, descriptor: WorkflowDescriptor) => void;
