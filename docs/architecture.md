@@ -33,7 +33,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `value` | The subpath `itinera/value`: `Value`, `PlainValue`, `SerialisesItself` and `AsValue`, the private capture that checks and copies a value, the private read that gives a requester its own copy checked by a schema, and the type tokens a request names, with `optional`, `classOf` and `guard` |
 | `schema` | Zod's `z`, re-exported |
 | `option` | The subpath `itinera/option`: `Option`, `Some` and `None` |
-| `event` | The subpath `itinera/event`: `Event`, every kind of event and what each carries, and the types of a closed set of names, `ClosedSet`, `EveryValue` and `ValueOf` |
+| `event` | The subpath `itinera/event`: `Event`, every kind of event and what each carries, and the types of a closed set of names, `ClosedSet`, `EveryValue` and `ValueOf`. It also holds, privately, the `Level` of an event a step or a hook emits, which only test support re-exports |
 | `report` | The subpath `itinera/report`: reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
 | `journey` | The subpath `itinera/journey`: journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, its output and `OutputError`, the data bag and what reading it gives, `Read`, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
 | `step` | The subpath `itinera/step`: step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors, their options and their builders |
@@ -42,7 +42,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `executor` | The subpath `itinera/executor`: `LocalExecutor`, `Refusal` and why `run` refuses an instance |
 | `policy` | The subpath `itinera/policy`: `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
 | `service` | The subpath `itinera/service`: provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter`, and, privately, how the implementation a provider made is named |
-| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `FailingReporter`, `Ending`, `stepMock` and `StepMock`, `RescueEnding`, `rescueStepMock` and `RescueStepMock`, `HookEnding`, `stepPolicyMock` and `StepPolicyMock`, `workflowPolicyMock` and `WorkflowPolicyMock` |
+| `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `FailingReporter`, `Ending`, `stepMock` and `StepMock`, `RescueEnding`, `rescueStepMock` and `RescueStepMock`, `HookEnding`, `stepPolicyMock` and `StepPolicyMock`, `workflowPolicyMock` and `WorkflowPolicyMock`, `TestMistake` and `MistakeKind`, `fakeProvider`, `scripted` and the scripted run's record, the recorders `Contributions`, `StepEventReporter` and `HookEventReporter`, and `TestDataBag` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, from which every closed set of names is declared, and its types, which `event` re-exports |
 | `name` | Private: `named`, which refuses an empty name as something is declared |
@@ -195,7 +195,7 @@ sequenceDiagram
 6. A failure of the factory, of the dispatcher or of a reporter in steps 4 and 5 refuses the instance. A refusal rejects `run` with a `Refusal`, before any journey and any event.
 7. Then the engine runs the journey, as the next section shows, and `run` resolves to its result: succeeded or failed with its data bag, or aborted. The application reads the result's output with `output`, giving a type for each key, as a typed read of the data bag does; it throws an `OutputError` for an aborted journey, which has no data bag, and for a key that holds no value or a value of another type.
 
-Where it lives: `executor.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts`, `engine/policies.ts`, `journey/result.ts`, `journey/output.ts`.
+Where it lives: `executor.ts`, `executor/local.ts`, `executor/refusal.ts`, `engine.ts`, `engine/start.ts`, `engine/policies.ts`, `journey/result.ts`, `journey/output.ts`.
 
 ### How a journey runs
 
@@ -249,7 +249,7 @@ flowchart TD
     3. A required input without a value aborts the journey with `required data missing`, and a value the schema refuses with `wrong type`, each naming the input adapter when the adapter made the request or supplied the value. An optional input without a value is `None`, and emits `optional_input_absent`.
     4. Then the engine resolves the services the step's `run` requests, in the order it declares them, as the section "How a service is lent" shows, so a step that cannot be built from its data never causes a provider to be called.
     5. Then the engine builds the step with its descriptor's `build`, giving the constructor the inputs. A constructor that throws aborts the journey with `step could not be built`.
-3. The engine makes the attempt's handles, its contributor and its step reporter, and awaits the step's `run`, synchronous or asynchronous, lending it the handles and the services its `run` requests, in order:
+3. The engine makes the attempt's handles, its contributor and its step reporter, and awaits the step's `run`, synchronous or asynchronous, lending it the handles and the services its `run` requests, in order, or, for an attempt a scripted run describes, what the script plays in its place:
     1. A contribution is captured when it is made, and kept until the attempt ends; the last value under a key wins.
     2. Every call on the step reporter, an event the step emits or an entry of global metadata it sets, runs once the calls made before it have settled, so a call the step does not await keeps its place. Its data is captured when the call is made. An entry of global metadata reaches the reporters, then emits `global_metadata_set`.
     3. A contribution, event data or global metadata that is not a value, global metadata under `journey_id`, or a reporter that fails on the step's event or entry, aborts the journey in that call's turn, and the call ends the step with the executor's signal, the journey-abort error, which the package never exports. A call made after the journey was aborted delivers nothing.
@@ -301,12 +301,12 @@ Where it lives: `engine/outcome/failed.ts`, `engine/decision.ts`, `engine/scan.t
 ```mermaid
 flowchart TD
     accTitle: How the engine lends a step a service
-    accDescr: For each service the step's run requests, in order, the engine finds the provider serving the step under its key. A provider of journey scope that already made an instance in this journey lends it again, with no event. Otherwise the engine answers the provider's requests in order, from the journey, the data bag or the attempt, lending it a provider reporter of its own when it requests one, and a request that aborts the journey stops there, before the provider is called. It calls the provider's method and awaits it and every call it made on its reporter, then closes the reporter. A journey aborted meanwhile stands. A provider that throws, or returns what this.provide does not make, emits service_provider_failed and aborts the journey with step could not be built. Data that is not a value aborts it with not a value, with no service event. Otherwise the engine emits service_provided, naming the implementation and carrying the data, keeps the instance for the journey when the provider is of journey scope, and lends it to the step's run, in the place it requests it. Once the journey ends, it lets go of every instance it kept.
+    accDescr: For each service the step's run requests, in order, the engine finds the provider serving the step under its key. A provider of journey scope that already made an instance in this journey lends it again, with no event. Otherwise the engine answers the provider's requests in order, from the journey, the data bag or the attempt, lending it a provider reporter of its own when it requests one, and a request that aborts the journey stops there, before the provider is called. It calls the provider's method, or the fake a test gave the instance in its place, and awaits it and every call it made on its reporter, then closes the reporter. A journey aborted meanwhile stands. A provider that throws, or returns what this.provide does not make, emits service_provider_failed and aborts the journey with step could not be built. Data that is not a value aborts it with not a value, with no service event. Otherwise the engine emits service_provided, naming the implementation and carrying the data, keeps the instance for the journey when the provider is of journey scope, and lends it to the step's run, in the place it requests it. Once the journey ends, it lets go of every instance it kept.
     find["The provider serving the step under the key"] --> kept{"Journey scope, and already made in this journey?"}
     kept -->|"yes"| lent["Lent to the step"]
     kept -->|"no"| answers{"Each of its requests, in order"}
     answers -->|"a request aborts the journey"| aborted["journey_aborted"]
-    answers -->|"answered"| method{"The provider's method, awaited with every call on its reporter"}
+    answers -->|"answered"| method{"The provider's method, or its fake, awaited with every call on its reporter"}
     method -->|"the journey was aborted meanwhile"| aborted
     method -->|"throws, or returns no instance"| failed["service_provider_failed"]
     failed --> aborted
@@ -318,11 +318,11 @@ flowchart TD
 1. For each service the step's `run` requests, in the order it declares them, the engine finds the provider serving the step under the service's key: the one of that key attached to the step, or else the one of that key attached to no step.
 2. A provider of journey scope is called the first time an attempt of a step it serves requests its key. The instance it made is kept on the journey, under the provider's name, and every later attempt of a step it serves receives it again with no event. Once the journey's result is made, however it ended, the engine clears what the journey kept, so no other journey ever receives an instance, and a handle an application keeps after the journey keeps none alive. A provider of attempt scope is called for every attempt that requests its key, and its instance is held only for that attempt.
 3. Before the provider is called, the engine answers its requests in the order they are declared: the journey ID, data from the workflow, read from the data bag as a hook's is, the step's name, the attempt, and a provider reporter of its own, made by the same handles as a step's, whose events and global metadata name the provider, the step and the attempt. A required value that is missing or of another type aborts the journey, naming the provider and the key, and the provider is not called; an optional one without a value is `None`, and emits `optional_input_absent` naming the provider.
-4. It calls the provider's method through the workflow descriptor's `provide`, on the workflow object, awaits it and every call it made on its reporter, then closes the reporter. A journey aborted meanwhile, such as by a reporter failing on the provider's event, stands, and nothing the provider returned is looked at.
+4. It calls the provider's method through the workflow descriptor's `provide`, on the workflow object, or, when a test gave the instance a fake for that provider with `fakeProvider`, the fake in its place, and awaits it and every call it made on its reporter, then closes the reporter. A journey aborted meanwhile, such as by a reporter failing on the provider's event, stands, and nothing the provider returned is looked at.
 5. A throw, a rejection, or a return that `this.provide(...)` did not make emits `service_provider_failed` and aborts the journey with `step could not be built`, naming the provider, and carrying the error, or a `TypeError` saying what came back, `undefined` included.
 6. Data supplied with the instance is captured; data that is not a value aborts the journey with `not a value`, naming the provider and `service_provided`, and no service event is emitted. Otherwise the engine emits `service_provided`, naming the implementation: the name of the instance's class, as the runtime reports it, or the service type's name for an instance with no class of its own, read without calling a getter, and carrying the data captured when the provider returned. The instance is then lent to the step's `run`, in the place the step requests it.
 
-Where it lives: `engine/services.ts`, `engine/provider.ts`, `engine/provider/answer.ts`, `engine/handles.ts`, `engine/handles/holder.ts`, `engine/request.ts`, `service/serving.ts`, `service/implementation.ts`, `service/provider.ts`, `service/provider/provided.ts`, `workflow/descriptor.ts`.
+Where it lives: `engine/services.ts`, `engine/provider.ts`, `engine/provider/answer.ts`, `engine/handles.ts`, `engine/handles/holder.ts`, `engine/request.ts`, `service/serving.ts`, `service/implementation.ts`, `service/provider.ts`, `service/provider/provided.ts`, `workflow/descriptor.ts`, `instance/made.ts`.
 
 ### How a hook is called
 
@@ -375,3 +375,38 @@ flowchart LR
 6. Global metadata goes through the same guards, before the journey starts and while it runs, when a step or a hook sets an entry. A reporter or the dispatcher that fails on an entry while the journey runs aborts it with `reporter failed`, as on an event.
 
 Where it lives: `engine/journey.ts`, `engine/emitter.ts`, `engine/guard.ts`, `engine/frozen.ts`, `report/default-dispatcher.ts`.
+
+### How a scripted run plays
+
+```mermaid
+sequenceDiagram
+    accTitle: How a scripted run plays its script
+    accDescr: The test writes the script, each mistake throwing a TestMistake where it is written. When the test runs it, the writer checks what the script leaves out and rejects with a TestMistake listing it, before any event. Otherwise it hands the instance and a script to the local executor, which runs the journey as run does. For each attempt, the engine builds the step for real, telling the script the attempt and the values its requests found just before the constructor runs, then asks the script what the attempt plays: nothing, and the real run is called, or actions played through the attempt's contributor and step reporter, then the outcome of the attempt's ending, or a throw. Everything else is the engine's own. The run resolves to the journey's result and the record of every step and rescue step.
+    participant Test as Test
+    participant Writer as Scripted run
+    participant Exec as LocalExecutor
+    participant Engine as Engine
+    Test->>Writer: step, attempts, actions and endings
+    Note over Writer: a mistake throws a TestMistake where it is written
+    Test->>Writer: run
+    Note over Writer: what the script leaves out rejects with a TestMistake, before any event
+    Writer->>Exec: run the instance, with the script
+    Exec->>Engine: run the journey, with the script
+    Engine->>Writer: an attempt handed to its step's construction, with the values found
+    Engine->>Writer: what does this attempt play?
+    Writer-->>Engine: nothing, or its actions, then its ending
+    Engine-->>Exec: the result
+    Exec-->>Writer: the result
+    Writer-->>Test: the result and the record of every step
+```
+
+1. A test writes a script with `scripted(instance)`: the steps it names, the attempts it describes, what each does and how it ends. Each mistake that chapter 8 says is found where it is written, such as a name the workflow does not have or a contribution of a step with no contributor, throws a `TestMistake` from the call that writes it.
+2. `run` first lists what the script leaves out, for each scripted step its first attempt not described and its rescue step when attempt 1 can fail, and every step when all were asked for, and rejects with a `TestMistake` listing them, before the journey and any event.
+3. Otherwise it hands the instance to the local executor, the one given or a new one, with a `Scripting`, the engine's view of the script, through a private entry to the executor's run, which runs the journey as `run` does, refusals included.
+4. For each attempt, the engine builds the step for real, its inputs, services and constructor included. Just before the constructor runs, it tells the script the attempt and the values its requests found: its inputs, and, for a rescue step, the contributions it requested of the failed attempt.
+5. Then the engine asks the script what the attempt plays. An attempt not described, or described to run for real, calls the step's `run`. A described attempt plays its actions, in order, through the contributor and step reporter the attempt lends, then ends with the outcome its ending stands for, or a throw for an abnormal termination, so what follows is the engine's own, as for a real step.
+6. The run resolves to the journey's result and the record of every step and rescue step of the workflow: the attempts handed to construction, each reading the values its step was built with.
+
+The recorders lend the same handles outside any journey: each makes a lone journey whose dispatcher keeps what it is given, or fails on every call, and lends the handles the engine makes for it, so each handle behaves as in a journey.
+
+Where it lives: `testing/scripted.ts`, `testing/scripted/attempt.ts`, `testing/scripted/writer.ts`, `testing/scripted/step-writer.ts`, `testing/scripted/target.ts`, `testing/scripted/checks.ts`, `testing/scripted/play.ts`, `testing/scripted/record.ts`, `testing/mistake.ts`, `executor/local.ts`, `engine/script.ts`, `engine/journey.ts`, `engine/build.ts`, `engine/run.ts`, `testing/recorders.ts`, `testing/lone.ts`.

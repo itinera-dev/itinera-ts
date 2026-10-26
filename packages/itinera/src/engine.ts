@@ -12,13 +12,15 @@ import type { DispatcherFactory } from "./report.js";
 import { type Clock, Emitter } from "./engine/emitter.js";
 import { Journey } from "./engine/journey.js";
 import { travel } from "./engine/scan.js";
+import type { Scripting } from "./engine/script.js";
 import { JourneyAbortError } from "./engine/signal.js";
 import { start } from "./engine/start.js";
 
 /**
  * Runs the journey of `instance`, delivering its events through a
- * dispatcher `factory` makes, and stamping them with the time `clock` gives.
- * Whatever happens in the journey is in its result.
+ * dispatcher `factory` makes, and stamping them with the time `clock` gives,
+ * playing `script` for a scripted run. Whatever happens in the journey is in
+ * its result.
  *
  * @throws Refusal when the instance is refused, or something before the
  * journey fails.
@@ -27,6 +29,7 @@ export async function runJourney(
   instance: WorkflowInstance,
   factory: DispatcherFactory,
   clock: Clock,
+  script?: Scripting,
 ): Promise<JourneyResult> {
   const { data, dispatcher, failures, policies } = await start(
     instance,
@@ -38,6 +41,7 @@ export async function runJourney(
     dispatcher,
     failures,
     data,
+    script,
   );
   try {
     return resultOf(journeyId, await ended());

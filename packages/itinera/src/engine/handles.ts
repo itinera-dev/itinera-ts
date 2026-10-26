@@ -5,13 +5,13 @@ import type { ProviderReporter } from "../service.js";
 import type { StepReporter } from "../step.js";
 import type { PlainValue } from "../value.js";
 import { capture } from "../value/capture.js";
+import type { Level } from "../event/level.js";
 import {
   blamed,
   described,
   emitted,
   emittedKind,
   type Holder,
-  type Level,
   setter,
 } from "./handles/holder.js";
 import type { Journey } from "./journey.js";

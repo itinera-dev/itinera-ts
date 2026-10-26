@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { Event } from "../../../src/event.js";
 import { EventKind } from "../../../src/event/kind.js";
-import type { Provided, ProviderReporter } from "../../../src/service.js";
+import { useFake, type WorkflowInstance } from "../../../src/instance/made.js";
+import type {
+  Provided,
+  ProviderName,
+  ProviderReporter,
+} from "../../../src/service.js";
+import { provided } from "../../../src/service/provider/provided.js";
 import { providerReporter } from "../../../src/service/reporter.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import { string } from "../../../src/value/token.js";
@@ -68,6 +74,26 @@ async function reportingFirst(
   await reporting.info("choosing", { gateway: "main" });
   await reporting.setGlobalMetadata("gateway", "main");
   return counted(till, provider);
+}
+
+class FakeGateway implements Gateway {
+  readonly label = "fake";
+}
+
+/** `instance`, whose provider `main` is replaced by a fake noting each call in `faked`. */
+function faking(
+  instance: WorkflowInstance<Till>,
+  faked: string[],
+): WorkflowInstance<Till> {
+  useFake(instance, "main" as ProviderName, () => {
+    faked.push("fake");
+    return provided(new FakeGateway(), undefined);
+  });
+  return instance;
+}
+
+function isServiceProvided(event: Event): boolean {
+  return event.kind === "service_provided";
 }
 
 function errorMessageOf(event: Event | undefined): unknown {
@@ -198,6 +224,50 @@ describe("providedBy", () => {
       abort: { reason: "step could not be built" },
     });
     expect(errorMessageOf(events[3])).toBe(errorMessage);
+  });
+
+  it("is replaced by the instance's fake, called once per attempt after its requests are resolved", async () => {
+    const till = chargingTill(counted, [fromWorkflow("gateway", string)]);
+    const recorder = new RecordingReporter();
+    const faked: string[] = [];
+    await run(
+      faking(
+        till.instance({ gateway: "main" }, { reporters: [recorder] }),
+        faked,
+      ),
+    );
+    expect([till.calls, faked]).toEqual([[], ["fake", "fake"]]);
+    expect(recorder.events.filter(isServiceProvided)).toMatchObject([
+      { implementation: "FakeGateway" },
+      { implementation: "FakeGateway" },
+    ]);
+  });
+
+  it.each([
+    ["throws", throwing],
+    ["rejects", rejecting],
+  ])(
+    "aborts the journey with step could not be built, carrying the error, when the instance's fake %s",
+    async (_, fake) => {
+      const instance = chargingTill(counted).instance();
+      useFake(instance, "main" as ProviderName, fake);
+      const result = await run(instance);
+      expect(result.abort).toMatchObject({
+        reason: "step could not be built",
+        source: { kind: "provider", provider: "main" },
+        errorMessage: "gateway down",
+      });
+    },
+  );
+
+  it("does not call the instance's fake when the provider's requests abort the journey", async () => {
+    const till = chargingTill(counted, [fromWorkflow("gateway", string)]);
+    const faked: string[] = [];
+    const result = await run(faking(till.instance(), faked));
+    expect([faked, result.abort?.reason]).toEqual([
+      [],
+      "required data missing",
+    ]);
   });
 
   it("emits its own events and sets global metadata through its reporter, naming it, before service_provided", async () => {

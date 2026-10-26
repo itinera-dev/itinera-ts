@@ -1,6 +1,7 @@
 import type { ProviderSource } from "../event.js";
 import { EventKind } from "../event/kind.js";
 import type { WorkflowInstance } from "../instance.js";
+import { fakeOf } from "../instance/made.js";
 import type { Result } from "ts-results-es";
 import { AbortReason } from "../journey.js";
 import { implementationOf } from "../service/implementation.js";
@@ -34,8 +35,10 @@ type Called =
  * `key`, as `source` names the step being built and its attempt, once its
  * own requests are resolved, in the order it declares them, which
  * `service_provided` reports with the implementation it is and the data the
- * provider supplied, captured. Its provider reporter, if it requests one, is
- * closed once the call and every call made on the reporter have settled.
+ * provider supplied, captured. A fake a test gave the instance is called
+ * instead of the provider's method, once its requests are resolved. Its
+ * provider reporter, if it requests one, is closed once the call and every
+ * call made on the reporter have settled.
  *
  * @throws JourneyAbortError, aborting the journey when one of its own
  * requests aborts it, before the provider is called; when it was aborted
@@ -87,16 +90,19 @@ export async function providedBy(
 }
 
 async function call(
-  { instance, source, key }: Calling,
+  { instance, provider, source, key }: Calling,
   answers: readonly unknown[],
 ): Promise<Called> {
   try {
-    const returned: unknown = await instance.descriptor.provide(
-      instance.workflow,
-      source.step,
-      key,
-      answers,
-    );
+    const fake = fakeOf(instance, provider.name);
+    const returned: unknown = await (fake === undefined
+      ? instance.descriptor.provide(
+          instance.workflow,
+          source.step,
+          key,
+          answers,
+        )
+      : fake());
     return isProvided(returned)
       ? {
           kind: "provided",

@@ -1,12 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { charging, orders } from "../fixtures/engine.js";
-import { LocalExecutor, Refusal } from "../../src/executor.js";
-import type { WorkflowInstance } from "../../src/instance.js";
-import type { Dispatcher, DispatcherFactory } from "../../src/report.js";
-import { DefaultDispatcherFactory } from "../../src/report/default-dispatcher.js";
-import { Ending } from "../../src/testing/ending.js";
-import { RecordingReporter } from "../../src/testing/recording-reporter.js";
-import { stepMock } from "../../src/testing/step-mock.js";
+import { charging, orders } from "../../fixtures/engine.js";
+import type { Scripting } from "../../../src/engine/script.js";
+import { LocalExecutor, Refusal } from "../../../src/executor.js";
+import { runScripted } from "../../../src/executor/local.js";
+import type { WorkflowInstance } from "../../../src/instance.js";
+import type { Dispatcher, DispatcherFactory } from "../../../src/report.js";
+import { DefaultDispatcherFactory } from "../../../src/report/default-dispatcher.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
 
 class Counting implements DispatcherFactory {
   readonly made: Dispatcher[] = [];
@@ -16,6 +18,16 @@ class Counting implements DispatcherFactory {
     this.made.push(dispatcher);
     return dispatcher;
   }
+}
+
+/** A script that describes no attempt, so that every step runs for real. */
+const playingNothing: Scripting = {
+  building: doNothing,
+  play: doNothing,
+};
+
+function doNothing(): undefined {
+  return undefined;
 }
 
 describe("LocalExecutor", () => {
@@ -45,6 +57,16 @@ describe("LocalExecutor", () => {
     await expect(executor.run(charging())).rejects.toEqual(
       new Refusal({ kind: "journey running" }),
     );
+    expect((await running).isSucceeded()).toBe(true);
+  });
+
+  it("refuses a scripted run while it runs a journey", async () => {
+    const slow = stepMock({ attempts: [Ending.success], asynchronous: true });
+    const executor = new LocalExecutor();
+    const running = executor.run(orders(slow.builder("charge")).instance());
+    await expect(
+      runScripted(executor, charging(), playingNothing),
+    ).rejects.toEqual(new Refusal({ kind: "journey running" }));
     expect((await running).isSucceeded()).toBe(true);
   });
 
