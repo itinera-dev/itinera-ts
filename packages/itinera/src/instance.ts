@@ -134,7 +134,7 @@ export function instanceOf<W extends Workflow>(
   options: InstanceOptions = {},
 ): WorkflowInstance<W> {
   const data = mapOf(initialData);
-  const journeyId = descriptor.generateJourneyId(workflow);
+  const journeyId = descriptor.generateJourneyId(workflow, data);
   const own = (options.reporters ?? []).map((reporter) =>
     madeFor(journeyId, reporter),
   );

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Event } from "../../../src/event.js";
+import type { DataBag } from "../../../src/journey.js";
+import type { Value } from "../../../src/value.js";
 import type { Reporter } from "../../../src/report.js";
 import { describeStep } from "../../../src/step/descriptor.js";
 import { Ship } from "../../fixtures/step.js";
@@ -12,7 +14,7 @@ import type { StepName } from "../../../src/step.js";
 import type { DeclaredAdapter } from "../../../src/workflow/adapter.js";
 import { assemble, type Parts } from "../../../src/workflow/descriptor.js";
 import { adapter } from "../../fixtures/workflow.js";
-import type { IdGenerator } from "../../../src/workflow/registry.js";
+import type { DeclaredIdGenerator } from "../../../src/workflow/id-generator.js";
 import { Violations } from "../../../src/workflow/violation.js";
 
 class Audit implements Reporter {
@@ -41,6 +43,26 @@ const nothing: Parts = {
 function shopId(this: Workflow): string {
   return this instanceof Shop ? `${this.shop}-1` : "unknown";
 }
+
+const kept: DataBag[] = [];
+
+function keepingData(...given: DataBag[]): string {
+  kept.push(...given);
+  return given.map(keysOf).join(" and ");
+}
+
+function keysOf(data: DataBag): string {
+  return data.keys().join(",");
+}
+
+function generator(
+  method: DeclaredIdGenerator["method"],
+  requests: DeclaredIdGenerator["requests"] = [],
+): DeclaredIdGenerator {
+  return { key: "orderId", method, requests };
+}
+
+const noData = new Map<string, Value>();
 
 describe("assemble", () => {
   it("refuses a workflow with no name", () => {
@@ -76,23 +98,58 @@ describe("assemble", () => {
 
   it("makes a random UUID v4 as the journey ID when it has no ID generator", () => {
     const descriptor = assemble(nothing, "Orders");
-    expect(descriptor.generateJourneyId(Shop.build())).toMatch(
+    expect(descriptor.generateJourneyId(Shop.build(), noData)).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
     );
   });
 
   it("calls its ID generator with the workflow object as this", () => {
-    const descriptor = assemble({ ...nothing, idGenerator: shopId }, "Orders");
-    expect(descriptor.generateJourneyId(Shop.build())).toBe("corner-1");
+    const descriptor = assemble(
+      { ...nothing, idGenerator: generator(shopId) },
+      "Orders",
+    );
+    expect(descriptor.generateJourneyId(Shop.build(), noData)).toBe("corner-1");
+  });
+
+  it("gives its ID generator a data bag of the initial data for each request, without what is not a value", () => {
+    const descriptor = assemble(
+      {
+        ...nothing,
+        idGenerator: generator(keepingData, [
+          { kind: "dataBag" },
+          { kind: "dataBag" },
+        ]),
+      },
+      "Orders",
+    );
+    const data = new Map<string, Value>([
+      ["number", 7],
+      ["total", Number.NaN],
+      ["shop", "corner"],
+    ]);
+    expect(descriptor.generateJourneyId(Shop.build(), data)).toBe(
+      "number,shop and number,shop",
+    );
+  });
+
+  it("empties the data bag it gave its ID generator once the ID is made", () => {
+    const descriptor = assemble(
+      {
+        ...nothing,
+        idGenerator: generator(keepingData, [{ kind: "dataBag" }]),
+      },
+      "Orders",
+    );
+    descriptor.generateJourneyId(Shop.build(), new Map([["number", 7]]));
+    expect(kept.at(-1)?.keys()).toEqual([]);
   });
 
   it("refuses a journey ID that is not a string", () => {
-    const numbered = (() => 7) as unknown as IdGenerator;
     const descriptor = assemble(
-      { ...nothing, idGenerator: numbered },
+      { ...nothing, idGenerator: generator(() => 7) },
       "Orders",
     );
-    expect(() => descriptor.generateJourneyId(Shop.build())).toThrow(
+    expect(() => descriptor.generateJourneyId(Shop.build(), noData)).toThrow(
       "the ID generator of workflow orders returned number, not a string",
     );
   });

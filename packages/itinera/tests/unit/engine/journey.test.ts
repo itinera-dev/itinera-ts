@@ -5,6 +5,7 @@ import type { StepName } from "../../../src/step.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import {
   FailingOn,
+  FailingOnGlobalMetadata,
   journeyThrough,
   Swallowing,
 } from "../../fixtures/engine.js";
@@ -77,6 +78,47 @@ describe("Journey.emit", () => {
       JourneyAbortError,
     );
     expect(journey.recorded).toMatchObject({ errorMessage: "disk full" });
+  });
+});
+
+describe("Journey.setGlobalMetadata", () => {
+  it("passes the entry on to the reporters", async () => {
+    const recorder = new RecordingReporter();
+    const journey = journeyThrough(
+      guarded(new DefaultDispatcher(), new Failures(), recorder),
+    );
+    await journey.setGlobalMetadata("tenant", "acme");
+    expect([...recorder.globalMetadata]).toEqual([["tenant", "acme"]]);
+  });
+
+  it("aborts the journey with reporter failed when a reporter fails on the entry", async () => {
+    const failures = new Failures();
+    const journey = journeyThrough(
+      guarded(
+        new Swallowing(),
+        failures,
+        new FailingOnGlobalMetadata("disk full"),
+      ),
+      failures,
+    );
+    await expect(
+      journey.setGlobalMetadata("tenant", "acme"),
+    ).rejects.toBeInstanceOf(JourneyAbortError);
+    expect(journey.recorded).toMatchObject({
+      reason: "reporter failed",
+      errorMessage: "disk full",
+    });
+  });
+});
+
+describe("Journey.commit", () => {
+  it("sets the key in the data bag, and says whether it replaced a value", () => {
+    const journey = journeyThrough(new DefaultDispatcher());
+    expect([
+      journey.commit("receipt", "R-1"),
+      journey.commit("receipt", "R-2"),
+      [...journey.data],
+    ]).toEqual([false, true, [["receipt", "R-2"]]]);
   });
 });
 

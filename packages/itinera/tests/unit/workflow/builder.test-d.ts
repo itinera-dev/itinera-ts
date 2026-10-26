@@ -1,4 +1,5 @@
 import { describe, expectTypeOf, it } from "vitest";
+import { type DataBag, dataBag } from "../../../src/journey.js";
 import type { Reporter } from "../../../src/report.js";
 import { type Outcome, Step, type StepClass } from "../../../src/step.js";
 import { type Built, Workflow } from "../../../src/workflow.js";
@@ -30,6 +31,10 @@ class Shop extends Workflow {
 
   withPrefix(prefix: string): string {
     return prefix;
+  }
+
+  numbered(data: DataBag): string {
+    return data.keys().join("-");
   }
 }
 
@@ -94,7 +99,9 @@ describe("WorkflowBuilder", () => {
   });
 
   it("takes as ID generator a method of the class", () => {
-    expectTypeOf<IdGeneratorKey<Shop>>().toEqualTypeOf<"orderId">();
+    expectTypeOf<IdGeneratorKey<Shop>>().toEqualTypeOf<
+      "orderId" | "numbered"
+    >();
   });
 
   it("takes as ID generator no field", () => {
@@ -107,9 +114,17 @@ describe("WorkflowBuilder", () => {
     Shop.builder().idGenerator("orderNumber");
   });
 
-  it("takes as ID generator no method taking a parameter", () => {
-    // @ts-expect-error no request can be made of an ID generator yet
+  it("takes as ID generator no method taking a parameter but the data bag", () => {
+    // @ts-expect-error an ID generator requests only the data bag
     Shop.builder().idGenerator("withPrefix");
+  });
+
+  it("takes the data bag's request by position for an ID generator taking it", () => {
+    Shop.builder().idGenerator("numbered", dataBag());
+    // @ts-expect-error the data bag's parameter needs its request
+    Shop.builder().idGenerator("numbered");
+    // @ts-expect-error a method taking nothing takes no request
+    Shop.builder().idGenerator("orderId", dataBag());
   });
 });
 

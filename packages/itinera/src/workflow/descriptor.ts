@@ -3,10 +3,11 @@ import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { Reporter, ReporterClass } from "../report.js";
 import type { DeclaredProvider } from "../service/provider.js";
 import type { StepDescriptor, StepName } from "../step.js";
+import type { Value } from "../value.js";
 import { adapting, type DeclaredAdapter } from "./adapter.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
 import { type ListedStep, listingOf } from "./listing.js";
-import type { IdGenerator } from "./registry.js";
+import { type DeclaredIdGenerator, generatedBy } from "./id-generator.js";
 import { Violations, violationsOf } from "./violation.js";
 
 declare const crypto: { randomUUID(): string };
@@ -113,18 +114,22 @@ export class WorkflowDescriptor {
   }
 
   /**
-   * Makes the journey ID of a new instance of the workflow object given, with
-   * the workflow's ID generator or as a random UUID.
+   * Makes the journey ID of a new instance of the workflow object given,
+   * holding `initialData`, with the workflow's ID generator or as a random
+   * UUID.
    *
    * @throws TypeError if the ID generator returns what is not a string.
    * @throws Whatever the ID generator throws.
    */
-  generateJourneyId(workflow: Workflow): JourneyId {
+  generateJourneyId(
+    workflow: Workflow,
+    initialData: ReadonlyMap<string, Value>,
+  ): JourneyId {
     const { idGenerator } = this.#parts;
     const id: unknown =
       idGenerator === undefined
         ? crypto.randomUUID()
-        : idGenerator.call(workflow);
+        : generatedBy(idGenerator, workflow, initialData);
     if (typeof id !== "string") {
       throw new TypeError(
         `the ID generator of workflow ${this.name} returned ${typeof id}, not a string`,
@@ -149,7 +154,7 @@ export interface Parts {
   /** The service providers, in order. */
   readonly providers: readonly DeclaredProvider[];
   /** The method that makes each instance's journey ID, if there is one. */
-  readonly idGenerator: IdGenerator | undefined;
+  readonly idGenerator: DeclaredIdGenerator | undefined;
 }
 
 /**

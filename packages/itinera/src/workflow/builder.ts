@@ -1,4 +1,3 @@
-import { requestsOf } from "../declaration.js";
 import { onlyAllowed, type RequestOf } from "../declaration/allowed.js";
 import { requestsGiven } from "../declaration/marking.js";
 import type { Request } from "../declaration/request.js";
@@ -31,9 +30,13 @@ import {
 } from "./adapter.js";
 import type { Supplied } from "./adapter/supplied.js";
 import { assemble, type WorkflowDescriptor } from "./descriptor.js";
-import type { IdGeneratorKey } from "./id-generator.js";
+import {
+  type DeclaredIdGenerator,
+  type IdGeneratorKey,
+  idGeneratorRequests,
+} from "./id-generator.js";
 import type { ListedStep } from "./listing.js";
-import type { Declaration, IdGenerator } from "./registry.js";
+import type { Declaration } from "./registry.js";
 
 /**
  * Puts a workflow together, starting from what the decorators of its class
@@ -59,7 +62,7 @@ export class WorkflowBuilder<
   readonly #policies: PolicyDescriptor[];
   readonly #adapters: DeclaredAdapter[];
   readonly #providers: DeclaredProvider[];
-  #idGenerator: IdGenerator | undefined;
+  #idGenerator: DeclaredIdGenerator | undefined;
   #args: ConstructorParameters<C> | undefined;
   readonly #attach: Attach;
 
@@ -195,19 +198,38 @@ export class WorkflowBuilder<
 
   /**
    * Makes the method `key` of the workflow class its ID generator, called
-   * with the workflow object as `this` to make each instance's journey ID.
+   * with the workflow object as `this` to make each instance's journey ID,
+   * its parameter, when it has one, making `requests`, as `@idGenerator`
+   * does for a method it marks: `dataBag()`, a data bag holding the
+   * instance's initial data.
+   *
+   * {@includeCode ../../examples/builder.ts}
    *
    * @throws Error if the workflow has an ID generator already, if `key`
-   * names a field rather than a method of the class, or if a parameter of the
-   * method has no request.
+   * names a field rather than a method of the class, if the method declares
+   * its requests with decorators, if a parameter is left without a request,
+   * or if one makes a request an ID generator may not make.
    */
-  idGenerator(key: IdGeneratorKey<InstanceType<C>>): this {
+  idGenerator<K extends IdGeneratorKey<InstanceType<C>>>(
+    key: K,
+    ...requests: Tokens<
+      ParametersOf<InstanceType<C>, K>,
+      Place<InstanceType<C>, K>
+    >
+  ): this {
     if (this.#idGenerator !== undefined) {
       throw new Error(`${this.#workflow.name} has more than one ID generator`);
     }
-    const generate = this.#methodOf(key);
-    requestsOf(this.#workflow, key);
-    this.#idGenerator = generate as IdGenerator;
+    this.#idGenerator = {
+      key,
+      method: this.#methodOf(key),
+      requests: this.#given(
+        key,
+        requests,
+        idGeneratorRequests,
+        "an ID generator",
+      ),
+    };
     return this;
   }
 

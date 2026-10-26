@@ -6,6 +6,8 @@
  */
 export type {
   EndsAbnormally,
+  EndsInFailure,
+  EndsInSkip,
   EndsInSuccess,
   Endings,
 } from "./testing/ending.js";
