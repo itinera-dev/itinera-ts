@@ -1,4 +1,5 @@
 import { defineParameterType } from "@cucumber/cucumber";
+import { fixtureNamed, fixtures } from "../fixture.js";
 import { valueType, valueTypes } from "../model.js";
 import {
   implementationNamed,
@@ -34,6 +35,13 @@ defineParameterType({
   name: "implementation",
   regexp: new RegExp(implementations.join("|")),
   transformer: implementationNamed,
+});
+
+/** A hand-written workflow, by the name the scenarios give it. */
+defineParameterType({
+  name: "fixture",
+  regexp: new RegExp(fixtures.join("|")),
+  transformer: fixtureNamed,
 });
 
 /** A step's status at the end of a journey, as the cases name it. */

@@ -11,6 +11,7 @@ import "./sentences/building.js";
 import "./sentences/data.js";
 import "./sentences/events.js";
 import "./sentences/executor.js";
+import "./sentences/fixtures.js";
 import "./sentences/global-metadata.js";
 import "./sentences/hooks.js";
 import "./sentences/journey-ids.js";

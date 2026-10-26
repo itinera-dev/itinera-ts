@@ -1,10 +1,11 @@
 import type { Event } from "itinera/event";
 import { describe, expect, it } from "vitest";
-import { admitted, type Journey, ran, streamOf } from "../../src/journeys.js";
-import { Model, ModelError } from "../../src/model.js";
-import { Recorders } from "../../src/recorders.js";
-import { Tested } from "../../src/tested.js";
-import { Witness } from "../../src/witness.js";
+import { admitted, type Journey, ran } from "../../../src/journeys.js";
+import { streamOf } from "../../../src/journeys/stream.js";
+import { Model, ModelError } from "../../../src/model.js";
+import { Recorders } from "../../../src/recorders.js";
+import { Tested } from "../../../src/tested.js";
+import { Witness } from "../../../src/witness.js";
 
 /** A workflow of one step listing the reporters, under the default dispatcher. */
 function listing(...reporters: string[]): Model {
@@ -15,7 +16,7 @@ function listing(...reporters: string[]): Model {
   return model;
 }
 
-async function journeysOf(
+async function admittedAndRan(
   model: Model,
   recorders: Recorders,
   times: number,
@@ -39,7 +40,7 @@ describe("the stream of a journey", () => {
     const model = listing("audit", "metrics");
     model.fails("audit", { kind: "first event" });
     const recorders = new Recorders(model.reporterFailures);
-    const journeys = await journeysOf(model, recorders, 1);
+    const journeys = await admittedAndRan(model, recorders, 1);
     const [metrics] = recorders.made("metrics");
     expect(metrics?.events).not.toHaveLength(0);
     expect(streamOf(model, recorders, journeys, journeys[0])).toEqual(
@@ -52,7 +53,7 @@ describe("the stream of a journey", () => {
     model.fails("audit", { kind: "first event" });
     model.fails("metrics", { kind: "first event" });
     const recorders = new Recorders(model.reporterFailures);
-    const journeys = await journeysOf(model, recorders, 1);
+    const journeys = await admittedAndRan(model, recorders, 1);
     expect(() => streamOf(model, recorders, journeys, journeys[0])).toThrow(
       ModelError,
     );
@@ -62,7 +63,7 @@ describe("the stream of a journey", () => {
     const model = new Model();
     model.declare("orders", ["charge"]);
     const recorders = new Recorders(model.reporterFailures);
-    const journeys = await journeysOf(model, recorders, 2);
+    const journeys = await admittedAndRan(model, recorders, 2);
     const second = journeys[1];
     const stream = streamOf(model, recorders, journeys, second);
     expect(stream).toHaveLength(4);
