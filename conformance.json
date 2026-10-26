@@ -2,7 +2,7 @@
   "cases": "v0.1.0-rc.15",
   "proposals": [
     2, 8, 9, 10, 11, 12, 24, 27, 32, 40, 41, 42, 49, 54, 55, 56, 57, 58, 60, 61,
-    62, 63, 64, 65, 81, 83, 85, 91, 106
+    62, 63, 64, 65, 81, 83, 85, 91, 95, 102, 104, 106
   ],
   "capabilities": ["async"],
   "impossible": {
@@ -32,6 +32,16 @@
         "scenario": "An adapter that writes through its access leaves the data bag unchanged",
         "proof": {
           "test": "an adapter cannot write through its access to the data bag",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      }
+    ],
+    "no-instance": [
+      {
+        "feature": "cases/tier-1/0095-services-provided-to-steps/failures.feature",
+        "scenario": "A provider that returns nothing aborts the journey, with no error",
+        "proof": {
+          "test": "a service provider cannot return what this.provide(...) does not make",
           "file": "packages/itinera/tests/integration/proofs.test-d.ts"
         }
       }

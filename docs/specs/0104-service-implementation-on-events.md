@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0104](https://github.com/itinera-dev/spec/blob/main/proposals/0104-service-implementation-on-events.md), implemented in [#34](https://github.com/itinera-dev/itinera-ts/issues/34). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 8 the service providers, and [0095](0095-services-provided-to-steps.md) the providers and how the engine calls them.
 
-Status: in progress. Stage 1 added `service_provided` with its `implementation` and optional `data`, and the abort for data that is not a value, `NotAValueInServiceProvided`. Stage 4 added `this.provide(instance, data)`. Stage 8 names the implementation and captures the data when a provider returns; its runner pull request lists the proposal.
+Status: complete, and 104 is listed in `conformance.json`. Stage 1 added `service_provided` with its `implementation` and optional `data`, and the abort for data that is not a value, `NotAValueInServiceProvided`. Stage 4 added `this.provide(instance, data)`. Stage 8 names the implementation and captures the data when a provider returns, and listed the proposal; its runner compares the implementation a case names, `first labeller` or `second labeller`, with the name of the runner's class for it.
 
 ## API
 
-Until 0104 is listed, these are exported only from `itinera/unstable`.
+0104 is listed, but these stay exported only from `itinera/unstable` with the service providers of [0095](0095-services-provided-to-steps.md), while those name API of proposals not yet listed, as the agents' manual says.
 
 - **What a provider supplies.** `this.provide(instance, data)`, a protected helper of `Workflow`, compiles only when `data` is a value, typed `D & AsValue<D>` as event data is (see [0064](0064-event-data-values.md)). Without `data`, the `Provided` it makes has no `data`, and `service_provided` carries none.
 - **The data captured.** The engine captures the data once the provider has returned, or its promise has settled, in `src/engine/provider.ts`, with the one capture every value goes through (see [0056](0056-data-bag-values.md)), so `service_provided` carries its own copy, frozen with the event. Data that is not a value, which only a cast or a value types cannot refuse lets through, such as `NaN` or a cycle, aborts the journey with `not a value`, naming the step, the provider and the event kind `service_provided`, as `NotAValueInServiceProvided`. Neither `service_provided` nor `service_provider_failed` is emitted, the step is not given the instance, and an instance of journey scope made in that call is never kept.
@@ -25,4 +25,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0104` passes, and 104 is listed in `conformance.json`. Planned for stage 8.
+Done in stage 8: every scenario tagged `@proposal-0104` passes, and 104 is listed in `conformance.json`.

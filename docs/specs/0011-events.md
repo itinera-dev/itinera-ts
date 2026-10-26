@@ -6,7 +6,7 @@ Status: complete, and 11 is listed in `conformance.json`. Stage 1 added the even
 
 ## API
 
-0011 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says. Each type is defined in the module of its concept, which becomes its subpath then:
+0011 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), as the agents' manual says. Each type is defined in the module of its concept, which becomes its subpath then:
 
 - `src/event.ts`, later `itinera/event`: `Event`, `EventKind`, each event's type, what only events carry, such as sources and who decided a decision, and `Timestamp`, in private submodules under `src/event/`.
 - `src/report.ts`, later `itinera/report`: `Reporter`, `DebugReporter`, and the dispatchers of 0063.

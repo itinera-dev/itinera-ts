@@ -6,7 +6,7 @@ Status: complete, and 83 is listed in `conformance.json`. Stage 3 added the fail
 
 ## API
 
-0083 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says.
+0083 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), as the agents' manual says.
 
 - **`Failure`**, in `src/journey/failure.ts`, is `FailureWithReason | FailureWithError`. A failure explained by a reason has `cause` (`failure`, `retries exhausted` or `FailWorkflow`) and `reason`; one explained by an error has `cause` (`abnormal termination` or `retries exhausted`), `error`, the thrown value itself, and `errorMessage`. Each says `never` for the other's fields, so no failure carries both, as chapter 5, 5.8's table requires.
 - **`Abort`**, in `src/journey/abort.ts`, is every abort `journey_aborted` carries, with `error` added exactly where the event carries `errorMessage`: required where the message is, optional where the message is. `journey_aborted` carries the abort without `error`, since events carry an error only as its message.
