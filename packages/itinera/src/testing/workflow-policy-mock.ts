@@ -1,3 +1,4 @@
+import type { WithoutStaticData } from "../declaration/static-data.js";
 import {
   WorkflowPolicy,
   type WorkflowPolicyClass,
@@ -35,7 +36,7 @@ export interface WorkflowPolicyMockClass {
   readonly prototype: WorkflowPolicyMock;
   /** Starts putting a workflow policy of the class together for a workflow's builder. */
   builder<C extends WorkflowPolicyClass>(
-    this: C,
+    this: WithoutStaticData<C, typeof WorkflowPolicy>,
     name?: string,
   ): WorkflowPolicyBuilder<C>;
 }

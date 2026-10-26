@@ -28,3 +28,27 @@ export class Refund extends RescueStep {
     return this.succeed();
   }
 }
+
+/**
+ * A step that keeps static data, which neither `@step` nor its builder
+ * accepts.
+ */
+export class Counter extends Step {
+  static attempts = 0;
+
+  override run(): Outcome {
+    return this.succeed();
+  }
+}
+
+/**
+ * A rescue step that keeps static data, which neither `@rescueStep` nor its
+ * builder accepts.
+ */
+export class Recount extends RescueStep {
+  static rescues = 0;
+
+  override run(): RescueOutcome {
+    return this.succeed();
+  }
+}

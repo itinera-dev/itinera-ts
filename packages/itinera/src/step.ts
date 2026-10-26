@@ -6,6 +6,10 @@
  *
  * @module itinera/step
  */
+import {
+  refuseStaticData,
+  type WithoutStaticData,
+} from "./declaration/static-data.js";
 import { type StepBuilder, stepBuilder } from "./step/builder.js";
 import {
   type Fail,
@@ -21,6 +25,7 @@ import type { PlainValue } from "./value.js";
 export { Attempt } from "./step/attempt.js";
 export type { StepBuilder } from "./step/builder.js";
 export { step } from "./step/declared.js";
+export type { WithoutStaticData } from "./declaration/static-data.js";
 export type { StepDescriptor, StepOptions } from "./step/descriptor.js";
 export type {
   Fail,
@@ -108,9 +113,16 @@ export abstract class Step {
    *
    * {@includeCode ../examples/builder.ts}
    *
-   * @throws Error if the name is empty.
+   * A step keeps no static data, refused as {@link WithoutStaticData} says:
+   * at compile time, or else when the builder starts.
+   *
+   * @throws Error if the class keeps static data, or if the name is empty.
    */
-  static builder<C extends StepClass>(this: C, name: string): StepBuilder<C> {
+  static builder<C extends StepClass>(
+    this: WithoutStaticData<C, typeof Step>,
+    name: string,
+  ): StepBuilder<C> {
+    refuseStaticData(this, Step, "step");
     return stepBuilder(this, name);
   }
 
@@ -163,5 +175,8 @@ export interface StepClass {
   /** The prototype every step of the class shares. */
   readonly prototype: Step;
   /** Starts putting a step of the class together for a workflow's builder. */
-  builder<C extends StepClass>(this: C, name: string): StepBuilder<C>;
+  builder<C extends StepClass>(
+    this: WithoutStaticData<C, typeof Step>,
+    name: string,
+  ): StepBuilder<C>;
 }

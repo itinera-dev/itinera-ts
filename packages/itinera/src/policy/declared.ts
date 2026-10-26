@@ -4,6 +4,10 @@ import {
   requestsOf,
   where,
 } from "../declaration.js";
+import {
+  refuseStaticData,
+  type WithoutStaticData,
+} from "../declaration/static-data.js";
 import { named } from "../name.js";
 import type { PolicyName } from "../policy.js";
 import {
@@ -40,18 +44,24 @@ const declared = new WeakMap<object, PolicyDescriptor>();
  * as `@onStepSuccess()`. A step lists it in the `policies` of its
  * `@withStep`, which accepts only a class declared with `@stepPolicy`.
  *
+ * A step policy keeps no static data, which every attempt of every journey
+ * would share, refused as {@link WithoutStaticData} says: at compile time, or
+ * else when the class is defined.
+ *
  * {@includeCode ../../examples/policy.ts}
  *
  * @throws Error, when the class is defined, if it does not extend
- * `StepPolicy` itself, if it is declared twice, if its name is empty, if it
- * defines no hook, if a method carries requests but no hook, if a parameter
- * of a hook has no request, or if a hook requests a cause it is not given:
- * the failure cause outside `on step failure`, or the retry cause outside
- * `on step retry`.
+ * `StepPolicy` itself, if it keeps static data, if it is declared twice, if
+ * its name is empty, if it defines no hook, if a method carries requests but
+ * no hook, if a parameter of a hook has no request, or if a hook requests a
+ * cause it is not given: the failure cause outside `on step failure`, or the
+ * retry cause outside `on step retry`.
  */
 export function stepPolicy(
   options: PolicyOptions = {},
-): (target: new () => StepPolicy) => void {
+): <C extends new () => StepPolicy>(
+  target: WithoutStaticData<C, typeof StepPolicy>,
+) => void {
   return (target) => {
     declare(target, "step", options);
   };
@@ -63,13 +73,19 @@ export function stepPolicy(
  * or `@onWorkflowFailure()`. A workflow lists it in the `policies` of its
  * `@workflow`, which accepts only a class declared with `@workflowPolicy`.
  *
+ * A workflow policy keeps no static data, which every journey would share,
+ * refused as {@link WithoutStaticData} says: at compile time, or else when
+ * the class is defined.
+ *
  * {@includeCode ../../examples/policy.ts}
  *
  * @throws Error, when the class is defined, as {@link stepPolicy} does.
  */
 export function workflowPolicy(
   options: PolicyOptions = {},
-): (target: new () => WorkflowPolicy) => void {
+): <C extends new () => WorkflowPolicy>(
+  target: WithoutStaticData<C, typeof WorkflowPolicy>,
+) => void {
   return (target) => {
     declare(target, "workflow", options);
   };
@@ -110,6 +126,7 @@ function declare(
   if (Object.getPrototypeOf(target) !== base) {
     throw new Error(`${target.name} must extend ${base.name} itself`);
   }
+  refuseStaticData(target, base, `${kind} policy`);
   if (declared.has(target)) {
     throw new Error(`${target.name} is declared as a policy twice`);
   }

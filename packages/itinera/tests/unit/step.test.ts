@@ -6,7 +6,7 @@ import {
   Step,
 } from "../../src/step.js";
 import { isOutcome } from "../../src/step/outcome.js";
-import { Ship } from "../fixtures/step.js";
+import { Counter, Ship } from "../fixtures/step.js";
 
 class Reporting extends Step {
   override run(): never {
@@ -52,5 +52,14 @@ describe("Step", () => {
     ],
   ])("gives a step its outcome: %s", (_, outcome, expected) => {
     expect([isOutcome(outcome), outcome]).toEqual([true, expected]);
+  });
+});
+
+describe("Step.builder", () => {
+  it("refuses a class that keeps static data", () => {
+    // @ts-expect-error a step keeps no static data
+    expect(() => Counter.builder("counter")).toThrow(
+      `step Counter keeps static data, which everything built from it would share: attempts`,
+    );
   });
 });

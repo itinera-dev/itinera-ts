@@ -1,3 +1,4 @@
+import type { WithoutStaticData } from "../declaration/static-data.js";
 import { RescueStep, type RescueOutcome } from "../step/rescue.js";
 import type { RescueStepBuilder } from "../step/rescue/builder.js";
 import type { RescueStepClass } from "../step/rescue.js";
@@ -45,7 +46,9 @@ export interface RescueStepMockClass {
   /** The prototype every rescue step mock of the class shares. */
   readonly prototype: RescueStepMock;
   /** Starts putting a rescue step of the class together for a step's builder. */
-  builder<C extends RescueStepClass>(this: C): RescueStepBuilder<C>;
+  builder<C extends RescueStepClass>(
+    this: WithoutStaticData<C, typeof RescueStep>,
+  ): RescueStepBuilder<C>;
 }
 
 /**

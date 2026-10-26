@@ -9,6 +9,10 @@ import {
   success,
   type Success,
 } from "./outcome.js";
+import {
+  refuseStaticData,
+  type WithoutStaticData,
+} from "../declaration/static-data.js";
 import { type RescueStepBuilder, rescueStepBuilder } from "./rescue/builder.js";
 import type { StepRequests } from "./declared.js";
 
@@ -47,9 +51,18 @@ export abstract class RescueStep {
    * Starts putting a rescue step of this class together for a step's
    * builder, as `Refund.builder()`.
    *
+   * A rescue step keeps no static data, refused as
+   * {@link WithoutStaticData} says: at compile time, or else when the builder
+   * starts.
+   *
    * {@includeCode ../../examples/rescue-step.ts}
+   *
+   * @throws Error if the class keeps static data.
    */
-  static builder<C extends RescueStepClass>(this: C): RescueStepBuilder<C> {
+  static builder<C extends RescueStepClass>(
+    this: WithoutStaticData<C, typeof RescueStep>,
+  ): RescueStepBuilder<C> {
+    refuseStaticData(this, RescueStep, "rescue step");
     return rescueStepBuilder(this);
   }
 
@@ -93,17 +106,23 @@ const declared = new WeakMap<RescueStepClass, StepRequests>();
  * `@failureReason` and `@error` on the constructor's, `@service`,
  * `@contributor` and `@stepReporter` on those of `run`.
  *
+ * A rescue step keeps no static data, refused as {@link WithoutStaticData}
+ * says: at compile time, or else when the class is defined.
+ *
  * {@includeCode ../../examples/rescue-step.ts}
  *
  * @throws Error, when the class is defined, if it does not extend
- * `RescueStep` itself, if it is declared twice, or if a parameter has no
- * request.
+ * `RescueStep` itself, if it keeps static data, if it is declared twice, or
+ * if a parameter has no request.
  */
-export function rescueStep(): (target: RescueStepClass) => void {
+export function rescueStep(): <C extends RescueStepClass>(
+  target: WithoutStaticData<C, typeof RescueStep>,
+) => void {
   return (target) => {
     if (Object.getPrototypeOf(target) !== RescueStep) {
       throw new Error(`${target.name} must extend RescueStep itself`);
     }
+    refuseStaticData(target, RescueStep, "rescue step");
     if (declared.has(target)) {
       throw new Error(`${target.name} is declared with @rescueStep twice`);
     }

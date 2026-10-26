@@ -94,3 +94,19 @@ export class Close extends WorkflowPolicy {
 
   failed(): void {}
 }
+
+/**
+ * A step policy that keeps static data, which neither `@stepPolicy` nor its
+ * builder accepts.
+ */
+export class Tracker extends StepPolicy {
+  static failures = 0;
+}
+
+/**
+ * A workflow policy that keeps static data, which neither `@workflowPolicy`
+ * nor its builder accepts.
+ */
+export class Census extends WorkflowPolicy {
+  static journeys = 0;
+}

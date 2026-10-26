@@ -88,7 +88,7 @@ Stage 2 started the runner in `packages/conformance`, on cucumber-js 13.3.0, wit
 - `tests/unit/testing/entry-recording-reporter.test.ts`: every entry kept in order with the kind of the event before it, what a recording reporter keeps kept too, and copies on every read.
 - `examples/entry-recording-reporter.ts`: the entries a journey's reporter received, a key set twice by a step included.
 - `tests/unit/testing/ending.test.ts`: the outcome each ending stands for, and frozen endings.
-- `tests/unit/testing/step-mock.test.ts`: the attempts played in order, the last repeating, each class counting on its own, asynchronous endings, the inputs kept in order, and a step that cannot be built.
+- `tests/unit/testing/step-mock.test.ts`: the attempts played in order, the last repeating, each class counting on its own, asynchronous endings, the inputs kept in order, and a step that cannot be built. `tests/unit/testing/step-mock.test-d.ts`, `step-policy-mock.test-d.ts` and `workflow-policy-mock.test-d.ts`: a class extending a mock that keeps static data, refused by its `builder`.
 - `examples/ending.ts` and `examples/step-mock.ts`.
 - `tests/unit/testing/rescue-step-mock.test.ts` and `.test-d.ts`, and `examples/rescue-step-mock.ts`: the rescue step mock's endings, asynchronous run, what it keeps and build failure, and that it takes no skip.
 - `tests/unit/testing/failing-reporter.test.ts` and `examples/failing-reporter.ts`: each failure, with its message or one of its own, what it keeps, and a reporter given no failure.

@@ -12,4 +12,12 @@ describe("stepPolicyMock", () => {
     // @ts-expect-error a failure hook cannot finish the workflow
     stepPolicyMock({ onStepAbnormalTermination: HookEnding.finishWorkflow });
   });
+
+  it("refuses static data on a class extending it", () => {
+    class Tracker extends stepPolicyMock({}) {
+      static failures = 0;
+    }
+    // @ts-expect-error a step policy keeps no static data
+    Tracker.builder();
+  });
 });

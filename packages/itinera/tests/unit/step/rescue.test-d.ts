@@ -119,3 +119,32 @@ describe("fromRescuedStep", () => {
     expectTypeOf(Refund).toExtend<RescueStepClass>();
   });
 });
+
+describe("rescueStep and RescueStep.builder", () => {
+  it("compile on a class with static methods, but not on one keeping static data, its own or inherited", () => {
+    @rescueStep()
+    class Refund extends RescueStep {
+      static cents(euros: number): number {
+        return euros * 100;
+      }
+
+      override run(): RescueOutcome {
+        return this.succeed();
+      }
+    }
+    Refund.builder();
+    // @ts-expect-error a rescue step keeps no static data
+    @rescueStep()
+    class Recount extends RescueStep {
+      static rescues = 0;
+
+      override run(): RescueOutcome {
+        return this.succeed();
+      }
+    }
+    class Express extends Recount {}
+    // @ts-expect-error nor inherits any
+    Express.builder();
+    return [Refund, Recount];
+  });
+});

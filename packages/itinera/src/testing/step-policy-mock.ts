@@ -1,3 +1,4 @@
+import type { WithoutStaticData } from "../declaration/static-data.js";
 import type { StepHook, WorkflowHook } from "../policy.js";
 import type { OnFailure, OnSuccess } from "../policy/lifecycle.js";
 import { StepPolicy, type StepPolicyClass } from "../policy/step-policy.js";
@@ -50,7 +51,7 @@ export interface StepPolicyMockClass {
   readonly prototype: StepPolicyMock;
   /** Starts putting a step policy of the class together for a step's builder. */
   builder<C extends StepPolicyClass>(
-    this: C,
+    this: WithoutStaticData<C, typeof StepPolicy>,
     name?: string,
   ): StepPolicyBuilder<C>;
 }

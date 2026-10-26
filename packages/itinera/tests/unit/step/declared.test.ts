@@ -3,7 +3,7 @@ import { type Outcome, Step, step } from "../../../src/step.js";
 import { integer } from "../../../src/value/token.js";
 import { isDeclared, requestsOfStep } from "../../../src/step/declared.js";
 import { input } from "../../../src/step/request.js";
-import { Ship } from "../../fixtures/step.js";
+import { Counter, Ship } from "../../fixtures/step.js";
 
 class Undeclared extends Step {
   override run(): Outcome {
@@ -48,6 +48,31 @@ describe("step", () => {
     expect(() => {
       step()(Express);
     }).toThrow("Express must extend Step itself");
+  });
+
+  it("refuses a class that keeps static data", () => {
+    expect(() => {
+      // @ts-expect-error a step keeps no static data
+      step()(Counter);
+    }).toThrow(
+      `step Counter keeps static data, which everything built from it would share: attempts`,
+    );
+  });
+
+  it("refuses a class that keeps static data no type can see", () => {
+    class Tally extends Step {
+      private static tallied = 0;
+
+      override run(): Outcome {
+        Tally.tallied += 1;
+        return this.succeed();
+      }
+    }
+    expect(() => {
+      step()(Tally);
+    }).toThrow(
+      `step Tally keeps static data, which everything built from it would share: tallied`,
+    );
   });
 
   it("refuses a class declared twice", () => {
