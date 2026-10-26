@@ -4,7 +4,10 @@ import {
   requestsOf,
   where,
 } from "../declaration.js";
-import type { Request } from "../declaration/request.js";
+import {
+  refuseStaticData,
+  type WithoutStaticData,
+} from "../declaration/static-data.js";
 import { named } from "../name.js";
 import type { PolicyName } from "../policy.js";
 import {
@@ -15,7 +18,7 @@ import {
   type PolicyDescriptor,
   type PolicyKind,
 } from "./descriptor.js";
-import { type Hook, hooksOf } from "./hooks.js";
+import { checkedHook, type Hook, hooksOf } from "./hooks.js";
 import { StepPolicy } from "./step-policy.js";
 import { WorkflowPolicy } from "./workflow-policy.js";
 
@@ -35,34 +38,30 @@ export interface PolicyOptions {
 
 const declared = new WeakMap<object, PolicyDescriptor>();
 
-const causes: Partial<Record<Request["kind"], Cause>> = {
-  failureCause: { name: "the failure cause", hook: "on step failure" },
-  retryCause: { name: "the retry cause", hook: "on step retry" },
-};
-
-interface Cause {
-  readonly name: string;
-  readonly hook: Hook;
-}
-
 /**
  * Declares a step policy: a class extending {@link StepPolicy} directly,
  * whose hooks are its methods marked with the step hooks' decorators, such
  * as `@onStepSuccess()`. A step lists it in the `policies` of its
  * `@withStep`, which accepts only a class declared with `@stepPolicy`.
  *
+ * A step policy keeps no static data, which every attempt of every journey
+ * would share, refused as {@link WithoutStaticData} says: at compile time, or
+ * else when the class is defined.
+ *
  * {@includeCode ../../examples/policy.ts}
  *
  * @throws Error, when the class is defined, if it does not extend
- * `StepPolicy` itself, if it is declared twice, if its name is empty, if it
- * defines no hook, if a method carries requests but no hook, if a parameter
- * of a hook has no request, or if a hook requests a cause it is not given:
- * the failure cause outside `on step failure`, or the retry cause outside
- * `on step retry`.
+ * `StepPolicy` itself, if it keeps static data, if it is declared twice, if
+ * its name is empty, if it defines no hook, if a method carries requests but
+ * no hook, if a parameter of a hook has no request, or if a hook requests a
+ * cause it is not given: the failure cause outside `on step failure`, or the
+ * retry cause outside `on step retry`.
  */
 export function stepPolicy(
   options: PolicyOptions = {},
-): (target: new () => StepPolicy) => void {
+): <C extends new () => StepPolicy>(
+  target: WithoutStaticData<C, typeof StepPolicy>,
+) => void {
   return (target) => {
     declare(target, "step", options);
   };
@@ -74,13 +73,19 @@ export function stepPolicy(
  * or `@onWorkflowFailure()`. A workflow lists it in the `policies` of its
  * `@workflow`, which accepts only a class declared with `@workflowPolicy`.
  *
+ * A workflow policy keeps no static data, which every journey would share,
+ * refused as {@link WithoutStaticData} says: at compile time, or else when
+ * the class is defined.
+ *
  * {@includeCode ../../examples/policy.ts}
  *
  * @throws Error, when the class is defined, as {@link stepPolicy} does.
  */
 export function workflowPolicy(
   options: PolicyOptions = {},
-): (target: new () => WorkflowPolicy) => void {
+): <C extends new () => WorkflowPolicy>(
+  target: WithoutStaticData<C, typeof WorkflowPolicy>,
+) => void {
   return (target) => {
     declare(target, "workflow", options);
   };
@@ -121,6 +126,7 @@ function declare(
   if (Object.getPrototypeOf(target) !== base) {
     throw new Error(`${target.name} must extend ${base.name} itself`);
   }
+  refuseStaticData(target, base, `${kind} policy`);
   if (declared.has(target)) {
     throw new Error(`${target.name} is declared as a policy twice`);
   }
@@ -160,34 +166,4 @@ function declaredHook(
   [hook, key]: readonly [Hook, string | symbol],
 ): [Hook, DeclaredHook] {
   return [hook, checkedHook(target, hook, key, requestsOf(target, key))];
-}
-
-/**
- * The hook `hook` of the policy class `target`, implemented by its method
- * `key`, whose parameters make `requests`.
- *
- * @throws Error if it requests a cause it is not given: the failure cause
- * outside `on step failure`, or the retry cause outside `on step retry`.
- */
-export function checkedHook(
-  target: Owner,
-  hook: Hook,
-  key: string | symbol,
-  requests: readonly Request[],
-): DeclaredHook {
-  const cause = requests.map(causeOf).find((found) => isMisplaced(found, hook));
-  if (cause !== undefined) {
-    throw new Error(
-      `${where(target, key)} requests ${cause.name}, which only ${cause.hook} is given`,
-    );
-  }
-  return { key, requests };
-}
-
-function causeOf(request: Request): Cause | undefined {
-  return causes[request.kind];
-}
-
-function isMisplaced(cause: Cause | undefined, hook: Hook): boolean {
-  return cause !== undefined && cause.hook !== hook;
 }

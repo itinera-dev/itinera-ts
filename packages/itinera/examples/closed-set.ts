@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import type { ValueOf } from "itinera/closed-set";
 import { EventKind, RescueCause } from "itinera/event";
 import { AbortReason, FailureCause } from "itinera/journey";
 import { RetryCause, StepHook, WorkflowHook } from "itinera/policy";
@@ -15,5 +16,10 @@ assert.deepEqual(StepHook.values, [
   "on step retry",
   "on step abnormal termination",
 ]);
-assert.ok(StepHook.has("on step retry"));
-assert.ok(!StepHook.has("On Step Retry"));
+
+function stepHookOf(text: string): ValueOf<typeof StepHook> | undefined {
+  return StepHook.has(text) ? text : undefined;
+}
+
+assert.equal(stepHookOf("on step retry"), StepHook.OnStepRetry);
+assert.equal(stepHookOf("On Step Retry"), undefined);

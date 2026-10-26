@@ -1,5 +1,7 @@
-import { requireMetadata, where } from "../declaration.js";
+import { type Owner, requireMetadata, where } from "../declaration.js";
+import type { Request } from "../declaration/request.js";
 import type { StepHook, WorkflowHook } from "../policy.js";
+import type { DeclaredHook } from "./descriptor.js";
 import type { OnFailure, OnSuccess } from "./lifecycle.js";
 import type { StepPolicy } from "./step-policy.js";
 import type { WorkflowPolicy } from "./workflow-policy.js";
@@ -137,4 +139,44 @@ function marking<R, P extends object>(hook: Hook): HookDecorator<R, P> {
     }
     hooks.set(hook, key);
   };
+}
+
+const causes: Partial<Record<Request["kind"], Cause>> = {
+  failureCause: { name: "the failure cause", hook: "on step failure" },
+  retryCause: { name: "the retry cause", hook: "on step retry" },
+};
+
+interface Cause {
+  readonly name: string;
+  readonly hook: Hook;
+}
+
+/**
+ * The hook `hook` of the policy class `target`, implemented by its method
+ * `key`, whose parameters make `requests`.
+ *
+ * @throws Error if it requests a cause it is not given: the failure cause
+ * outside `on step failure`, or the retry cause outside `on step retry`.
+ */
+export function checkedHook(
+  target: Owner,
+  hook: Hook,
+  key: string | symbol,
+  requests: readonly Request[],
+): DeclaredHook {
+  const cause = requests.map(causeOf).find((found) => isMisplaced(found, hook));
+  if (cause !== undefined) {
+    throw new Error(
+      `${where(target, key)} requests ${cause.name}, which only ${cause.hook} is given`,
+    );
+  }
+  return { key, requests };
+}
+
+function causeOf(request: Request): Cause | undefined {
+  return causes[request.kind];
+}
+
+function isMisplaced(cause: Cause | undefined, hook: Hook): boolean {
+  return cause !== undefined && cause.hook !== hook;
 }

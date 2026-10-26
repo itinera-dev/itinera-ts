@@ -89,6 +89,7 @@ The package root exports nothing of its own. Each concept is imported from a sub
 | `itinera/instance` | Workflow instances, one per journey |
 | `itinera/executor` | Executors, which run journeys, and what `run` rejects with when it refuses an instance |
 | `itinera/event` | Events, the record of what happens in a journey |
+| `itinera/closed-set` | The types of the closed sets of names, such as the kinds of events and the hooks |
 | `itinera/report` | Reporters, which receive the events, and dispatchers, which deliver them |
 | `itinera/value` | Values, the only data a journey holds, and the type tokens that check them |
 | `itinera/schema` | Zod, which the type tokens are built on, for an application's own schemas |

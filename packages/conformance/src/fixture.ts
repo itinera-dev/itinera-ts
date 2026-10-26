@@ -1,5 +1,5 @@
 /**
- * The workflows the features under `features/fixtures` drive, written by
+ * The workflows the features under `tests/fixtures/features` drive, written by
  * hand as an application writes them, declared with the decorators alone,
  * each named by a scenario instead of declared sentence by sentence.
  */

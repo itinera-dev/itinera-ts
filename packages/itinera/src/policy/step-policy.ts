@@ -2,6 +2,10 @@ import {
   type StepPolicyBuilder,
   stepPolicyBuilder,
 } from "./step-policy/builder.js";
+import {
+  refuseStaticData,
+  type WithoutStaticData,
+} from "../declaration/static-data.js";
 import type { GivenReason } from "../step.js";
 import {
   type FailWorkflow,
@@ -29,7 +33,6 @@ declare const roles: unique symbol;
  * @typeParam R The roles its hooks request, which every workflow it is
  * attached to must provide: an interface, or several joined with `&`.
  */
-// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters -- R exists only in the types, where a workflow the policy is attached to must provide it
 export abstract class StepPolicy<R = unknown> {
   // eslint-disable-next-line no-unused-private-class-members -- only a class extending StepPolicy has this field, so only such a class has the type of a step policy
   readonly #stepPolicy = true;
@@ -47,13 +50,18 @@ export abstract class StepPolicy<R = unknown> {
    *
    * {@includeCode ../../examples/policy-builder.ts}
    *
-   * @throws Error if the name is empty, or if the class is declared with a
-   * policy's decorator.
+   * A step policy keeps no static data, which every attempt of every journey
+   * would share, refused as {@link WithoutStaticData} says: at compile time,
+   * or else when the builder starts.
+   *
+   * @throws Error if the class keeps static data, if the name is empty, or
+   * if the class is declared with a policy's decorator.
    */
   static builder<C extends StepPolicyClass>(
-    this: C,
+    this: WithoutStaticData<C, typeof StepPolicy>,
     name?: string,
   ): StepPolicyBuilder<C> {
+    refuseStaticData(this, StepPolicy, "step policy");
     return stepPolicyBuilder(this, name);
   }
 

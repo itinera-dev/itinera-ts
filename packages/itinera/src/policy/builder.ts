@@ -2,7 +2,7 @@ import { type Owner, where } from "../declaration.js";
 import { requestsGiven } from "../declaration/marking.js";
 import { named } from "../name.js";
 import type { PolicyName } from "../policy.js";
-import { checkedHook, isDeclaredPolicy } from "./declared.js";
+import { isDeclaredPolicy } from "./declared.js";
 import {
   type DeclaredHook,
   describePolicy,
@@ -10,7 +10,7 @@ import {
   type PolicyDescriptor,
   type PolicyKind,
 } from "./descriptor.js";
-import type { Hook } from "./hooks.js";
+import { checkedHook, type Hook } from "./hooks.js";
 
 /** The hooks a policy's builder was given so far. */
 export class Hooks {

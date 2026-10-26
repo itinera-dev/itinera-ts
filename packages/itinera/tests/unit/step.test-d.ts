@@ -82,6 +82,29 @@ describe("step", () => {
     }
     expectTypeOf(Ship).toBeConstructibleWith();
   });
+
+  it("compiles on a class with static methods, but not on one keeping static data", () => {
+    @step()
+    class Ship extends Step {
+      static parcels(grams: number): number {
+        return Math.ceil(grams / 20_000);
+      }
+
+      run(): Outcome {
+        return { kind: "success" };
+      }
+    }
+    // @ts-expect-error a step keeps no static data
+    @step()
+    class Charge extends Step {
+      static charged = 0;
+
+      run(): Outcome {
+        return { kind: "success" };
+      }
+    }
+    return [Ship, Charge];
+  });
 });
 
 describe("the outcomes of a step", () => {
@@ -118,5 +141,32 @@ describe("the outcomes of a step", () => {
     }
     expectTypeOf(Charge).toBeConstructibleWith();
     expectTypeOf(Discount).toBeConstructibleWith();
+  });
+});
+
+describe("Step.builder", () => {
+  it("compiles on a class with static methods, but not on one keeping static data, its own or inherited", () => {
+    class Ship extends Step {
+      static parcels(grams: number): number {
+        return Math.ceil(grams / 20_000);
+      }
+
+      override run(): Outcome {
+        return this.succeed();
+      }
+    }
+    class Counted extends Step {
+      static charged = 0;
+
+      override run(): Outcome {
+        return this.succeed();
+      }
+    }
+    class Express extends Counted {}
+    Ship.builder("ship");
+    // @ts-expect-error a step keeps no static data
+    Counted.builder("counted");
+    // @ts-expect-error nor inherits any
+    Express.builder("express");
   });
 });

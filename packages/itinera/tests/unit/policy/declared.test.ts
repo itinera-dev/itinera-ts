@@ -23,6 +23,7 @@ import { failureCause, retryCause } from "../../../src/policy/request.js";
 import { StepPolicy } from "../../../src/policy/step-policy.js";
 import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
 import type { RetryCause, StepFailureCause } from "../../../src/policy.js";
+import { Census, Tracker } from "../../fixtures/policy.js";
 
 describe("stepPolicy", () => {
   it("records the policy's name and each hook with its requests", () => {
@@ -75,39 +76,6 @@ describe("stepPolicy", () => {
       ],
       ["on step retry", { key: "retried", requests: [{ kind: "retryCause" }] }],
     ]);
-  });
-
-  it.each([
-    [
-      "the failure cause outside on step failure",
-      () => {
-        @stepPolicy()
-        class Audit extends StepPolicy {
-          @onStepRetry()
-          retried(@failureCause() cause: StepFailureCause): OnFailure {
-            return this.failWorkflow(cause);
-          }
-        }
-        return Audit;
-      },
-      "Audit.retried requests the failure cause, which only on step failure is given",
-    ],
-    [
-      "the retry cause outside on step retry",
-      () => {
-        @stepPolicy()
-        class Audit extends StepPolicy {
-          @onStepFailure()
-          failed(@retryCause() cause: RetryCause): OnFailure {
-            return this.failWorkflow(cause);
-          }
-        }
-        return Audit;
-      },
-      "Audit.failed requests the retry cause, which only on step retry is given",
-    ],
-  ])("refuses a hook that requests %s", (_, declaring, message) => {
-    expect(declaring).toThrow(message);
   });
 
   it.each([
@@ -196,6 +164,14 @@ describe("stepPolicy", () => {
       },
       "Audit.audited: parameter 1 carries no request",
     ],
+    [
+      "a class that keeps static data",
+      () => {
+        // @ts-expect-error a policy keeps no static data
+        stepPolicy()(Tracker);
+      },
+      "step policy Tracker keeps static data, which everything built from it would share: failures",
+    ],
   ])("refuses %s", (_, declaring, message) => {
     expect(declaring).toThrow(message);
   });
@@ -225,6 +201,15 @@ describe("workflowPolicy", () => {
       }
       return Notify;
     }).toThrow("Notify must extend WorkflowPolicy itself");
+  });
+
+  it("refuses a class that keeps static data", () => {
+    expect(() => {
+      // @ts-expect-error a policy keeps no static data
+      workflowPolicy()(Census);
+    }).toThrow(
+      `workflow policy Census keeps static data, which everything built from it would share: journeys`,
+    );
   });
 });
 

@@ -9,4 +9,12 @@ describe("rescueStepMock", () => {
       attempts: [Ending.skip],
     });
   });
+
+  it("refuses static data on a class extending it", () => {
+    class Recount extends rescueStepMock({ attempts: [Ending.success] }) {
+      static rescues = 0;
+    }
+    // @ts-expect-error a rescue step keeps no static data
+    Recount.builder();
+  });
 });

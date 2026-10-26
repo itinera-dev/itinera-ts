@@ -1,5 +1,9 @@
 import { requestsOf } from "../declaration.js";
 import type { Request } from "../declaration/request.js";
+import {
+  refuseStaticData,
+  type WithoutStaticData,
+} from "../declaration/static-data.js";
 import { Step, type StepClass } from "../step.js";
 
 /** What a step requests: its needs, given to its constructor, then what its `run` takes. */
@@ -24,14 +28,23 @@ const declared = new WeakMap<StepClass, StepRequests>();
  *
  * {@includeCode ../../examples/step.ts}
  *
+ * A step keeps no static data, which every attempt of every journey would
+ * share: a public static property holding anything but a function does not
+ * compile, and a `protected` or `private` one, or an accessor, is refused when
+ * the class is defined, as {@link WithoutStaticData} says.
+ *
  * @throws Error, when the class is defined, if it does not extend `Step`
- * itself, if it is declared twice, or if a parameter has no request.
+ * itself, if it keeps static data, if it is declared twice, or if a
+ * parameter has no request.
  */
-export function step(): (target: StepClass) => void {
+export function step(): <C extends StepClass>(
+  target: WithoutStaticData<C, typeof Step>,
+) => void {
   return (target) => {
     if (Object.getPrototypeOf(target) !== Step) {
       throw new Error(`${target.name} must extend Step itself`);
     }
+    refuseStaticData(target, Step, "step");
     if (declared.has(target)) {
       throw new Error(`${target.name} is declared with @step twice`);
     }

@@ -1,4 +1,5 @@
-import { closedSet, type ValueOf } from "../closed-set.js";
+import type { ValueOf } from "../closed-set.js";
+import { closedSet } from "../closed-set/declare.js";
 import type { FailureCause } from "../journey.js";
 import type { PolicyName, RetryCause, StepHook } from "../policy.js";
 import type { Reason, StepName } from "../step.js";

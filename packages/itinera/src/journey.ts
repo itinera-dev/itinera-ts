@@ -6,7 +6,8 @@
  *
  * @module itinera/journey
  */
-import { closedSet, type ValueOf } from "./closed-set.js";
+import type { ValueOf } from "./closed-set.js";
+import { closedSet } from "./closed-set/declare.js";
 
 export type { Abort } from "./journey/abort.js";
 export { type Contributor, contributor } from "./journey/contributor.js";

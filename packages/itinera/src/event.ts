@@ -1,6 +1,6 @@
 /**
- * Events: the record of what happens in a journey, what only events carry,
- * and the types of a closed set of names, such as the kinds of events.
+ * Events: the record of what happens in a journey and what only events
+ * carry.
  *
  * {@includeCode ../examples/event.ts}
  *
@@ -46,7 +46,6 @@ import type {
   ServiceProviderFailed,
 } from "./event/input.js";
 
-export type { ClosedSet, EveryValue, ValueOf } from "./closed-set.js";
 export type * from "./event/abort.js";
 export type * from "./event/data.js";
 export type * from "./event/decision.js";

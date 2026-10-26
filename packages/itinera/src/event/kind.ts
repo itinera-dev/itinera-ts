@@ -1,4 +1,5 @@
-import { closedSet, type ValueOf } from "../closed-set.js";
+import type { ValueOf } from "../closed-set.js";
+import { closedSet } from "../closed-set/declare.js";
 
 /**
  * The kind of an event, one per event of the specification's catalogue and

@@ -48,3 +48,30 @@ describe("stepPolicy and workflowPolicy", () => {
     return [Notify, Audit, Plain];
   });
 });
+
+describe("stepPolicy and workflowPolicy, on static members", () => {
+  it("compile on a policy with static methods, but not on one keeping static data", () => {
+    @stepPolicy()
+    class Audit extends StepPolicy {
+      static limit(): number {
+        return 3;
+      }
+
+      @onStepSuccess()
+      audited(): OnSuccess {
+        return this.keepDefault();
+      }
+    }
+    // @ts-expect-error a policy keeps no static data
+    @stepPolicy()
+    class Tracker extends StepPolicy {
+      static failures = 0;
+    }
+    // @ts-expect-error a policy keeps no static data
+    @workflowPolicy()
+    class Census extends WorkflowPolicy {
+      static journeys = 0;
+    }
+    return [Audit, Tracker, Census];
+  });
+});

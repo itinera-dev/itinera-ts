@@ -1,4 +1,13 @@
 /**
+ * Closed sets of names, such as the kinds of events, the abort reasons and
+ * the hooks: the types every closed set itinera declares is built from.
+ *
+ * {@includeCode ../examples/closed-set.ts}
+ *
+ * @module itinera/closed-set
+ */
+
+/**
  * A closed set of names, such as the kinds of events or the abort reasons:
  * each name as a member of its own, every value in the order declared, and a
  * check that reads a value back from its text.
@@ -32,16 +41,3 @@ export interface EveryValue<Value extends string> {
  */
 export type ValueOf<Set extends EveryValue<string>> =
   Set extends EveryValue<infer Value> ? Value : never;
-
-/** Declares a closed set of names, each mapped to the text of its value. */
-export function closedSet<const Names extends Record<string, string>>(
-  names: Names,
-): ClosedSet<Names> {
-  const values = Object.freeze(Object.values(names) as Names[keyof Names][]);
-  const known = new Set<string>(values);
-  return Object.freeze({
-    ...names,
-    values,
-    has: (text: string): text is Names[keyof Names] => known.has(text),
-  });
-}

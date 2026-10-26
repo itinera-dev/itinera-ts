@@ -16,6 +16,7 @@ import {
   type RescueOutcome,
   requestsOfRescue,
 } from "../../../src/step/rescue.js";
+import { Recount } from "../../fixtures/step.js";
 
 @rescueStep()
 class Refund extends RescueStep {
@@ -64,6 +65,15 @@ describe("rescueStep", () => {
     expect(() => {
       rescueStep()(Express);
     }).toThrow("Express must extend RescueStep itself");
+  });
+
+  it("refuses a class that keeps static data", () => {
+    expect(() => {
+      // @ts-expect-error a rescue step keeps no static data
+      rescueStep()(Recount);
+    }).toThrow(
+      `rescue step Recount keeps static data, which everything built from it would share: rescues`,
+    );
   });
 
   it("refuses a class declared twice", () => {
@@ -116,5 +126,14 @@ describe("fromRescuedStep", () => {
       key,
       type: { schema, optional },
     });
+  });
+});
+
+describe("RescueStep.builder", () => {
+  it("refuses a class that keeps static data", () => {
+    // @ts-expect-error a rescue step keeps no static data
+    expect(() => Recount.builder()).toThrow(
+      `rescue step Recount keeps static data, which everything built from it would share: rescues`,
+    );
   });
 });
