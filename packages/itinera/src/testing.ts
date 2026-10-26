@@ -9,7 +9,7 @@
  *
  * {@includeCode ../examples/scripted.ts}
  *
- * @module
+ * @module itinera/testing
  */
 export type {
   EndsAbnormally,

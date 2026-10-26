@@ -69,5 +69,9 @@ export const EventKind = closedSet({
   JourneyError: "journey_error",
 });
 
-/** One of the values of {@link EventKind}. */
+/**
+ * One of the values of {@link EventKind}.
+ *
+ * {@includeCode ../../examples/event-kind.ts}
+ */
 export type EventKind = ValueOf<typeof EventKind>;

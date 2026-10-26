@@ -4,7 +4,7 @@
  *
  * {@includeCode ../examples/step.ts}
  *
- * @module
+ * @module itinera/step
  */
 import { type StepBuilder, stepBuilder } from "./step/builder.js";
 import {

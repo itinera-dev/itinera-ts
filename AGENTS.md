@@ -76,6 +76,7 @@ After `npm ci`, each of these is a required CI check, and every one must pass be
 - `npm run package`
 - `npm run docs`
 - `npm run dependency-check`
+- `npm run release-actions`
 
 `npm run check` runs them in this order, and stops at the first that fails. CI runs the tests on Linux on Node 22, 24 and 26, and on Windows and macOS on Node 24, and the rest on Node 24.
 

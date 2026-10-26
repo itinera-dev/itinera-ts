@@ -4,7 +4,7 @@ The TypeScript implementation of [Itinera](https://github.com/itinera-dev/spec),
 
 ## Learning it
 
-[The Itinera site](https://itinera-dev.org/) explains why Itinera exists, and [the specification](https://github.com/itinera-dev/spec) defines what every implementation does. The Itinera book has no TypeScript edition yet; one is planned after the first release.
+[The Itinera site](https://itinera-dev.org/) explains why Itinera exists, and [the specification](https://github.com/itinera-dev/spec) defines what every implementation does. The Itinera book has no TypeScript edition yet; one is planned.
 
 ## Status
 

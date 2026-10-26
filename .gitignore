@@ -2,3 +2,5 @@ node_modules
 /conformance-report
 /packages/*/dist
 /packages/itinera/api
+/packages/itinera/api-reference.tar.gz
+__pycache__

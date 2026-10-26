@@ -1,0 +1,21 @@
+.col-content a:not(.tsd-anchor-icon),
+.tsd-generator a {
+  text-decoration: underline;
+}
+
+.col-content {
+  overflow-wrap: anywhere;
+}
+
+.tsd-hierarchy a,
+.tsd-breadcrumb a {
+  display: inline-block;
+  min-width: 24px;
+  min-height: 24px;
+  line-height: 24px;
+}
+
+.tsd-signature,
+.col-content li {
+  line-height: 24px;
+}
