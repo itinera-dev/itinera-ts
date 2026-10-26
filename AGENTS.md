@@ -92,7 +92,7 @@ The runner is in `packages/conformance`. Run `npm run conformance`, which builds
 
 In CI the `run-conformance` action sets these from `conformance.json`.
 
-The runner builds each scenario's workflow with the builder, from test support's mocks. The features under `packages/conformance/features/fixtures` drive workflows written by hand with the decorators, as an application writes them, reusing the sentences of the conformance cases with a Given sentence naming each workflow, such as `Given the payment workflow`.
+The runner builds each scenario's workflow with the builder, from test support's mocks. The features under `packages/conformance/tests/fixtures/features` drive workflows written by hand with the decorators, as an application writes them, reusing the sentences of the conformance cases with a Given sentence naming each workflow, such as `Given the payment workflow`.
 
 ## Pull requests and stacks
 
