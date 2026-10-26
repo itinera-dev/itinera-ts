@@ -13,18 +13,18 @@ Tier 1 runs a journey in one process, with steps, retries, rescue steps, policie
 ```mermaid
 flowchart LR
     accTitle: The packages of itinera-ts
-    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through itinera/unstable, itinera/value, and itinera/schema for Zod, and reads the conformance cases. itinera depends on Zod, which it re-exports from itinera/schema.
+    accDescr: Applications depend on the package itinera and import each concept from a subpath, through an ESM layer or the CommonJS module behind it. The conformance runner, a package of the workspace that is never published, depends on itinera through its subpaths, as an application does, and reads the conformance cases. itinera depends on Zod, which it re-exports from itinera/schema.
     app["Application"] -->|"import, through the ESM layer"| itinera["itinera"]
     app -->|"require, the CommonJS module"| itinera
-    runner["packages/conformance, the runner"] -->|"itinera/unstable, itinera/value and itinera/schema"| itinera
+    runner["packages/conformance, the runner"] -->|"its subpaths"| itinera
     cases["Conformance cases, from itinera-dev/conformance"] --> runner
     itinera -->|"re-exports z from itinera/schema"| zod["zod"]
 ```
 
 1. An application depends on one package, `itinera`, and imports each concept from a subpath of it. The package root exports nothing of its own.
 2. Each subpath is a CommonJS module with an ESM layer that only re-exports it, so `import` and `require` reach the same copy.
-3. Until a proposal is listed in `conformance.json`, and while its API holds a stand-in or names API of a proposal not yet listed, its API is exported only from `itinera/unstable`. The other subpaths for now are `itinera/value`, with values and the type tokens, and `itinera/schema`, which re-exports Zod's `z`, on which itinera's type tokens are built, so an application uses the same copy of Zod as itinera.
-4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through `itinera/unstable`, `itinera/value`, and `itinera/schema` for Zod, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks and rescue step mocks, given their inputs, what a rescue step requests of the step it rescues, and their services, by position, each extended to call each service it is lent and to play what the step does before it ends, its input adapters from one method of the scenario's workflow class that plays their scripts, its service providers from one method of that class for each provider name, since nothing a provider requests says which provider it is, each making the runner's own labellers and meters, and its policies from test support's policy mocks, each extended to play what the hook does before it ends, with the scenario's workflow class providing every role, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
+3. The subpaths are those of the concepts: `itinera/event`, `itinera/executor`, `itinera/instance`, `itinera/journey`, `itinera/option`, `itinera/policy`, `itinera/report`, `itinera/service`, `itinera/step`, `itinera/value` and `itinera/workflow`, and `itinera/schema`, which re-exports Zod's `z`, on which itinera's type tokens are built, so an application uses the same copy of Zod as itinera. Until a proposal is listed in `conformance.json`, and while its API holds a stand-in or names API of a proposal not yet listed, its API is exported only from `itinera/unstable`, which now holds only test support.
+4. `packages/conformance`, which is never published, runs the conformance cases of [itinera-dev/conformance](https://github.com/itinera-dev/conformance) against `itinera`, through its subpaths, test support from `itinera/unstable` included, as an application imports it. It puts each scenario's workflow together with the builder from test support's step mocks and rescue step mocks, given their inputs, what a rescue step requests of the step it rescues, and their services, by position, each extended to call each service it is lent and to play what the step does before it ends, its input adapters from one method of the scenario's workflow class that plays their scripts, its service providers from one method of that class for each provider name, since nothing a provider requests says which provider it is, each making the runner's own labellers and meters, and its policies from test support's policy mocks, each extended to play what the hook does before it ends, with the scenario's workflow class providing every role, runs it with `LocalExecutor`, and reads what the journey did from recording reporters.
 
 The modules of `packages/itinera/src`, each the module of one concept:
 
@@ -32,23 +32,23 @@ The modules of `packages/itinera/src`, each the module of one concept:
 |---|---|
 | `value` | The subpath `itinera/value`: `Value`, `PlainValue`, `SerialisesItself` and `AsValue`, the private capture that checks and copies a value, the private read that gives a requester its own copy checked by a schema, and the type tokens a request names, with `optional`, `classOf` and `guard` |
 | `schema` | Zod's `z`, re-exported |
-| `option` | `Option`, `Some` and `None` |
-| `event` | `Event`, every kind of event and what each carries |
-| `report` | Reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
-| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, its output and `OutputError`, the data bag and what reading it gives, `Read`, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
-| `step` | Step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors, their options and their builders |
-| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, their listing, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
-| `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
-| `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
-| `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
-| `service` | Provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter`, and, privately, how the implementation a provider made is named |
+| `option` | The subpath `itinera/option`: `Option`, `Some` and `None` |
+| `event` | The subpath `itinera/event`: `Event`, every kind of event and what each carries, and the types of a closed set of names, `ClosedSet`, `EveryValue` and `ValueOf` |
+| `report` | The subpath `itinera/report`: reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
+| `journey` | The subpath `itinera/journey`: journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, its output and `OutputError`, the data bag and what reading it gives, `Read`, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
+| `step` | The subpath `itinera/step`: step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors, their options and their builders |
+| `workflow` | The subpath `itinera/workflow`: `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, their listing, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
+| `instance` | The subpath `itinera/instance`: `WorkflowInstance`, which only `instance()` makes, in the private `instance/made.ts`, and what an instance holds besides its initial data |
+| `executor` | The subpath `itinera/executor`: `LocalExecutor`, `Refusal` and why `run` refuses an instance |
+| `policy` | The subpath `itinera/policy`: `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
+| `service` | The subpath `itinera/service`: provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter`, and, privately, how the implementation a provider made is named |
 | `testing` | Test support: `RecordingReporter`, `EntryRecordingReporter`, `FailingReporter`, `Ending`, `stepMock` and `StepMock`, `RescueEnding`, `rescueStepMock` and `RescueStepMock`, `HookEnding`, `stepPolicyMock` and `StepPolicyMock`, `workflowPolicyMock` and `WorkflowPolicyMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
-| `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
+| `closed-set` | `closedSet`, from which every closed set of names is declared, and its types, which `event` re-exports |
 | `name` | Private: `named`, which refuses an empty name as something is declared |
 | `declaration` | Private: the table of the requests parameter decorators record, the requests a builder is given by position, the types of the request decorators and of the requests given by position, the types read from the metadata, the check that the compiler recorded it, and the guard that refuses to compile without `strictNullChecks` |
 | `index` | The package root, which exports nothing of its own |
-| `unstable` | The subpath `itinera/unstable`, which re-exports the API of the proposals not listed yet, and of those listed whose API still names it |
+| `unstable` | The subpath `itinera/unstable`, which re-exports the API of the proposals not listed yet: test support, until 0108 is listed |
 
 Where it lives: `packages/`, and each module in `packages/itinera/src/`, with its submodules in the directory of its name.
 
@@ -90,7 +90,7 @@ flowchart TD
 5. The local executor runs an instance, reading only what `WorkflowInstance` holds.
 6. All three are sealed: only the decorators, the builder and `instance()` make them, so one written by hand does not compile where one is expected.
 
-Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `step/builder.ts`, `workflow/descriptor.ts`, `workflow/descriptor/assemble.ts`, `workflow/violation.ts` and its submodules in `workflow/violation/`, `workflow/listing.ts`, `service/serving.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
+Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `step/builder.ts`, `workflow/descriptor.ts`, `workflow/descriptor/assemble.ts`, `workflow/violation.ts` and its submodules in `workflow/violation/`, `workflow/listing.ts`, `service/serving.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`, `instance/made.ts`.
 
 ### How requests are declared
 

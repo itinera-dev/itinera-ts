@@ -1,4 +1,6 @@
-import type { Event, JourneyResult, ListedStep } from "itinera/unstable";
+import type { Event } from "itinera/event";
+import type { JourneyResult } from "itinera/journey";
+import type { ListedStep } from "itinera/workflow";
 import {
   admitted,
   type Admission,

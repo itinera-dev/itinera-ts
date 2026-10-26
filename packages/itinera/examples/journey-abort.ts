@@ -1,4 +1,4 @@
-import type { JourneyAbort, Requester } from "itinera/unstable";
+import type { JourneyAbort, Requester } from "itinera/event";
 
 function who(requester: Requester): string {
   switch (requester.kind) {

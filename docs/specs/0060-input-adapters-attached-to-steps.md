@@ -6,7 +6,7 @@ Status: complete, and 60 is listed in `conformance.json`. Stage 4 has added `@in
 
 ## API
 
-0060 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the rescue steps of [0003](0003-rescue-steps.md), as the agents' manual says. It is defined in `src/workflow/adapter.ts`, with what an adapter returns in `src/workflow/adapter/supplied.ts`, and re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow`.
+Since stage 10, it is exported from the subpath `itinera/workflow`. It is defined in `src/workflow/adapter.ts`, with what an adapter returns in `src/workflow/adapter/supplied.ts`, and re-exported by `src/workflow.ts`.
 
 - **`@inputAdapter({ steps, name? })`** marks a method of a workflow class as an input adapter of the steps it names, at least one, so an empty list does not compile, and `<step name>_rescue` for a rescue step (see [0098](0098-rescue-step-adapters-and-providers.md)). Its name is the method's unless given. It is typed as the interface `InputAdapterDecorator`, generic in the method's type, and compiles only on a method of a class extending `Workflow` that returns a `Supplied` or a promise of one. It records the adapter, its name, its steps, its method and its requests in the class's declaration, in the order the methods are written.
 - **What an adapter may request**: `@stepName()`, `@key()`, the key of the input it is asked for, `@fromWorkflow(key, type?)`, `@journeyId()` and `@dataBag()`. Any other request throws when the class is defined, naming the method and the request, since a parameter decorator cannot see its method's decorator to refuse it at compile time.

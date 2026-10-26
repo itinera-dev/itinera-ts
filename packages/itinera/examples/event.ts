@@ -1,4 +1,4 @@
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 
 export function summary(event: Event): string {
   if (event.kind === "step_failed") {

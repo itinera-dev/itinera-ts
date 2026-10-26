@@ -1,11 +1,8 @@
-import type {
-  AdapterName,
-  JourneyId,
-  PolicyName,
-  ProviderName,
-  StepName,
-  WorkflowName,
-} from "itinera/unstable";
+import type { JourneyId } from "itinera/journey";
+import type { PolicyName } from "itinera/policy";
+import type { ProviderName } from "itinera/service";
+import type { StepName } from "itinera/step";
+import type { AdapterName, WorkflowName } from "itinera/workflow";
 
 export function origin(
   journeyId: JourneyId,

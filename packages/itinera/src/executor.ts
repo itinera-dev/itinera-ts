@@ -2,10 +2,12 @@
  * Executors, which run journeys, and what `run` rejects with when it refuses
  * an instance.
  *
+ * {@includeCode ../examples/local-executor.ts}
+ *
  * @module
  */
 import { runJourney } from "./engine.js";
-import { isInstance, type WorkflowInstance } from "./instance.js";
+import { isInstance, type WorkflowInstance } from "./instance/made.js";
 import type { JourneyResult } from "./journey.js";
 import type { DispatcherFactory } from "./report.js";
 import { DefaultDispatcherFactory } from "./report/default-dispatcher.js";

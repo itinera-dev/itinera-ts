@@ -1,4 +1,4 @@
-import { EventKind } from "itinera/unstable";
+import { EventKind } from "itinera/event";
 import { ModelError } from "./error.js";
 
 /** How a scripted reporter fails, as test support's failing reporter does. */

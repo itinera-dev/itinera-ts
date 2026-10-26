@@ -1,4 +1,5 @@
-import { DataBag, None, type Option, Some } from "itinera/unstable";
+import { DataBag } from "itinera/journey";
+import { None, type Option, Some } from "itinera/option";
 import { type PlainValue } from "itinera/value";
 import { given } from "./given.js";
 import {

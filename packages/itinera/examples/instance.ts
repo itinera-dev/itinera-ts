@@ -1,15 +1,9 @@
 import assert from "node:assert/strict";
-import {
-  type Event,
-  type JourneyId,
-  type Outcome,
-  type Reporter,
-  Step,
-  step,
-  withStep,
-  Workflow,
-  workflow,
-} from "itinera/unstable";
+import type { Event } from "itinera/event";
+import type { JourneyId } from "itinera/journey";
+import type { Reporter } from "itinera/report";
+import { type Outcome, Step, step } from "itinera/step";
+import { withStep, Workflow, workflow } from "itinera/workflow";
 
 @step()
 class Ship extends Step {

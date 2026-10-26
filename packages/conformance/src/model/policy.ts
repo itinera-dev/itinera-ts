@@ -1,4 +1,4 @@
-import { StepHook, WorkflowHook } from "itinera/unstable";
+import { StepHook, WorkflowHook } from "itinera/policy";
 import { ModelError } from "./error.js";
 import type { Level } from "./step.js";
 import type { Scripted, ValueType } from "./value.js";

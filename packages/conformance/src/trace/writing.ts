@@ -11,10 +11,10 @@ import type {
   JourneyAbort,
   MissingData,
   ProviderSource,
-  Reason,
   StepHookSource,
   StepSource,
-} from "itinera/unstable";
+} from "itinera/event";
+import type { Reason } from "itinera/step";
 import type { PlainValue } from "itinera/value";
 
 import type { Column, Data } from "./line.js";

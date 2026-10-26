@@ -1,4 +1,4 @@
-import type { ContributionSource, Event } from "itinera/unstable";
+import type { ContributionSource, Event } from "itinera/event";
 
 function author(source: ContributionSource): string {
   switch (source.kind) {

@@ -1,4 +1,4 @@
-import type { DecidedBy, Event, GiveUpHook } from "itinera/unstable";
+import type { DecidedBy, Event, GiveUpHook } from "itinera/event";
 
 function decider(decidedBy: DecidedBy): string {
   return decidedBy === "default"

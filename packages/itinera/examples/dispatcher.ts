@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import type { Dispatcher, Event, Reporter } from "itinera/unstable";
+import type { Event } from "itinera/event";
+import type { Dispatcher, Reporter } from "itinera/report";
 import type { PlainValue } from "itinera/value";
 
 class OnlyMine implements Dispatcher {

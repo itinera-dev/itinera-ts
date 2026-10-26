@@ -3,11 +3,9 @@
  * each hook keeping its call with the witness and playing its script before
  * the mock ends it.
  */
+import type { Contributor } from "itinera/journey";
+import type { HookReporter, OnFailure, OnSuccess } from "itinera/policy";
 import {
-  type Contributor,
-  type HookReporter,
-  type OnFailure,
-  type OnSuccess,
   type StepPolicyMock,
   stepPolicyMock,
   type StepPolicyMockScript,

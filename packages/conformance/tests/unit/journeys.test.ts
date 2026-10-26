@@ -1,4 +1,4 @@
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 import { describe, expect, it } from "vitest";
 import { admitted, type Journey, ran, streamOf } from "../../src/journeys.js";
 import { Model, ModelError } from "../../src/model.js";

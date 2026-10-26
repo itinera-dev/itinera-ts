@@ -1,4 +1,5 @@
-import type { Contributor, StepReporter } from "itinera/unstable";
+import type { Contributor } from "itinera/journey";
+import type { StepReporter } from "itinera/step";
 import { describe, expect, it } from "vitest";
 import { ModelError } from "../../../src/model/error.js";
 import {

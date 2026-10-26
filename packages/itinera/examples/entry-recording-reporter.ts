@@ -1,15 +1,14 @@
 import assert from "node:assert/strict";
+import { LocalExecutor } from "itinera/executor";
+import { None, Some } from "itinera/option";
 import {
-  EntryRecordingReporter,
-  LocalExecutor,
-  None,
   type Outcome,
-  Some,
   Step,
   stepReporter,
   type StepReporter,
-  Workflow,
-} from "itinera/unstable";
+} from "itinera/step";
+import { EntryRecordingReporter } from "itinera/unstable";
+import { Workflow } from "itinera/workflow";
 
 class Lookup extends Step {
   override async run(reporter: StepReporter): Promise<Outcome> {

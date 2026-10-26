@@ -1,9 +1,5 @@
-import {
-  type InstanceOptions,
-  instanceOf,
-  type ValuesByKey,
-  type WorkflowInstance,
-} from "../instance.js";
+import type { InstanceOptions, ValuesByKey } from "../instance.js";
+import { instanceOf, type WorkflowInstance } from "../instance/made.js";
 import { type Provided, provided } from "../service/provider/provided.js";
 import type { AsValue } from "../value.js";
 import { fromBag, type Supplied, supplied } from "./adapter/supplied.js";

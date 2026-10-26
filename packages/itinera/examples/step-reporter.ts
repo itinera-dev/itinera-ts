@@ -5,7 +5,7 @@ import {
   step,
   stepReporter,
   type StepReporter,
-} from "itinera/unstable";
+} from "itinera/step";
 
 @step()
 class Ship extends Step {

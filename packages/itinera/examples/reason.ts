@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { Reason } from "itinera/unstable";
+import type { Reason } from "itinera/step";
 
 function explain(reason: Reason): string {
   return reason.message === undefined

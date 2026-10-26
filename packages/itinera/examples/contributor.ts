@@ -1,11 +1,6 @@
 import assert from "node:assert/strict";
-import {
-  type Contributor,
-  contributor,
-  type Outcome,
-  Step,
-  step,
-} from "itinera/unstable";
+import { type Contributor, contributor } from "itinera/journey";
+import { type Outcome, Step, step } from "itinera/step";
 
 @step()
 class Charge extends Step {

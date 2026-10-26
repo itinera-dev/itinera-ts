@@ -6,7 +6,7 @@ Status: complete, and 65 is listed in `conformance.json`. Stage 3 added `Journey
 
 ## API
 
-Everything here is exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the failure and the abort of 0083, as the agents' manual says. It is defined in `src/journey/result.ts`, `src/journey/failure.ts`, `src/journey/abort.ts` and `src/journey/data-bag.ts`, re-exported by `src/journey.ts`, which becomes the subpath `itinera/journey` then.
+Since stage 10, everything here is exported from the subpath `itinera/journey`. It is defined in `src/journey/result.ts`, `src/journey/failure.ts`, `src/journey/abort.ts` and `src/journey/data-bag.ts`, and re-exported by `src/journey.ts`.
 
 - **`JourneyResult`** is an interface, frozen once made: `journeyId`, `status`, `failure`, `abort`, and `isSucceeded()`, `isFailed()` and `isAborted()`, each a type guard narrowing `status`, so the data bag is read without a switch, as chapter 5, 5.14 suggests.
 - **`JourneyStatus`** is a discriminated union on `kind`: `Succeeded` with the `dataBag`, `Failed` with the `failure` and the `dataBag`, and `Aborted` with the `abort` only.

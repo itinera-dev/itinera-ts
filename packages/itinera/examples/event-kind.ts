@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { type EmittedKind, type Event, EventKind } from "itinera/unstable";
+import { type EmittedKind, type Event, EventKind } from "itinera/event";
 
 export function isLast(event: Event): boolean {
   return (

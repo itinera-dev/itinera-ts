@@ -1,5 +1,6 @@
 import { Then } from "@cucumber/cucumber";
-import { Attempt, Option } from "itinera/unstable";
+import { Option } from "itinera/option";
+import { Attempt } from "itinera/step";
 import { equalTo } from "../../equal.js";
 import { ModelError } from "../../model.js";
 import { dataUnder, type ProviderRequest } from "../../model/provider.js";

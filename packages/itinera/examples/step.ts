@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { type Outcome, Step, step } from "itinera/unstable";
+import { type Outcome, Step, step } from "itinera/step";
 
 @step()
 class Ship extends Step {

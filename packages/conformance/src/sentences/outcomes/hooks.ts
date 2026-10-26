@@ -1,6 +1,6 @@
 import { isDeepStrictEqual } from "node:util";
 import { type DataTable, Then } from "@cucumber/cucumber";
-import type { Event } from "itinera/unstable";
+import type { Event } from "itinera/event";
 import { type Row, rows } from "../../model.js";
 import { expectOfStream, holds } from "../../unmet.js";
 import type { Called } from "../../witness/hooks.js";
