@@ -34,6 +34,7 @@ describe("StepWriter", () => {
 
   it.each([
     ["0", 0, MistakeKind.NoSuchAttempt],
+    ["-1", -1, MistakeKind.NoSuchAttempt],
     ["a fraction", 1.5, MistakeKind.NoSuchAttempt],
     ["one past the most it can have", 3, MistakeKind.NoSuchAttempt],
     ["one described before", 1, MistakeKind.AttemptScriptedTwice],
@@ -65,8 +66,32 @@ describe("StepWriter", () => {
     );
   });
 
+  it("names an attempt the step can never have rather than one described already", () => {
+    expect(() =>
+      charging(1).onEveryAttempt().willFail("declined").onAttempt(5),
+    ).toThrow(
+      mistaken({
+        kind: MistakeKind.NoSuchAttempt,
+        step: "charge",
+        attempt: 5,
+      }),
+    );
+  });
+
   it("throws a test mistake for every attempt once one is described", () => {
     expect(() => charging(1).willFail("declined").onEveryAttempt()).toThrow(
+      mistaken({
+        kind: MistakeKind.AttemptScriptedTwice,
+        step: "charge",
+        attempt: 1,
+      }),
+    );
+  });
+
+  it("throws a test mistake for every attempt once the remaining attempts are described", () => {
+    expect(() =>
+      charging(1).onRemainingAttempts().willFail("declined").onEveryAttempt(),
+    ).toThrow(
       mistaken({
         kind: MistakeKind.AttemptScriptedTwice,
         step: "charge",

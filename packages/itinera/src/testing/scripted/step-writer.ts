@@ -50,11 +50,11 @@ export class StepWriter implements NamedStep, StepScript {
     if (!Number.isInteger(attempt) || attempt < 1) {
       this.#mistakenOn(MistakeKind.NoSuchAttempt, attempt);
     }
-    if (this.#target.rest !== undefined || attempt < next) {
-      this.#mistakenOn(MistakeKind.AttemptScriptedTwice, attempt);
-    }
     if (attempt > this.#target.mostAttempts) {
       this.#mistakenOn(MistakeKind.NoSuchAttempt, attempt);
+    }
+    if (this.#target.rest !== undefined || attempt < next) {
+      this.#mistakenOn(MistakeKind.AttemptScriptedTwice, attempt);
     }
     if (attempt > next) {
       this.#mistakenOn(MistakeKind.GapInTheAttempts, attempt);
@@ -73,11 +73,11 @@ export class StepWriter implements NamedStep, StepScript {
 
   onRemainingAttempts(): AttemptScript {
     const next = this.#target.numbered.length + 1;
-    if (this.#target.rest !== undefined) {
-      this.#mistakenOn(MistakeKind.AttemptScriptedTwice, next);
-    }
     if (next > this.#target.mostAttempts) {
       this.#mistakenOn(MistakeKind.NoSuchAttempt, next);
+    }
+    if (this.#target.rest !== undefined) {
+      this.#mistakenOn(MistakeKind.AttemptScriptedTwice, next);
     }
     this.#slot = "remaining";
     return this;
