@@ -1,5 +1,7 @@
 import io
 import json
+import tarfile
+import tempfile
 import unittest
 import urllib.error
 from unittest import mock
@@ -17,6 +19,18 @@ class Answer(io.BytesIO):
 
 def answering(body):
     return mock.patch("urllib.request.urlopen", return_value=Answer(body))
+
+
+def tarball(files):
+    """A gzipped tarball holding `files`, each name relative to one top folder, as GitHub serves a repository."""
+    buffer = io.BytesIO()
+    with tarfile.open(fileobj=buffer, mode="w:gz") as tar:
+        for name, text in files.items():
+            data = text.encode()
+            member = tarfile.TarInfo(f"o-r-0123456/{name}")
+            member.size = len(data)
+            tar.addfile(member, io.BytesIO(data))
+    return buffer.getvalue()
 
 
 def failing(code):
@@ -56,3 +70,27 @@ class GitHubPost(unittest.TestCase):
     def test_nothing_there_is_an_error(self):
         with failing(404), self.assertRaisesRegex(RequestError, "found nothing"):
             GitHub("token").post("/repos/o/site/dispatches", {"event_type": "api-reference"})
+
+
+class GitHubExtractRepository(unittest.TestCase):
+    def test_the_root_is_the_tarballs_top_folder(self):
+        with tempfile.TemporaryDirectory() as into, answering(tarball({"typescript/package.json": "{}"})):
+            root = GitHub("token").extract_repository("o/r", "0123456", into)
+            self.assertEqual(root.name, "o-r-0123456")
+            self.assertEqual((root / "typescript" / "package.json").read_text(), "{}")
+
+    def test_a_member_outside_the_folder_is_refused(self):
+        archive = tarball({"../../outside": ""})
+        with tempfile.TemporaryDirectory() as into, answering(archive):
+            with self.assertRaisesRegex(RequestError, "cannot be extracted"):
+                GitHub("token").extract_repository("o/r", "0123456", into)
+
+    def test_a_tarball_without_one_top_folder_is_refused(self):
+        with tempfile.TemporaryDirectory() as into, answering(tarball({})):
+            with self.assertRaisesRegex(RequestError, "no single top folder"):
+                GitHub("token").extract_repository("o/r", "0123456", into)
+
+    def test_nothing_there_is_an_error(self):
+        with tempfile.TemporaryDirectory() as into, failing(404):
+            with self.assertRaisesRegex(RequestError, "found nothing"):
+                GitHub("token").extract_repository("o/r", "0123456", into)

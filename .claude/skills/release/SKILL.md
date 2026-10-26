@@ -32,8 +32,9 @@ One pull request, titled "Release <version>" with a release commit `chore(releas
    - nothing that was already true in the last release, which `git show v<last version>:<file>` settles;
    - nothing about how the documentation spells something the language already allowed, such as a type annotation the language lets code leave out;
    - a commit since the last release that changes what an application meets but carries no entry gets its entry here; changes to CI, the release workflow or the documentation get one only when they change what is published or how, as docs/contributing.md "Commit messages and the changelog" says.
-8. Check the change against every condition of the release gate. Run the checks of AGENTS.md "Running the checks", and have the change reviewed as the `review-change` skill says. Ask the reviewer to check every changelog entry against the code at both versions, and the section against the entries git-cliff printed.
-9. Open the pull request, in a cloud session with the REST form the `stack` skill gives, and report it as AGENTS.md "Working with the maintainer" says.
+8. Move `book.json` to the head of the book's `next`, as docs/contributing.md "The book in CI" says. `git ls-remote https://github.com/itinera-dev/book refs/heads/next` gives it.
+9. Check the change against every condition of the release gate. Run the checks of AGENTS.md "Running the checks", and have the change reviewed as the `review-change` skill says. Ask the reviewer to check every changelog entry against the code at both versions, and the section against the entries git-cliff printed.
+10. Open the pull request, in a cloud session with the REST form the `stack` skill gives, and report it as AGENTS.md "Working with the maintainer" says.
 
 ## After the merge
 
@@ -58,7 +59,12 @@ One pull request, titled "Release <version>" with a release commit `chore(releas
 
 As soon as `itinera` is on npm at the version, Claude carries the release into the book and the site without waiting to be asked. The maintainer's standing preference is that both changes are pushed straight to each repository's `main`, with no pull request, once the checks its own manual asks for pass and a separate reviewer has passed them. When this session cannot reach a repository, Claude asks the maintainer for a thread working on it, and passes that preference on.
 
-1. **The book**, itinera-dev/book, has no TypeScript edition yet. Until it has one, there is nothing to carry into it; the change that starts the edition adds here how a release reaches it.
+1. **The book**, itinera-dev/book, follows the release as its BOOK.md says in "How the examples are checked": `next` merges into `main`, whose `typescript` directory then names the released version, and the prose naming the release, such as the installing chapter and the appendix on what the version supports, is raised to it. Once that commit is on the book's `main`, give the maintainer the commands that tag it:
+   1. `git fetch origin`
+   2. `git tag -a typescript-<version> <commit> -m "The TypeScript book for itinera <version>"`
+   3. `git push origin typescript-<version>`
+
+   The tag freezes its commit as the version's edition, so it goes only on the commit whose prose names the new version.
 2. **The site**, itinera-dev/itinera-dev.github.io, follows each language's release, as its own manual says. For TypeScript:
    - in `src/data/languages.json`, the TypeScript entry's `state` becomes `released`, and its `version`, `install`, `tier` and `executors` match the release and its `conformance.json`, with the other fields a released entry has;
    - in the `facts` of `site.config.mjs`, `conformance-ref` matches the cases `conformance.json` pins;

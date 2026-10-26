@@ -6,7 +6,7 @@ import sys
 import tempfile
 from typing import NoReturn
 
-from lib.cases import extract, proposals_of_tiers
+from lib.cases import proposals_of_tiers
 from lib.http import GitHub, RequestError, npm_versions
 from lib.release import (
     changelog_section,
@@ -88,10 +88,11 @@ def main():
     if shape:
         fail([*found, *shape])
     try:
-        archive = github.download(f"/repos/{conformance_repo}/tarball/{conformance['cases']}")
+        root = github.extract_repository(
+            conformance_repo, conformance["cases"], tempfile.mkdtemp(dir=env.get("RUNNER_TEMP"))
+        )
     except RequestError as error:
         fail([*found, f"The cases at {conformance_repo}@{conformance['cases']} cannot be downloaded: {error}"])
-    root = extract(archive, tempfile.mkdtemp(dir=env.get("RUNNER_TEMP")))
     found += tier_problems(proposals_of_tiers(root, claimed), conformance["proposals"], claimed)
 
     if found:
