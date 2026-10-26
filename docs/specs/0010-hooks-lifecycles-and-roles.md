@@ -42,9 +42,9 @@ None of its own.
 
 ## Tests
 
-- `tests/unit/policy/hooks.test.ts`: the hooks recorded, one hook on two methods, and two hooks on one method.
+- `tests/unit/policy/hooks.test.ts`: the hooks recorded, one hook on two methods, two hooks on one method, and a hook requesting a cause it is not given.
 - `tests/unit/policy/hooks.test-d.ts`: each hook's return type, a failure hook finishing the workflow, a step hook returning nothing or a string, a workflow hook returning a value, and a hook on the other kind of policy or on a class that is not one.
-- `tests/unit/policy/declared.test.ts`: the name, given or the class's, the hooks with their requests, the causes, and every refusal when a class is defined.
+- `tests/unit/policy/declared.test.ts`: the name, given or the class's, the hooks with their requests, the causes, and every other refusal when a class is defined.
 - `tests/unit/policy/declared.test-d.ts`: a policy whose constructor takes something, a policy of the other kind, and a class that is not a policy.
 - `tests/unit/policy/request.test.ts`, `tests/unit/policy/request.test-d.ts`, `tests/unit/policy/reporter.test.ts` and `tests/unit/policy/reporter.test-d.ts`: what `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter` record, and where each does not compile.
 - `tests/unit/workflow/decorators.test.ts`: policies attached to the workflow and its steps, in order, policies not declared, and policies of the other kind given through a cast.

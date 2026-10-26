@@ -79,39 +79,6 @@ describe("stepPolicy", () => {
 
   it.each([
     [
-      "the failure cause outside on step failure",
-      () => {
-        @stepPolicy()
-        class Audit extends StepPolicy {
-          @onStepRetry()
-          retried(@failureCause() cause: StepFailureCause): OnFailure {
-            return this.failWorkflow(cause);
-          }
-        }
-        return Audit;
-      },
-      "Audit.retried requests the failure cause, which only on step failure is given",
-    ],
-    [
-      "the retry cause outside on step retry",
-      () => {
-        @stepPolicy()
-        class Audit extends StepPolicy {
-          @onStepFailure()
-          failed(@retryCause() cause: RetryCause): OnFailure {
-            return this.failWorkflow(cause);
-          }
-        }
-        return Audit;
-      },
-      "Audit.failed requests the retry cause, which only on step retry is given",
-    ],
-  ])("refuses a hook that requests %s", (_, declaring, message) => {
-    expect(declaring).toThrow(message);
-  });
-
-  it.each([
-    [
       "a class that extends another policy",
       () => {
         class Base extends StepPolicy {}
