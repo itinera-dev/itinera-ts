@@ -51,6 +51,31 @@ export class PolicyDescriptor {
   build(): StepPolicy | WorkflowPolicy {
     return new this.#policy();
   }
+
+  /**
+   * Calls the hook `hook` on `policy`, an instance {@link PolicyDescriptor.build}
+   * made: the method that implements it, with `answers`, what its requests
+   * were answered with, in the order it declares them, and gives what the
+   * method returns.
+   *
+   * {@includeCode ../../examples/policy-builder.ts}
+   *
+   * @throws TypeError if the policy does not define the hook.
+   * @throws Whatever the hook throws.
+   */
+  call(
+    policy: StepPolicy | WorkflowPolicy,
+    hook: StepHook | WorkflowHook,
+    answers: readonly unknown[],
+  ): unknown {
+    const declared = this.#parts.hooks.get(hook);
+    const method: unknown =
+      declared === undefined ? undefined : Reflect.get(policy, declared.key);
+    if (typeof method !== "function") {
+      throw new TypeError(`policy ${this.name} does not define ${hook}`);
+    }
+    return Reflect.apply(method, policy, answers);
+  }
 }
 
 /** A class of policies of either kind. */

@@ -3,9 +3,9 @@ import type { Reporter } from "../../../src/report.js";
 import { DefaultDispatcher } from "../../../src/report/default-dispatcher.js";
 import { Attempt, type StepName } from "../../../src/step.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
-import { FailingOn, journeyThrough } from "../../fixtures/engine.js";
+import { journeyThrough, failingOn } from "../../fixtures/engine.js";
 import { Failures, Guard } from "../../../src/engine/guard.js";
-import { AttemptHandles } from "../../../src/engine/handles.js";
+import { Handles } from "../../../src/engine/handles.js";
 import type { Journey } from "../../../src/engine/journey.js";
 import { JourneyAbortError } from "../../../src/engine/signal.js";
 
@@ -14,7 +14,7 @@ const charge = "charge" as StepName;
 const notAValue = Number.NaN;
 
 interface Lent {
-  readonly handles: AttemptHandles;
+  readonly handles: Handles;
   readonly journey: Journey;
   readonly recorder: RecordingReporter;
 }
@@ -29,7 +29,7 @@ function lent(...others: readonly Reporter[]): Lent {
   }
   const journey = journeyThrough(dispatcher, failures);
   journey.step = charge;
-  const handles = new AttemptHandles(journey, {
+  const handles = new Handles(journey, {
     kind: "step",
     step: charge,
     attempt: Attempt.first,
@@ -120,18 +120,18 @@ describe("the step reporter of an attempt", () => {
   it.each([
     [
       "event data that is not a value",
-      (handles: AttemptHandles) => handles.reporter.info("charged", notAValue),
+      (handles: Handles) => handles.reporter.info("charged", notAValue),
       { reason: "not a value", step: "charge", eventKind: "step_info" },
     ],
     [
       "global metadata that is not a value",
-      (handles: AttemptHandles) =>
+      (handles: Handles) =>
         handles.reporter.setGlobalMetadata("total", notAValue),
       { reason: "not a value", step: "charge", key: "total" },
     ],
     [
       "global metadata under journey_id",
-      (handles: AttemptHandles) =>
+      (handles: Handles) =>
         handles.reporter.setGlobalMetadata("journey_id", "other"),
       {
         reason: "reserved metadata key",
@@ -155,7 +155,7 @@ describe("the step reporter of an attempt", () => {
 
   it("rejects the emit a reporter fails on, and delivers nothing the step emits afterwards", async () => {
     const { handles, journey, recorder } = lent(
-      new FailingOn("step_info", "disk full"),
+      failingOn("step_info", "disk full"),
     );
     const failed = handles.reporter.info("charged");
     const later = handles.reporter.warning("late");
@@ -187,23 +187,22 @@ describe("the step reporter of an attempt", () => {
 });
 
 describe("closed handles", () => {
-  it.each<[string, (handles: AttemptHandles) => unknown, string]>([
+  it.each<[string, (handles: Handles) => unknown, string]>([
     [
       "contributing",
-      (handles: AttemptHandles) => {
+      (handles: Handles) => {
         handles.contributor.contribute("stale", 1);
       },
       "contributor",
     ],
     [
       "emitting",
-      (handles: AttemptHandles) => handles.reporter.info("stale"),
+      (handles: Handles) => handles.reporter.info("stale"),
       "step reporter",
     ],
     [
       "setting global metadata",
-      (handles: AttemptHandles) =>
-        handles.reporter.setGlobalMetadata("stale", 1),
+      (handles: Handles) => handles.reporter.setGlobalMetadata("stale", 1),
       "step reporter",
     ],
   ])(

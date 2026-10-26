@@ -2,6 +2,8 @@ import type { Event } from "../../src/event.js";
 import type { EventKind } from "../../src/event/kind.js";
 import type { WorkflowInstance } from "../../src/instance.js";
 import type { JourneyId, JourneyResult } from "../../src/journey.js";
+import type { StepPolicyBuilder } from "../../src/policy/step-policy/builder.js";
+import type { WorkflowPolicyBuilder } from "../../src/policy/workflow-policy/builder.js";
 import type {
   Dispatcher,
   DispatcherFactory,
@@ -15,8 +17,22 @@ import {
   type StepClass,
 } from "../../src/step.js";
 import { Ending } from "../../src/testing/ending.js";
+import { FailingReporter } from "../../src/testing/failing-reporter.js";
 import { RecordingReporter } from "../../src/testing/recording-reporter.js";
 import { type StepMockClass, stepMock } from "../../src/testing/step-mock.js";
+import {
+  type HookCall,
+  type StepPolicyMock,
+  type StepPolicyMockClass,
+  type StepPolicyMockScript,
+  stepPolicyMock,
+} from "../../src/testing/step-policy-mock.js";
+import {
+  type WorkflowPolicyMock,
+  type WorkflowPolicyMockClass,
+  type WorkflowPolicyMockScript,
+  workflowPolicyMock,
+} from "../../src/testing/workflow-policy-mock.js";
 import type { PlainValue, Value } from "../../src/value.js";
 import {
   type Built,
@@ -97,6 +113,17 @@ export function orders(
   return steps.reduce(withStep, named()).build();
 }
 
+/**
+ * The workflow `orders`, with the workflow policy `policy` and these steps
+ * in order.
+ */
+export function guarded(
+  policy: WorkflowPolicyBuilder<WorkflowPolicyMockClass>,
+  ...steps: readonly StepBuilder<StepClass>[]
+): Built<Orders> {
+  return steps.reduce(withStep, named()).policy(policy).build();
+}
+
 function named() {
   return Orders.builder().name("orders");
 }
@@ -172,36 +199,6 @@ export class Payment {
   }
 }
 
-/** A reporter that throws an error with the message on each event of a kind. */
-export class FailingOn implements Reporter {
-  readonly received: Event[] = [];
-
-  constructor(
-    private readonly kind: EventKind,
-    private readonly message: string,
-  ) {}
-
-  report(event: Event): void {
-    this.received.push(event);
-    if (event.kind === this.kind) {
-      throw new Error(this.message);
-    }
-  }
-}
-
-/** A reporter that throws an error with the message on every entry of global metadata. */
-export class FailingOnGlobalMetadata implements Reporter {
-  constructor(private readonly message: string) {}
-
-  report(): void {
-    // Events are not what fails here.
-  }
-
-  receiveGlobalMetadata(): void {
-    throw new Error(this.message);
-  }
-}
-
 /** A dispatcher that delivers to its reporters in order, swallowing their failures. */
 export class Swallowing implements Dispatcher {
   readonly #reporters: Reporter[] = [];
@@ -234,4 +231,114 @@ export class Swallowing implements Dispatcher {
 /** The factory of the dispatcher `dispatcher`, the same one for every journey. */
 export function factoryOf(dispatcher: Dispatcher): DispatcherFactory {
   return { create: () => dispatcher };
+}
+
+/**
+ * A class of step policy mocks whose hooks end as `script` says, keeping in
+ * `built` every one built, in the order they were built.
+ */
+export function keptStepPolicy(
+  built: StepPolicyMock[],
+  script: StepPolicyMockScript = {},
+): StepPolicyMockClass {
+  return class Kept extends stepPolicyMock(script) {
+    constructor() {
+      super();
+      built.push(this);
+    }
+  };
+}
+
+/**
+ * A class of workflow policy mocks whose hooks end as `script` says, keeping
+ * in `built` every one built, in the order they were built.
+ */
+export function keptWorkflowPolicy(
+  built: WorkflowPolicyMock[],
+  script: WorkflowPolicyMockScript = {},
+): WorkflowPolicyMockClass {
+  return class Kept extends workflowPolicyMock(script) {
+    constructor() {
+      super();
+      built.push(this);
+    }
+  };
+}
+
+/**
+ * The builder of the step policy `alarm`, a class of policy mocks whose
+ * hooks end as `script` says, keeping in `built` every one built.
+ */
+export function alarm(
+  built: StepPolicyMock[] = [],
+  script: StepPolicyMockScript = {},
+): StepPolicyBuilder<StepPolicyMockClass> {
+  return keptStepPolicy(built, script).builder("alarm");
+}
+
+/**
+ * The builder of the workflow policy `audit`, a class of policy mocks whose
+ * hooks end as `script` says, keeping in `built` every one built.
+ */
+export function audit(
+  built: WorkflowPolicyMock[] = [],
+  script: WorkflowPolicyMockScript = {},
+): WorkflowPolicyBuilder<WorkflowPolicyMockClass> {
+  return keptWorkflowPolicy(built, script).builder("audit");
+}
+
+/** Every call of a hook of the policy mocks `built`, in order. */
+export function callsOf(
+  built: readonly (StepPolicyMock | WorkflowPolicyMock)[],
+): readonly HookCall[] {
+  return built.flatMap(callsMadeOn);
+}
+
+function callsMadeOn(
+  policy: StepPolicyMock | WorkflowPolicyMock,
+): readonly HookCall[] {
+  return policy.calls;
+}
+
+/** The kind of the event. */
+export function kindOf(event: Event): string {
+  return event.kind;
+}
+
+/** A reporter that writes the kind of every event it receives in `log`. */
+export class Logging implements Reporter {
+  constructor(private readonly log: string[]) {}
+
+  report(event: Event): void {
+    this.log.push(event.kind);
+  }
+}
+
+/** A class of step policy mocks that writes `<name> built` in `log` when built. */
+export function logging(log: string[], name: string): StepPolicyMockClass {
+  return class extends stepPolicyMock() {
+    constructor() {
+      super();
+      log.push(`${name} built`);
+    }
+  };
+}
+
+/** A step `charge` that fails once then succeeds, writing `charge built` in `log`. */
+export function loggedCharge(log: string[]) {
+  return class extends stepMock({
+    attempts: [Ending.failure("declined"), Ending.success],
+  }) {
+    constructor() {
+      super();
+      log.push("charge built");
+    }
+  }
+    .builder("charge")
+    .retryBudget(1);
+}
+
+/** A reporter that throws an error with the message on each event of a kind. */
+export function failingOn(event: EventKind, message: string): FailingReporter {
+  return new FailingReporter({ kind: "on event", event, message });
 }

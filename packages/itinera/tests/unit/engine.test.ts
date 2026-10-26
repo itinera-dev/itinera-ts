@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { charging, FailingOn, orders, run } from "../fixtures/engine.js";
+import { charging, orders, run, failingOn } from "../fixtures/engine.js";
 import { Step } from "../../src/step.js";
 import { Ending } from "../../src/testing/ending.js";
 import { RecordingReporter } from "../../src/testing/recording-reporter.js";
@@ -71,7 +71,7 @@ describe("runJourney", () => {
   });
 
   it("aborts the journey when a reporter fails, and delivers journey_aborted to the others only", async () => {
-    const failing = new FailingOn("attempt_started", "disk full");
+    const failing = failingOn("attempt_started", "disk full");
     const recorder = new RecordingReporter();
     const result = await run(charging({}, { reporters: [failing, recorder] }));
     expect(result.abort).toMatchObject({
@@ -79,7 +79,7 @@ describe("runJourney", () => {
       step: "charge",
       errorMessage: "disk full",
     });
-    expect(failing.received.map((event) => event.kind)).toEqual([
+    expect(failing.events.map((event) => event.kind)).toEqual([
       "journey_started",
       "attempt_started",
     ]);
@@ -93,7 +93,9 @@ describe("runJourney", () => {
     const result = await run(
       charging(
         {},
-        { reporters: [new FailingOn("journey_succeeded", "disk full")] },
+        {
+          reporters: [failingOn("journey_succeeded", "disk full")],
+        },
       ),
     );
     expect(result.abort).toEqual({
