@@ -7,8 +7,8 @@ import {
   type Built,
   Ending,
   LocalExecutor,
+  type StepBuilder,
   type StepMockScript,
-  type StepOptions,
   type Value,
   type WorkflowInstance,
   Workflow,
@@ -72,10 +72,12 @@ export function workflowOf(
   const builder = Scenario.builder().name(name);
   for (const step of steps) {
     const script = model.step(step);
-    builder.step(witness.classOf(step, mockScriptOf(script)), {
-      ...optionsOf(script),
-      name: step,
-    });
+    builder.step(
+      describedAs(
+        witness.classOf(step, mockScriptOf(script)).builder(step),
+        script,
+      ),
+    );
   }
   for (const reporter of reporters) {
     builder.reporter(recorders.classOf(reporter));
@@ -89,11 +91,11 @@ export function workflowOf(
   return builder.constructWith("").build();
 }
 
-function optionsOf(script: StepScript): Omit<StepOptions, "name"> {
-  return {
-    retryBudget: script.retries,
-    noRetryOnAbnormalTermination: !script.retriesAbnormalTerminations,
-  };
+function describedAs(step: StepBuilder, script: StepScript): StepBuilder {
+  const budgeted = step.retryBudget(script.retries);
+  return script.retriesAbnormalTerminations
+    ? budgeted
+    : budgeted.noRetryOnAbnormalTermination();
 }
 
 function mockScriptOf(script: StepScript): StepMockScript {

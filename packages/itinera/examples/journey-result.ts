@@ -12,7 +12,7 @@ class Orders extends Workflow {}
 export default (async () => {
   const orders = Orders.builder()
     .name("orders")
-    .step(Charge, { name: "charge" })
+    .step(Charge.builder("charge"))
     .build();
   const instance = orders.instance(new Map([["order", "A-1"]]));
 

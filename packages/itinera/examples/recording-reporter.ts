@@ -15,7 +15,7 @@ export default (async () => {
   });
   const orders = Orders.builder()
     .name("orders")
-    .step(charge, { name: "charge", retryBudget: 1 })
+    .step(charge.builder("charge").retryBudget(1))
     .build();
   const recorder = new RecordingReporter();
   const instance = orders.instance(

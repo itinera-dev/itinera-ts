@@ -139,7 +139,7 @@ describe("travel", () => {
 
   it("runs the steps in their order", async () => {
     const ship = stepMock({ attempts: [Ending.success] });
-    expect(await pathOf(orders(charge(), [ship, { name: "ship" }]))).toEqual([
+    expect(await pathOf(orders(charge(), ship.builder("ship")))).toEqual([
       "charge attempt 1 succeeded",
       "ship attempt 1 succeeded",
       "journey succeeded",
@@ -151,7 +151,7 @@ describe("travel", () => {
       attempts: [Ending.abnormalTermination("timeout"), Ending.success],
     });
     expect(
-      await pathOf(orders([flaky, { name: "charge", retryBudget: 2 }])),
+      await pathOf(orders(flaky.builder("charge").retryBudget(2))),
     ).toEqual([
       "charge attempt 1 terminated abnormally: timeout",
       "charge retrying",
@@ -165,8 +165,8 @@ describe("travel", () => {
     expect(
       await pathOf(
         orders(
-          [crashing("timeout", "down"), { name: "charge", retryBudget: 1 }],
-          [ship, { name: "ship" }],
+          crashing("timeout", "down").builder("charge").retryBudget(1),
+          ship.builder("ship"),
         ),
       ),
     ).toEqual([
@@ -179,13 +179,16 @@ describe("travel", () => {
   });
 
   it.each([
-    ["with no retry budget", { name: "charge" }],
+    ["with no retry budget", crashing("timeout").builder("charge")],
     [
       "that never retries an abnormal termination",
-      { name: "charge", retryBudget: 3, noRetryOnAbnormalTermination: true },
+      crashing("timeout")
+        .builder("charge")
+        .retryBudget(3)
+        .noRetryOnAbnormalTermination(),
     ],
-  ])("gives up at once a step %s", async (_, options) => {
-    expect(await pathOf(orders([crashing("timeout"), options]))).toEqual([
+  ])("gives up at once a step %s", async (_, step) => {
+    expect(await pathOf(orders(step))).toEqual([
       "charge attempt 1 terminated abnormally: timeout",
       "charge given up: abnormal termination",
       "journey failed at charge: timeout",
@@ -194,7 +197,7 @@ describe("travel", () => {
 
   it("carries the step, the cause and the error's message on journey_failed", async () => {
     const { events } = await recorded(
-      orders([crashing("timeout"), { name: "charge" }]),
+      orders(crashing("timeout").builder("charge")),
     );
     expect(events.at(-1)).toMatchObject({
       kind: "journey_failed",
@@ -206,7 +209,7 @@ describe("travel", () => {
   });
 
   it("ends in an abnormal termination an attempt whose run returns what is not an outcome", async () => {
-    expect(await pathOf(orders([Returning, { name: "charge" }]))).toEqual([
+    expect(await pathOf(orders(Returning.builder("charge")))).toEqual([
       "charge attempt 1 terminated abnormally: step charge returned number, not an outcome made with its helpers",
       "charge given up: abnormal termination",
       "journey failed at charge: step charge returned number, not an outcome made with its helpers",
@@ -214,15 +217,13 @@ describe("travel", () => {
   });
 
   it("takes the text of what is thrown that is not an error as its message", async () => {
-    expect(await pathOf(orders([Throwing, { name: "charge" }]))).toContain(
+    expect(await pathOf(orders(Throwing.builder("charge")))).toContain(
       "charge attempt 1 terminated abnormally: gateway down",
     );
   });
 
   it("aborts the journey when a step cannot be built", async () => {
-    const { events } = await recorded(
-      orders([unbuildable, { name: "charge" }]),
-    );
+    const { events } = await recorded(orders(unbuildable.builder("charge")));
     expect(events.map((event) => event.kind)).toEqual([
       "journey_started",
       "attempt_started",

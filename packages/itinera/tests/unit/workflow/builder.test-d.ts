@@ -1,6 +1,6 @@
 import { describe, expectTypeOf, it } from "vitest";
 import type { Reporter } from "../../../src/report.js";
-import type { Outcome } from "../../../src/step.js";
+import { type Outcome, Step, type StepClass } from "../../../src/step.js";
 import { type Built, Workflow } from "../../../src/workflow.js";
 import type { IdGeneratorKey } from "../../../src/workflow/builder.js";
 
@@ -64,8 +64,14 @@ describe("WorkflowBuilder", () => {
         return { kind: "success" };
       }
     }
+    expectTypeOf(Pack).not.toExtend<StepClass>();
     // @ts-expect-error Pack does not extend Step
-    Shop.builder().step(Pack, { name: "pack" });
+    Step.builder.call(Pack, "pack");
+  });
+
+  it("cannot put Step itself together", () => {
+    // @ts-expect-error Step is abstract
+    Step.builder("step");
   });
 
   it("takes only reporters built without arguments", () => {
