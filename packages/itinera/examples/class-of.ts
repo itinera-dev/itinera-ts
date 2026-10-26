@@ -1,8 +1,14 @@
 import assert from "node:assert/strict";
 import { LocalExecutor } from "itinera/executor";
+import { type Contributor, contributor } from "itinera/journey";
 import { input, type Outcome, Step, step } from "itinera/step";
 import { Workflow } from "itinera/workflow";
-import { classOf, type PlainValue, type ValueClass } from "itinera/value";
+import {
+  classOf,
+  integer,
+  type PlainValue,
+  type ValueClass,
+} from "itinera/value";
 
 class Payment {
   constructor(readonly cents: number) {}
@@ -21,8 +27,6 @@ class Payment {
 
 @step()
 class Refund extends Step {
-  static refunded: Payment[] = [];
-
   constructor(
     @input("payment", classOf(Payment)) readonly payment: Payment,
     @input("previous") readonly previous: Payment,
@@ -30,8 +34,11 @@ class Refund extends Step {
     super();
   }
 
-  override run(): Outcome {
-    Refund.refunded.push(this.payment, this.previous);
+  override run(@contributor() contributor: Contributor): Outcome {
+    contributor.contribute(
+      "refunded",
+      this.payment.cents + this.previous.cents,
+    );
     return this.succeed();
   }
 }
@@ -46,14 +53,20 @@ export default (async () => {
   const instance = refunds.instance(
     new Map([
       ["payment", new Payment(1250)],
-      ["previous", new Payment(0)],
+      ["previous", new Payment(250)],
     ]),
   );
 
-  await new LocalExecutor().run(instance);
+  const result = await new LocalExecutor().run(instance);
 
   const type: ValueClass<Payment> = Payment;
   assert.equal(type.fromValue(1250).cents, 1250);
   assert.ok(classOf(Payment).safeParse(1250).success);
-  assert.deepEqual(Refund.refunded, [new Payment(1250), new Payment(0)]);
+  assert.ok(result.isSucceeded());
+  const { dataBag } = result.status;
+  assert.equal(dataBag.read("refunded", integer).option().unwrap(), 1500);
+  assert.deepEqual(
+    dataBag.read("payment", classOf(Payment)).option().unwrap(),
+    new Payment(1250),
+  );
 })();

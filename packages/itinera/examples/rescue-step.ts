@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { type Contributor, contributor } from "itinera/journey";
 import { None, type Option, Some } from "itinera/option";
 import {
   failureReason,
@@ -14,13 +15,12 @@ import {
   Step,
   step,
 } from "itinera/step";
+import { Contributions } from "itinera/testing";
 import { withStep, Workflow, workflow } from "itinera/workflow";
 import { integer, optional, string } from "itinera/value";
 
 @rescueStep()
 class Refund extends RescueStep {
-  readonly refunded: string[] = [];
-
   constructor(
     @input("order", string) readonly order: string,
     @fromRescuedStep("charged", optional(integer))
@@ -30,9 +30,10 @@ class Refund extends RescueStep {
     super();
   }
 
-  override run(): RescueOutcome {
+  override run(@contributor() contributor: Contributor): RescueOutcome {
     const why = this.reason.isSome() ? this.reason.value.code : "a throw";
-    this.refunded.push(
+    contributor.contribute(
+      "refunded",
       `${this.order}: ${String(this.charged.unwrapOr(0))} after ${why}`,
     );
     return this.succeed();
@@ -72,10 +73,13 @@ const shipping = Orders.builder()
 const refund = new Refund("A-1", Some(40), Some({ code: "declined" }));
 const unknown = new Refund("B-2", None, None);
 
-assert.deepEqual(refund.run(), { kind: "success" });
-assert.deepEqual(refund.refunded, ["A-1: 40 after declined"]);
-unknown.run();
-assert.deepEqual(unknown.refunded, ["B-2: 0 after a throw"]);
+const refunding = new Contributions();
+const guessing = new Contributions();
+
+assert.deepEqual(refund.run(refunding.contributor), { kind: "success" });
+assert.equal(refunded(refunding), "A-1: 40 after declined");
+unknown.run(guessing.contributor);
+assert.equal(refunded(guessing), "B-2: 0 after a throw");
 assert.deepEqual(new Weigh(0).run(), {
   kind: "failure",
   reason: { code: "nothing to weigh" },
@@ -88,3 +92,7 @@ assert.deepEqual(
     .map((described) => described.name),
   ["charge", "ship"],
 );
+
+function refunded(contributions: Contributions): string {
+  return contributions.read("refunded", string).option().unwrap();
+}

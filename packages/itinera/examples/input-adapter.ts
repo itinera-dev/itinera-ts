@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { LocalExecutor } from "itinera/executor";
 import {
+  type Contributor,
+  contributor,
   type DataBag,
   dataBag,
   type JourneyId,
@@ -30,14 +32,12 @@ import { integer, string } from "itinera/value";
 
 @step()
 class Charge extends Step {
-  static charged: number[] = [];
-
   constructor(@input("amount", integer) readonly amount: number) {
     super();
   }
 
-  override run(): Outcome {
-    Charge.charged.push(this.amount);
+  override run(@contributor() contributor: Contributor): Outcome {
+    contributor.contribute("charged", this.amount);
     return this.succeed();
   }
 }
@@ -82,12 +82,13 @@ export default (async () => {
   const supplied = await new LocalExecutor().run(supplying);
   const read = await new LocalExecutor().run(reading);
 
-  assert.deepEqual(Charge.charged, [40, 25]);
+  assert.ok(supplied.isSucceeded() && read.isSucceeded());
+  assert.equal(charged(supplied.status.dataBag), 40);
+  assert.equal(charged(read.status.dataBag), 25);
   assert.deepEqual(orders.asked, [
     `${supplying.journeyId}: charge amount`,
     `${reading.journeyId}: charge amount`,
   ]);
-  assert.ok(supplied.isSucceeded() && read.isSucceeded());
   const charge = "charge" as StepName;
   assert.deepEqual(
     orders.price(
@@ -110,3 +111,7 @@ export default (async () => {
     { kind: "fromDataBag" } satisfies FromDataBag,
   );
 })();
+
+function charged(bag: DataBag): number {
+  return bag.read("charged", integer).option().unwrap();
+}
