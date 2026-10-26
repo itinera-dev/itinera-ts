@@ -35,12 +35,12 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `option` | `Option`, `Some` and `None` |
 | `event` | `Event`, every kind of event and what each carries |
 | `report` | Reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
-| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag, `Contributor` and `@contributor` |
-| `step` | Step names, reasons, `Step` and `@step`, `@input`, `@stepReporter` and `StepReporter`, outcomes, attempts, step descriptors and their options |
-| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
+| `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag, `Contributor` and `@contributor`, and `@journeyId` |
+| `step` | Step names, reasons, `Step` and `@step`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors and their options |
+| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
 | `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
-| `policy` | The names and closed sets events carry about policies and hooks |
+| `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, and the names and closed sets events carry about policies and hooks |
 | `service` | Provider names, service types and `@service` |
 | `testing` | Test support: `RecordingReporter`, `Ending`, `stepMock` and `StepMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
@@ -82,27 +82,49 @@ flowchart TD
 4. A `WorkflowInstance` holds the descriptor beside the workflow object, the journey ID, the initial data, the reporters made for this journey, the workflow's first and the instance's own after them, and the initial global metadata.
 5. The local executor runs an instance. It reads only the `WorkflowInstance` interface, so it runs any instance, however it was made.
 
-Where it lives: `workflow/decorators.ts`, `workflow/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
+Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
 
 ### How requests are declared
 
 ```mermaid
 flowchart TD
     accTitle: How a parameter's request is recorded and gathered
-    accDescr: A parameter decorator records its request in a private table, by class, method and position, taking its type from the request or from the compiler's metadata. A class decorator then reads the table for its constructor and methods, in the order of their parameters, and refuses a parameter that carries no request. What it gathers is the class's declaration.
+    accDescr: A parameter decorator records its request in a private table, by class, method and position, taking its type from the request or from the compiler's metadata. A class decorator, such as @step or @stepPolicy, then reads the table for its constructor and methods, in the order of their parameters, and refuses a parameter that carries no request. What it gathers is the class's declaration: what its constructor, its run or its hooks request.
     parameter["A parameter decorator, such as @input or @service"] -->|"records, by class, method and position"| table["The table of requests"]
     type["The type written: a token, another Standard Schema validator, or optional of one"] --> parameter
     metadata["The compiler's metadata, when no type is written"] --> parameter
-    table -->|"read in the order of the parameters"| decorator["The class decorator, such as @step"]
-    decorator --> declared["The class's declaration: what its constructor and run request"]
+    table -->|"read in the order of the parameters"| decorator["The class decorator, such as @step or @stepPolicy"]
+    decorator --> declared["The class's declaration: what its constructor, its run or its hooks request"]
 ```
 
 1. Each parameter decorator records one request in a private table, keyed by the class, the method, or `undefined` for the constructor, and the parameter's position. A parameter carrying two requests is refused at once.
 2. A request for a value takes its type from what it is given: one of the tokens, any other Standard Schema validator, or either wrapped in `optional`. With no type given, it reads the parameter's declared type from the metadata the compiler records, which says only `number`, `string`, `boolean` or a class that serialises itself; anything else is refused when the class is defined.
 3. The types of the decorators refuse at compile time a request in a place that may not make it, and a parameter whose declared type does not accept what the request gives.
-4. The class decorator reads the table for its constructor and its methods, in the order of their parameters, counted from the metadata or the function's length, and refuses a parameter that carries no request. What it gathers is the class's declaration: for a step, what its constructor needs and what its `run` takes. Later stages resolve these requests when a step is built and run.
+4. The class decorator reads the table for its constructor and its methods, in the order of their parameters, counted from the metadata or the function's length, and refuses a parameter that carries no request. What it gathers is the class's declaration: for a step, what its constructor needs and what its `run` takes; for a policy, what each of its hooks requests. Later stages resolve these requests when a step is built and run, and when a hook is called.
 
-Where it lives: `declaration.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `service/request.ts`.
+Where it lives: `declaration.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `journey/request.ts`, `service/request.ts`, `workflow/request.ts`, `policy/request.ts`, `policy/reporter.ts`.
+
+### How policies are declared
+
+```mermaid
+flowchart TD
+    accTitle: How a policy is declared and attached
+    accDescr: A hook decorator records which method of a policy class implements its hook, and the parameter decorators record what the method requests. The policy's class decorator gathers its kind, its name and each hook with its requests, and checks them. The workflow's decorators attach the declared policies, a workflow policy to the workflow and a step policy to a step, and compile only on a workflow class that implements every role the policies request.
+    hook["A hook decorator, such as @onStepSuccess"] -->|"records the hook's method"| policyDecorator["@stepPolicy or @workflowPolicy"]
+    requests["The table of requests"] -->|"each hook's requests"| policyDecorator
+    policyDecorator --> declared["The policy's declaration: its kind, its name, and each hook with its requests"]
+    declared --> withStep["@withStep, which attaches step policies to a step"]
+    declared --> workflow["@workflow, which attaches workflow policies to the workflow"]
+    roles["The roles each policy requests, in its base class's type argument"] -->|"checked by the compiler"| withStep
+    roles -->|"checked by the compiler"| workflow
+```
+
+1. A hook decorator marks the method of a policy class that implements its hook, and compiles only on a method of the right kind of policy that returns what its hook may return: `OnSuccess` for `on step success`, `OnFailure` for the other step hooks, and nothing for the workflow hooks. One hook on two methods, or two hooks on one method, is refused when the class is defined.
+2. The parameter decorators record each hook's requests in the table of requests, as for a step.
+3. `@stepPolicy` or `@workflowPolicy` gathers the policy's kind, its name, the class's name unless one is given, and each hook with its requests. It refuses, when the class is defined, a policy that defines no hook, a method that carries requests but no hook, and a cause requested by a hook that is not given it.
+4. `@withStep` attaches step policies to its step, and `@workflow` workflow policies to the workflow, each refusing a policy not declared with its decorator, including a policy of the other kind given through a cast. A policy names the roles it requests as its base class's type argument, so both compile only on a workflow class that implements every role their policies request. Nothing about roles exists at run time.
+
+Where it lives: `policy/hooks.ts`, `policy/declared.ts`, `policy/step-policy.ts`, `policy/workflow-policy.ts`, `policy/lifecycle.ts`, `policy/roles.ts`, `workflow/decorators.ts`, `workflow/registry.ts`, `step/descriptor.ts`.
 
 ### From declaration to result
 

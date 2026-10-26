@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   checkedOf,
   marking,
+  methodsWithRequests,
   requestsOf,
   requireMetadata,
 } from "../../src/declaration.js";
@@ -76,6 +77,12 @@ describe("marking", () => {
       }
       return Twice;
     }).toThrow("Twice.run: parameter 1 carries two requests");
+  });
+});
+
+describe("methodsWithRequests", () => {
+  it("lists the methods whose parameters carry a request", () => {
+    expect(methodsWithRequests(Recorded)).toEqual(["requesting", "missing"]);
   });
 });
 

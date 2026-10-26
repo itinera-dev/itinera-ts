@@ -9,8 +9,16 @@ import {
   optional,
   string,
 } from "../../../src/value/token.js";
+import type { Option } from "../../../src/option.js";
+import { StepPolicy } from "../../../src/policy/step-policy.js";
+import type { Reason, StepName } from "../../../src/step.js";
+import type { Attempt } from "../../../src/step/attempt.js";
 import {
+  attempt,
+  error,
+  failureReason,
   input,
+  stepName,
   stepReporter,
   type StepReporter,
 } from "../../../src/step/request.js";
@@ -79,5 +87,31 @@ describe("input", () => {
 describe("stepReporter", () => {
   it("records a request for the step reporter", () => {
     expect(requestsOf(Charge, "run")).toEqual([{ kind: "stepReporter" }]);
+  });
+});
+
+describe("the requests of a step hook about its step", () => {
+  class Audit extends StepPolicy {
+    failed(
+      @stepName() step: StepName,
+      @attempt() attempt: Attempt,
+      @failureReason() reason: Reason,
+      @failureReason({ optional: true }) maybe: Option<Reason>,
+      @error() thrown: unknown,
+      @error({ optional: true }) caught: Option<unknown>,
+    ): unknown {
+      return [step, attempt, reason, maybe, thrown, caught];
+    }
+  }
+
+  it("are recorded in the order of the parameters", () => {
+    expect(requestsOf(Audit, "failed")).toEqual([
+      { kind: "stepName" },
+      { kind: "attempt" },
+      { kind: "failureReason", optional: false },
+      { kind: "failureReason", optional: true },
+      { kind: "error", optional: false },
+      { kind: "error", optional: true },
+    ]);
   });
 });

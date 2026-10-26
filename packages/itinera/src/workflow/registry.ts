@@ -1,6 +1,7 @@
+import type { WorkflowPolicyClass } from "../policy.js";
 import type { ReporterClass } from "../report.js";
 import type { StepDescriptor } from "../step.js";
-import type { Workflow, WorkflowName } from "../workflow.js";
+import { Workflow, type WorkflowName } from "../workflow.js";
 import type { WorkflowDescriptor } from "./descriptor.js";
 
 /**
@@ -15,6 +16,8 @@ export interface Declaration {
   readonly steps: StepDescriptor[];
   /** The classes of the workflow's own reporters. */
   reporters: readonly ReporterClass[];
+  /** The classes of the workflow policies attached to the workflow. */
+  policies: readonly WorkflowPolicyClass[];
   /** The method that makes each instance's journey ID, if one is marked. */
   idGenerator: IdGenerator | undefined;
   /** The workflow descriptor `@workflow` made, once it has. */
@@ -36,9 +39,22 @@ export function declarationOf(target: object): Declaration {
     name: undefined,
     steps: [],
     reporters: [],
+    policies: [],
     idGenerator: undefined,
     descriptor: undefined,
   };
   declarations.set(target, declaration);
   return declaration;
+}
+
+/**
+ * What the decorators of the workflow class `target` declared so far.
+ *
+ * @throws Error if `target` does not extend `Workflow` itself.
+ */
+export function declarationOn(target: { readonly name: string }): Declaration {
+  if (Object.getPrototypeOf(target) !== Workflow) {
+    throw new Error(`${target.name} must extend Workflow itself`);
+  }
+  return declarationOf(target);
 }

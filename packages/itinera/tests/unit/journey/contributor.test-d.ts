@@ -1,6 +1,7 @@
 import { describe, expectTypeOf, it } from "vitest";
 import { type Outcome, Step, type StepClass } from "../../../src/step.js";
 import type { StepReporter } from "../../../src/step/request.js";
+import { WorkflowPolicy } from "../../../src/policy/workflow-policy.js";
 import {
   type Contributor,
   contributor,
@@ -45,5 +46,14 @@ describe("contributor", () => {
       }
     }
     expectTypeOf(Charge).toExtend<StepClass>();
+  });
+
+  it("compiles in a hook", () => {
+    class Notify extends WorkflowPolicy {
+      paid(@contributor() contributor: Contributor): void {
+        contributor.contribute("notified", true);
+      }
+    }
+    expectTypeOf(Notify).toBeConstructibleWith();
   });
 });
