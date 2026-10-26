@@ -5,15 +5,13 @@ import type {
   StepPolicyClass,
   WorkflowPolicyClass,
 } from "../policy.js";
-import {
-  declarationOfPolicy,
-  type PolicyDeclaration,
-} from "../policy/declared.js";
+import { declaredPolicy } from "../policy/declared.js";
+import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { ReporterClass } from "../report.js";
 import type { StepClass, StepOptions } from "../step.js";
 import { isDeclared } from "../step/declared.js";
 import { describeStep } from "../step/descriptor.js";
-import { requestsOfRescue } from "../step/rescue.js";
+import { rescueGiven } from "../step/rescue/builder.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
 import { assemble } from "./descriptor.js";
 import { type Declaration, declarationOn } from "./registry.js";
@@ -78,8 +76,7 @@ export function workflow<
   const P extends readonly WorkflowPolicyClass[] = readonly [],
 >(options: WorkflowOptions<P>): (target: WorkflowClass<RolesOf<P>>) => void {
   return (target) => {
-    const policies = options.policies ?? [];
-    requireDeclared(policies, "workflow");
+    const policies = (options.policies ?? []).map(asWorkflowPolicy);
     const declaration = declarationOn(target);
     if (declaration.descriptor !== undefined) {
       throw new Error(`${target.name} is declared with @workflow twice`);
@@ -126,36 +123,27 @@ export function withStep<
     if (!isDeclared(step)) {
       throw new Error(`${step.name} is not declared with @step`);
     }
-    requireDeclared(options.policies ?? [], "step");
-    const rescue = options.rescue;
-    if (rescue !== undefined && requestsOfRescue(rescue) === undefined) {
-      throw new Error(`${rescue.name} is not declared with @rescueStep`);
-    }
+    const policies = (options.policies ?? []).map(asStepPolicy);
+    const rescue =
+      options.rescue === undefined ? undefined : rescueGiven(options.rescue);
     const declaration = declarationOn(target);
     if (declaration.descriptor !== undefined) {
       throw new Error(
         `@withStep(${step.name}) is written above @workflow on ${target.name}: write @workflow on the top line`,
       );
     }
-    declaration.steps.unshift(describeStep(step, options));
+    declaration.steps.unshift(
+      describeStep(step, { ...options, policies, rescue }),
+    );
   };
 }
 
-function requireDeclared(
-  policies: readonly { readonly name: string }[],
-  kind: PolicyDeclaration["kind"],
-): void {
-  const undeclared = policies.find((policy) => isUndeclared(policy, kind));
-  if (undeclared !== undefined) {
-    throw new Error(`${undeclared.name} is not declared with @${kind}Policy`);
-  }
+function asStepPolicy(policy: StepPolicyClass): PolicyDescriptor {
+  return declaredPolicy(policy, "step");
 }
 
-function isUndeclared(
-  policy: object,
-  kind: PolicyDeclaration["kind"],
-): boolean {
-  return declarationOfPolicy(policy)?.kind !== kind;
+function asWorkflowPolicy(policy: WorkflowPolicyClass): PolicyDescriptor {
+  return declaredPolicy(policy, "workflow");
 }
 
 function isUnmarked(key: string | symbol, declaration: Declaration): boolean {

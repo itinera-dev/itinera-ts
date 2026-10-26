@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0095](https://github.com/itinera-dev/spec/blob/main/proposals/0095-services-provided-to-steps.md), implemented in [#31](https://github.com/itinera-dev/itinera-ts/issues/31). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 8 the service providers, [0008](0008-steps.md) the steps that request services, and [0062](0062-workflow-descriptors.md) the table of requests.
 
-Status: in progress. Stage 4 has added `serviceType` and `@service`, a step's request for a service, then `@provider`, what a provider returns and `@providerReporter`. Its next layer adds providers to the builder, the violations about services and the listing, stage 5 resolves a step's services as it is built, and stage 8 runs the providers and lists the proposal.
+Status: in progress. Stage 4 has added `serviceType` and `@service`, a step's request for a service, then `@provider`, what a provider returns and `@providerReporter`. Its sixth layer has added providers to the builder, its seventh adds the violations about services and the listing, stage 5 resolves a step's services as it is built, and stage 8 runs the providers and lists the proposal.
 
 ## API
 
@@ -15,6 +15,7 @@ Until 0095 is listed, everything here is exported only from `itinera/unstable`. 
 - **What a provider may request**: `@journeyId()`, `@fromWorkflow(key, type?)`, `@providerReporter()`, `@stepName()` and `@attempt()`. Any other request throws when the class is defined, naming the method and the request. `@stepName()` or `@attempt()` on a provider of journey scope is the violation `attempt request in journey scope`, which the next layer finds with the other violations.
 - **`Provided<T>`** holds the instance and, optionally, the data for reporters, and is typed through a `unique symbol` only itinera names, so only `this.provide(instance)` or `this.provide(instance, data)`, a protected helper of `Workflow`, makes one; `data` compiles only when it is a value. Each object it makes is recorded, so `isProvided` tells it from one a cast makes, which stage 8 turns into `service_provider_failed`.
 - **`@providerReporter()`**, in `src/service/reporter.ts`, requests a `ProviderReporter`, whose `info`, `warning` and `error` emit `journey_info`, `journey_warning` and `journey_error`, and whose `setGlobalMetadata` sets global metadata, each returning a promise, as chapter 4, 4.9 point 7 asks.
+- **On the builder**, `provider(key, serviceType, { perAttempt?, steps?, key?, name? }, ...requests)` names a method of the workflow class, typed `MethodKey<InstanceType<C>, Provided<T>>` for the service type's `T`, so a method providing another service, or a field, does not compile, with its requests by position (see [0062](0062-workflow-descriptors.md)). It throws at once as `@provider` throws when the class is defined, and for a field holding a function or a method that declares its requests with decorators.
 - **Refused when the class is defined**: an empty name or key, a request a provider may not make, a parameter with no request, a missing compiler option `emitDecoratorMetadata`, and a class that does not extend `Workflow` itself. `@workflow` refuses a method that carries requests but is marked with neither `@provider` nor `@inputAdapter`.
 
 ## Dependencies
@@ -28,6 +29,7 @@ None of its own.
 - `tests/unit/service/provider.test.ts`: each provider recorded in order with its service, scope, steps and requests, an empty name or key, a request a provider may not make, and `isProvided` with what the helper makes and what a cast makes.
 - `tests/unit/service/provider.test-d.ts`: a provider with its requests, one providing another service or a bare instance, one outside a workflow, an empty list of steps, data that is not a value, and `Provided` from a plain object.
 - `tests/unit/service/reporter.test.ts`: what `@providerReporter()` records.
+- `tests/unit/workflow/builder.test.ts` and `tests/unit/workflow/builder.test-d.ts`: a provider named to the builder with its requests, one providing another service, and each refusal.
 - `tests/unit/service/reporter.test-d.ts`: `@providerReporter` on a parameter of another type or in a hook.
 - `tests/unit/workflow.test.ts`: what `this.provide(...)` makes, with and without data.
 - `examples/service.ts`: a step requesting a payment gateway. `examples/provider.ts`: providers of both scopes.

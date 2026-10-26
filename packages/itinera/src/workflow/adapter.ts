@@ -1,4 +1,5 @@
-import { marking, requestsMadeBy } from "../declaration.js";
+import { requestsMadeBy } from "../declaration.js";
+import { marking } from "../declaration/marking.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { Request } from "../declaration/request.js";
 import { named } from "../name.js";
@@ -92,7 +93,8 @@ const helpers = new WeakSet<object>();
 export const fromBag: FromDataBag = Object.freeze({ kind: "fromDataBag" });
 helpers.add(fromBag);
 
-const allowed: readonly Request["kind"][] = [
+/** The kinds of request an input adapter may make. */
+export const adapterRequests: readonly Request["kind"][] = [
   "stepName",
   "key",
   "fromWorkflow",
@@ -121,16 +123,37 @@ export function inputAdapter(
 ): InputAdapterDecorator {
   return (prototype, key) => {
     const owner = prototype.constructor;
-    declarationOn(owner).adapters.push({
-      name: named<AdapterName>(
-        options.name ?? String(key),
-        `the input adapter ${owner.name}.${String(key)}`,
+    declarationOn(owner).adapters.push(
+      declaredAdapter(owner, key, options, () =>
+        requestsMadeBy(prototype, key, adapterRequests, "an input adapter"),
       ),
-      steps: [...options.steps],
-      key,
-      requests: requestsMadeBy(prototype, key, allowed, "an input adapter"),
-    });
+    );
   };
+}
+
+/**
+ * The input adapter the method `key` of the workflow class `owner`
+ * implements, as `options` say, its parameters making the requests
+ * `requested` gives.
+ *
+ * @throws Error if its name is empty, or whatever `requested` throws.
+ */
+export function declaredAdapter(
+  owner: { readonly name: string },
+  key: string | symbol,
+  options: InputAdapterOptions,
+  requested: () => readonly Request[],
+): DeclaredAdapter {
+  const name = named<AdapterName>(
+    options.name ?? String(key),
+    `the input adapter ${owner.name}.${String(key)}`,
+  );
+  return Object.freeze({
+    name,
+    steps: Object.freeze([...options.steps]),
+    key,
+    requests: requested(),
+  });
 }
 
 /**
@@ -142,7 +165,7 @@ export function key(): RequestDecorator<
   string,
   Place<Workflow, string | symbol>
 > {
-  return marking(() => ({ kind: "key" }));
+  return marking({ kind: "key" });
 }
 
 /** A value an input adapter supplies, as `this.supply(value)` makes it. */

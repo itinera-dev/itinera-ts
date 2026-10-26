@@ -1,4 +1,4 @@
-import { marking } from "../declaration.js";
+import { marking } from "../declaration/marking.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { StepPolicy, WorkflowPolicy } from "../policy.js";
 import type { Step } from "../step.js";
@@ -32,5 +32,5 @@ export function contributor(): RequestDecorator<
   | Place<Step | RescueStep, "run">
   | Place<StepPolicy | WorkflowPolicy, string | symbol>
 > {
-  return marking(() => ({ kind: "contributor" }));
+  return marking({ kind: "contributor" });
 }

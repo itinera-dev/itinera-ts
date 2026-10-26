@@ -20,6 +20,7 @@ export {
   type RescueOutcome,
   type RescueStepClass,
 } from "./step/rescue.js";
+export type { RescueStepBuilder } from "./step/rescue/builder.js";
 export {
   attempt,
   error,
@@ -91,10 +92,9 @@ export abstract class Step {
    *
    * {@includeCode ../examples/builder.ts}
    *
-   * @throws Error if the name is empty, or if a parameter of the step's
-   * constructor or of its `run` has no request.
+   * @throws Error if the name is empty.
    */
-  static builder(this: StepClass, name: string): StepBuilder {
+  static builder<C extends StepClass>(this: C, name: string): StepBuilder<C> {
     return stepBuilder(this, name);
   }
 
@@ -115,5 +115,5 @@ export interface StepClass {
   /** The prototype every step of the class shares. */
   readonly prototype: Step;
   /** Starts putting a step of the class together for a workflow's builder. */
-  builder(name: string): StepBuilder;
+  builder<C extends StepClass>(this: C, name: string): StepBuilder<C>;
 }

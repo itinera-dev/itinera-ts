@@ -40,13 +40,13 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
 | `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
-| `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, and the names and closed sets events carry about policies and hooks |
+| `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
 | `service` | Provider names, service types and `@service`, `@provider`, what a provider returns, `@providerReporter` and `ProviderReporter` |
 | `testing` | Test support: `RecordingReporter`, `Ending`, `stepMock` and `StepMock` |
 | `engine` | Private: runs one journey, from what comes before it to its result |
 | `closed-set` | `closedSet`, `ClosedSet`, `EveryValue` and `ValueOf`, from which every closed set of names is declared |
 | `name` | Private: `named`, which refuses an empty name as something is declared |
-| `declaration` | Private: the table of the requests parameter decorators record, the types of the request decorators, the types read from the metadata, the check that the compiler recorded it, and the guard that refuses to compile without `strictNullChecks` |
+| `declaration` | Private: the table of the requests parameter decorators record, the requests a builder is given by position, the types of the request decorators and of the requests given by position, the types read from the metadata, the check that the compiler recorded it, and the guard that refuses to compile without `strictNullChecks` |
 | `index` | The package root, which exports nothing of its own |
 | `unstable` | The subpath `itinera/unstable`, which re-exports the API of the proposals not listed yet |
 
@@ -57,15 +57,19 @@ Where it lives: `packages/`, and each module in `packages/itinera/src/`, with it
 ```mermaid
 flowchart TD
     accTitle: What a workflow descriptor and an instance hold
-    accDescr: A workflow descriptor holds its name, its step descriptors in order, makes the reporters it lists, and generates journey IDs. A step descriptor holds the step's name, its retry budget, whether it retries an abnormal termination, and how to build the step. Decorators and the builder, given a builder for each step, both make the descriptor. An instance holds the descriptor beside the workflow object, its journey ID, its initial data, its reporters and its initial global metadata, and the local executor runs it.
+    accDescr: A workflow descriptor holds its name, its step descriptors in order, makes the reporters it lists, and generates journey IDs. A workflow descriptor also holds its workflow policies, and keeps its input adapters and service providers private. A step descriptor holds the step's name, its retry budget, whether it retries an abnormal termination, its step policies, and how to build the step, and keeps its rescue step and its requests private. Decorators and the builder, given a builder for each step or its own lists, both make the descriptor. An instance holds the descriptor beside the workflow object, its journey ID, its initial data, its reporters and its initial global metadata, and the local executor runs it.
     decorators["@workflow, @withStep and @idGenerator"] --> descriptor["WorkflowDescriptor"]
-    builder["Orders.builder(), with Charge.builder(name) for each step"] --> descriptor
+    builder["Orders.builder(), with Charge.builder(name) for each step, or the builder's own lists"] --> descriptor
     descriptor --> name["WorkflowName"]
     descriptor --> steps["StepDescriptor, one per step, in order"]
     descriptor --> reporters["reporters, which makes the reporters it lists"]
     descriptor --> generator["generateJourneyId"]
+    descriptor --> workflowPolicies["policies, its workflow policies"]
+    descriptor --> adapters["Its input adapters and service providers, kept private"]
     steps --> stepName["StepName"]
     steps --> budget["Retry budget and retry on abnormal termination"]
+    steps --> stepPolicies["policies, its step policies"]
+    steps --> stepPrivate["Its rescue step and its requests, kept private"]
     steps --> build["build, a new step for each attempt"]
     instance["WorkflowInstance"] --> descriptor
     instance --> workflow["The workflow object"]
@@ -76,9 +80,9 @@ flowchart TD
     executor["LocalExecutor"] -->|"runs"| instance
 ```
 
-1. A `WorkflowDescriptor` is the workflow's declaration, its own object beside the workflow object. The decorators fill the lists the builder reads, and the builder also puts a workflow together without decorators, taking each step from a step builder that the step class's `builder(name)` starts; either way, `build()` checks it and makes it.
-2. It holds the workflow's name and its step descriptors in the order they run. Its `reporters` makes a new reporter of each class the workflow lists, and its `generateJourneyId` asks the ID generator for a journey ID, or makes a random UUID when the workflow has none.
-3. Each `StepDescriptor` holds the step's name, its retry budget, whether it retries an abnormal termination, which it does unless that is turned off, and `build`, which makes a new step for each attempt.
+1. A `WorkflowDescriptor` is the workflow's declaration, its own object beside the workflow object. The decorators fill the lists the builder reads, and the builder also puts a workflow together without decorators, taking each step from a step builder that the step class's `builder(name)` starts, and its policies, input adapters, service providers and reporters from its own lists; either way, `build()` checks it and makes it.
+2. It holds the workflow's name, its step descriptors in the order they run, and its workflow policies, as policy descriptors, and keeps its input adapters and service providers where only itinera's own modules read them. Its `reporters` makes a new reporter of each class the workflow lists, and its `generateJourneyId` asks the ID generator for a journey ID, or makes a random UUID when the workflow has none.
+3. Each `StepDescriptor` holds the step's name, its retry budget, whether it retries an abnormal termination, which it does unless that is turned off, its step policies, and `build`, which makes a new step for each attempt, and keeps its rescue step and what the step's constructor and `run` request where only itinera's own modules read them.
 4. A `WorkflowInstance` holds the descriptor beside the workflow object, the journey ID, the initial data, the reporters made for this journey, the workflow's first and the instance's own after them, and the initial global metadata.
 5. The local executor runs an instance, reading only what `WorkflowInstance` holds.
 6. All three are sealed: only the decorators, the builder and `instance()` make them, so one written by hand does not compile where one is expected.
@@ -102,20 +106,22 @@ flowchart TD
 2. A request for a value takes its type from what it is given: one of the tokens, any other Standard Schema validator, or either wrapped in `optional`. With no type given, it reads the parameter's declared type from the metadata the compiler records, which says only `number`, `string`, `boolean` or a class that serialises itself; anything else is refused when the class is defined.
 3. The types of the decorators refuse at compile time a request in a place that may not make it, and a parameter whose declared type does not accept what the request gives. Without the compiler option `strictNullChecks`, `null` would belong to every type and these refusals would compile, so then no request decorator compiles.
 4. The class decorator reads the table for its constructor and its methods, in the order of their parameters, counted from the metadata or the function's length, and refuses a parameter that carries no request. What it gathers is the class's declaration: for a step, what its constructor needs and what its `run` takes; for a policy, what each of its hooks requests. Later stages resolve these requests when a step is built and run, and when a hook is called.
+5. A class declared without decorators is given its requests by position, through a builder: each is a request decorator itself, such as `input("amount", integer)`, which remembers the request it stands for, so the builder gathers the same declaration without the table. Its type carries what the request gives and where it may be made, so a request that does not fit its parameter, or one left out, does not compile, and a request for a value must write its type, since no metadata is read there.
 
-Where it lives: `declaration.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `journey/request.ts`, `service/request.ts`, `service/provider.ts`, `service/reporter.ts`, `workflow/request.ts`, `workflow/adapter.ts`, `step/rescue.ts`, `policy/request.ts`, `policy/reporter.ts`.
+Where it lives: `declaration.ts`, `declaration/marking.ts`, `declaration/token.ts`, `declaration/request.ts`, `declaration/parameter.ts`, `declaration/metadata.ts`, `value/token.ts`, `step/request.ts`, `step/declared.ts`, `journey/contributor.ts`, `journey/request.ts`, `service/request.ts`, `service/provider.ts`, `service/reporter.ts`, `workflow/request.ts`, `workflow/adapter.ts`, `step/rescue.ts`, `policy/request.ts`, `policy/reporter.ts`.
 
 ### How policies are declared
 
 ```mermaid
 flowchart TD
     accTitle: How a policy is declared and attached
-    accDescr: A hook decorator records which method of a policy class implements its hook, and the parameter decorators record what the method requests. The policy's class decorator gathers its kind, its name and each hook with its requests, and checks them. The workflow's decorators attach the declared policies, a workflow policy to the workflow and a step policy to a step, and compile only on a workflow class that implements every role the policies request.
+    accDescr: A hook decorator records which method of a policy class implements its hook, and the parameter decorators record what the method requests. The policy's class decorator gathers its kind, its name and each hook with its requests, and checks them. A policy's builder gathers the same for a class declared without decorators, each hook's method and its requests by position. Either way the policy becomes a policy descriptor. The workflow's decorators and builders attach the policy descriptors, a workflow policy to the workflow and a step policy to a step, and compile only on a workflow class that implements every role the policies request.
     hook["A hook decorator, such as @onStepSuccess"] -->|"records the hook's method"| policyDecorator["@stepPolicy or @workflowPolicy"]
     requests["The table of requests"] -->|"each hook's requests"| policyDecorator
-    policyDecorator --> declared["The policy's declaration: its kind, its name, and each hook with its requests"]
-    declared --> withStep["@withStep, which attaches step policies to a step"]
-    declared --> workflow["@workflow, which attaches workflow policies to the workflow"]
+    policyDecorator --> declared["The policy descriptor: its kind, its name, and each hook with its requests"]
+    policyBuilder["Audit.builder(name), each hook's method and its requests by position"] --> declared
+    declared --> withStep["@withStep or a step's builder, which attach step policies to a step"]
+    declared --> workflow["@workflow or the workflow builder, which attach workflow policies to the workflow"]
     roles["The roles each policy requests, in its base class's type argument"] -->|"checked by the compiler"| withStep
     roles -->|"checked by the compiler"| workflow
 ```
@@ -123,30 +129,33 @@ flowchart TD
 1. A hook decorator marks the method of a policy class that implements its hook, and compiles only on a method of the right kind of policy that returns what its hook may return: `OnSuccess` for `on step success`, `OnFailure` for the other step hooks, and nothing for the workflow hooks. One hook on two methods, or two hooks on one method, is refused when the class is defined.
 2. The parameter decorators record each hook's requests in the table of requests, as for a step.
 3. `@stepPolicy` or `@workflowPolicy` gathers the policy's kind, its name, the class's name unless one is given, and each hook with its requests. It refuses, when the class is defined, a policy that defines no hook, a method that carries requests but no hook, and a cause requested by a hook that is not given it.
-4. `@withStep` attaches step policies to its step, and `@workflow` workflow policies to the workflow, each refusing a policy not declared with its decorator, including a policy of the other kind given through a cast. A policy names the roles it requests as its base class's type argument, so both compile only on a workflow class that implements every role their policies request. Nothing about roles exists at run time.
+4. For a policy class declared without decorators, a policy's builder, `Audit.builder(name)`, names the method of each hook with its requests by position, and checks at once what the decorators check when a class is defined. It is refused for a class declared with a policy's decorator, which is given as the class itself.
+5. Either way the policy becomes a `PolicyDescriptor`, sealed as the other descriptors are, holding its name, the hooks it defines and how to build it.
+6. `@withStep` and a step's builder attach step policies to a step, and `@workflow` and the workflow builder workflow policies to the workflow, each refusing a policy not declared with its decorator nor put together by a policy's builder, including a policy of the other kind given through a cast. A policy names the roles it requests as its base class's type argument, so each compiles only on a workflow class that implements every role their policies request. Nothing about roles exists at run time.
 
-Where it lives: `policy/hooks.ts`, `policy/declared.ts`, `policy/step-policy.ts`, `policy/workflow-policy.ts`, `policy/lifecycle.ts`, `policy/roles.ts`, `workflow/decorators.ts`, `workflow/registry.ts`, `step/descriptor.ts`.
+Where it lives: `policy/hooks.ts`, `policy/declared.ts`, `policy/descriptor.ts`, `policy/builder.ts`, `policy/step-policy/builder.ts`, `policy/workflow-policy/builder.ts`, `step/builder.ts`, `workflow/builder.ts`, `policy/step-policy.ts`, `policy/workflow-policy.ts`, `policy/lifecycle.ts`, `policy/roles.ts`, `workflow/decorators.ts`, `workflow/registry.ts`, `step/descriptor.ts`.
 
 ### How rescue steps, input adapters and providers are declared
 
 ```mermaid
 flowchart TD
     accTitle: How rescue steps, input adapters and service providers are declared
-    accDescr: The rescue step decorator gathers what a rescue step's constructor and run request, and withStep attaches a declared rescue step to its step. The input adapter and provider decorators mark methods of the workflow class, check what their parameters request against what each may request, and add each to the workflow's declaration, which also holds its steps, its policies and its ID generator.
-    rescue["@rescueStep on a class extending RescueStep"] -->|"what its constructor and run request"| withStep["@withStep, its rescue"]
+    accDescr: The rescue step decorator gathers what a rescue step's constructor and run request, and withStep attaches a declared rescue step to its step, as a step's builder attaches one declared or put together by a rescue step's builder. The input adapter and provider decorators mark methods of the workflow class, or the workflow builder names them with their requests by position, check what their parameters request against what each may request, and add each to the workflow's declaration, which also holds its steps, its policies and its ID generator.
+    rescue["@rescueStep on a class extending RescueStep"] -->|"what its constructor and run request"| withStep["@withStep or a step's builder, its rescue"]
+    rescueBuilder["Refund.builder(), its requests by position"] --> withStep
     withStep --> declaration["The workflow's declaration"]
-    adapter["@inputAdapter on a method of the workflow class"] -->|"its steps and requests"| declaration
-    provider["@provider on a method of the workflow class"] -->|"its service, scope, steps and requests"| declaration
+    adapter["@inputAdapter on a method of the workflow class, or the builder's inputAdapter"] -->|"its steps and requests"| declaration
+    provider["@provider on a method of the workflow class, or the builder's provider"] -->|"its service, scope, steps and requests"| declaration
     requests["The table of requests"] --> rescue
     requests -->|"checked against what each may request"| adapter
     requests -->|"checked against what each may request"| provider
 ```
 
-1. `@rescueStep` gathers what a rescue step's constructor and its `run` request, as `@step` does for a step, and `@withStep` attaches a rescue step declared with it to its step, through `rescue`.
-2. `@inputAdapter` and `@provider` mark methods of the workflow class. Each reads its method's requests from the table of requests, refuses at once a request it may not make, and adds the adapter or the provider, with its name, the steps it serves and its requests, to the workflow's declaration, beside its steps, its policies and its ID generator. `@workflow` then refuses any method that carries requests but is marked with neither.
+1. `@rescueStep` gathers what a rescue step's constructor and its `run` request, as `@step` does for a step, and `@withStep` attaches a rescue step declared with it to its step, through `rescue`. A step's builder takes one in its `rescue`, declared with `@rescueStep` or put together by a rescue step's builder, `Refund.builder()`, from its requests by position.
+2. `@inputAdapter` and `@provider` mark methods of the workflow class. Each reads its method's requests from the table of requests, refuses at once a request it may not make, and adds the adapter or the provider, with its name, the steps it serves and its requests, to the workflow's declaration, beside its steps, its policies and its ID generator. `@workflow` then refuses any method that carries requests but is marked with neither. The workflow builder's `inputAdapter` and `provider` add the same for a method named to it, with its requests by position, checked at once.
 3. An input adapter returns `this.supply(value)` or `this.fromDataBag()`, and a provider `this.provide(instance)` or `this.provide(instance, data)`, helpers of `Workflow`; what they make is recorded, so what a cast lets through is told apart from them. Later stages call them while a step is built.
 
-Where it lives: `step/rescue.ts`, `workflow/adapter.ts`, `service/provider.ts`, `service/reporter.ts`, `workflow/registry.ts`, `workflow/decorators.ts`, `workflow.ts`, `step/descriptor.ts`, `declaration.ts`.
+Where it lives: `step/rescue.ts`, `step/rescue/builder.ts`, `workflow/builder.ts`, `workflow/adapter.ts`, `service/provider.ts`, `service/reporter.ts`, `workflow/registry.ts`, `workflow/decorators.ts`, `workflow.ts`, `step/descriptor.ts`, `declaration.ts`.
 
 ### From declaration to result
 

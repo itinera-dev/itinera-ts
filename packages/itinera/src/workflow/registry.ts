@@ -1,4 +1,4 @@
-import type { WorkflowPolicyClass } from "../policy.js";
+import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { ReporterClass } from "../report.js";
 import type { DeclaredProvider } from "../service/provider.js";
 import type { StepDescriptor } from "../step.js";
@@ -18,8 +18,8 @@ export interface Declaration {
   readonly steps: StepDescriptor[];
   /** The classes of the workflow's own reporters. */
   reporters: readonly ReporterClass[];
-  /** The classes of the workflow policies attached to the workflow. */
-  policies: readonly WorkflowPolicyClass[];
+  /** The workflow policies attached to the workflow, in order. */
+  policies: readonly PolicyDescriptor[];
   /** The input adapters, in the order their methods are written. */
   readonly adapters: DeclaredAdapter[];
   /** The service providers, in the order their methods are written. */

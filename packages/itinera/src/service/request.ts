@@ -1,4 +1,4 @@
-import { marking } from "../declaration.js";
+import { marking } from "../declaration/marking.js";
 import { named } from "../name.js";
 import type { Place, RequestDecorator } from "../declaration/parameter.js";
 import type { Step } from "../step.js";
@@ -49,5 +49,5 @@ export function service<T>(
   key: string,
   type: ServiceType<T>,
 ): RequestDecorator<T, Place<Step | RescueStep, "run">> {
-  return marking(() => ({ kind: "service", key, type }));
+  return marking({ kind: "service", key, type });
 }

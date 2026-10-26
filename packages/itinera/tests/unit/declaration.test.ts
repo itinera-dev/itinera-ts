@@ -1,18 +1,16 @@
 import { describe, expect, it } from "vitest";
 import {
-  checkedOf,
-  marking,
   methodsWithRequests,
   requestsOf,
   requireMetadata,
 } from "../../src/declaration.js";
+import { marking } from "../../src/declaration/marking.js";
 import type { Request } from "../../src/declaration/request.js";
-import { integer, optional } from "../../src/value/token.js";
 
 const contributing: Request = { kind: "contributor" };
 
 function contributor(): ParameterDecorator {
-  return marking(() => contributing);
+  return marking(contributing);
 }
 
 function marked(): MethodDecorator {
@@ -83,28 +81,6 @@ describe("marking", () => {
 describe("methodsWithRequests", () => {
   it("lists the methods whose parameters carry a request", () => {
     expect(methodsWithRequests(Recorded)).toEqual(["requesting", "missing"]);
-  });
-});
-
-describe("checkedOf", () => {
-  it("checks the type written, as required", () => {
-    expect(checkedOf(integer, Recorded, undefined, 0)).toEqual({
-      schema: integer,
-      optional: false,
-    });
-  });
-
-  it("checks the type optional wraps, as optional", () => {
-    expect(checkedOf(optional(integer), Recorded, undefined, 0)).toEqual({
-      schema: integer,
-      optional: true,
-    });
-  });
-
-  it("names the parameter whose type is not written and the metadata cannot say", () => {
-    expect(() => checkedOf(undefined, Recorded, undefined, 0)).toThrow(
-      "the constructor of Recorded: the type of parameter 1 cannot be read from the metadata, so its request must write it",
-    );
   });
 });
 

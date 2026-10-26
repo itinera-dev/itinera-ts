@@ -1,21 +1,35 @@
-import { requestsOf } from "../declaration.js";
+import { onlyAllowed, requestsOf } from "../declaration.js";
+import { requestsGiven } from "../declaration/marking.js";
+import type { Request } from "../declaration/request.js";
+import type { Place } from "../declaration/parameter.js";
+import type { MethodKey, ParametersOf, Tokens } from "../declaration/token.js";
 import { named } from "../name.js";
+import type { Provides, RolesOfOne, WorkflowPolicyClass } from "../policy.js";
+import {
+  type WorkflowPolicyBuilder,
+  workflowPolicyGiven,
+} from "../policy/workflow-policy/builder.js";
+import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { ReporterClass } from "../report.js";
-import type { StepBuilder, StepDescriptor } from "../step.js";
+import type { Provided, ProviderOptions, ServiceType } from "../service.js";
+import {
+  declaredProvider,
+  type DeclaredProvider,
+  providerRequests,
+} from "../service/provider.js";
+import type { StepBuilder, StepClass, StepDescriptor } from "../step.js";
 import { describedBy } from "../step/builder.js";
 import type { Built, Workflow, WorkflowName } from "../workflow.js";
+import {
+  adapterRequests,
+  declaredAdapter,
+  type DeclaredAdapter,
+  type InputAdapterOptions,
+  type Supplied,
+} from "./adapter.js";
 import { assemble, type WorkflowDescriptor } from "./descriptor.js";
+import type { IdGeneratorKey } from "./id-generator.js";
 import type { Declaration, IdGenerator } from "./registry.js";
-
-/**
- * The names of the methods of `W` that can make a journey ID: those taking
- * nothing and returning a string.
- *
- * {@includeCode ../../examples/builder.ts}
- */
-export type IdGeneratorKey<W> = {
-  [K in keyof W & (string | symbol)]: W[K] extends () => string ? K : never;
-}[keyof W & (string | symbol)];
 
 /**
  * Puts a workflow together, starting from what the decorators of its class
@@ -38,6 +52,9 @@ export class WorkflowBuilder<
   #name: WorkflowName | undefined;
   readonly #steps: StepDescriptor[];
   readonly #reporters: ReporterClass[];
+  readonly #policies: PolicyDescriptor[];
+  readonly #adapters: DeclaredAdapter[];
+  readonly #providers: DeclaredProvider[];
   #idGenerator: IdGenerator | undefined;
   #args: ConstructorParameters<C> | undefined;
   readonly #attach: Attach;
@@ -52,6 +69,9 @@ export class WorkflowBuilder<
     this.#name = declared.name;
     this.#steps = [...declared.steps];
     this.#reporters = [...declared.reporters];
+    this.#policies = [...declared.policies];
+    this.#adapters = [...declared.adapters];
+    this.#providers = [...declared.providers];
     this.#idGenerator = declared.idGenerator;
   }
 
@@ -71,10 +91,95 @@ export class WorkflowBuilder<
   /**
    * Adds a step after the steps the workflow has so far, as its builder has
    * put it together so far: a class extending `Step`, declared with `@step`
-   * or not, started with `Charge.builder("charge")`.
+   * or not, started with `Charge.builder("charge")`. It compiles only when
+   * the workflow class implements every role the step's policies request.
+   *
+   * @throws Error if a parameter of the step's constructor or of its `run`
+   * has no request.
    */
-  step(step: StepBuilder): this {
+  step<S extends StepClass, R>(
+    step: StepBuilder<S, R> & Provides<InstanceType<C>, R>,
+  ): this {
     this.#steps.push(describedBy(step));
+    return this;
+  }
+
+  /**
+   * Attaches a workflow policy, after those attached so far: a class
+   * declared with `@workflowPolicy`, or a policy's builder. It compiles only
+   * when the workflow class implements every role the policy requests.
+   *
+   * {@includeCode ../../examples/policy-builder.ts}
+   *
+   * @throws Error if the class is not declared with `@workflowPolicy`, or if
+   * the policy's builder was given no hook.
+   */
+  policy<P extends WorkflowPolicyClass>(
+    policy: (P | WorkflowPolicyBuilder<P>) &
+      Provides<InstanceType<C>, RolesOfOne<P>>,
+  ): this {
+    this.#policies.push(workflowPolicyGiven(policy));
+    return this;
+  }
+
+  /**
+   * Makes the method `key` of the workflow class an input adapter, as
+   * `options` say, after those the workflow has so far, its parameters
+   * making `requests`, in order, as `@inputAdapter` does for a method it
+   * marks.
+   *
+   * {@includeCode ../../examples/tokens-by-position.ts}
+   *
+   * @throws Error if `key` names a field rather than a method of the class,
+   * if the name is empty, if the method declares its requests with
+   * decorators, if a parameter is left without a request, or if one makes a
+   * request an input adapter may not make.
+   */
+  inputAdapter<K extends MethodKey<InstanceType<C>, Supplied>>(
+    key: K,
+    options: InputAdapterOptions,
+    ...requests: Tokens<
+      ParametersOf<InstanceType<C>, K>,
+      Place<InstanceType<C>, K>
+    >
+  ): this {
+    this.#requireMethod(key);
+    this.#adapters.push(
+      declaredAdapter(this.#workflow, key, options, () =>
+        this.#given(key, requests, adapterRequests, "an input adapter"),
+      ),
+    );
+    return this;
+  }
+
+  /**
+   * Makes the method `key` of the workflow class a service provider of the
+   * service type `type`, as `options` say, after those the workflow has so
+   * far, its parameters making `requests`, in order, as `@provider` does for
+   * a method it marks.
+   *
+   * {@includeCode ../../examples/tokens-by-position.ts}
+   *
+   * @throws Error if `key` names a field rather than a method of the class,
+   * if its name or its key is empty, if the method declares its requests
+   * with decorators, if a parameter is left without a request, or if one
+   * makes a request a service provider may not make.
+   */
+  provider<T, K extends MethodKey<InstanceType<C>, Provided<T>>>(
+    key: K,
+    type: ServiceType<T>,
+    options: ProviderOptions,
+    ...requests: Tokens<
+      ParametersOf<InstanceType<C>, K>,
+      Place<InstanceType<C>, K>
+    >
+  ): this {
+    this.#requireMethod(key);
+    this.#providers.push(
+      declaredProvider(this.#workflow, key, type, options, () =>
+        this.#given(key, requests, providerRequests, "a service provider"),
+      ),
+    );
     return this;
   }
 
@@ -96,14 +201,12 @@ export class WorkflowBuilder<
     if (this.#idGenerator !== undefined) {
       throw new Error(`${this.#workflow.name} has more than one ID generator`);
     }
-    const prototype = this.#workflow.prototype as Workflow;
-    const generate: unknown = Reflect.get(prototype, key);
-    if (typeof generate !== "function") {
-      throw new Error(
-        `${this.#workflow.name}.${String(key)} is not a method of the class`,
-      );
-    }
+    this.#requireMethod(key);
     requestsOf(this.#workflow, key);
+    const generate: unknown = Reflect.get(
+      this.#workflow.prototype as Workflow,
+      key,
+    );
     this.#idGenerator = generate as IdGenerator;
     return this;
   }
@@ -132,6 +235,9 @@ export class WorkflowBuilder<
         name: this.#name,
         steps: this.#steps,
         reporters: this.#reporters,
+        policies: this.#policies,
+        adapters: this.#adapters,
+        providers: this.#providers,
         idGenerator: this.#idGenerator,
       },
       this.#workflow.name,
@@ -139,6 +245,33 @@ export class WorkflowBuilder<
     const made = new this.#workflow(...(this.#args ?? []));
     this.#attach(made, descriptor);
     return made as Built<InstanceType<C>>;
+  }
+
+  #requireMethod(key: string | symbol): void {
+    const method: unknown = Reflect.get(
+      this.#workflow.prototype as Workflow,
+      key,
+    );
+    if (typeof method !== "function") {
+      throw new Error(
+        `${this.#workflow.name}.${String(key)} is not a method of the class`,
+      );
+    }
+  }
+
+  #given(
+    key: string | symbol,
+    given: readonly unknown[],
+    allowed: readonly Request["kind"][],
+    what: string,
+  ): readonly Request[] {
+    return onlyAllowed(
+      requestsGiven(this.#workflow, key, given),
+      this.#workflow,
+      key,
+      allowed,
+      what,
+    );
   }
 }
 

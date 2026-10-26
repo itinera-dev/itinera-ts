@@ -1,4 +1,9 @@
-import { type Outcome, Step, type StepBuilder } from "../step.js";
+import {
+  type Outcome,
+  Step,
+  type StepBuilder,
+  type StepClass,
+} from "../step.js";
 import { Ending } from "./ending.js";
 
 /**
@@ -37,7 +42,7 @@ export interface StepMockClass {
   /** The prototype every step mock of the class shares. */
   readonly prototype: StepMock;
   /** Starts putting a step of the class together for a workflow's builder. */
-  builder(name: string): StepBuilder;
+  builder<C extends StepClass>(this: C, name: string): StepBuilder<C>;
 }
 
 /**
