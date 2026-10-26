@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/npm-release-gate
+      - uses: itinera-dev/actions/release-gate@v1
         with:
-          package: packages/itinera
+          manifest: packages/itinera/package.json
           tier: 1
 
   # Checks on main do not block anything once a pull request has merged,
@@ -64,7 +64,7 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
       - run: npm ci
-      - uses: ./.github/actions/npm-publish
+      - uses: itinera-dev/actions/publish-npm@v1
         with:
           package: packages/itinera
 
