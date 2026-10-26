@@ -1,4 +1,4 @@
-import type { Event, JourneyResult } from "itinera/unstable";
+import type { Event, JourneyResult, ListedStep } from "itinera/unstable";
 import {
   admitted,
   type Admission,
@@ -9,6 +9,7 @@ import {
 import { Model } from "./model.js";
 import { ModelError } from "./model/error.js";
 import { Recorders } from "./recorders.js";
+import { listingOf } from "./scenario.js";
 import { Unmet } from "./unmet.js";
 import { Witness } from "./witness.js";
 
@@ -18,10 +19,11 @@ export class World {
   readonly model = new Model();
   /** Every recording reporter of the scenario, by name. */
   readonly recorders = new Recorders(this.model.reporterFailures);
-  /** Every step the scenario's workflow built. */
-  readonly witness = new Witness();
+  /** What the scenario's workflow built and called: steps, hooks and roles. */
+  readonly witness = new Witness(this.model.policies.roles);
   #admission: Admission | undefined;
   #journeys: readonly Journey[] = [];
+  #listing: readonly ListedStep[] | undefined;
 
   /** Builds the workflow the scenario declares, once. */
   admit(): Admission {
@@ -40,6 +42,19 @@ export class World {
         times,
       );
     }
+  }
+
+  /** Lists the workflow the scenario declares, without running anything. */
+  list(): void {
+    this.#listing = listingOf(this.model, this.witness);
+  }
+
+  /** The workflow's listing, once a When sentence listed it. */
+  get listing(): readonly ListedStep[] {
+    if (this.#listing === undefined) {
+      throw new ModelError("the workflow was not listed");
+    }
+    return this.#listing;
   }
 
   /** What building the workflow gave, once a When sentence built it. */

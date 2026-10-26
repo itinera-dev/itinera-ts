@@ -8,3 +8,7 @@ When<World>("the workflow is admitted", function () {
 When<World>("the workflow runs", async function () {
   await this.run(1);
 });
+
+When<World>("the workflow is listed", function () {
+  this.list();
+});

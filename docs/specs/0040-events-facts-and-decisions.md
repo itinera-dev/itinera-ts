@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0040](https://github.com/itinera-dev/spec/blob/main/proposals/0040-events-facts-and-decisions.md), implemented in [#12](https://github.com/itinera-dev/itinera-ts/issues/12). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, and [0011](0011-events.md) the events themselves.
 
-Status: in progress. Stage 1 added the types of the decision events. Stage 3 added the executor's decision after an abnormal termination, a pure function (see 0024). The decisions after a failure and a skip come in stage 6, the hooks around them in stage 7, which lists the proposal.
+Status: complete, and 40 is listed in `conformance.json`. Stage 1 added the types of the decision events. Stage 3 added the executor's decision after an abnormal termination, a pure function (see 0024). The decisions after a failure and a skip come in stage 6, and the hooks around them in stage 7, which listed the proposal.
 
 ## API
 
-Until 0040 is listed, these types are exported only from `itinera/unstable`. They are defined in `src/event/decision.ts`, re-exported by `src/event.ts`, which becomes the subpath `itinera/event` then.
+0040 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says. They are defined in `src/event/decision.ts`, re-exported by `src/event.ts`, which becomes the subpath `itinera/event` then.
 
 - Facts and decisions are members of one union, `Event`, with no marker of their own: the kind tells which it is, as chapter 2 lists them.
 - The decision events are `StepRetrying`, `StepRescuing`, `StepRescued`, `StepGivenUp`, `JourneySucceeded` and `JourneyFailed`.
@@ -25,4 +25,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0040` passes, and 40 is listed in `conformance.json`. Planned for stage 7.
+Done in stage 7: every scenario tagged `@proposal-0040` passes, but those that also name a proposal not yet listed, and 40 is listed in `conformance.json`.

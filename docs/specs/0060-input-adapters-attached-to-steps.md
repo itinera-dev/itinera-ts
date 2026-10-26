@@ -2,11 +2,11 @@
 
 Tech spec for [proposal 0060](https://github.com/itinera-dev/spec/blob/main/proposals/0060-input-adapters-attached-to-steps.md), implemented in [#21](https://github.com/itinera-dev/itinera-ts/issues/21). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 8 the input adapters, [0091](0091-adapters-read-the-data-bag.md) an adapter's read access to the data bag, and [0062](0062-workflow-descriptors.md) the table of requests and the descriptors.
 
-Status: in progress. Stage 4 has added `@inputAdapter`, `@key` and what an adapter returns. Its sixth layer has added adapters to the builder, its seventh has added the violations about adapters and the listing, stage 5 has called an adapter as a step is built, and stage 7 lists the proposal.
+Status: complete, and 60 is listed in `conformance.json`. Stage 4 has added `@inputAdapter`, `@key` and what an adapter returns. Its sixth layer has added adapters to the builder, its seventh has added the violations about adapters and the listing, stage 5 has called an adapter as a step is built, and stage 7 listed the proposal.
 
 ## API
 
-Until 0060 is listed, everything here is exported only from `itinera/unstable`. It is defined in `src/workflow/adapter.ts`, with what an adapter returns in `src/workflow/adapter/supplied.ts`, and re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow`.
+0060 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says. It is defined in `src/workflow/adapter.ts`, with what an adapter returns in `src/workflow/adapter/supplied.ts`, and re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow`.
 
 - **`@inputAdapter({ steps, name? })`** marks a method of a workflow class as an input adapter of the steps it names, at least one, so an empty list does not compile, and `<step name>_rescue` for a rescue step (see [0098](0098-rescue-step-adapters-and-providers.md)). Its name is the method's unless given. It is typed as the interface `InputAdapterDecorator`, generic in the method's type, and compiles only on a method of a class extending `Workflow` that returns a `Supplied` or a promise of one. It records the adapter, its name, its steps, its method and its requests in the class's declaration, in the order the methods are written.
 - **What an adapter may request**: `@stepName()`, `@key()`, the key of the input it is asked for, `@fromWorkflow(key, type?)`, `@journeyId()` and `@dataBag()`. Any other request throws when the class is defined, naming the method and the request, since a parameter decorator cannot see its method's decorator to refuse it at compile time.
@@ -41,4 +41,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0060` passes, and 60 is listed in `conformance.json`. Planned for stage 7.
+Done in stage 7: every scenario tagged `@proposal-0060` passes, but those that also name a proposal not yet listed, and 60 is listed in `conformance.json`.

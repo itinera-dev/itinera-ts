@@ -3,25 +3,21 @@
  * gives it, failing as the scenario scripts it.
  */
 import {
-  EntryRecordingReporter,
   type Event,
+  FailingReporter,
   type GlobalMetadataEntry,
   type JourneyId,
+  type ReporterFailure,
 } from "itinera/unstable";
-import { type PlainValue } from "itinera/value";
 import { listedUnder } from "./listed.js";
 import { ModelError } from "./model/error.js";
-import type { ReporterFailure } from "./model/report.js";
 
 /**
- * A recording reporter of the scenario: it keeps every event and entry of
- * global metadata it receives, the one it fails on included, then fails as
- * the scenario scripts it, and remembers whether it ever failed.
+ * A recording reporter of the scenario: test support's failing reporter,
+ * failing as the scenario scripts it, if at all, which remembers the journey
+ * ID it was made with.
  */
-export class ScenarioReporter extends EntryRecordingReporter {
-  readonly #failure: ReporterFailure | undefined;
-  #failed = false;
-
+export class ScenarioReporter extends FailingReporter {
   /**
    * A reporter failing as `failure` says, made with the journey ID
    * `madeWith` by the workflow instance, or with none by a dispatcher.
@@ -30,57 +26,8 @@ export class ScenarioReporter extends EntryRecordingReporter {
     failure: ReporterFailure | undefined,
     readonly madeWith?: JourneyId,
   ) {
-    super();
-    this.#failure = failure;
+    super(...(failure === undefined ? [] : [failure]));
   }
-
-  /** Whether it failed on any event or entry of global metadata. */
-  get failed(): boolean {
-    return this.#failed;
-  }
-
-  override report(event: Event): void {
-    const isFirst = this.events.length === 0;
-    super.report(event);
-    if (this.#failure !== undefined && failsOn(this.#failure, event, isFirst)) {
-      this.#failed = true;
-      throw new Error(messageOf(this.#failure, event));
-    }
-  }
-
-  override receiveGlobalMetadata(key: string, value: PlainValue): void {
-    super.receiveGlobalMetadata(key, value);
-    if (
-      this.#failure?.kind === "on global metadata" &&
-      this.#failure.key === key
-    ) {
-      this.#failed = true;
-      throw new Error(
-        `the scripted reporter fails on the global metadata ${key}`,
-      );
-    }
-  }
-}
-
-function failsOn(
-  failure: ReporterFailure,
-  event: Event,
-  isFirst: boolean,
-): boolean {
-  switch (failure.kind) {
-    case "first event":
-      return isFirst;
-    case "on event":
-      return failure.event === event.kind;
-    case "on global metadata":
-      return false;
-  }
-}
-
-function messageOf(failure: ReporterFailure, event: Event): string {
-  return failure.kind === "on event" && failure.message !== undefined
-    ? failure.message
-    : `the scripted reporter fails on ${event.kind}`;
 }
 
 /**

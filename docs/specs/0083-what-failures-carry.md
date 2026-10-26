@@ -2,15 +2,19 @@
 
 Tech spec for [proposal 0083](https://github.com/itinera-dev/spec/blob/main/proposals/0083-what-failures-carry.md), implemented in [#28](https://github.com/itinera-dev/itinera-ts/issues/28). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, decisions 6 and 8, and [0065](0065-business-result.md) the result.
 
-Status: in progress. Stage 3 added the failure and the abort of the result, the refusal and how an error's message is read. Hooks requesting `@failureReason()`, `@error()` and `@failureCause()` come in stage 7, which lists the proposal.
+Status: complete, and 83 is listed in `conformance.json`. Stage 3 added the failure and the abort of the result, the refusal and how an error's message is read. Stage 7 answered hooks requesting `@failureReason()`, `@error()` and `@failureCause()`, and listed the proposal.
 
 ## API
 
-Until 0083 is listed, everything here is exported only from `itinera/unstable`.
+0083 is listed, but it stays exported only from `itinera/unstable` while it names API of proposals not yet listed, such as the services of [0095](0095-services-provided-to-steps.md), the rescue steps of [0003](0003-rescue-steps.md) and the global metadata of [0102](0102-global-metadata.md), as the agents' manual says.
 
 - **`Failure`**, in `src/journey/failure.ts`, is `FailureWithReason | FailureWithError`. A failure explained by a reason has `cause` (`failure`, `retries exhausted` or `FailWorkflow`) and `reason`; one explained by an error has `cause` (`abnormal termination` or `retries exhausted`), `error`, the thrown value itself, and `errorMessage`. Each says `never` for the other's fields, so no failure carries both, as chapter 5, 5.8's table requires.
 - **`Abort`**, in `src/journey/abort.ts`, is every abort `journey_aborted` carries, with `error` added exactly where the event carries `errorMessage`: required where the message is, optional where the message is. `journey_aborted` carries the abort without `error`, since events carry an error only as its message.
 - **`Refusal`** carries `error` and `errorMessage` on the kinds of `refused` that failing custom code caused, and the same error as its standard `cause`, the option of `Error` made for this. These were the open names of #28.
+
+## What hooks receive
+
+`@failureReason()` is answered with a copy of the reason the attempt's outcome carries, and `@error()` with its own copy of what the attempt threw, keeping its prototype and its properties (see [0027](0027-received-data-read-only.md)), in `src/engine/hook/answer.ts`, while the result carries the error as it was thrown. When the attempt reported none, a required request aborts the journey with `required data missing`, naming the step and the hook, and an optional one is `None`. `@failureCause()` and `@retryCause()` give why the hook was called. A hook that fails its journey with `FailWorkflow` gives the result a failure with the cause `FailWorkflow` and the hook's reason.
 
 ## How an error's message is read
 
@@ -29,4 +33,4 @@ None of its own.
 
 ## Done when
 
-Every scenario tagged `@proposal-0083` passes, and 83 is listed in `conformance.json`. Planned for stage 7.
+Done in stage 7: every scenario tagged `@proposal-0083` passes, but those that also name a proposal not yet listed, and 83 is listed in `conformance.json`.

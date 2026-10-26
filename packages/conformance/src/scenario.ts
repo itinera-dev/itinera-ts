@@ -10,12 +10,12 @@ import {
   fromWorkflow,
   input,
   key,
-  type StepName,
+  type ListedStep,
   stepName,
+  type StepBuilder,
   stepReporter,
-  type Supplied,
+  type WorkflowBuilder,
   type WorkflowInstance,
-  Workflow,
 } from "itinera/unstable";
 import { type Value } from "itinera/value";
 import { Adapters } from "./adapters.js";
@@ -27,43 +27,10 @@ import type { Model } from "./model.js";
 import type { Recorders } from "./recorders.js";
 import { actingOf } from "./scenario/actions.js";
 import { mockScriptOf } from "./scenario/mock.js";
+import { stepPolicyOf, workflowPolicyOf } from "./scenario/policies.js";
+import { Scenario } from "./scenario/workflow.js";
 import { requestTypeOf, tokenOf } from "./tokens.js";
-import type { Witness } from "./witness.js";
-
-/**
- * The workflow class of every scenario, which declares nothing: the builder
- * puts each scenario's workflow together on it, its ID generator returns the
- * journey ID the scenario gives, and every input adapter the scenario
- * declares is its method `adapt`, which plays the script of the adapter
- * attached to the step it is called for.
- */
-export class Scenario extends Workflow {
-  readonly #adapters: Adapters;
-
-  constructor(
-    readonly id: string,
-    adapters: Adapters,
-  ) {
-    super();
-    this.#adapters = adapters;
-  }
-
-  /** The journey ID the scenario's ID generator returns. */
-  journeyId(): string {
-    return this.id;
-  }
-
-  /**
-   * What the adapter attached to `step` returns for the input of `key`,
-   * given what its own requests were answered with, in order.
-   */
-  adapt(step: StepName, key: string, ...answers: unknown[]): Supplied {
-    const reply = this.#adapters.reply(step, key, answers);
-    return reply.isSome()
-      ? this.supply(given(reply.value))
-      : this.fromDataBag();
-  }
-}
+import type { ActingClass, Witness } from "./witness.js";
 
 /**
  * The workflow the scenario declares, put together with the builder, each
@@ -75,16 +42,57 @@ export class Scenario extends Workflow {
  * it could never hold.
  */
 export function workflowOf(model: Model, witness: Witness): Built<Scenario> {
+  return builderOf(model, witness).build();
+}
+
+/**
+ * The listing of the workflow the scenario declares, read from its builder
+ * without building it.
+ *
+ * @throws Violations when the builder refuses the workflow.
+ */
+export function listingOf(
+  model: Model,
+  witness: Witness,
+): readonly ListedStep[] {
+  return builderOf(model, witness).listing();
+}
+
+/** The step's builder, with the scenario's policy `policy` attached. */
+function withPolicy(
+  attached: StepBuilder<ActingClass>,
+  policy: string,
+  model: Model,
+  witness: Witness,
+): StepBuilder<ActingClass> {
+  return attached.policy(
+    stepPolicyOf(policy, model.policies.policy(policy), witness),
+  );
+}
+
+function builderOf(
+  model: Model,
+  witness: Witness,
+): WorkflowBuilder<typeof Scenario, true> {
   const { name, steps, adapters, idGenerator } = model.workflow;
   const builder = Scenario.builder().name(name);
   for (const step of steps) {
     const script = model.step(step);
-    const mock = witness
-      .classOf(step, mockScriptOf(script), actingOf(script))
+    const scripted = witness
+      .classOf(
+        step,
+        mockScriptOf(script),
+        actingOf(script),
+        script.keepsHandles,
+      )
       .builder(step)
       .needs(...script.inputs.map(inputOf))
       .run(contributor(), stepReporter())
       .retryBudget(script.retries);
+    const mock = (script.policies ?? []).reduce(
+      (attached, policy) => withPolicy(attached, policy, model, witness),
+      scripted,
+    );
     builder.step(
       script.retriesAbnormalTerminations
         ? mock
@@ -101,14 +109,19 @@ export function workflowOf(model: Model, witness: Witness): Built<Scenario> {
       ...adapter.requests.map(requestOf),
     );
   }
+  for (const policy of model.policies.workflowHas ?? []) {
+    builder.policy(
+      workflowPolicyOf(policy, model.policies.policy(policy), witness),
+    );
+  }
   const played = new Adapters(adapters);
+  const { roles } = witness;
   if (idGenerator?.kind === "returns") {
     return builder
       .idGenerator("journeyId")
-      .constructWith(idGenerator.id, played)
-      .build();
+      .constructWith(idGenerator.id, played, roles);
   }
-  return builder.constructWith("", played).build();
+  return builder.constructWith("", played, roles);
 }
 
 function inputOf({ key, type, optional }: Input) {
