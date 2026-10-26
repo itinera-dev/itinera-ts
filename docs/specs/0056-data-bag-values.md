@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0056](https://github.com/itinera-dev/spec/blob/main/proposals/0056-data-bag-values.md), implemented in [#18](https://github.com/itinera-dev/itinera-ts/issues/18). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals.
 
-Status: in progress. Stage 1 added the types of values and the function that captures one. Later stages give the data bag its initial data, its contributions and what input adapters supply, all captured by that function, and stage 6 lists the proposal.
+Status: in progress. Stage 1 added the types of values and the function that captures one. Stage 3 gave the data bag its initial data, and stage 5 what input adapters supply, all captured by that function, and the function that reads a value back; stage 5 adds contributions, and stage 6 lists the proposal.
 
 ## API
 
@@ -51,6 +51,17 @@ No npm package does all of it:
 
 Changing the walk changes `src/value/capture.ts` alone.
 
+## Reading a value
+
+`received(stored, schema)`, in `src/value/read.ts`, is the one function every read of a stored value calls: a step's input, an input adapter's request for data from the workflow, and `DataBag.read`. It is not exported from the package. It returns an `Option`:
+
+1. It copies the stored value with `structuredClone`, which is enough for plain data, so each requester gets its own copy, sharing nothing with the data bag or with another requester.
+2. It checks the copy with the schema through the Standard Schema interface. The requester gets the stored value, never what the schema makes of it, so a schema that coerces or transforms changes nothing.
+3. Wherever `classOf(C)` appears, at the top or inside a Zod list, object, optional or nullable schema, it replaces the value there with what `C.fromValue` makes of it. Other properties of an object, and an optional property that is missing, are left as they are.
+4. It gives nothing when the schema refuses the value, when the schema throws, when its check returns a promise or any other thenable, and when a `fromValue` throws. The caller turns nothing into `wrong type`, or `other type` for `DataBag.read`, carrying no error, as [spec#113](https://github.com/itinera-dev/spec/issues/113), approved by the maintainer, says of a conversion that fails while a value is read.
+
+A check that returns a promise is asynchronous, which section 3 of the plan says cannot be used, and which a Standard Schema validator shows only when it runs. Stage 5 decided, for the maintainer to confirm, that it counts as a check that failed: the promise is never awaited, and its rejection is caught and dropped, so it is never an unhandled rejection. Zod also turns a throw inside a custom check into such a rejection.
+
 ## Dependencies
 
 - **`ts-results-es`**, a runtime dependency, for `Result`, which `capture` returns. Decision 8 of the plan chose it: it uses Rust's names, has no dependencies of its own, and ships CommonJS and ESM builds with their types. itinera uses its `Result` only inside, never exporting it, and re-exports its `Option`, `Some` and `None` for applications.
@@ -59,6 +70,7 @@ Changing the walk changes `src/value/capture.ts` alone.
 ## Tests
 
 - `tests/unit/value/capture.test.ts`: every JSON value is captured as it is, a property-based test with fast-check; the copy shares nothing with what was given; a key named `__proto__` stays a key; an object without a prototype is accepted; a getter is read once; objects that serialise themselves are captured at any depth, and `toValue()` is called once, its result captured in turn; `toValue` is read once; an object reached twice is accepted; one named case for each kind of non-value, a revoked proxy included; a value nested too deeply; the path of the problem, and of a proxy or a getter that throws.
+- `tests/unit/value/read.test.ts`: what each schema accepts given as it is, what it refuses, a schema that throws, one that checks asynchronously, a `fromValue` that refuses, a copy that shares nothing, the stored value rather than the schema's output, and `fromValue` wherever `classOf` names a class.
 - `tests/unit/value.test-d.ts`: what `Value`, `PlainValue` and `AsValue` accept and refuse, one test each, run on TypeScript 6.0 and 5.5.
 
 ## Done when

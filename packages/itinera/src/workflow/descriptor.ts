@@ -2,8 +2,8 @@ import type { JourneyId } from "../journey.js";
 import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { Reporter, ReporterClass } from "../report.js";
 import type { DeclaredProvider } from "../service/provider.js";
-import type { StepDescriptor } from "../step.js";
-import type { DeclaredAdapter } from "./adapter.js";
+import type { StepDescriptor, StepName } from "../step.js";
+import { adapting, type DeclaredAdapter } from "./adapter.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
 import { type ListedStep, listingOf } from "./listing.js";
 import type { IdGenerator } from "./registry.js";
@@ -16,7 +16,8 @@ let partsOf: (described: WorkflowDescriptor) => Parts;
 
 /**
  * How a workflow is described to the executor: its name, its steps, its
- * policies, its reporters, how it makes a journey ID, and its listing. The
+ * policies, its reporters, how it asks an input adapter for an input, how it
+ * makes a journey ID, and its listing. The
  * executor reads this and nothing else about the workflow, and passes the
  * workflow object to the calls that need it.
  *
@@ -84,6 +85,31 @@ export class WorkflowDescriptor {
    */
   reporters(): readonly Reporter[] {
     return this.#parts.reporters.map(build);
+  }
+
+  /**
+   * Asks the input adapter attached to the step `step` for one of the
+   * step's inputs: calls the adapter's method on the workflow object given,
+   * with `answers`, what its requests were answered with, in the order the
+   * adapter declares them, and gives what the method returns.
+   *
+   * {@includeCode ../../examples/descriptors.ts}
+   *
+   * @throws TypeError if no input adapter is attached to the step.
+   * @throws Whatever the adapter's method throws.
+   */
+  adapt(
+    workflow: Workflow,
+    step: StepName,
+    answers: readonly unknown[],
+  ): unknown {
+    const adapter = adapting(this.#parts.adapters, step);
+    if (adapter === undefined) {
+      throw new TypeError(
+        `no input adapter of workflow ${this.name} is attached to step ${step}`,
+      );
+    }
+    return Reflect.apply(adapter.method, workflow, answers);
   }
 
   /**

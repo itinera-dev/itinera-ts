@@ -3,15 +3,16 @@ import { EventKind } from "../event/kind.js";
 import { AbortReason, type Abort } from "../journey.js";
 import type { Dispatcher } from "../report.js";
 import type { StepName } from "../step.js";
+import type { PlainValue } from "../value.js";
 import type { Emitter, EventBody } from "./emitter.js";
 import type { Failures } from "./guard.js";
 import { messageOf } from "./message.js";
 import { JourneyAbortError } from "./signal.js";
 
 /**
- * One journey while it runs: it makes its events and delivers them through
- * its dispatcher, knows the step being run, and records the journey's abort,
- * the first one standing.
+ * One journey while it runs: it holds its data bag, makes its events and
+ * delivers them through its dispatcher, knows the step being run, and
+ * records the journey's abort, the first one standing.
  */
 export class Journey {
   /** The step being run, if any. */
@@ -22,6 +23,8 @@ export class Journey {
     private readonly emitter: Emitter,
     private readonly dispatcher: Dispatcher,
     private readonly failures: Failures,
+    /** The data bag: values by key, in the order each was first set. */
+    readonly data: Map<string, PlainValue>,
   ) {}
 
   /** The abort recorded, once the journey was aborted. */

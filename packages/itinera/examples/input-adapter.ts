@@ -27,11 +27,14 @@ import {
 
 @step()
 class Charge extends Step {
+  static charged: number[] = [];
+
   constructor(@input("amount", integer) readonly amount: number) {
     super();
   }
 
   override run(): Outcome {
+    Charge.charged.push(this.amount);
     return this.succeed();
   }
 }
@@ -57,7 +60,7 @@ class Orders extends Workflow {
   ): Supplied {
     this.asked.push(`${id}: ${step} ${key}`);
     const price = this.prices.get(order);
-    return price === undefined || bag.keys().includes(key)
+    return price === undefined || bag.read(key, integer).kind === "present"
       ? this.fromDataBag()
       : this.supply(price);
   }
@@ -65,33 +68,42 @@ class Orders extends Workflow {
 
 export default (async () => {
   const orders = Orders.build(new Map([["A-1", 40]]));
-  const instance = orders.instance(new Map([["order", "A-1"]]));
-  const result = await new LocalExecutor().run(instance);
-  assert.ok(result.isSucceeded());
-  const bag = result.status.dataBag;
-
-  const supplied = orders.price(
-    "charge" as StepName,
-    "amount",
-    "A-1",
-    instance.journeyId,
-    bag,
-  );
-  const read = orders.price(
-    "charge" as StepName,
-    "amount",
-    "B-2",
-    instance.journeyId,
-    bag,
+  const supplying = orders.instance(new Map([["order", "A-1"]]));
+  const reading = orders.instance(
+    new Map<string, string | number>([
+      ["order", "A-1"],
+      ["amount", 25],
+    ]),
   );
 
-  assert.deepEqual(supplied, {
-    kind: "supplied",
-    value: 40,
-  } satisfies SuppliedValue);
-  assert.deepEqual(read, { kind: "fromDataBag" } satisfies FromDataBag);
+  const supplied = await new LocalExecutor().run(supplying);
+  const read = await new LocalExecutor().run(reading);
+
+  assert.deepEqual(Charge.charged, [40, 25]);
   assert.deepEqual(orders.asked, [
-    `${instance.journeyId}: charge amount`,
-    `${instance.journeyId}: charge amount`,
+    `${supplying.journeyId}: charge amount`,
+    `${reading.journeyId}: charge amount`,
   ]);
+  assert.ok(supplied.isSucceeded() && read.isSucceeded());
+  const charge = "charge" as StepName;
+  assert.deepEqual(
+    orders.price(
+      charge,
+      "amount",
+      "A-1",
+      supplying.journeyId,
+      supplied.status.dataBag,
+    ),
+    { kind: "supplied", value: 40 } satisfies SuppliedValue,
+  );
+  assert.deepEqual(
+    orders.price(
+      charge,
+      "amount",
+      "A-1",
+      reading.journeyId,
+      read.status.dataBag,
+    ),
+    { kind: "fromDataBag" } satisfies FromDataBag,
+  );
 })();

@@ -1,11 +1,25 @@
 import { describe, expect, it } from "vitest";
 import {
   adaptersForUnknownSteps,
+  duplicateAdapterNames,
   stepsAdaptedTwice,
 } from "../../../../src/workflow/violation/adapters.js";
 import { adapter, step } from "../../../fixtures/workflow.js";
 
 const steps = [step("charge", { rescue: [] }), step("ship")];
+
+describe("duplicateAdapterNames", () => {
+  it("names each name more than one adapter has, once", () => {
+    expect(
+      duplicateAdapterNames([
+        adapter("pricing", "charge"),
+        adapter("pricing", "ship"),
+        adapter("pricing", "charge_rescue"),
+        adapter("credentials", "ship"),
+      ]),
+    ).toEqual([{ kind: "duplicate adapter name", adapter: "pricing" }]);
+  });
+});
 
 describe("adaptersForUnknownSteps", () => {
   it.each([
@@ -42,6 +56,18 @@ describe("stepsAdaptedTwice", () => {
         kind: "step adapted twice",
         step: "charge_rescue",
         adapters: ["credentials", "tokens"],
+      },
+    ]);
+  });
+
+  it("names a step that one adapter lists twice", () => {
+    expect(
+      stepsAdaptedTwice(steps, [adapter("pricing", "charge", "charge")]),
+    ).toEqual([
+      {
+        kind: "step adapted twice",
+        step: "charge",
+        adapters: ["pricing", "pricing"],
       },
     ]);
   });

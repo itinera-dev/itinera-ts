@@ -6,7 +6,7 @@ Status: in progress. Stage 3 added `WorkflowInstance`, `instance()` and the exec
 
 ## API
 
-Until 0061 is listed, everything here is exported only from `itinera/unstable`. It is defined in `src/instance.ts`, which becomes the subpath `itinera/instance` then, and `instance()` in `src/workflow.ts`. When it does, the class and the two functions that make and recognise an instance, `instanceOf` and `isInstance`, move to a private submodule, `src/instance/made.ts`, and `instance.ts` re-exports only the type.
+Until 0061 is listed, everything here is exported only from `itinera/unstable`. It is defined in `src/instance.ts`, which becomes the subpath `itinera/instance` then, and `instance()` in `src/workflow/base.ts`. When it does, the class and the two functions that make and recognise an instance, `instanceOf` and `isInstance`, move to a private submodule, `src/instance/made.ts`, and `instance.ts` re-exports only the type.
 
 - **`orders.instance(initialData, { reporters, reportersGlobalMetadata })`**, on a workflow object `build()` made, makes the instance in the order of chapter 5, 5.1: the initial data, then the journey ID from the descriptor's `generateJourneyId`, given the workflow object, then the reporters: a new one of each class the workflow lists, from the descriptor's `reporters()`, followed by the instance's own.
 - **`ValuesByKey`**: initial data and initial global metadata are each a `Map`, entries, or a plain object whose properties set to `undefined` are left out. They are copied into a new `Map` when the instance is made, so changing what was given changes nothing in the instance, and a key given twice keeps its last value. The values are checked by `run`, which refuses what is not a value, as chapter 3, 3.7 says.
@@ -21,7 +21,7 @@ None of its own. The random UUID is the platform's `crypto.randomUUID()`, which 
 ## Tests
 
 - `tests/unit/instance.test.ts`: the ID from the ID generator, a reporter function given the ID, the workflow's reporters before the instance's own, new reporters for each instance, reporters and global metadata handed over once, initial data in the order given as a `Map` or entries, properties set to `undefined` left out, the last value of a key given twice, and a copy of the `Map` given.
-- `tests/unit/workflow.test.ts`: the workflow object beside its descriptor, and an object made with `new` refused.
+- `tests/unit/workflow/base.test.ts`: the workflow object beside its descriptor, and an object made with `new` refused.
 - `examples/instance.ts`.
 
 ## Done when
