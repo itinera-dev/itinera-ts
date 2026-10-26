@@ -1,11 +1,10 @@
 import { PageEvent } from "typedoc";
 
 /**
- * Makes each page TypeDoc writes pass axe, as every page of the
- * organisation's site does: TypeDoc's default theme leaves its content
- * outside any landmark, names two navigation landmarks alike, puts permalinks
- * inside the summaries that open and close sections, and skips heading
- * levels.
+ * Puts right what axe found in each page TypeDoc writes: TypeDoc's default
+ * theme leaves its content outside any landmark, names two navigation
+ * landmarks alike, puts permalinks inside the summaries that open and close
+ * sections, and skips heading levels.
  *
  * @param {import("typedoc").Application} app
  */
