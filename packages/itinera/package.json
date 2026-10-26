@@ -29,6 +29,16 @@
         "default": "./dist/index.js"
       }
     },
+    "./closed-set": {
+      "import": {
+        "types": "./dist/closed-set.d.mts",
+        "default": "./dist/closed-set.mjs"
+      },
+      "require": {
+        "types": "./dist/closed-set.d.ts",
+        "default": "./dist/closed-set.js"
+      }
+    },
     "./event": {
       "import": {
         "types": "./dist/event.d.mts",

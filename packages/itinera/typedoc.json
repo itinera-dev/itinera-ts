@@ -3,6 +3,7 @@
   "name": "itinera",
   "readme": "README.md",
   "entryPoints": [
+    "src/closed-set.ts",
     "src/event.ts",
     "src/executor.ts",
     "src/instance.ts",
@@ -26,6 +27,7 @@
     "includeFolders": false
   },
   "navigationLeaves": [
+    "itinera/closed-set",
     "itinera/event",
     "itinera/executor",
     "itinera/instance",

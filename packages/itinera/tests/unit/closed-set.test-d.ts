@@ -1,10 +1,11 @@
 import { describe, it } from "vitest";
-import { closedSet, type ValueOf } from "../../src/closed-set.js";
+import type { ValueOf } from "../../src/closed-set.js";
+import { closedSet } from "../../src/closed-set/declare.js";
 
 const Colour = closedSet({ Red: "red", Blue: "blue" });
 declare function painting(colour: ValueOf<typeof Colour>): void;
 
-describe("closedSet", () => {
+describe("ClosedSet", () => {
   it("gives a type that is only one of its values", () => {
     painting(Colour.Red);
     painting("blue");

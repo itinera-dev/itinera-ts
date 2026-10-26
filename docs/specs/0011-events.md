@@ -8,7 +8,8 @@ Status: complete, and 11 is listed in `conformance.json`. Stage 1 added the even
 
 Since stage 10, each type is exported from the subpath of its concept, defined in the module of the same name:
 
-- `src/event.ts`, `itinera/event`: `Event`, `EventKind`, each event's type, what only events carry, such as sources and who decided a decision, and `Timestamp`, in private submodules under `src/event/`, and the types of a closed set of names, `ClosedSet`, `EveryValue` and `ValueOf`, from `src/closed-set.ts`.
+- `src/event.ts`, `itinera/event`: `Event`, `EventKind`, each event's type, what only events carry, such as sources and who decided a decision, and `Timestamp`, in private submodules under `src/event/`.
+- `src/closed-set.ts`, `itinera/closed-set`: the types of a closed set of names, `ClosedSet`, `EveryValue` and `ValueOf`, and, in the private `src/closed-set/declare.ts`, `closedSet`, which declares each closed set.
 - `src/report.ts`, `itinera/report`: `Reporter`, `DebugReporter`, and the dispatchers of 0063.
 - Names and closed sets that events carry, in their own concepts' modules: `JourneyId`, `AbortReason` and `FailureCause` in `src/journey.ts`; `StepName`, `Attempt` and `Reason` in `src/step.ts`; `PolicyName`, `StepHook`, `WorkflowHook`, `RetryCause` and `Lifecycle` in `src/policy.ts`; `WorkflowName` and `AdapterName` in `src/workflow.ts`; `ProviderName` in `src/service.ts`.
 
@@ -45,7 +46,7 @@ Every name an event carries is a branded string, `StepName`, `PolicyName`, `Work
 
 ### Closed sets
 
-`EventKind`, `AbortReason`, `FailureCause`, `StepHook`, `WorkflowHook`, `RetryCause` and `RescueCause` are each declared once, with `closedSet` from `src/closed-set.ts`: a frozen object of names, each mapped to the specification's text, with `values`, every value in the order declared, and `has(text)`, which reads a value back only when it is written exactly so. The type of the same name is the union of its values, so a value compares with a string literal and narrows a union as a literal does. `ClosedSet`, `EveryValue` and `ValueOf` are the types an application meets.
+`EventKind`, `AbortReason`, `FailureCause`, `StepHook`, `WorkflowHook`, `RetryCause` and `RescueCause` are each declared once, with `closedSet` from `src/closed-set/declare.ts`: a frozen object of names, each mapped to the specification's text, with `values`, every value in the order declared, and `has(text)`, which reads a value back only when it is written exactly so. The type of the same name is the union of its values, so a value compares with a string literal and narrows a union as a literal does. `ClosedSet`, `EveryValue` and `ValueOf` are the types an application meets, exported from `itinera/closed-set`, a subpath of their own, as the maintainer decided on 2026-10-26.
 
 Decision 10 of the plan chose `enum-plus` for this. Its declarations do not type-check without `skipLibCheck` on TypeScript 6.0, in each version tried, 3.0.0, 3.1.8, 3.2.1 and 3.3.1, and itinera's build and its oldest supported TypeScript check every declaration an application compiles. A closed set needs a frozen object, its values and a check, a dozen lines, so `closedSet` replaces it, as the maintainer decided on 2026-10-19. `ts-enum-util` would replace only `Object.values` and a lookup in a `Set`, and Zod's `z.enum` gives its names no documentation of their own. TypeScript's own string `enum` is ruled out too: a string literal is not assignable to one, so `"step_failed"` would not compare with `EventKind.StepFailed`, nor narrow `Event`.
 
@@ -80,7 +81,7 @@ None of its own.
 - `tests/unit/report.test-d.ts`: a reporter need not receive global metadata, and may report asynchronously.
 - `tests/unit/report/debug-reporter.test.ts`: each event printed as JSON on a line of its own.
 - `tests/unit/step.test.ts`: attempts counted from 1, each after the one before, `isFirst`, written as their number as text and in JSON, and frozen.
-- `tests/unit/closed-set.test.ts`: names and values, values in order, `has` reading back only a value written exactly, and frozen.
+- `tests/unit/closed-set/declare.test.ts`: names and values, values in order, `has` reading back only a value written exactly, and frozen.
 - Later stages: property-based tests with fast-check of the first and last events, increasing sequence numbers, one outcome fact per attempt, and no data bag values in engine events.
 
 ## Done when

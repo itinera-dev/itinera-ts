@@ -1,7 +1,8 @@
 import type { PolicyDescriptor } from "../policy/descriptor.js";
 import type { DeclaredProvider } from "../service/provider.js";
 import type { StepDescriptor } from "../step.js";
-import { closedSet, type ValueOf } from "../closed-set.js";
+import type { ValueOf } from "../closed-set.js";
+import { closedSet } from "../closed-set/declare.js";
 import type { DeclaredAdapter } from "./adapter.js";
 import {
   adaptersForUnknownSteps,

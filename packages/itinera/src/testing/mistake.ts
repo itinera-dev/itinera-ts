@@ -1,4 +1,5 @@
-import { closedSet, type ValueOf } from "../closed-set.js";
+import type { ValueOf } from "../closed-set.js";
+import { closedSet } from "../closed-set/declare.js";
 
 /**
  * What a mistake in a test is, each written in words, such as

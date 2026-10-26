@@ -1,4 +1,5 @@
-import { closedSet, type ValueOf } from "../closed-set.js";
+import type { ValueOf } from "../closed-set.js";
+import { closedSet } from "../closed-set/declare.js";
 
 /**
  * The level of an event a step or a hook emits through its reporter: `info`,
