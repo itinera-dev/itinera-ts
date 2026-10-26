@@ -1,6 +1,6 @@
 import { ModelError } from "./error.js";
 import type { StepAction } from "./step.js";
-import type { Scripted, ValueType } from "./value.js";
+import type { Scripted, CaseType } from "./value.js";
 
 /** The service types the cases name: `labeller` and `meter`. */
 export const serviceTypes = ["labeller", "meter"] as const;
@@ -58,7 +58,7 @@ export type ProviderRequest =
   | {
       readonly kind: "data from the workflow";
       readonly key: string;
-      readonly type: ValueType;
+      readonly type: CaseType;
       readonly optional: boolean;
     };
 

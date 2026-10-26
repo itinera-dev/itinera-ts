@@ -29,7 +29,7 @@ The copy is built as the walk goes, so it shares nothing with what was given, an
 
 Anything thrown while capturing makes what was given not a value, at the place it was thrown, and the error is not kept:
 
-- a `toValue()` that throws, as [spec#113](https://github.com/itinera-dev/spec/issues/113), approved by the maintainer, says of a conversion that fails at capture;
+- a `toValue()` that throws, as proposal 0113 says of a value conversion that fails while a value is captured, which may carry its error but here does not (see [0113](0113-value-conversions.md));
 - a getter or a proxy that throws. The specification names no such case, and none is decided here beyond what it says: a value is data that can be serialised (chapter 1, 1.3), and data whose reading throws cannot be, so it is not a value, with the consequences chapter 4, 4.6 point 2 gives one.
 
 A value nested more deeply than the call stack allows, over a thousand levels or so depending on where it is captured, cannot be walked, and is refused as not a value too.
@@ -58,7 +58,7 @@ Changing the walk changes `src/value/capture.ts` alone.
 1. It copies the stored value with `structuredClone`, which is enough for plain data, so each requester gets its own copy, sharing nothing with the data bag or with another requester.
 2. It checks the copy with the schema through the Standard Schema interface. The requester gets the stored value, never what the schema makes of it, so a schema that coerces or transforms changes nothing.
 3. Wherever `classOf(C)` appears, at the top or inside a Zod list, object, optional or nullable schema, it replaces the value there with what `C.fromValue` makes of it. Other properties of an object, and an optional property that is missing, are left as they are.
-4. It gives nothing when the schema refuses the value, when the schema throws, when its check returns a promise or any other thenable, and when a `fromValue` throws. The caller turns nothing into `wrong type`, or `other type` for `DataBag.read`, carrying no error, as [spec#113](https://github.com/itinera-dev/spec/issues/113), approved by the maintainer, says of a conversion that fails while a value is read.
+4. It gives nothing when the schema refuses the value, when the schema throws, when its check returns a promise or any other thenable, and when a `fromValue` throws. The caller turns nothing into `wrong type`, or `other type` for `DataBag.read`, carrying no error, as proposal 0113 says of a value conversion that fails while a value is read (see [0113](0113-value-conversions.md)).
 
 A check that returns a promise is asynchronous, which section 3 of the plan says cannot be used, and which a Standard Schema validator shows only when it runs. Stage 5 decided, for the maintainer to confirm, that it counts as a check that failed: the promise is never awaited, and its rejection is caught and dropped, so it is never an unhandled rejection. Zod also turns a throw inside a custom check into such a rejection.
 

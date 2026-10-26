@@ -30,6 +30,16 @@ describe("what a returns sentence says an adapter answers", () => {
         through: "its access",
       },
     ],
+    [
+      "a key read from the data bag as a converted type",
+      '"price.charge" of type throwing record, read from the data bag,',
+      {
+        kind: "returns what it reads",
+        key: "price.charge",
+        type: "throwing record",
+        through: "its access",
+      },
+    ],
   ])("is read from what it writes: %s", (_, written, answer) => {
     expect(answerOf(written)).toEqual(answer);
   });

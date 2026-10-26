@@ -1,12 +1,12 @@
 import { defineParameterType } from "@cucumber/cucumber";
 import { fixtureNamed, fixtures } from "../fixture.js";
-import { valueType, valueTypes } from "../model.js";
 import {
   implementationNamed,
   implementations,
   serviceTypeNamed,
   serviceTypes,
 } from "../model/provider.js";
+import { caseType, caseTypes } from "../model/value.js";
 import { statuses, stepStatus } from "../trace/status.js";
 
 /** One or more names, each in double quotes, separated by commas: `"a", "b"`. */
@@ -16,11 +16,11 @@ defineParameterType({
   transformer: names,
 });
 
-/** A type of the neutral vocabulary. */
+/** A type the cases name: of the neutral vocabulary, or a converted type. */
 defineParameterType({
   name: "type",
-  regexp: new RegExp(valueTypes.join("|")),
-  transformer: valueType,
+  regexp: new RegExp(caseTypes.join("|")),
+  transformer: caseType,
 });
 
 /** A service type the cases name. */

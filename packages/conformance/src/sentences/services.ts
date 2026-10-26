@@ -1,10 +1,11 @@
 import { Given } from "@cucumber/cucumber";
 import {
+  aThrowingRecord,
+  type CaseType,
   emit,
   type Level,
   nonValue,
   scripted,
-  type ValueType,
 } from "../model.js";
 import {
   type Implementation,
@@ -54,7 +55,7 @@ Given<World>(
 
 Given<World>(
   "the service provider {string} requests data from the workflow {string} of type {type}",
-  function (provider: string, key: string, type: ValueType) {
+  function (provider: string, key: string, type: CaseType) {
     requests(this, provider, {
       kind: "data from the workflow",
       key,
@@ -66,7 +67,7 @@ Given<World>(
 
 Given<World>(
   "the service provider {string} requests optional data from the workflow {string} of type {type}",
-  function (provider: string, key: string, type: ValueType) {
+  function (provider: string, key: string, type: CaseType) {
     requests(this, provider, {
       kind: "data from the workflow",
       key,
@@ -149,6 +150,13 @@ Given<World>(
   "the service provider {string} supplies data that is not a value with each instance",
   function (provider: string) {
     this.model.providers.provider(provider).data = nonValue;
+  },
+);
+
+Given<World>(
+  "the service provider {string} supplies a throwing record as data with each instance",
+  function (provider: string) {
+    this.model.providers.provider(provider).data = aThrowingRecord;
   },
 );
 

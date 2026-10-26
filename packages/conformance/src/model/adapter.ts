@@ -1,11 +1,5 @@
 import { ModelError } from "./error.js";
-import {
-  nonValue,
-  scripted,
-  type Scripted,
-  valueType,
-  type ValueType,
-} from "./value.js";
+import { type Scripted, caseType, type CaseType, written } from "./value.js";
 
 /**
  * What a scenario says one scripted input adapter does: the steps it is
@@ -32,7 +26,7 @@ export type AdapterRequest =
   | {
       readonly kind: "data from the workflow";
       readonly key: string;
-      readonly type: ValueType;
+      readonly type: CaseType;
     };
 
 /**
@@ -54,7 +48,7 @@ export type Answer =
   | {
       readonly kind: "returns what it reads";
       readonly key: string;
-      readonly type: ValueType;
+      readonly type: CaseType;
       readonly through: "its access" | "the kept access";
     };
 
@@ -66,7 +60,7 @@ export function unscriptedAdapter(
   return { name, steps, requests: [], answers: [], writes: [] };
 }
 
-const readFromTheDataBag = /^"([^"]*)" of type (\w+), read from the data bag,$/;
+const readFromTheDataBag = /^"([^"]*)" of type (.+), read from the data bag,$/;
 
 /** Whether an input adapter's script is of the adapter named `name`. */
 export function adapterNamed(
@@ -77,25 +71,22 @@ export function adapterNamed(
 
 /**
  * What a "returns" sentence says an adapter answers, from what it writes
- * between "returns" and "for": nothing, a non-value, a key read from the
- * data bag, or a value written as JSON.
+ * between "returns" and "for": nothing, a non-value, a throwing record, a key
+ * read from the data bag, or a value written as JSON.
  */
-export function answerOf(written: string): Answer {
-  if (written === "nothing") {
+export function answerOf(text: string): Answer {
+  if (text === "nothing") {
     return { kind: "returns nothing" };
   }
-  if (written === "a non-value") {
-    return { kind: "returns", value: nonValue };
-  }
-  const read = readFromTheDataBag.exec(written);
+  const read = readFromTheDataBag.exec(text);
   if (read === null) {
-    return { kind: "returns", value: scripted(written) };
+    return { kind: "returns", value: written(text) };
   }
   const [, key = "", type = ""] = read;
   return {
     kind: "returns what it reads",
     key,
-    type: valueType(type),
+    type: caseType(type),
     through: "its access",
   };
 }
