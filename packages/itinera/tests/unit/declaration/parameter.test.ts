@@ -69,12 +69,19 @@ const options: ts.CompilerOptions = {
   noEmit: true,
 };
 
+/**
+ * Each test compiles the package's sources with the TypeScript compiler,
+ * which takes several seconds, more on a loaded machine.
+ */
+const compiling = 30_000;
+
 describe("a request decorator", () => {
   it.each(sources)(
     "compiles, in $name, with the compiler option strictNullChecks",
     ({ source }) => {
       expect(diagnosticsOf(source, options)).toEqual([]);
     },
+    compiling,
   );
 
   it.each(sources)(
@@ -86,5 +93,6 @@ describe("a request decorator", () => {
         ),
       ).toContain("itinera needs the compiler option strictNullChecks");
     },
+    compiling,
   );
 });
