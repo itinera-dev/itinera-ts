@@ -10,6 +10,9 @@ import {
   type OnSuccess,
   type Outcome,
   provider,
+  type RescueOutcome,
+  RescueStep,
+  rescueStep,
   role,
   serviceType,
   Step,
@@ -148,5 +151,42 @@ describe("no-instance", () => {
     // @ts-expect-error a provider returns this.provide(instance), never a bare instance
     Kiosk.builder().provider("bare", GATEWAY, {});
     return Shop;
+  });
+});
+
+describe("rescue-skip", () => {
+  it("a rescue step cannot skip", () => {
+    class Skipping extends Step {
+      override run(): Outcome {
+        return this.skip();
+      }
+    }
+    // @ts-expect-error a rescue step that may skip is not a rescue step
+    @rescueStep()
+    class Renew extends RescueStep {
+      // @ts-expect-error a rescue step's run returns a success or a failure, never a skip
+      override run(): Outcome {
+        return new Skipping().run();
+      }
+    }
+    class Skips extends RescueStep {
+      override run(): RescueOutcome {
+        return this.succeed();
+      }
+
+      skipping(): unknown {
+        // @ts-expect-error a rescue step has no skip, even for its own class
+        return this.skip;
+      }
+    }
+    @withStep(Charge, {
+      name: "charge",
+      // @ts-expect-error a step that may skip is not a rescue step
+      rescue: Skipping,
+    })
+    class Orders extends Workflow {}
+    // @ts-expect-error a step that may skip is not a rescue step
+    Charge.builder("charge").rescue(Skipping);
+    return [Renew, Skips, Orders];
   });
 });

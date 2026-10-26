@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0003](https://github.com/itinera-dev/spec/blob/main/proposals/0003-rescue-steps.md), implemented in [#3](https://github.com/itinera-dev/itinera-ts/issues/3). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, section 4 the decorators, [0008](0008-steps.md) the steps, [0098](0098-rescue-step-adapters-and-providers.md) the adapters and providers of a rescue step, and [0062](0062-workflow-descriptors.md) the table of requests and the descriptors.
 
-Status: in progress. Stage 4 has added the base class `RescueStep`, `@rescueStep`, `@fromRescuedStep`, and the `rescue` of `@withStep`. Its sixth layer has added the rescue step to the builders, its seventh has added it to the listing and its violations. Stage 5 has added the outcome of a failure. Stage 9 rescues steps in the engine, with test support's rescue step mock, and its runner plays them and lists the proposal.
+Status: complete, and 3 is listed in `conformance.json`. Stage 4 has added the base class `RescueStep`, `@rescueStep`, `@fromRescuedStep`, and the `rescue` of `@withStep`. Its sixth layer has added the rescue step to the builders, its seventh has added it to the listing and its violations. Stage 5 has added the outcome of a failure. Stage 9 rescues steps in the engine, with test support's rescue step mock, gave the runner its rescue steps and listed the proposal.
 
 ## API
 
@@ -37,7 +37,9 @@ None of its own.
 - `tests/unit/engine/request.test.ts`: what `failureAnswered` gives a request for the failure's reason or the error, and the abort naming its requester. `tests/unit/engine/own-copy.test.ts`: the error's own copy, its class, message, stack, cause and properties kept, a getter copied without being called, and what cannot be copied or is no object given as it is.
 - `tests/unit/testing/rescue-step-mock.test.ts` and `.test-d.ts`: the mock's endings, asynchronous run, inputs and build failure, and that it takes no skip.
 - `examples/rescue-step.ts` and `examples/rescue-step-mock.ts`.
+- `tests/integration/proofs.test-d.ts`: a rescue step that skips does not compile, with the decorator or with the builder, the proof of the `@rescue-skip` exclusion in `conformance.json`.
+- `packages/conformance`: the runner's rescue steps, each a rescue step mock given its inputs, then what it requests of the step it rescues, and the sentences on what it received, playing every scenario of 0003 and 0098 but the excluded one; `tests/unit/scenario/mock.test.ts`: a rescue step's script played as the step mock's, and one that skips refused.
 
 ## Done when
 
-Every scenario tagged `@proposal-0003` passes, and 3 is listed in `conformance.json`. Planned for stage 9.
+Done in stage 9: every scenario tagged `@proposal-0003` passes, but the one that `conformance.json` excludes as `rescue-skip`, with its proof that a rescue step cannot skip, and 3 is listed in `conformance.json`.

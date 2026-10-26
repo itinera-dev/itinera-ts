@@ -1,9 +1,10 @@
 import { isDeepStrictEqual } from "node:util";
 import { Then } from "@cucumber/cucumber";
-import { None, type Option, Some, type StepMock } from "itinera/unstable";
+import { None, type Option, Some } from "itinera/unstable";
 import { json, ModelError } from "../../model.js";
 import type { Input } from "../../model/step.js";
 import { holds } from "../../unmet.js";
+import type { Mock } from "../../witness.js";
 import type { World } from "../../world.js";
 
 Then<World>(
@@ -44,7 +45,7 @@ Then<World>(
 function expectBuilt(
   world: World,
   step: string,
-  built: readonly StepMock[],
+  built: readonly Mock[],
   key: string,
   expected: Option<unknown>,
 ): void {
@@ -70,7 +71,11 @@ function isKeyed(input: Input, key: string): boolean {
  * What the step was given for the input at `at`, which itinera gives as an
  * `Option` when the input is optional.
  */
-function receivedBy(made: StepMock, input: Input, at: number): Option<unknown> {
+export function receivedBy(
+  made: Mock,
+  input: Input,
+  at: number,
+): Option<unknown> {
   const given = made.inputs[at];
   if (!input.optional) {
     return Some(given);
@@ -78,6 +83,7 @@ function receivedBy(made: StepMock, input: Input, at: number): Option<unknown> {
   return given instanceof Some ? Some(given.value) : None;
 }
 
-function written(received: Option<unknown>): string {
+/** What a step received, as an unmet sentence tells it. */
+export function written(received: Option<unknown>): string {
   return received.isSome() ? `= ${JSON.stringify(received.value)}` : "absent";
 }

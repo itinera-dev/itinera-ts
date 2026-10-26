@@ -51,7 +51,7 @@ export interface Input {
  * What a rescue step requests of the failed attempt of the step it rescues:
  * data it contributed, the failure reason or the error.
  */
-type RescueRequest =
+export type RescueRequest =
   | { readonly kind: "data"; readonly input: Input }
   | { readonly kind: "failure reason" }
   | { readonly kind: "error" };
