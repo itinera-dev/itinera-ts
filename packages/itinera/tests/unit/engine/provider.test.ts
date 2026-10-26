@@ -173,7 +173,11 @@ describe("providedBy", () => {
   );
 
   it.each([
-    ["nothing, carrying no error", returningNothing, undefined],
+    [
+      "nothing, carrying why",
+      returningNothing,
+      "service provider main returned nothing, not what provide() makes",
+    ],
     [
       "what provide() does not make, carrying why",
       returningBare,
