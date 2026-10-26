@@ -1,4 +1,5 @@
-import type { Event, PlainValue } from "itinera/unstable";
+import type { Event } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import { Writing } from "./writing.js";
 
 /** A column of an event table, other than `event` and `data`. */

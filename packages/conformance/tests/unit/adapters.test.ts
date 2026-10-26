@@ -1,15 +1,14 @@
 import {
   DataBag,
   Ending,
-  integer,
   LocalExecutor,
   None,
   type Option,
   Some,
   stepMock,
-  type Value,
   Workflow,
 } from "itinera/unstable";
+import { integer, type Value } from "itinera/value";
 import { describe, expect, it } from "vitest";
 import { Adapters } from "../../src/adapters.js";
 import {

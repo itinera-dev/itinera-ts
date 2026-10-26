@@ -11,7 +11,6 @@ import {
   fromStep,
   fromWorkflow,
   type HookDecorator,
-  integer,
   type JourneyId,
   journeyId,
   type KeepDefault,
@@ -23,7 +22,6 @@ import {
   type OnSuccess,
   onWorkflowSuccess,
   type Option,
-  optional,
   type Outcome,
   type PolicyOptions,
   type Reason,
@@ -49,6 +47,7 @@ import {
   workflowPolicy,
   type WorkflowPolicyClass,
 } from "itinera/unstable";
+import { integer, optional } from "itinera/value";
 
 /** A role the shop provides: telling a customer something. */
 interface Messages {

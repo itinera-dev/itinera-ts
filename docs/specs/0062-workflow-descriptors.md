@@ -6,7 +6,7 @@ Status: complete, and 62 is listed in `conformance.json`. Stage 3 added the base
 
 ## API
 
-0062 is listed, but what it defines names the steps, policies, input adapters and providers of proposals not listed yet, such as 0008 and 0010, so everything here stays exported only from `itinera/unstable` until they are, as the agents' manual requires. The base class is defined in `src/workflow/base.ts`, re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow` then, with its submodules in `src/workflow/`.
+0062 is listed, but what it defines names the steps, policies, input adapters and providers of proposals not listed yet, such as 0008 and 0010, so everything here stays exported only from `itinera/unstable` until they are, as the agents' manual requires, but the type tokens, which name none of them and are exported from `itinera/value` since stage 6 (see [0056](0056-data-bag-values.md)). The base class is defined in `src/workflow/base.ts`, re-exported by `src/workflow.ts`, which becomes the subpath `itinera/workflow` then, with its submodules in `src/workflow/`.
 
 ### The descriptors, the executor's contract
 

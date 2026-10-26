@@ -1,4 +1,5 @@
-import type { Event, PlainValue, Reporter } from "itinera/unstable";
+import type { Event, Reporter } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 
 export class Audit implements Reporter {
   readonly #metadata = new Map<string, PlainValue>();

@@ -1,5 +1,6 @@
 import { Then } from "@cucumber/cucumber";
-import type { Event, PlainValue } from "itinera/unstable";
+import type { Event } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 import { contributedUnder, ModelError, type Scripted } from "../../model.js";
 import {
   carriesMessage,

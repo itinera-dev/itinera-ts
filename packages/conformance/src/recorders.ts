@@ -6,9 +6,9 @@ import {
   EntryRecordingReporter,
   type Event,
   type GlobalMetadataEntry,
-  type PlainValue,
-  type ReporterClass,
+  type JourneyId,
 } from "itinera/unstable";
+import { type PlainValue } from "itinera/value";
 import { listedUnder } from "./listed.js";
 import { ModelError } from "./model/error.js";
 import type { ReporterFailure } from "./model/report.js";
@@ -22,7 +22,14 @@ export class ScenarioReporter extends EntryRecordingReporter {
   readonly #failure: ReporterFailure | undefined;
   #failed = false;
 
-  constructor(failure: ReporterFailure | undefined) {
+  /**
+   * A reporter failing as `failure` says, made with the journey ID
+   * `madeWith` by the workflow instance, or with none by a dispatcher.
+   */
+  constructor(
+    failure: ReporterFailure | undefined,
+    readonly madeWith?: JourneyId,
+  ) {
     super();
     this.#failure = failure;
   }
@@ -89,26 +96,22 @@ export class Recorders {
     this.#failures = failures;
   }
 
-  /** A new reporter under the name, failing as the scenario scripts it. */
-  make(name: string): ScenarioReporter {
-    const reporter = new ScenarioReporter(this.#failures.get(name));
+  /**
+   * A new reporter under the name, failing as the scenario scripts it, made
+   * with the journey ID when a workflow instance makes it.
+   */
+  make(name: string, journeyId?: JourneyId): ScenarioReporter {
+    const reporter = new ScenarioReporter(this.#failures.get(name), journeyId);
     this.#listOf(name).push(reporter);
     return reporter;
   }
 
   /**
-   * The class of the reporter the workflow lists under the name, each of
-   * which is kept under the name as it is made.
+   * What makes the reporter the workflow lists under the name, from the
+   * journey ID, for each workflow instance.
    */
-  classOf(name: string): ReporterClass {
-    const failure = this.#failures.get(name);
-    const made = this.#listOf(name);
-    return class extends ScenarioReporter {
-      constructor() {
-        super(failure);
-        made.push(this);
-      }
-    };
+  makerOf(name: string): (journeyId: JourneyId) => ScenarioReporter {
+    return (journeyId) => this.make(name, journeyId);
   }
 
   /** The reporters made under the name, in the order they were made. */

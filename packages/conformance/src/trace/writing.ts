@@ -10,12 +10,12 @@ import type {
   DecidedBy,
   JourneyAbort,
   MissingData,
-  PlainValue,
   ProviderSource,
   Reason,
   StepHookSource,
   StepSource,
 } from "itinera/unstable";
+import type { PlainValue } from "itinera/value";
 
 import type { Column, Data } from "./line.js";
 

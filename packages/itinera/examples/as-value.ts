@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { AsValue } from "itinera/unstable";
+import type { AsValue } from "itinera/value";
 
 interface Order {
   id: string;

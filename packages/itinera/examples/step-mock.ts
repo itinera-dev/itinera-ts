@@ -6,9 +6,9 @@ import {
   RecordingReporter,
   type StepMock,
   stepMock,
-  string,
   Workflow,
 } from "itinera/unstable";
+import { string } from "itinera/value";
 
 class Orders extends Workflow {}
 

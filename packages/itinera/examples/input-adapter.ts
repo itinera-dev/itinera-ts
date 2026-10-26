@@ -7,7 +7,6 @@ import {
   input,
   inputAdapter,
   type InputAdapterOptions,
-  integer,
   type JourneyId,
   journeyId,
   key,
@@ -19,11 +18,11 @@ import {
   step,
   type Supplied,
   type SuppliedValue,
-  string,
   withStep,
   Workflow,
   workflow,
 } from "itinera/unstable";
+import { integer, string } from "itinera/value";
 
 @step()
 class Charge extends Step {
