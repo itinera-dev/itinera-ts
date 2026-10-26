@@ -1,39 +1,115 @@
+import type { PolicyDescriptor } from "../policy/descriptor.js";
+import type { DeclaredProvider } from "../service/provider.js";
+import type { StepDescriptor } from "../step.js";
 import { closedSet, type ValueOf } from "../closed-set.js";
-import type { StepName } from "../step.js";
+import type { DeclaredAdapter } from "./adapter.js";
+import {
+  adaptersForUnknownSteps,
+  type InputAdapterForUnknownStep,
+  type StepAdaptedTwice,
+  stepsAdaptedTwice,
+} from "./violation/adapters.js";
+import {
+  type StepHookDefinedTwice,
+  stepHooksDefinedTwice,
+  type WorkflowHookDefinedTwice,
+  workflowHooksDefinedTwice,
+} from "./violation/hooks.js";
+import {
+  type DuplicateProviderName,
+  providerViolations,
+  type ServiceProvidedTwice,
+  type ServiceProviderForUnknownStep,
+} from "./violation/providers.js";
+import type { AttemptRequestInJourneyScope } from "./violation/scope.js";
+import {
+  type ServiceNotProvided,
+  type ServiceRequestedTwice,
+  serviceViolations,
+  type WrongServiceType,
+} from "./violation/services.js";
+import {
+  type DuplicateStepName,
+  duplicateStepNames,
+  type RescuedStepRetried,
+  rescuedStepsRetried,
+} from "./violation/steps.js";
+
+export type {
+  AttemptRequestInJourneyScope,
+  DuplicateProviderName,
+  DuplicateStepName,
+  InputAdapterForUnknownStep,
+  RescuedStepRetried,
+  ServiceNotProvided,
+  ServiceProvidedTwice,
+  ServiceProviderForUnknownStep,
+  ServiceRequestedTwice,
+  StepAdaptedTwice,
+  StepHookDefinedTwice,
+  WorkflowHookDefinedTwice,
+  WrongServiceType,
+};
 
 /**
  * The kinds of violation: what can be wrong in how a workflow is put
  * together, found before any journey. Each value is written as the
- * specification names it, such as `"duplicate step name"`.
+ * specification names it, such as `"duplicate step name"`. A policy whose
+ * roles the workflow does not provide does not compile, and the local
+ * executor accepts every execution mode, so neither has a kind.
  *
  * {@includeCode ../../examples/violations.ts}
  */
 export const ViolationKind = closedSet({
+  /** Two policies attached to one step, or to the workflow, define the same hook. */
+  HookDefinedTwice: "hook defined twice",
   /** Two steps of one workflow have the same name. */
   DuplicateStepName: "duplicate step name",
+  /** Two input adapters are attached to the same step. */
+  StepAdaptedTwice: "step adapted twice",
+  /** An input adapter is attached to a step or rescue step the workflow does not have. */
+  InputAdapterForUnknownStep: "input adapter for unknown step",
+  /** A step has both a rescue step and a retry budget greater than 0. */
+  RescuedStepRetried: "rescued step retried",
+  /** A step requests a service that no provider serves for it. */
+  ServiceNotProvided: "service not provided",
+  /** A step requests the same key twice among its services. */
+  ServiceRequestedTwice: "service requested twice",
+  /** Two providers of one key are attached to the same step, or to no step. */
+  ServiceProvidedTwice: "service provided twice",
+  /** Two service providers of one workflow have the same name. */
+  DuplicateProviderName: "duplicate provider name",
+  /** A service provider is attached to a step or rescue step the workflow does not have. */
+  ServiceProviderForUnknownStep: "service provider for unknown step",
+  /** The provider serving a step supplies another type than the step requests. */
+  WrongServiceType: "wrong service type",
+  /** A service provider of journey scope requests the step's name or the attempt. */
+  AttemptRequestInJourneyScope: "attempt request in journey scope",
 });
 
 /** One of the values of {@link ViolationKind}. */
 export type ViolationKind = ValueOf<typeof ViolationKind>;
 
 /**
- * One thing wrong in how a workflow is put together, with what it concerns.
+ * One thing wrong in how a workflow is put together, with what it concerns,
+ * told apart by its `kind`.
  *
  * {@includeCode ../../examples/violations.ts}
  */
-export type Violation = DuplicateStepName;
-
-/**
- * Two steps of one workflow have the same name.
- *
- * {@includeCode ../../examples/violations.ts}
- */
-export interface DuplicateStepName {
-  /** Tells this violation from the others. */
-  readonly kind: typeof ViolationKind.DuplicateStepName;
-  /** The name two steps have. */
-  readonly step: StepName;
-}
+export type Violation =
+  | StepHookDefinedTwice
+  | WorkflowHookDefinedTwice
+  | DuplicateStepName
+  | StepAdaptedTwice
+  | InputAdapterForUnknownStep
+  | RescuedStepRetried
+  | ServiceNotProvided
+  | ServiceRequestedTwice
+  | ServiceProvidedTwice
+  | DuplicateProviderName
+  | ServiceProviderForUnknownStep
+  | WrongServiceType
+  | AttemptRequestInJourneyScope;
 
 /**
  * Every violation found in how a workflow is put together, thrown when its
@@ -55,26 +131,59 @@ export class Violations extends Error {
   }
 }
 
+/** What a workflow is put together from, as admission checks it. */
+export interface Checked {
+  readonly steps: readonly StepDescriptor[];
+  readonly policies: readonly PolicyDescriptor[];
+  readonly adapters: readonly DeclaredAdapter[];
+  readonly providers: readonly DeclaredProvider[];
+}
+
+/** Every violation in how the workflow `checked` is put together, in order. */
+export function violationsOf(checked: Checked): Violation[] {
+  const { steps, policies, adapters, providers } = checked;
+  return [
+    ...duplicateStepNames(steps),
+    ...rescuedStepsRetried(steps),
+    ...steps.flatMap(stepHooksDefinedTwice),
+    ...workflowHooksDefinedTwice(policies),
+    ...adaptersForUnknownSteps(steps, adapters),
+    ...stepsAdaptedTwice(steps, adapters),
+    ...serviceViolations(steps, providers),
+    ...providerViolations(steps, providers),
+  ];
+}
+
 function line(violation: Violation): string {
-  return `${violation.kind}: ${violation.step}`;
+  return `${violation.kind}: ${subjectOf(violation)}`;
 }
 
-/** Every violation in how the steps given are put together. */
-export function violationsOf(
-  steps: readonly { readonly name: StepName }[],
-): Violation[] {
-  const names = steps.map((step) => step.name);
-  return [...new Set(names.filter(seenBefore))].map(duplicateStepName);
-}
-
-function seenBefore(
-  name: StepName,
-  index: number,
-  names: readonly StepName[],
-): boolean {
-  return names.indexOf(name) !== index;
-}
-
-function duplicateStepName(step: StepName): DuplicateStepName {
-  return { kind: ViolationKind.DuplicateStepName, step };
+function subjectOf(violation: Violation): string {
+  switch (violation.kind) {
+    case "hook defined twice":
+      return "step" in violation
+        ? `${violation.hook} on step ${violation.step}`
+        : violation.hook;
+    case "duplicate step name":
+    case "rescued step retried":
+    case "step adapted twice":
+      return violation.step;
+    case "input adapter for unknown step":
+      return `${violation.adapter} on ${violation.step}`;
+    case "service not provided":
+      return `${violation.key} for ${violation.step}`;
+    case "service requested twice":
+      return `${violation.key} by ${violation.step}`;
+    case "service provided twice":
+      return violation.step === undefined
+        ? violation.key
+        : `${violation.key} for ${violation.step}`;
+    case "duplicate provider name":
+    case "attempt request in journey scope":
+      return violation.provider;
+    case "service provider for unknown step":
+      return `${violation.provider} on ${violation.step}`;
+    case "wrong service type":
+      return `${violation.provider} for ${violation.key} of ${violation.step}`;
+  }
 }

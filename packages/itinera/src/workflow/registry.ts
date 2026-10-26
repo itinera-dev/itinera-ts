@@ -66,3 +66,20 @@ export function declarationOn(target: { readonly name: string }): Declaration {
   }
   return declarationOf(target);
 }
+
+/**
+ * The workflow descriptor `@workflow` made for the class `workflow`.
+ *
+ * @throws Error if the class is not declared with `@workflow`.
+ */
+export function declaredDescriptor(workflow: {
+  readonly name: string;
+}): WorkflowDescriptor {
+  const { descriptor } = declarationOf(workflow);
+  if (descriptor === undefined) {
+    throw new Error(
+      `${workflow.name} is not declared with @workflow, so it has no workflow descriptor`,
+    );
+  }
+  return descriptor;
+}

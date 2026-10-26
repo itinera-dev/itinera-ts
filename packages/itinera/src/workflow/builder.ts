@@ -29,6 +29,7 @@ import {
 } from "./adapter.js";
 import { assemble, type WorkflowDescriptor } from "./descriptor.js";
 import type { IdGeneratorKey } from "./id-generator.js";
+import type { ListedStep } from "./listing.js";
 import type { Declaration, IdGenerator } from "./registry.js";
 
 /**
@@ -230,7 +231,29 @@ export class WorkflowBuilder<
    * @throws Error if the workflow has no name.
    */
   build(this: WorkflowBuilder<C, true>): Built<InstanceType<C>> {
-    const descriptor = assemble(
+    const descriptor = this.#assemble();
+    const made = new this.#workflow(...(this.#args ?? []));
+    this.#attach(made, descriptor);
+    return made as Built<InstanceType<C>>;
+  }
+
+  /**
+   * Lists the steps the workflow has so far, in order, without running
+   * anything and without a workflow object, as the workflow descriptor
+   * `build()` would make lists them.
+   *
+   * {@includeCode ../../examples/listing.ts}
+   *
+   * @throws Violations listing every violation in how the workflow is put
+   * together so far.
+   * @throws Error if the workflow has no name.
+   */
+  listing(): readonly ListedStep[] {
+    return this.#assemble().listing();
+  }
+
+  #assemble(): WorkflowDescriptor {
+    return assemble(
       {
         name: this.#name,
         steps: this.#steps,
@@ -242,9 +265,6 @@ export class WorkflowBuilder<
       },
       this.#workflow.name,
     );
-    const made = new this.#workflow(...(this.#args ?? []));
-    this.#attach(made, descriptor);
-    return made as Built<InstanceType<C>>;
   }
 
   #requireMethod(key: string | symbol): void {

@@ -37,7 +37,7 @@ The modules of `packages/itinera/src`, each the module of one concept:
 | `report` | Reporters, dispatchers and their factories, `DefaultDispatcher`, `DebugReporter` |
 | `journey` | Journey IDs, abort reasons and failure causes, the result, its statuses, failures and aborts, the data bag, `Contributor` and `@contributor`, `@journeyId` and `@dataBag` |
 | `step` | Step names, reasons, `Step` and `@step`, `RescueStep`, `@rescueStep` and `@fromRescuedStep`, `@input`, `@stepReporter` and `StepReporter`, the requests of a step hook about its step, `@stepName`, `@attempt`, `@failureReason` and `@error`, outcomes, attempts, step descriptors, their options and their builders |
-| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
+| `workflow` | `Workflow`, `@workflow`, `@withStep`, `@idGenerator`, `@fromWorkflow`, `@inputAdapter`, `@key` and what an adapter returns, the builder, workflow descriptors, their listing, violations, the names of workflows and adapters, and the types of the request decorators, which it re-exports from `declaration` |
 | `instance` | `WorkflowInstance` and what an instance holds besides its initial data |
 | `executor` | `LocalExecutor`, `Refusal` and why `run` refuses an instance |
 | `policy` | `StepPolicy`, `WorkflowPolicy`, `@stepPolicy` and `@workflowPolicy`, the hooks' decorators, what a hook returns, the requests only hooks make, `@fromStep`, `@role`, `@failureCause`, `@retryCause` and `@hookReporter`, the roles a list of policies requests, policy descriptors and the policies' builders, and the names and closed sets events carry about policies and hooks |
@@ -57,7 +57,7 @@ Where it lives: `packages/`, and each module in `packages/itinera/src/`, with it
 ```mermaid
 flowchart TD
     accTitle: What a workflow descriptor and an instance hold
-    accDescr: A workflow descriptor holds its name, its step descriptors in order, makes the reporters it lists, and generates journey IDs. A workflow descriptor also holds its workflow policies, and keeps its input adapters and service providers private. A step descriptor holds the step's name, its retry budget, whether it retries an abnormal termination, its step policies, and how to build the step, and keeps its rescue step and its requests private. Decorators and the builder, given a builder for each step or its own lists, both make the descriptor. An instance holds the descriptor beside the workflow object, its journey ID, its initial data, its reporters and its initial global metadata, and the local executor runs it.
+    accDescr: A workflow descriptor holds its name, its step descriptors in order, makes the reporters it lists, and generates journey IDs. A workflow descriptor also holds its workflow policies, keeps its input adapters and service providers private, and lists its steps without running anything. A step descriptor holds the step's name, its retry budget, whether it retries an abnormal termination, its step policies, and how to build the step, and keeps its rescue step and its requests private. Decorators and the builder, given a builder for each step or its own lists, both make the descriptor, after checking every violation. An instance holds the descriptor beside the workflow object, its journey ID, its initial data, its reporters and its initial global metadata, and the local executor runs it.
     decorators["@workflow, @withStep and @idGenerator"] --> descriptor["WorkflowDescriptor"]
     builder["Orders.builder(), with Charge.builder(name) for each step, or the builder's own lists"] --> descriptor
     descriptor --> name["WorkflowName"]
@@ -66,6 +66,7 @@ flowchart TD
     descriptor --> generator["generateJourneyId"]
     descriptor --> workflowPolicies["policies, its workflow policies"]
     descriptor --> adapters["Its input adapters and service providers, kept private"]
+    descriptor --> listing["listing, each step with its position, policies, adapter, services and rescue section"]
     steps --> stepName["StepName"]
     steps --> budget["Retry budget and retry on abnormal termination"]
     steps --> stepPolicies["policies, its step policies"]
@@ -80,14 +81,14 @@ flowchart TD
     executor["LocalExecutor"] -->|"runs"| instance
 ```
 
-1. A `WorkflowDescriptor` is the workflow's declaration, its own object beside the workflow object. The decorators fill the lists the builder reads, and the builder also puts a workflow together without decorators, taking each step from a step builder that the step class's `builder(name)` starts, and its policies, input adapters, service providers and reporters from its own lists; either way, `build()` checks it and makes it.
-2. It holds the workflow's name, its step descriptors in the order they run, and its workflow policies, as policy descriptors, and keeps its input adapters and service providers where only itinera's own modules read them. Its `reporters` makes a new reporter of each class the workflow lists, and its `generateJourneyId` asks the ID generator for a journey ID, or makes a random UUID when the workflow has none.
+1. A `WorkflowDescriptor` is the workflow's declaration, its own object beside the workflow object. The decorators fill the lists the builder reads, and the builder also puts a workflow together without decorators, taking each step from a step builder that the step class's `builder(name)` starts, and its policies, input adapters, service providers and reporters from its own lists; either way, `build()` checks it and makes it. The check, `violationsOf`, finds every violation of chapter 3, 3.6 that TypeScript does not refuse at compile time, twelve kinds, and `@workflow`, when the class is defined, or the builder's `build()`, before the workflow's constructor runs, throws them all at once as `Violations`.
+2. It holds the workflow's name, its step descriptors in the order they run, and its workflow policies, as policy descriptors, and keeps its input adapters and service providers where only itinera's own modules read them. Its `reporters` makes a new reporter of each class the workflow lists, and its `generateJourneyId` asks the ID generator for a journey ID, or makes a random UUID when the workflow has none. Its `listing()` gives each step's name, position, policies, input adapter, services with the provider serving each, and a rescue section for a step with a rescue step, reading only what it holds; the static `Orders.listing()` and the builder's `listing()` read it too, without a workflow object.
 3. Each `StepDescriptor` holds the step's name, its retry budget, whether it retries an abnormal termination, which it does unless that is turned off, its step policies, and `build`, which makes a new step for each attempt, and keeps its rescue step and what the step's constructor and `run` request where only itinera's own modules read them.
 4. A `WorkflowInstance` holds the descriptor beside the workflow object, the journey ID, the initial data, the reporters made for this journey, the workflow's first and the instance's own after them, and the initial global metadata.
 5. The local executor runs an instance, reading only what `WorkflowInstance` holds.
 6. All three are sealed: only the decorators, the builder and `instance()` make them, so one written by hand does not compile where one is expected.
 
-Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `step/builder.ts`, `workflow/descriptor.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
+Where it lives: `workflow/decorators.ts`, `workflow/id-generator.ts`, `workflow/builder.ts`, `step/builder.ts`, `workflow/descriptor.ts`, `workflow/violation.ts` and its submodules in `workflow/violation/`, `workflow/listing.ts`, `service/serving.ts`, `workflow/registry.ts`, `step/descriptor.ts`, `instance.ts`.
 
 ### How requests are declared
 

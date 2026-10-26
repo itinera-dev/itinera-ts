@@ -1,6 +1,11 @@
 import type { RetryCause, StepFailureCause } from "../../src/policy.js";
 import type { Contributor } from "../../src/journey.js";
-import { onStepSuccess, onWorkflowSuccess } from "../../src/policy/hooks.js";
+import {
+  onStepFailure,
+  onStepSuccess,
+  onWorkflowFailure,
+  onWorkflowSuccess,
+} from "../../src/policy/hooks.js";
 import { stepPolicy, workflowPolicy } from "../../src/policy/declared.js";
 import type { OnFailure, OnSuccess } from "../../src/policy/lifecycle.js";
 import { role } from "../../src/policy/request.js";
@@ -44,6 +49,22 @@ export class Notify extends WorkflowPolicy<Messages> {
 export class Quiet extends WorkflowPolicy {
   @onWorkflowSuccess()
   paid(): void {}
+}
+
+/** A step policy that keeps the default after every failure. */
+@stepPolicy({ name: "alarm" })
+export class Alarm extends StepPolicy {
+  @onStepFailure()
+  raised(): OnFailure {
+    return this.keepDefault();
+  }
+}
+
+/** A workflow policy that does nothing once the journey failed. */
+@workflowPolicy({ name: "report" })
+export class Report extends WorkflowPolicy {
+  @onWorkflowFailure()
+  failed(): void {}
 }
 
 /**

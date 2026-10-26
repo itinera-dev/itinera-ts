@@ -2,11 +2,12 @@ import { describe, expect, it } from "vitest";
 import { type Outcome, Step } from "../../../src/step.js";
 import { onStepSuccess, onWorkflowSuccess } from "../../../src/policy/hooks.js";
 import {
+  Alarm,
   Audit,
-  Ledger,
   type Messages,
   Notify,
   Quiet,
+  Report,
 } from "../../fixtures/policy.js";
 import type { OnSuccess } from "../../../src/policy/lifecycle.js";
 import { StepPolicy } from "../../../src/policy/step-policy.js";
@@ -102,6 +103,7 @@ describe("workflow, on the methods of its class", () => {
 
   it("accepts the methods its adapters and providers mark", () => {
     @workflow({ name: "orders" })
+    @withStep(Charge, { name: "charge" })
     class Orders extends Workflow {
       @inputAdapter({ steps: ["charge"] })
       price(@journeyId() id: JourneyId): Supplied {
@@ -173,17 +175,17 @@ describe("withStep", () => {
 
 describe("the policies of a workflow", () => {
   it("are attached to the workflow and to its steps, in order", () => {
-    @workflow({ name: "orders", policies: [Notify, Quiet] })
-    @withStep(Charge, { name: "charge", policies: [Ledger, Audit] })
+    @workflow({ name: "orders", policies: [Notify, Report] })
+    @withStep(Charge, { name: "charge", policies: [Alarm, Audit] })
     class Orders extends Workflow implements Messages {
       tell(message: string): string {
         return message;
       }
     }
     const declaration = declarationOf(Orders);
-    expect(declaration.policies.map(nameOf)).toEqual(["notify", "quiet"]);
+    expect(declaration.policies.map(nameOf)).toEqual(["notify", "report"]);
     expect(declaration.steps[0]?.policies().map(nameOf)).toEqual([
-      "ledger",
+      "alarm",
       "audit",
     ]);
   });
