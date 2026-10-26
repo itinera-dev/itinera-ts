@@ -8,7 +8,7 @@ import {
   type RescueEnding,
   type RescueStepMockScript,
   type StepMockScript,
-} from "itinera/unstable";
+} from "itinera/testing";
 import { given } from "../given.js";
 import { ModelError } from "../model/error.js";
 import type { AttemptScript, ScriptedReason } from "../model/step/attempt.js";

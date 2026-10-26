@@ -68,6 +68,13 @@ export function unscriptedAdapter(
 
 const readFromTheDataBag = /^"([^"]*)" of type (\w+), read from the data bag,$/;
 
+/** Whether an input adapter's script is of the adapter named `name`. */
+export function adapterNamed(
+  name: string,
+): (adapter: AdapterScript) => boolean {
+  return (adapter) => adapter.name === name;
+}
+
 /**
  * What a "returns" sentence says an adapter answers, from what it writes
  * between "returns" and "for": nothing, a non-value, a key read from the

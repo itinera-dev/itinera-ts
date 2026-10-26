@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { LocalExecutor } from "itinera/executor";
 import { type Provided, provider, service, serviceType } from "itinera/service";
 import { type Outcome, Step, step } from "itinera/step";
-import { fakeProvider } from "itinera/unstable";
+import { fakeProvider } from "itinera/testing";
 import { withStep, Workflow, workflow } from "itinera/workflow";
 
 interface PaymentGateway {

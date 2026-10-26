@@ -1,7 +1,7 @@
 import { LocalExecutor } from "itinera/executor";
 import { DataBag } from "itinera/journey";
 import { None, type Option, Some } from "itinera/option";
-import { Ending, stepMock } from "itinera/unstable";
+import { Ending, stepMock } from "itinera/testing";
 import { Workflow } from "itinera/workflow";
 import { integer, type Value } from "itinera/value";
 import { describe, expect, it } from "vitest";

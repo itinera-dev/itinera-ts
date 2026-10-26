@@ -8,7 +8,7 @@ import {
   stepReporter,
   type StepReporter,
 } from "itinera/step";
-import { Level, RecordingReporter, scripted } from "itinera/unstable";
+import { Level, RecordingReporter, scripted } from "itinera/testing";
 import { integer } from "itinera/value";
 import { withStep, Workflow, workflow } from "itinera/workflow";
 

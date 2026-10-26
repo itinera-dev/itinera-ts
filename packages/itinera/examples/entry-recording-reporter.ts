@@ -7,7 +7,7 @@ import {
   stepReporter,
   type StepReporter,
 } from "itinera/step";
-import { EntryRecordingReporter } from "itinera/unstable";
+import { EntryRecordingReporter } from "itinera/testing";
 import { Workflow } from "itinera/workflow";
 
 class Lookup extends Step {

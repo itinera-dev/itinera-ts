@@ -6,7 +6,7 @@ import {
   RecordingReporter,
   type StepMock,
   stepMock,
-} from "itinera/unstable";
+} from "itinera/testing";
 import { Workflow } from "itinera/workflow";
 import { string } from "itinera/value";
 

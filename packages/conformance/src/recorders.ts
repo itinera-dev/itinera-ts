@@ -8,7 +8,7 @@ import {
   FailingReporter,
   type GlobalMetadataEntry,
   type ReporterFailure,
-} from "itinera/unstable";
+} from "itinera/testing";
 import { listedUnder } from "./listed.js";
 import { ModelError } from "./model/error.js";
 
