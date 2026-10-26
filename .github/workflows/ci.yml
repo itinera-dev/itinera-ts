@@ -155,4 +155,6 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - uses: ./.github/actions/check-book
+      - uses: itinera-dev/actions/check-book@v1
+        with:
+          book-dir: typescript
