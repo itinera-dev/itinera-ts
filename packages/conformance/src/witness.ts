@@ -22,8 +22,8 @@ export class Witness {
     const built = listedUnder(this.#built, step);
     const ran = this.#ran;
     return class extends stepMock(script) {
-      constructor() {
-        super();
+      constructor(...inputs: unknown[]) {
+        super(...inputs);
         built.push(this);
       }
 

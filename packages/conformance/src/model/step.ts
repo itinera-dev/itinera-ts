@@ -35,7 +35,7 @@ export interface StepScript {
 }
 
 /** An input a step requests, of a type of the vocabulary. */
-interface Input {
+export interface Input {
   readonly key: string;
   readonly type: ValueType;
   readonly optional: boolean;

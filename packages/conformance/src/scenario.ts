@@ -1,57 +1,64 @@
 /**
  * What the runner builds from the scenario model, through itinera's public
  * API: the workflow, put together with the builder from test support's step
- * mocks, its instances and the executor.
+ * mocks, and its instances.
  */
 import {
   type Built,
-  Ending,
-  LocalExecutor,
-  type StepMockScript,
+  dataBag,
+  fromWorkflow,
+  input,
+  key,
+  type StepName,
+  stepName,
+  type Supplied,
   type Value,
   type WorkflowInstance,
   Workflow,
 } from "itinera/unstable";
-import type { Dispatching } from "./model/report.js";
-import type { AttemptScript } from "./model/step/attempt.js";
-import type { StepScript } from "./model/step.js";
+import { Adapters } from "./adapters.js";
+import { given } from "./given.js";
+import { type AdapterRequest, refuseUnheldAccess } from "./model/adapter.js";
+import type { Input } from "./model/step.js";
 import type { Scripted } from "./model/value.js";
 import type { Model } from "./model.js";
-import { RecordingDispatcherFactory } from "./record.js";
 import type { Recorders } from "./recorders.js";
+import { mockScriptOf } from "./scenario/mock.js";
+import { requestTypeOf, tokenOf } from "./tokens.js";
 import type { Witness } from "./witness.js";
-
-/** The name of the recording reporter the runner's own dispatchers hold. */
-export const runnersRecorder = "the runner's recorder";
-
-/** The message of an abnormal termination the case scripts with none. */
-const unwrittenMessage = "the scripted step terminated abnormally";
 
 /**
  * The workflow class of every scenario, which declares nothing: the builder
- * puts each scenario's workflow together on it, and its ID generator
- * returns the journey ID the scenario gives.
+ * puts each scenario's workflow together on it, its ID generator returns the
+ * journey ID the scenario gives, and every input adapter the scenario
+ * declares is its method `adapt`, which plays the script of the adapter
+ * attached to the step it is called for.
  */
 export class Scenario extends Workflow {
-  constructor(readonly id: string) {
+  readonly #adapters: Adapters;
+
+  constructor(
+    readonly id: string,
+    adapters: Adapters,
+  ) {
     super();
+    this.#adapters = adapters;
   }
 
   /** The journey ID the scenario's ID generator returns. */
   journeyId(): string {
     return this.id;
   }
-}
 
-/**
- * A sentence of the case that the runner cannot run yet, because the stage
- * of itinera that makes it run has not landed.
- */
-class NotRunYet extends Error {
-  override readonly name = "NotRunYet";
-
-  constructor(what: string) {
-    super(`the runner cannot run ${what} yet`);
+  /**
+   * What the adapter attached to `step` returns for the input of `key`,
+   * given what its own requests were answered with, in order.
+   */
+  adapt(step: StepName, key: string, ...answers: unknown[]): Supplied {
+    const reply = this.#adapters.reply(step, key, answers);
+    return reply.isSome()
+      ? this.supply(given(reply.value))
+      : this.fromDataBag();
   }
 }
 
@@ -61,19 +68,22 @@ class NotRunYet extends Error {
  *
  * @throws Violations when the builder refuses the workflow.
  * @throws NotRunYet when the scenario scripts what the runner cannot run.
+ * @throws ModelError when an input adapter's script uses a data bag access
+ * it could never hold.
  */
 export function workflowOf(
   model: Model,
   recorders: Recorders,
   witness: Witness,
 ): Built<Scenario> {
-  const { name, steps, reporters = [], idGenerator } = model.workflow;
+  const { name, steps, adapters, reporters = [], idGenerator } = model.workflow;
   const builder = Scenario.builder().name(name);
   for (const step of steps) {
     const script = model.step(step);
     const mock = witness
       .classOf(step, mockScriptOf(script))
       .builder(step)
+      .needs(...script.inputs.map(inputOf))
       .retryBudget(script.retries);
     builder.step(
       script.retriesAbnormalTerminations
@@ -81,63 +91,41 @@ export function workflowOf(
         : mock.noRetryOnAbnormalTermination(),
     );
   }
+  for (const adapter of adapters) {
+    refuseUnheldAccess(adapter);
+    builder.inputAdapter(
+      "adapt",
+      adapter,
+      stepName(),
+      key(),
+      ...adapter.requests.map(requestOf),
+    );
+  }
   for (const reporter of reporters) {
     builder.reporter(recorders.classOf(reporter));
   }
+  const played = new Adapters(adapters);
   if (idGenerator?.kind === "returns") {
     return builder
       .idGenerator("journeyId")
-      .constructWith(idGenerator.id)
+      .constructWith(idGenerator.id, played)
       .build();
   }
-  return builder.constructWith("").build();
+  return builder.constructWith("", played).build();
 }
 
-function mockScriptOf(script: StepScript): StepMockScript {
-  refuseWhatDoesNotRunYet(script);
-  const [first = Ending.success, ...rest] = (script.attempts ?? []).map(
-    endingOf,
-  );
-  return {
-    attempts: [first, ...rest],
-    asynchronous: script.asynchronous,
-    ...(script.constructorFailure === undefined
-      ? {}
-      : { buildFailure: script.constructorFailure }),
-  };
+function inputOf({ key, type, optional }: Input) {
+  return input(key, requestTypeOf(type, optional));
 }
 
-function refuseWhatDoesNotRunYet(script: StepScript): void {
-  const notYet = [
-    script.inputs.length > 0 && "inputs",
-    script.actions.length > 0 && "contributions, emits or global metadata",
-    (script.hasRescueStep || script.isRescueStep) && "rescue steps",
-    script.ignoresFailedEmits && "failed emits",
-    script.keepsHandles && "kept handles",
-  ].find(isNamed);
-  if (notYet !== undefined) {
-    throw new NotRunYet(notYet);
-  }
-}
-
-function isNamed(what: string | false): what is string {
-  return what !== false;
-}
-
-function endingOf(attempt: AttemptScript): Ending {
-  if (attempt.contributes.length > 0) {
-    throw new NotRunYet("contributions");
-  }
-  switch (attempt.outcome.kind) {
-    case "success":
-      return Ending.success;
-    case "error":
-      return Ending.abnormalTermination(
-        attempt.outcome.message ?? unwrittenMessage,
-      );
-    case "failure":
-    case "skipped":
-      throw new NotRunYet("an attempt that fails or is skipped");
+function requestOf(request: AdapterRequest) {
+  switch (request.kind) {
+    case "data bag":
+      return dataBag();
+    case "step name":
+      return stepName();
+    case "data from the workflow":
+      return fromWorkflow(request.key, tokenOf(request.type));
   }
 }
 
@@ -151,42 +139,9 @@ export function instanceOf(
   });
 }
 
-function asGiven([key, given]: readonly [string, Scripted]): [string, Value] {
-  return [key, given.kind === "value" ? given.value : notAValue()];
-}
-
-/** Something that is not a value: a function, which only a cast lets through. */
-function notAValue(): Value {
-  return notAValue as unknown as Value;
-}
-
-/** The executor the scenario runs its journeys with, dispatching as it says. */
-export function executorOf(
-  dispatching: Dispatching,
-  recorders: Recorders,
-): LocalExecutor {
-  switch (dispatching.kind) {
-    case "default":
-      return new LocalExecutor();
-    case "unstated":
-      return new LocalExecutor(
-        new RecordingDispatcherFactory(recorders.make(runnersRecorder), {
-          kind: "makes",
-          holding: { kind: "adds reporters" },
-        }),
-      );
-    case "holding":
-      return new LocalExecutor(
-        new RecordingDispatcherFactory(recorders.make(dispatching.reporter), {
-          kind: "makes",
-          holding: dispatching.holding,
-        }),
-      );
-    case "failing factory":
-      return new LocalExecutor(
-        new RecordingDispatcherFactory(recorders.make(runnersRecorder), {
-          kind: "fails",
-        }),
-      );
-  }
+function asGiven([key, scripted]: readonly [string, Scripted]): [
+  string,
+  Value,
+] {
+  return [key, given(scripted)];
 }
