@@ -72,13 +72,14 @@ export class WorkflowBuilder<
   /**
    * Adds a step after the steps the workflow has so far: a class extending
    * `Step`, declared with `@step` or not, and what the workflow says about it.
-   * The builder attaches no step policies, so `policies`, if given, is empty.
+   * The builder attaches no step policies and no rescue step, so
+   * `policies`, if given, is empty, and there is no `rescue`.
    *
    * @throws Error if the name is empty, if the retry budget is not a whole
    * number from 0, or if a parameter of the step's constructor or of its
    * `run` has no request.
    */
-  step(step: StepClass, options: StepOptions): this {
+  step(step: StepClass, options: Omit<StepOptions, "rescue">): this {
     requestsOfStep(step);
     this.#steps.push(describeStep(step, options));
     return this;

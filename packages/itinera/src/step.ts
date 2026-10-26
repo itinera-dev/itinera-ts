@@ -12,6 +12,13 @@ export { step } from "./step/declared.js";
 export type { StepDescriptor, StepOptions } from "./step/descriptor.js";
 export type { Outcome, Success } from "./step/outcome.js";
 export {
+  fromRescuedStep,
+  RescueStep,
+  rescueStep,
+  type RescueOutcome,
+  type RescueStepClass,
+} from "./step/rescue.js";
+export {
   attempt,
   error,
   failureReason,

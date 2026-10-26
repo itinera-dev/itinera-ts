@@ -9,7 +9,7 @@ import { closedSet, type ValueOf } from "./closed-set.js";
 export type { Abort } from "./journey/abort.js";
 export { type Contributor, contributor } from "./journey/contributor.js";
 export { DataBag } from "./journey/data-bag.js";
-export { journeyId } from "./journey/request.js";
+export { dataBag, journeyId } from "./journey/request.js";
 export type {
   Failure,
   FailureWithError,

@@ -7,16 +7,18 @@ import type {
 import type { Option } from "../option.js";
 import type { StepPolicy } from "../policy.js";
 import type { Reason, Step, StepClass, StepName } from "../step.js";
+import type { Workflow } from "../workflow.js";
 import type { AsValue } from "../value.js";
 import type { Attempt } from "./attempt.js";
+import type { RescueStep, RescueStepClass } from "./rescue.js";
 import type { RequestType } from "../value/token.js";
 
 /**
- * Requests one of a step's inputs, on a parameter of its constructor: the
- * value under `key`, from the step's input adapter or the data bag, checked
- * by `type`. With no type written, the parameter's own type is checked, as
- * the compiler records it, which it can say only for `number`, `string`,
- * `boolean` and a class that serialises itself.
+ * Requests one of the inputs of a step or a rescue step, on a parameter of
+ * its constructor: the value under `key`, from the step's input adapter or
+ * the data bag, checked by `type`. With no type written, the parameter's
+ * own type is checked, as the compiler records it, which it can say only for
+ * `number`, `string`, `boolean` and a class that serialises itself.
  *
  * An input is required unless `type` is wrapped in `optional`.
  *
@@ -28,7 +30,7 @@ import type { RequestType } from "../value/token.js";
 export function input<T extends RequestType | undefined = undefined>(
   key: string,
   type?: T,
-): ValueRequestDecorator<T, Place<StepClass, undefined>> {
+): ValueRequestDecorator<T, Place<StepClass | RescueStepClass, undefined>> {
   return marking((target, method, index) => ({
     kind: "input",
     key,
@@ -37,38 +39,40 @@ export function input<T extends RequestType | undefined = undefined>(
 }
 
 /**
- * Requests a step reporter, in a step's `run`, for the step's own events and
- * for setting global metadata.
+ * Requests a step reporter, in the `run` of a step or a rescue step, for the
+ * step's own events and for setting global metadata.
  *
  * {@includeCode ../../examples/step-reporter.ts}
  */
 export function stepReporter(): RequestDecorator<
   StepReporter,
-  Place<Step, "run">
+  Place<Step | RescueStep, "run">
 > {
   return marking(() => ({ kind: "stepReporter" }));
 }
 
 /**
- * Requests the name of the step a step hook acts on.
+ * Requests the name of the step a step hook acts on, or, in an input adapter
+ * or a service provider of attempt scope, of the step being built.
  *
  * {@includeCode ../../examples/policy.ts}
  */
 export function stepName(): RequestDecorator<
   StepName,
-  Place<StepPolicy, string | symbol>
+  Place<StepPolicy | Workflow, string | symbol>
 > {
   return marking(() => ({ kind: "stepName" }));
 }
 
 /**
- * Requests the attempt a step hook acts on.
+ * Requests the attempt a step hook acts on, or, in a service provider of
+ * attempt scope, the attempt being built.
  *
  * {@includeCode ../../examples/policy.ts}
  */
 export function attempt(): RequestDecorator<
   Attempt,
-  Place<StepPolicy, string | symbol>
+  Place<StepPolicy | Workflow, string | symbol>
 > {
   return marking(() => ({ kind: "attempt" }));
 }
@@ -99,7 +103,8 @@ export type FromFailure<T, O extends boolean> = O extends true ? Option<T> : T;
 
 /**
  * Requests, in a step hook, the reason the attempt it acts on reported with
- * its failure: required unless `optional` is `true`.
+ * its failure, or, in a rescue step's constructor, the reason the step it
+ * rescues reported: required unless `optional` is `true`.
  *
  * {@includeCode ../../examples/policy.ts}
  */
@@ -107,7 +112,7 @@ export function failureReason<O extends boolean = false>(
   options: FromFailureOptions<O> = {},
 ): RequestDecorator<
   FromFailure<Reason, O>,
-  Place<StepPolicy, string | symbol>
+  Place<StepPolicy, string | symbol> | Place<RescueStepClass, undefined>
 > {
   return marking(() => ({
     kind: "failureReason",
@@ -117,7 +122,8 @@ export function failureReason<O extends boolean = false>(
 
 /**
  * Requests, in a step hook, what the attempt it acts on threw when it ended
- * in an abnormal termination: required unless `optional` is `true`.
+ * in an abnormal termination, or, in a rescue step's constructor, what the
+ * step it rescues threw: required unless `optional` is `true`.
  *
  * {@includeCode ../../examples/policy.ts}
  */
@@ -125,7 +131,7 @@ export function error<O extends boolean = false>(
   options: FromFailureOptions<O> = {},
 ): RequestDecorator<
   FromFailure<unknown, O>,
-  Place<StepPolicy, string | symbol>
+  Place<StepPolicy, string | symbol> | Place<RescueStepClass, undefined>
 > {
   return marking(() => ({
     kind: "error",
