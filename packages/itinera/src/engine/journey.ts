@@ -2,6 +2,7 @@ import type { Event, JourneyAbort } from "../event.js";
 import { EventKind } from "../event/kind.js";
 import { AbortReason, type Abort } from "../journey.js";
 import type { Dispatcher } from "../report.js";
+import type { ProviderName } from "../service.js";
 import type { StepName } from "../step.js";
 import type { PlainValue } from "../value.js";
 import type { Emitter, EventBody } from "./emitter.js";
@@ -10,13 +11,19 @@ import { messageOf } from "./message.js";
 import { JourneyAbortError } from "./signal.js";
 
 /**
- * One journey while it runs: it holds its data bag, makes its events and
- * delivers them through its dispatcher, knows the step being run, and
- * records the journey's abort, the first one standing.
+ * One journey while it runs: it holds its data bag and the instances of
+ * journey scope its service providers made, makes its events and delivers
+ * them through its dispatcher, knows the step being run, and records the
+ * journey's abort, the first one standing.
  */
 export class Journey {
   /** The step being run, if any. */
   step: StepName | undefined;
+  /**
+   * The instance each service provider of journey scope made, by its name,
+   * lent to every attempt it serves until the journey ends.
+   */
+  readonly kept = new Map<ProviderName, unknown>();
   #recorded: Abort | undefined;
 
   constructor(
@@ -26,6 +33,11 @@ export class Journey {
     /** The data bag: values by key, in the order each was first set. */
     readonly data: Map<string, PlainValue>,
   ) {}
+
+  /** Lets go of every instance of journey scope it kept, once it has ended. */
+  end(): void {
+    this.kept.clear();
+  }
 
   /** The abort recorded, once the journey was aborted. */
   get recorded(): Abort | undefined {

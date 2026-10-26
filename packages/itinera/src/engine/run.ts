@@ -1,9 +1,10 @@
 import type { Request } from "../declaration/request.js";
 import { AbortReason } from "../journey.js";
-import type { Attempt, Outcome, Step, StepDescriptor } from "../step.js";
+import type { Attempt, Outcome, StepDescriptor } from "../step.js";
 import { requestsOfDescribed } from "../step/descriptor.js";
 import { hasDetailsRefused, isOutcome } from "../step/outcome.js";
 import type { PlainValue } from "../value.js";
+import type { BuiltStep } from "./build.js";
 import { Handles } from "./handles.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
@@ -23,10 +24,11 @@ export type Ran =
   | { readonly kind: "abnormal termination"; readonly error: unknown };
 
 /**
- * Runs the step built for `attempt`, lending its `run` the handles it
- * requests, in order, and closes them once the attempt and every call it
- * made on them have settled. An error escaping `run`, or what it returned
- * that is not an outcome, ends the attempt in an abnormal termination.
+ * Runs the step built for `attempt`, lending its `run` the handles and the
+ * services it requests, in order, and closes the handles once the attempt
+ * and every call it made on them have settled. An error escaping `run`, or
+ * what it returned that is not an outcome, ends the attempt in an abnormal
+ * termination.
  *
  * @throws JourneyAbortError when the journey was aborted while the step ran,
  * whatever it did afterwards, or with `not a value` when its outcome's
@@ -36,15 +38,16 @@ export async function ran(
   journey: Journey,
   step: StepDescriptor,
   attempt: Attempt,
-  made: Step,
+  { made, services }: BuiltStep,
 ): Promise<Ran> {
   const handles = new Handles(journey, {
     kind: "step",
     step: step.name,
     attempt,
   });
+  const lends: Lent = { handles, services };
   const lent = requestsOfDescribed(step).run.map((request) =>
-    lending(journey, step, handles, request),
+    lending(journey, step, lends, request),
   );
   let ended: Ran;
   try {
@@ -64,10 +67,16 @@ export async function ran(
   return ended;
 }
 
+/** What an attempt lends its step's `run`: its handles and its services. */
+interface Lent {
+  readonly handles: Handles;
+  readonly services: ReadonlyMap<string, unknown>;
+}
+
 function lending(
   journey: Journey,
   step: StepDescriptor,
-  handles: Handles,
+  { handles, services }: Lent,
   request: Request,
 ): unknown {
   if (request.kind === "contributor") {
@@ -75,6 +84,9 @@ function lending(
   }
   if (request.kind === "stepReporter") {
     return handles.reporter;
+  }
+  if (request.kind === "service" && services.has(request.key)) {
+    return services.get(request.key);
   }
   throw notLent(journey, step, request);
 }

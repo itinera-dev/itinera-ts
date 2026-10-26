@@ -29,7 +29,8 @@ import {
   type InputAdapterOptions,
 } from "./adapter.js";
 import type { Supplied } from "./adapter/supplied.js";
-import { assemble, type WorkflowDescriptor } from "./descriptor.js";
+import type { WorkflowDescriptor } from "./descriptor.js";
+import { assemble } from "./descriptor/assemble.js";
 import {
   type DeclaredIdGenerator,
   type IdGeneratorKey,
@@ -181,9 +182,9 @@ export class WorkflowBuilder<
       Place<InstanceType<C>, K>
     >
   ): this {
-    this.#methodOf(key);
+    const method = this.#methodOf(key);
     this.#providers.push(
-      declaredProvider(this.#workflow, key, type, options, () =>
+      declaredProvider(this.#workflow, key, method, type, options, () =>
         this.#given(key, requests, providerRequests, "a service provider"),
       ),
     );

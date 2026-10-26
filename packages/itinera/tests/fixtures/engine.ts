@@ -1,3 +1,5 @@
+import type { Place } from "../../src/declaration/parameter.js";
+import type { Tokens } from "../../src/declaration/token.js";
 import type { Event } from "../../src/event.js";
 import type { EventKind } from "../../src/event/kind.js";
 import type { WorkflowInstance } from "../../src/instance.js";
@@ -19,7 +21,12 @@ import {
 import { Ending } from "../../src/testing/ending.js";
 import { FailingReporter } from "../../src/testing/failing-reporter.js";
 import { RecordingReporter } from "../../src/testing/recording-reporter.js";
-import { type StepMockClass, stepMock } from "../../src/testing/step-mock.js";
+import {
+  type StepMock,
+  type StepMockClass,
+  stepMock,
+  type StepMockScript,
+} from "../../src/testing/step-mock.js";
 import {
   type HookCall,
   type StepPolicyMock,
@@ -33,7 +40,9 @@ import {
   type WorkflowPolicyMockScript,
   workflowPolicyMock,
 } from "../../src/testing/workflow-policy-mock.js";
-import type { PlainValue, Value } from "../../src/value.js";
+import type { Provided } from "../../src/service.js";
+import { service, serviceType } from "../../src/service/request.js";
+import type { AsValue, PlainValue, Value } from "../../src/value.js";
 import {
   type Built,
   type Supplied,
@@ -341,4 +350,133 @@ export function loggedCharge(log: string[]) {
 /** A reporter that throws an error with the message on each event of a kind. */
 export function failingOn(event: EventKind, message: string): FailingReporter {
   return new FailingReporter({ kind: "on event", event, message });
+}
+
+/** A service of the engine's tests, labelled with where it came from. */
+export interface Gateway {
+  /** Where it came from. */
+  readonly label: string;
+}
+
+/** The type of the service {@link Gateway}. */
+export const GATEWAY = serviceType<Gateway>("Gateway");
+
+/**
+ * What a service provider of a {@link Till} does, given the provider's
+ * method and what its requests were answered with.
+ */
+export type Providing = (
+  till: Till,
+  provider: string,
+  ...given: unknown[]
+) => Provided<Gateway> | Promise<Provided<Gateway>>;
+
+/**
+ * A workflow class whose methods `main` and `spare`, given to the builder as
+ * service providers, keep what each call was given, after the method's name,
+ * and do as `providing` says.
+ */
+export class Till extends Workflow {
+  readonly calls: unknown[][] = [];
+  readonly #counts = new Map<string, number>();
+
+  constructor(private readonly providing: Providing = counted) {
+    super();
+  }
+
+  main(...given: unknown[]): Provided<Gateway> | Promise<Provided<Gateway>> {
+    return this.#called("main", given);
+  }
+
+  spare(...given: unknown[]): Provided<Gateway> | Promise<Provided<Gateway>> {
+    return this.#called("spare", given);
+  }
+
+  /** How many times the provider of the method `provider` was called. */
+  callsTo(provider: string): number {
+    return this.#counts.get(provider) ?? 0;
+  }
+
+  lending<T, D = undefined>(instance: T, data?: D & AsValue<D>): Provided<T> {
+    return this.provide(instance, data);
+  }
+
+  #called(
+    provider: string,
+    given: unknown[],
+  ): Provided<Gateway> | Promise<Provided<Gateway>> {
+    this.calls.push([provider, ...given]);
+    this.#counts.set(provider, this.callsTo(provider) + 1);
+    return this.providing(this, provider, ...given);
+  }
+}
+
+/**
+ * A gateway labelled with the provider's method and how many times it was
+ * called, such as `main 2`.
+ */
+export function counted(till: Till, provider: string): Provided<Gateway> {
+  return till.lending({
+    label: `${provider} ${String(till.callsTo(provider))}`,
+  });
+}
+
+/**
+ * A class of step mocks that end as `script` says, whose `run` keeps the
+ * services it is lent in `lent`, in order, one list per attempt.
+ */
+export function serviced(
+  lent: unknown[][],
+  script: StepMockScript = { attempts: [Ending.success] },
+): ServicedClass {
+  return class Serviced extends stepMock(script) {
+    override run(...services: unknown[]): Outcome | Promise<Outcome> {
+      lent.push(services);
+      return super.run();
+    }
+  };
+}
+
+/** A class of step mocks that {@link serviced} makes. */
+type ServicedClass = StepMockClass &
+  (new (...inputs: unknown[]) => StepMock & {
+    run(...services: unknown[]): Outcome | Promise<Outcome>;
+  });
+
+/** The requests of the till's provider `main`, by position. */
+export type ProviderRequests = Tokens<unknown[], Place<Till, "main">>;
+
+/**
+ * The workflow `orders` of a till playing `providing`, whose step `charge`
+ * requests the gateway `payments`, attempted twice when it fails once, served
+ * by the till's `main` of attempt scope, making `requests`.
+ */
+export function chargingTill(
+  providing: Providing,
+  requests: ProviderRequests = [],
+): Built<Till> {
+  return Till.builder()
+    .name("orders")
+    .step(
+      serviced([], { attempts: [Ending.failure("declined"), Ending.success] })
+        .builder("charge")
+        .run(service("payments", GATEWAY))
+        .retryBudget(1),
+    )
+    .provider(
+      "main",
+      GATEWAY,
+      { key: "payments", perAttempt: true },
+      ...requests,
+    )
+    .constructWith(providing)
+    .build();
+}
+
+/** The events of a journey of the till, with the initial data `data`. */
+export async function travelled(
+  till: Built<Till>,
+  data: Parameters<typeof recorded>[1] = {},
+): Promise<readonly Event[]> {
+  return (await recorded(till, data)).events;
 }

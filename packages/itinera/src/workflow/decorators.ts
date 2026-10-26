@@ -13,7 +13,7 @@ import { isDeclared } from "../step/declared.js";
 import { describeStep } from "../step/descriptor.js";
 import { rescueGiven } from "../step/rescue/builder.js";
 import type { Workflow, WorkflowName } from "../workflow.js";
-import { assemble } from "./descriptor.js";
+import { assemble } from "./descriptor/assemble.js";
 import { type Declaration, declarationOn } from "./registry.js";
 
 /**
