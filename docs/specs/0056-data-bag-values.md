@@ -30,7 +30,7 @@ The copy is built as the walk goes, so it shares nothing with what was given, an
 Anything thrown while capturing makes what was given not a value, at the place it was thrown, and the error is not kept:
 
 - a `toValue()` that throws, as proposal 0113 says of a value conversion that fails while a value is captured, which may carry its error but here does not (see [0113](0113-value-conversions.md));
-- a getter or a proxy that throws. The specification names no such case, and none is decided here beyond what it says: a value is data that can be serialised (chapter 1, 1.3), and data whose reading throws cannot be, so it is not a value, with the consequences chapter 4, 4.6 point 2 gives one.
+- a getter or a proxy that throws, which is a copy that fails while a value is captured, so it is not a value, as proposal 0121 says (see [0121](0121-read-only-copies.md)).
 
 A value nested more deeply than the call stack allows, over a thousand levels or so depending on where it is captured, cannot be walked, and is refused as not a value too.
 

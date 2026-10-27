@@ -14,6 +14,8 @@ TypeScript cannot make a received value read-only in a way a cast cannot undo, a
 - **The error** a hook requests is its own copy of what the attempt threw, in `src/engine/hook/answer.ts`: an object with the same prototype and the thrown object's own properties, made as an `Error` when the thrown value is one, so that `instanceof`, its message, its stack and its cause hold, and a hook that changes it changes neither what another hook nor the result receives. `structuredClone` would keep only the standard error classes, and lose a subclass and its own properties. The properties are copied as they are defined, so a getter runs only when the hook reads it, and one that throws then fails the hook; only the stack is copied as its value, since the runtime's accessor would read the copy's. The copy is shallow: a property holding an object, such as a cause, is the thrown error's own. A thrown value that is not an object cannot be changed, and is given as it is, and so is an object that cannot be copied, such as a proxy whose traps throw, since nothing may escape `run`.
 - **Contributions** are captured when `contribute` is called, by the handles in `src/engine/handles.ts`, so a step or hook that changes the object afterwards changes nothing committed.
 
+The copy made when a value is captured runs the getters of what is given and a proxy's traps, and the copy made for each request for a value, or each read through an input adapter's access, calls no application code: [0121](0121-read-only-copies.md) says what each copy calls and what a copy that fails means.
+
 ## Dependencies
 
 None of its own.
