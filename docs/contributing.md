@@ -32,7 +32,7 @@ The subpath `itinera/unstable` holds API that the specification has not accepted
 
 Examples, under `packages/itinera/examples`, import from the subpaths applications write, such as `itinera/step`. `tsconfig.json` and `vitest.config.mts` map those subpaths to the package's sources, so the examples are checked and run without a build, and `tests/integration/examples.test.ts` runs every one of them. Most are pulled into the API reference with TypeDoc's `@includeCode`; those under `examples/programs` are whole programs, the counterparts of itinera-rs's `orders` examples, which print what their journeys do.
 
-`packages/itinera/README.md` is the package's overview: npm shows it on the package's page, and it is the front page of the API reference. Its example is `examples/first-workflow.ts`, copied as it is, which `tests/integration/readme.test.ts` checks.
+`packages/itinera/README.md` is the package's overview, written for the people who use itinera: npm shows it on the package's page, it is the front page of the API reference, and the repository's `README.md` is a link to it, so GitHub shows it too. The link points this way because npm leaves links out of a package. Its example is `examples/first-workflow.ts`, copied as it is, which `tests/integration/readme.test.ts` checks.
 
 ## Building and testing
 
@@ -61,11 +61,17 @@ Every one of these is a required check in CI:
 
 `.licensee.json` allows the licences that `deny.toml` allows in itinera-rs, with `BlueOak-1.0.0` and `CC0-1.0`, which many of npm's own packages use. It checks every package installed, the tools included. The exceptions are tools that applications never receive: `argparse`, under `Python-2.0`, which TypeDoc uses through `markdown-it`; `lightningcss`, under `MPL-2.0`, which Vite uses for CSS; and `spdx-exceptions`, `spdx-expression-validate` and `spdx-ranges`, which carry `CC-BY-3.0` for their data, and which licensee itself uses.
 
-## Conformance in CI
+## Conformance
 
 `conformance.json` pins the conformance cases, lists the proposals implemented and the capabilities claimed, and maps each scenario excluded as impossible to express to the test that proves it. A proposal is listed only by the pull request that completes it.
 
 In CI, the `run-conformance` action of [itinera-dev/actions](https://github.com/itinera-dev/actions) reads `conformance.json`, checks the excluded scenarios, runs the scenarios whose proposals are all listed, and writes the report. While no proposal is listed, it checks the manifest without starting the runner, which arrives in stage 2 as `npm run conformance`.
+
+To run the cases yourself, check out [itinera-dev/conformance](https://github.com/itinera-dev/conformance) at the tag pinned in `conformance.json`, then run `npm run conformance` from this repository with:
+
+- `ITINERA_CONFORMANCE_CASES` set to that checkout's `cases` directory;
+- `ITINERA_CONFORMANCE_TAGS` set to a Cucumber tag expression selecting the scenarios to run;
+- `ITINERA_CONFORMANCE_REPORT` set to the file the Cucumber JSON report is written to.
 
 ## The book in CI
 
@@ -124,7 +130,7 @@ npm has no counterpart of docs.rs, so this repository's GitHub Pages serve the A
 
 - the newest release at `/itinera-ts/`;
 - `main` at `/itinera-ts/next/`;
-- a frozen copy of each release at `/itinera-ts/VERSION/`, such as `/itinera-ts/0.1.0-beta.4/`.
+- a frozen copy of each release at `/itinera-ts/VERSION/`, such as `/itinera-ts/0.1.0-beta.5/`.
 
 Before the first release, `/itinera-ts/` sends readers to `next/`.
 

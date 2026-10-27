@@ -24,7 +24,7 @@ The plan is implemented in stages, tracked in [#1](https://github.com/itinera-de
 8. Services: providers of both scopes, their requests, events, data, global metadata and implementation names.
 9. Rescue steps: the rescue, its requests, decisions and statuses, adapters and providers attached to `<step>_rescue`.
 10. Test support: `itinera/testing`, the mocks moved there from `itinera/unstable`, what test support still lacks, the runner's test support sentences, `testing` claimed.
-11. Release preparation: the API reference, the package overview, examples, the release workflow, ready for `0.1.0-beta.1`, published only after the maintainer merges the stack.
+11. Release preparation: the API reference, the package overview, examples, the release workflow, ready for the first release, published only after the maintainer merges the stack.
 12. The book: the TypeScript edition of [itinera-dev/book](https://github.com/itinera-dev/book), a `typescript/` book beside `rust/`, following BOOK.md, its examples compiled and run against itinera-ts in CI, written as a chain of pull requests of its own in the book repository after stage 11, against the top branch of this repository's stack until the release.
 
 A proposal is added to `proposals` in `conformance.json` only by the pull request that completes it, which says `Closes #N` for its implementation issue. A proposal is listed only once its cases are at the tag `conformance.json` pins; cases not merged yet are run locally from their pull request's branch. Proofs that a rule is impossible to express land with their feature, together with their entries under `impossible`.

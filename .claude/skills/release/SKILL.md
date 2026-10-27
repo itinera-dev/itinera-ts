@@ -16,8 +16,8 @@ One pull request, titled "Release <version>" with a release commit `chore(releas
 1. Branch from the latest `main`.
 2. After `git fetch --tags`, list what changed since the last release with `git log v<last version>..origin/main`, and read each commit's message, its changelog trailers included.
 3. Raise the version:
-   - in `packages/itinera/package.json` and `package-lock.json`, with `npm version <version> --workspace packages/itinera --no-git-tag-version`;
-   - in the status paragraph of `README.md`.
+   - in `packages/itinera/package.json`, `package-lock.json` and the `itinera` dependency of `packages/conformance/package.json`: set that dependency to `<version>` first, since npm looks a version the workspace no longer holds up on the registry, then run `npm version <version> --workspace packages/itinera --no-git-tag-version`;
+   - in the status paragraph of `packages/itinera/README.md`, which the repository's `README.md` links to.
 4. Set the dist-tag: `publishConfig.tag` in `packages/itinera/package.json` is `next` for a version with a pre-release part, such as `0.1.0-beta.1`, and is removed for any other version, which npm then publishes as `latest`. For the first version without a pre-release part, also remove from `packages/itinera/README.md` the sentence saying that every version is a pre-release under `next`.
 5. Check that `conformance.json` lists every tier 1 proposal of the cases it pins, except one whose every case needs a capability it does not claim, which the release gate in docs/contributing.md "Releasing" requires. If it does not, stop and tell the maintainer, since the tag would be refused.
 6. Write the version's section at the top of `CHANGELOG.md`, above the last release's, in the form of the sections below it:

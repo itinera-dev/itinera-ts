@@ -9,6 +9,6 @@
   "dependencies": {
     "@cucumber/cucumber": "13.3.0",
     "@cucumber/tag-expressions": "11.0.1",
-    "itinera": "0.0.0"
+    "itinera": "0.1.0-beta.5"
   }
 }
