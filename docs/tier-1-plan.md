@@ -510,7 +510,7 @@ The maintainer asked for this to be part of the plan. Stage 0 copies these from 
 | `.github/workflows/pull-request-checks.yml` | Unchanged: `pr-has-issue`, `no-cross-repo-closing` and `commit messages` |
 | `.github/workflows/ci.yml`, `release.yml` and `weekly.yml` | The same jobs, each running one npm script; the weekly run tries the next TypeScript and Node versions |
 | `LICENSE-APACHE`, `LICENSE-MIT`, `.gitattributes`, `.gitignore` | Unchanged licences; ignores for npm |
-| `README.md` | For end users only, as the project instructions require: what itinera is, how to install it, the tier and capabilities claimed, learning links, how to run the runner |
+| `README.md` | For end users only, as the project instructions require: a link to the package's overview, `packages/itinera/README.md`, so that GitHub and npm show one text: what itinera is, how to install it, a first workflow, the parts of a workflow, the tier and capabilities claimed, learning links; how to run the runner is in the contributor guide |
 | `conformance.json` | Same shape, with no proposals and no exclusions yet; proofs of rules made impossible land with their features |
 | `docs/tier-1-plan.md` | This plan, once its decisions are taken |
 | The memory notes of this project | Nothing to copy: they are shared by every thread already |

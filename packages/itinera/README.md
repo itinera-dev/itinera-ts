@@ -1,6 +1,6 @@
 # itinera
 
-The TypeScript implementation of [Itinera](https://itinera-dev.org/), a workflow framework that keeps business rules separate from flow control.
+The TypeScript implementation of [Itinera](https://itinera-dev.org/), a workflow framework that keeps business rules separate from flow control. It implements the [Itinera specification](https://github.com/itinera-dev/spec), whose vocabulary it uses.
 
 A workflow is a list of steps. Each step holds one piece of business logic and says only how it ended: it succeeded, it failed with a reason, or it was skipped. Everything around the steps, such as retrying a failed attempt, passing data from one step to the next, lending a step the services it needs, and telling every reporter what happened, is the executor's work, done the same way for every workflow. Policies attached to a step or to the whole workflow change those decisions in one place, without touching the steps.
 
@@ -75,6 +75,16 @@ export default (async () => {
 })();
 ```
 
+## The parts of a workflow
+
+- A **step** holds one business rule: a class extending `Step` that requests the data it needs, which the workflow supplies, runs once per attempt, and reports an outcome: success, failure or skipped. Only an attempt that succeeds commits what the step contributed. A step may have a **rescue step**, which runs when the step fails or terminates abnormally and, once it succeeds, lets the step run again. See [`itinera/step`](https://itinera-dev.org/itinera-ts/modules/itinera_step.html).
+- A **workflow** lists its steps in the order they run, with their retry budgets and step policies, its workflow policies, its input adapters, its service providers, the roles it provides, its ID generator and its reporters. It is declared once, before any journey, and a declaration that breaks a rule of the specification throws `Violations`. See [`itinera/workflow`](https://itinera-dev.org/itinera-ts/modules/itinera_workflow.html).
+- A **step policy** holds flow control for the steps it is attached to. Its hooks, `on step success`, `on step failure`, `on step retry` and `on step abnormal termination`, are called in response to a step's outcome, and may end the journey early. See [`itinera/policy`](https://itinera-dev.org/itinera-ts/modules/itinera_policy.html).
+- A **workflow policy** holds flow control for the whole journey. Its hooks, `on workflow success` and `on workflow failure`, are called when the journey ends. Any hook may use a role, an interface of operations the workflow provides, such as sending a notification. See [`itinera/policy`](https://itinera-dev.org/itinera-ts/modules/itinera_policy.html).
+- Everything that happens in a journey is an **event**, which the journey's reporters receive, together with the journey's **global metadata**: entries of a key and a value, apart from the data bag, starting with the journey ID. See [`itinera/event`](https://itinera-dev.org/itinera-ts/modules/itinera_event.html) and [`itinera/report`](https://itinera-dev.org/itinera-ts/modules/itinera_report.html).
+- A **service** is an object of operations a step uses to do its business, such as a payment gateway. The step requests it by key and service type, and a service provider of the workflow makes it, for the journey or for each attempt. See [`itinera/service`](https://itinera-dev.org/itinera-ts/modules/itinera_service.html).
+- A **workflow instance** is made for each journey, with its initial data, its reporters and any initial global metadata, and an **executor** runs it to a **result**: the journey succeeded, failed or was aborted. See [`itinera/instance`](https://itinera-dev.org/itinera-ts/modules/itinera_instance.html), [`itinera/executor`](https://itinera-dev.org/itinera-ts/modules/itinera_executor.html) and [`itinera/journey`](https://itinera-dev.org/itinera-ts/modules/itinera_journey.html).
+
 ## What each subpath holds
 
 The package root exports nothing of its own. Each concept is imported from a subpath of its own:
@@ -99,12 +109,33 @@ The package root exports nothing of its own. Each concept is imported from a sub
 
 ## Learning more
 
+- [The Itinera book for TypeScript](https://itinera-dev.org/book/typescript/) teaches Itinera from a first workflow onwards, and every example in it compiles and runs.
 - [The API reference](https://itinera-dev.org/itinera-ts/) documents every item of every subpath, each with an example.
 - [The Itinera site](https://itinera-dev.org/) explains why Itinera exists.
 - [The specification](https://github.com/itinera-dev/spec) defines what every implementation of Itinera does.
 - [The changelog](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each version changed, and which specification version, tier, capabilities and conformance cases it implements.
 - [The repository](https://github.com/itinera-dev/itinera-ts) holds the source, the conformance runner and the contributor guide.
 
-## License
+## Status
+
+`0.1.0-beta.5`, the first release, implements tier 1 of specification 0.1.0, with the capabilities `async`, `testing` and `value-conversions`, and passes the conformance cases `v0.1.0-rc.16`. It is a beta, not yet meant for production: until `0.1.0`, features may be added and its API may still change. The [changelog](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each release implements, and each [GitHub release](https://github.com/itinera-dev/itinera-ts/releases) carries the report of the conformance cases it passes.
+
+## Rules made impossible to express
+
+The specification lets an implementation make some rules impossible to express rather than check them while a workflow runs. In TypeScript, these mistakes do not compile:
+
+- a hook returning a lifecycle it may not return;
+- a policy needing a role the workflow does not implement;
+- a rescue step that skips;
+- a service provider returning anything but what `this.provide(...)` makes;
+- an input adapter writing to the data bag.
+
+## Contributing
+
+The [contributor guide](https://github.com/itinera-dev/itinera-ts/blob/main/docs/contributing.md) says how work arrives here, how itinera-ts is put together, how to build and test it and how to run the conformance cases. Itinera is built with AI under the terms of [A manifesto for software engineering with AI](https://marlon-sousa.com/blog/manifesto/); see [how Itinera is built](https://github.com/itinera-dev/.github/blob/main/CONTRIBUTING.md#how-itinera-is-built).
+
+## Licence
 
 Licensed under either of the [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) or the [MIT license](https://opensource.org/licenses/MIT), at your option.
+
+Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in the work by you, as defined in the Apache-2.0 license, shall be dual licensed as above, without any additional terms or conditions.
