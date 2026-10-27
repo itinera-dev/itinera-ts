@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0121](https://github.com/itinera-dev/spec/blob/main/proposals/0121-read-only-copies.md), implemented in [#82](https://github.com/itinera-dev/itinera-ts/issues/82). It amends [0113](0113-value-conversions.md), [0027](0027-received-data-read-only.md) and [0091](0091-adapters-read-the-data-bag.md). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals, and [0056](0056-data-bag-values.md) how a value is captured and read.
 
-Status: complete, and 121 is listed in `conformance.json`. itinera already copied values as the proposal asks, so the layer that moved the cases to `v0.1.0-rc.17` listed it with no change to the code.
+Status: complete, and 121 is listed in `conformance.json`. itinera already copied values as the proposal asks, so the layer that moved the cases to `v0.1.0-rc.18` listed it with no change to the code.
 
 ## Where itinera copies a value
 
@@ -41,4 +41,4 @@ The proposal adds no conformance scenario.
 
 ## Done when
 
-Done: 121 is listed in `conformance.json`, with the cases at `v0.1.0-rc.17`.
+Done: 121 is listed in `conformance.json`, with the cases at `v0.1.0-rc.18`.
