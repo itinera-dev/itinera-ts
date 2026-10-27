@@ -51,7 +51,7 @@ One pull request, titled "Release <version>" with a release commit `chore(releas
    - the GitHub release exists, marked as a pre-release when the version has a pre-release part such as `-beta.1`, with the changelog section, the conformance report and `api-reference.tar.gz`;
    - GitHub Pages have deployed again, and serve the version's reference at `https://itinera-dev.org/itinera-ts/<version>/` and at `https://itinera-dev.org/itinera-ts/`, each front page naming the version.
 
-   If publishing failed, tell the maintainer, pointing at docs/contributing.md "Releasing". If the release workflow succeeded but Pages do not serve the version, the run of `.github/workflows/reference.yml` that followed it failed or did not start; running that workflow by hand on `main` deploys every edition again.
+   If publishing failed, tell the maintainer, pointing at docs/contributing.md "Releasing". If the release workflow succeeded but Pages do not serve the version, the run of `.github/workflows/reference.yml` that followed it did not start or failed, which its `reference-live` step does when Pages keep serving the previous deployment. Running that workflow by hand on `main` deploys every edition again; if its `reference-live` step fails too, tell the maintainer, since Pages then need a deployment of a newer commit of `main`.
 
 ## Once the package is published
 
