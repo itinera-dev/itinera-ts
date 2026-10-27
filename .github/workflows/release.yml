@@ -90,12 +90,3 @@ jobs:
       - uses: itinera-dev/actions/create-release@v1
         with:
           assets: release-assets/
-
-  pages:
-    name: API reference on GitHub Pages
-    needs: release
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    uses: ./.github/workflows/reference.yml

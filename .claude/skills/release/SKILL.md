@@ -5,7 +5,7 @@ description: How Claude prepares a release of the itinera package on npm, and ca
 
 # Releasing
 
-The "Releasing" section of [docs/contributing.md](../../../docs/contributing.md) says how a release runs: the tag, the release gate, the release workflow and its six jobs, trusted publishing, the dist-tag, the first version, which the maintainer publishes by hand, and the API reference on GitHub Pages. This skill adds only the part Claude does.
+The "Releasing" section of [docs/contributing.md](../../../docs/contributing.md) says how a release runs: the tag, the release gate, the release workflow and its five jobs, trusted publishing, the dist-tag, the first version, which the maintainer publishes by hand, and the API reference on GitHub Pages. This skill adds only the part Claude does.
 
 Claude never pushes a tag and never publishes to npm. The maintainer pushes the tag, and the release workflow publishes.
 
@@ -51,7 +51,7 @@ One pull request, titled "Release <version>" with a release commit `chore(releas
    - the GitHub release exists, marked as a pre-release when the version has a pre-release part such as `-beta.1`, with the changelog section, the conformance report and `api-reference.tar.gz`;
    - GitHub Pages have deployed again, and serve the version's reference at `https://itinera-dev.org/itinera-ts/<version>/` and at `https://itinera-dev.org/itinera-ts/`, each front page naming the version.
 
-   If publishing failed, tell the maintainer, pointing at docs/contributing.md "Releasing". If only the last job failed, the reference was not deployed, and re-running that job is enough, once whatever stopped it, such as the `github-pages` environment refusing the tag, is put right.
+   If publishing failed, tell the maintainer, pointing at docs/contributing.md "Releasing". If the release workflow succeeded but Pages do not serve the version, the run of `.github/workflows/reference.yml` that followed it did not start or failed, which its `reference-live` step does when Pages keep serving the previous deployment. Running that workflow by hand on `main` deploys every edition again; if its `reference-live` step fails too, tell the maintainer, since Pages then need a deployment of a newer commit of `main`.
 
 ## Once the package is published
 

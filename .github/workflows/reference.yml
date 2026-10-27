@@ -3,12 +3,19 @@ name: API reference
 # This repository's GitHub Pages serve the API reference: the newest release's
 # at the root, each release's under its version, from the archive attached to
 # its GitHub release, and main's under next/. Each change on main and each
-# release deploys every edition again.
+# release deploys every edition again. A release deploys through workflow_run,
+# which runs on main: a release is tagged on a commit main has already
+# deployed, and Pages ignore a deployment from a tag of a commit they have
+# already deployed, while still reporting it as successful. So after each
+# deployment, reference-live reads the reference as readers get it, and fails
+# if it does not serve the newest release.
 
 on:
   push:
     branches: [main]
-  workflow_call:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +24,7 @@ permissions:
 jobs:
   build:
     name: build every edition
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -44,8 +52,12 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     permissions:
+      contents: read
       pages: write
       id-token: write
     steps:
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+      - uses: itinera-dev/actions/reference-live@v1
+        with:
+          url: ${{ steps.deployment.outputs.page_url }}
