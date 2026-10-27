@@ -11,6 +11,8 @@ While a journey runs, and when `run` is handed an instance, itinera calls code t
 1. `toValue()`, on an object that serialises itself, whenever it is captured: contributed, emitted as event data, set as global metadata, given in a reason's details, supplied by an input adapter, supplied by a service provider with an instance, or held in an instance's initial data or initial global metadata.
 2. A static `fromValue`, on a class that `classOf` names, a type guard that `guard` names, and any other Standard Schema validator, whenever a request or a typed read of the data bag reads a value.
 
+The getters and proxy traps that capture runs while it copies what is given are not conversions but copies, as [0121](0121-read-only-copies.md) says, with the same outcome when one throws.
+
 ## API
 
 No exported item is added or removed. `SerialisesItself` and `ValueClass`, in `itinera/value`, already said that a `toValue()` that throws makes the object not a value, and that a `fromValue` throws when it cannot make an instance.
