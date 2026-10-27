@@ -78,10 +78,10 @@ export default (async () => {
 ## The parts of a workflow
 
 - A **step** holds one business rule: a class extending `Step` that requests the data it needs, which the workflow supplies, runs once per attempt, and reports an outcome: success, failure or skipped. Only an attempt that succeeds commits what the step contributed. A step may have a **rescue step**, which runs when the step fails or terminates abnormally and, once it succeeds, lets the step run again. See [`itinera/step`](https://itinera-dev.org/itinera-ts/modules/itinera_step.html).
-- A **workflow** lists its steps in the order they run, with their retry budgets and step policies, its workflow policies, its input adapters, its service providers, the roles it provides, its ID generator and its reporters. It is declared once, before any journey, and a declaration that breaks a rule of the specification throws `Violations`. See [`itinera/workflow`](https://itinera-dev.org/itinera-ts/modules/itinera_workflow.html).
+- A **workflow** lists its steps in the order they run, with their retry budgets and step policies, its workflow policies, its input adapters, its service providers, the roles it provides, its ID generator and its reporters. It is declared once, before any journey, and building a workflow whose declaration breaks a rule of the specification throws `Violations`. See [`itinera/workflow`](https://itinera-dev.org/itinera-ts/modules/itinera_workflow.html).
 - A **step policy** holds flow control for the steps it is attached to. Its hooks, `on step success`, `on step failure`, `on step retry` and `on step abnormal termination`, are called in response to a step's outcome, and may end the journey early. See [`itinera/policy`](https://itinera-dev.org/itinera-ts/modules/itinera_policy.html).
-- A **workflow policy** holds flow control for the whole journey. Its hooks, `on workflow success` and `on workflow failure`, are called when the journey ends. Any hook may use a role, an interface of operations the workflow provides, such as sending a notification. See [`itinera/policy`](https://itinera-dev.org/itinera-ts/modules/itinera_policy.html).
-- Everything that happens in a journey is an **event**, which the journey's reporters receive, together with the journey's **global metadata**: entries of a key and a value, apart from the data bag, starting with the journey ID. See [`itinera/event`](https://itinera-dev.org/itinera-ts/modules/itinera_event.html) and [`itinera/report`](https://itinera-dev.org/itinera-ts/modules/itinera_report.html).
+- A **workflow policy** acts when the journey ends: its hooks, `on workflow success` and `on workflow failure`, are called before the result is produced, and what they contribute is part of the journey's output. Any hook may use a role, an interface of operations the workflow provides, such as sending a notification. See [`itinera/policy`](https://itinera-dev.org/itinera-ts/modules/itinera_policy.html).
+- What happens in a journey is recorded as **events**, which the journey's reporters receive, together with the journey's **global metadata**: entries of a key and a value, apart from the data bag, starting with the journey ID. See [`itinera/event`](https://itinera-dev.org/itinera-ts/modules/itinera_event.html) and [`itinera/report`](https://itinera-dev.org/itinera-ts/modules/itinera_report.html).
 - A **service** is an object of operations a step uses to do its business, such as a payment gateway. The step requests it by key and service type, and a service provider of the workflow makes it, for the journey or for each attempt. See [`itinera/service`](https://itinera-dev.org/itinera-ts/modules/itinera_service.html).
 - A **workflow instance** is made for each journey, with its initial data, its reporters and any initial global metadata, and an **executor** runs it to a **result**: the journey succeeded, failed or was aborted. See [`itinera/instance`](https://itinera-dev.org/itinera-ts/modules/itinera_instance.html), [`itinera/executor`](https://itinera-dev.org/itinera-ts/modules/itinera_executor.html) and [`itinera/journey`](https://itinera-dev.org/itinera-ts/modules/itinera_journey.html).
 
@@ -125,14 +125,14 @@ The package root exports nothing of its own. Each concept is imported from a sub
 The specification lets an implementation make some rules impossible to express rather than check them while a workflow runs. In TypeScript, these mistakes do not compile:
 
 - a hook returning a lifecycle it may not return;
-- a policy needing a role the workflow does not implement;
+- a policy needing a role the workflow does not provide;
 - a rescue step that skips;
 - a service provider returning anything but what `this.provide(...)` makes;
 - an input adapter writing to the data bag.
 
 ## Contributing
 
-The [contributor guide](https://github.com/itinera-dev/itinera-ts/blob/main/docs/contributing.md) says how work arrives here, how itinera-ts is put together, how to build and test it and how to run the conformance cases. Itinera is built with AI under the terms of [A manifesto for software engineering with AI](https://marlon-sousa.com/blog/manifesto/); see [how Itinera is built](https://github.com/itinera-dev/.github/blob/main/CONTRIBUTING.md#how-itinera-is-built).
+The [contributor guide](https://github.com/itinera-dev/itinera-ts/blob/main/docs/contributing.md) says how work arrives in the repository, how itinera-ts is put together, how to build and test it and how to run the conformance cases. Itinera is built with AI under the terms of [A manifesto for software engineering with AI](https://marlon-sousa.com/blog/manifesto/); see [how Itinera is built](https://github.com/itinera-dev/.github/blob/main/CONTRIBUTING.md#how-itinera-is-built).
 
 ## Licence
 
