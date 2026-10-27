@@ -3,4 +3,3 @@ node_modules
 /packages/*/dist
 /packages/itinera/api
 /packages/itinera/api-reference.tar.gz
-__pycache__

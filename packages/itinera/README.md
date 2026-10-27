@@ -99,7 +99,7 @@ The package root exports nothing of its own. Each concept is imported from a sub
 
 ## Learning more
 
-- [The API reference](https://itinera-dev.org/api/typescript/) documents every item of every subpath, each with an example.
+- [The API reference](https://itinera-dev.org/itinera-ts/) documents every item of every subpath, each with an example.
 - [The Itinera site](https://itinera-dev.org/) explains why Itinera exists.
 - [The specification](https://github.com/itinera-dev/spec) defines what every implementation of Itinera does.
 - [The changelog](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each version changed, and which specification version, tier, capabilities and conformance cases it implements.

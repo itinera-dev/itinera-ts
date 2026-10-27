@@ -1,27 +1,51 @@
 name: API reference
 
-# The organisation's site serves the API reference of main at
-# /api/typescript/next/, so each change on main asks it to deploy again.
-# Until the token's secret is set, it only warns.
+# This repository's GitHub Pages serve the API reference: the newest release's
+# at the root, each release's under its version, from the archive attached to
+# its GitHub release, and main's under next/. Each change on main and each
+# release deploys every edition again.
 
 on:
   push:
     branches: [main]
+  workflow_call:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-concurrency:
-  group: reference
-  cancel-in-progress: true
-
 jobs:
-  site:
-    name: API reference of main on the site
+  build:
+    name: build every edition
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: ./.github/actions/request-site-deploy
         with:
-          token: ${{ secrets.SITE_DEPLOY_TOKEN }}
-          without-token: skip
+          ref: main
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run docs -- --name "itinera next"
+      - uses: itinera-dev/actions/reference-editions@v1
+        with:
+          next: packages/itinera/api
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: reference-site
+
+  deploy:
+    name: deploy
+    needs: build
+    runs-on: ubuntu-latest
+    concurrency: pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

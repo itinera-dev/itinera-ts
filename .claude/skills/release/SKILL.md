@@ -5,11 +5,9 @@ description: How Claude prepares a release of the itinera package on npm, and ca
 
 # Releasing
 
-The "Releasing" section of [docs/contributing.md](../../../docs/contributing.md) says how a release runs: the tag, the release gate, the release workflow and its six jobs, trusted publishing, the dist-tag, the first version, which the maintainer publishes by hand, and the API reference on the organisation's site. This skill adds only the part Claude does.
+The "Releasing" section of [docs/contributing.md](../../../docs/contributing.md) says how a release runs: the tag, the release gate, the release workflow and its six jobs, trusted publishing, the dist-tag, the first version, which the maintainer publishes by hand, and the API reference on GitHub Pages. This skill adds only the part Claude does.
 
 Claude never pushes a tag and never publishes to npm. The maintainer pushes the tag, and the release workflow publishes.
-
-Before the first release, the maintainer also sets the secret `SITE_DEPLOY_TOKEN`, which lets the release workflow ask the site to deploy, as docs/contributing.md "The API reference on the site" says. Remind the maintainer of it when giving the commands under "After the merge", if it is not set yet.
 
 ## The release pull request
 
@@ -21,7 +19,7 @@ One pull request, titled "Release <version>" with a release commit `chore(releas
    - in `packages/itinera/package.json` and `package-lock.json`, with `npm version <version> --workspace packages/itinera --no-git-tag-version`;
    - in the status paragraph of `README.md`.
 4. Set the dist-tag: `publishConfig.tag` in `packages/itinera/package.json` is `next` for a version with a pre-release part, such as `0.1.0-beta.1`, and is removed for any other version, which npm then publishes as `latest`. For the first version without a pre-release part, also remove from `packages/itinera/README.md` the sentence saying that every version is a pre-release under `next`.
-5. Check that `conformance.json` lists every tier 1 proposal of the cases it pins, which the release gate in docs/contributing.md "Releasing" requires. If it does not, stop and tell the maintainer, since the tag would be refused.
+5. Check that `conformance.json` lists every tier 1 proposal of the cases it pins, except one whose every case needs a capability it does not claim, which the release gate in docs/contributing.md "Releasing" requires. If it does not, stop and tell the maintainer, since the tag would be refused.
 6. Write the version's section at the top of `CHANGELOG.md`, above the last release's, in the form of the sections below it:
    - `git cliff --unreleased --tag v<version> --strip all` prints the heading `## [<version>]` and the entries that commits since the last release carry as trailers, under `### Added`, `### Changed`, `### Fixed` and `### Removed`, each only when it has entries; `docs/contributing.md` "Commit messages and the changelog" says how;
    - after the heading, one paragraph naming which release it is, whether it breaks code written for the last one, the specification version, the tier, the capabilities, the conformance cases of `conformance.json`, the oldest Node and TypeScript versions supported, and saying "What a journey does is unchanged" when that is so;
@@ -51,9 +49,9 @@ One pull request, titled "Release <version>" with a release commit `chore(releas
 2. Once the release workflow has finished, check that:
    - `itinera` is on npm at the version, under the dist-tag of step 4, with provenance unless it is the first version, which the maintainer published by hand, which `npm view itinera@<version>` and `npm view itinera dist-tags` show;
    - the GitHub release exists, marked as a pre-release when the version has a pre-release part such as `-beta.1`, with the changelog section, the conformance report and `api-reference.tar.gz`;
-   - the site has deployed again, and serves the version's reference at `https://itinera-dev.org/api/typescript/<version>/` and at `https://itinera-dev.org/api/typescript/`, each front page naming the version.
+   - GitHub Pages have deployed again, and serve the version's reference at `https://itinera-dev.org/itinera-ts/<version>/` and at `https://itinera-dev.org/itinera-ts/`, each front page naming the version.
 
-   If publishing failed, tell the maintainer, pointing at docs/contributing.md "Releasing". If only the last job failed, the site was not asked to deploy, usually because `SITE_DEPLOY_TOKEN` is not set or has expired; once it is, re-running that job is enough.
+   If publishing failed, tell the maintainer, pointing at docs/contributing.md "Releasing". If only the last job failed, the reference was not deployed, and re-running that job is enough, once whatever stopped it, such as the `github-pages` environment refusing the tag, is put right.
 
 ## Once the package is published
 

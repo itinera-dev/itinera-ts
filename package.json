@@ -16,9 +16,8 @@
     "docs": "typedoc --options packages/itinera/typedoc.json",
     "reference": "typedoc --options packages/itinera/typedoc.json --includeVersion && tar -czf packages/itinera/api-reference.tar.gz -C packages/itinera/api .",
     "dependency-check": "npm audit && licensee --errors-only",
-    "release-actions": "python3 -m unittest discover --start-directory .github/actions --top-level-directory .github/actions",
     "use-next-typescript": "npm install --no-save typescript@next",
-    "check": "npm run format && npm run lint && npm run typecheck && npm run typecheck-oldest && npm test && npm run package && npm run docs && npm run dependency-check && npm run release-actions",
+    "check": "npm run format && npm run lint && npm run typecheck && npm run typecheck-oldest && npm test && npm run package && npm run docs && npm run dependency-check",
     "conformance": "npm run build && npm run build --workspace packages/conformance && node packages/conformance/dist/main.js"
   },
   "devDependencies": {
