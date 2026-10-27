@@ -5,6 +5,7 @@ import type { PlainValue, Value } from "../value.js";
 import { capture } from "../value/capture.js";
 import { Failures, Guard } from "./guard.js";
 import { messageOf } from "./message.js";
+import { whatIs } from "./returned.js";
 import { type BuiltPolicy, workflowPolicies } from "./policies.js";
 
 /** What a journey starts with, once nothing refused it. */
@@ -101,8 +102,9 @@ function isNotReserved(key: string): boolean {
 }
 
 async function made(factory: DispatcherFactory): Promise<Dispatcher> {
+  let dispatcher: unknown;
   try {
-    return await factory.create();
+    dispatcher = await factory.create();
   } catch (error) {
     throw new Refusal({
       kind: "dispatcher factory failed",
@@ -110,6 +112,37 @@ async function made(factory: DispatcherFactory): Promise<Dispatcher> {
       errorMessage: messageOf(error),
     });
   }
+  if (!isDispatcher(dispatcher)) {
+    throw new Refusal({
+      kind: "unexpected result",
+      source: { kind: "dispatcher factory" },
+      message: `the dispatcher factory returned ${whatIs(dispatcher)}, not a dispatcher`,
+    });
+  }
+  return dispatcher;
+}
+
+/**
+ * Whether `made` has every method of a dispatcher. Reading one may throw, as
+ * a getter or a proxy may, and then it has none, since nothing may escape
+ * `run`.
+ */
+function isDispatcher(made: unknown): made is Dispatcher {
+  try {
+    return (
+      typeof made === "object" &&
+      made !== null &&
+      dispatcherMethods.every((method) => isMethodOf(made, method))
+    );
+  } catch {
+    return false;
+  }
+}
+
+const dispatcherMethods = ["add", "dispatch", "setGlobalMetadata"] as const;
+
+function isMethodOf(made: object, method: keyof Dispatcher): boolean {
+  return typeof Reflect.get(made, method) === "function";
 }
 
 async function added(

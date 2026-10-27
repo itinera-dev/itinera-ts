@@ -87,6 +87,28 @@ export interface ByProvider {
   readonly provider: ProviderName;
 }
 
+/**
+ * A service provider, with the key of the step's service it was providing.
+ *
+ * {@includeCode ../../examples/journey-abort.ts}
+ */
+export interface ByProviderForKey extends ByProvider {
+  /** The key of the service. */
+  readonly key: string;
+}
+
+/**
+ * A step policy, while it was built for an attempt of a step.
+ *
+ * {@includeCode ../../examples/journey-abort.ts}
+ */
+export interface ByPolicy {
+  /** Who it is. */
+  readonly kind: "policy";
+  /** The policy's name. */
+  readonly policy: PolicyName;
+}
+
 /** The step and attempt something happened in. */
 interface During {
   /** The step's name. */

@@ -1,7 +1,9 @@
-import type { StepDescriptor, StepName } from "../step.js";
+import { Step, type StepDescriptor, type StepName } from "../step.js";
+import { RescueStep } from "../step/rescue.js";
 import type { StepRequests } from "../step/declared.js";
 import { requestsOfDescribed, type Rescue } from "../step/descriptor.js";
 import type { Left } from "./hook.js";
+import { isOf } from "./returned.js";
 
 /**
  * A step, or a rescue step, as the engine builds and runs it for an attempt:
@@ -24,7 +26,12 @@ export interface Buildable {
    *
    * @throws Whatever its constructor throws.
    */
-  build(needs: readonly unknown[]): Runs;
+  build(needs: readonly unknown[]): unknown;
+  /**
+   * Whether what {@link Buildable.build} made is a step, or a rescue step,
+   * as its class is: a constructor that returns another object makes none.
+   */
+  isBuilt(made: unknown): made is Runs;
 }
 
 /**
@@ -42,6 +49,7 @@ export function ofStep(step: StepDescriptor): Buildable {
     requests: requestsOfDescribed(step),
     rescued: undefined,
     build: (needs) => step.build(needs),
+    isBuilt: isStep,
   };
 }
 
@@ -55,5 +63,14 @@ export function ofRescue(rescue: Rescue, left: Left): Buildable {
     requests: rescue.requests,
     rescued: left,
     build: (needs) => new rescue.step(...(needs as never[])),
+    isBuilt: isRescueStep,
   };
+}
+
+function isStep(made: unknown): made is Runs {
+  return isOf(made, Step);
+}
+
+function isRescueStep(made: unknown): made is Runs {
+  return isOf(made, RescueStep);
 }

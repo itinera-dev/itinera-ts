@@ -9,6 +9,7 @@ import { adapted } from "./adapter.js";
 import type { Buildable, Runs } from "./buildable.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
+import { whatIs } from "./returned.js";
 import { inOrder } from "./order.js";
 import { byAdapter, byStep, requested } from "./request.js";
 import { fromRescued, isOfRescued } from "./rescue/request.js";
@@ -50,7 +51,8 @@ export interface BuiltStep {
  * its requests found, just before the constructor is called.
  *
  * @throws JourneyAbortError when resolving a request or a service aborts the
- * journey, or with `step could not be built` when its constructor fails.
+ * journey, with `step could not be built` when its constructor fails, or
+ * with `unexpected result` when its constructor returns another object.
  */
 export async function built(
   journey: Journey,
@@ -71,14 +73,24 @@ export async function built(
   );
   const services = await servicesFor(journey, instance, step, attempt);
   journey.script?.building(step.name, attempt, building.found);
+  let made: unknown;
   try {
-    return { made: step.build(needs), services };
+    made = step.build(needs);
   } catch (error) {
     if (error instanceof JourneyAbortError) {
       throw error;
     }
     throw couldNotBeBuilt(building, error);
   }
+  if (!step.isBuilt(made)) {
+    throw journey.abort({
+      reason: AbortReason.UnexpectedResult,
+      step: step.name,
+      source: { kind: "step" },
+      message: `the constructor of step ${step.name} returned ${whatIs(made)}, not the step`,
+    });
+  }
+  return { made, services };
 }
 
 async function need(building: Building, request: Request): Promise<unknown> {

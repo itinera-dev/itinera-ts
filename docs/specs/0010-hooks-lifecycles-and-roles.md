@@ -32,7 +32,7 @@ Since stage 10, its API is exported from the subpaths of its concepts, chiefly `
 Where each hook runs is in [0009](0009-running-a-workflow.md), and how one is called in [0002](0002-foundations.md). What is particular to this proposal:
 
 - **`PolicyDescriptor.call(policy, hook, answers)`**, public, calls the method that implements the hook on a policy object the descriptor built, with the answers in order, and gives what it returned. It throws a `TypeError` when the object has no such method, which only a cast lets happen.
-- **What a hook returned** is checked by `lifecycleOf`, in `src/engine/hook/lifecycle.ts`, whatever a cast let through: nothing, or `KeepDefault`, keeps the default; `FinishWorkflow` only from `on step success`; `FailWorkflow` with a reason whose code is a string and whose message is a string or absent, captured again as `failWorkflow` captures it, gives a frozen lifecycle of its own. Details that are not a value abort the journey with `not a value`, naming the step and the hook; anything else, any lifecycle from a workflow hook, or a getter that throws while it is read, aborts it with `invalid lifecycle`, naming the step of a step hook.
+- **What a hook returned** is checked by `lifecycleOf`, in `src/engine/hook/lifecycle.ts`, whatever a cast let through. A workflow hook is void: what it returns, or what its promise resolves to, is never read. For a step hook, `KeepDefault` keeps the default; `FinishWorkflow` only from `on step success`, and from any other hook aborts the journey with `invalid lifecycle`, naming the step; `FailWorkflow` with a reason whose code is a string and whose message is a string or absent, captured again as `failWorkflow` captures it, gives a frozen lifecycle of its own. Details that are not a value abort the journey with `not a value`, naming the step and the hook; anything else, `undefined` included, or a getter that throws while it is read, aborts it with `unexpected result`, naming the step, the policy and the hook (see [0122](0122-unexpected-results.md)).
 - **Roles.** A request `@role<R>()` is answered with the workflow object of the instance, which implements every role its policies request, as the types made sure.
 - **Test support.** `stepPolicyMock(script)` and `workflowPolicyMock(script)`, in `src/testing/`, from `itinera/testing`, are policies whose hooks keep what each call received and end as the script says, through `HookEnding` (see [0108](0108-test-support.md)).
 
@@ -53,7 +53,7 @@ None of its own.
 - `tests/unit/step/builder.test-d.ts` and `tests/unit/workflow/builder.test-d.ts`: a step's policies or a workflow policy on a workflow that implements their roles, on one that does not, and a step's builder widened to a type that forgets its policies' roles.
 - `tests/unit/workflow/violation/hooks.test.ts`: a hook defined twice for a step and for the workflow, naming every policy defining it.
 - `tests/unit/policy/descriptor.test.ts`: `call`.
-- `tests/unit/engine/hook/lifecycle.test.ts`: every lifecycle a hook may return, and every one it may not, through a cast.
+- `tests/unit/engine/hook/lifecycle.test.ts`: every lifecycle a hook may return, every one it may not, and what is not a lifecycle, through a cast, and a workflow hook's return never read.
 - `tests/unit/engine/hook.test.ts` and `tests/unit/engine/hook/answer.test.ts`: a role answered with the workflow object.
 - `examples/policy.ts`, `examples/hook-reporter.ts`, `examples/policy-builder.ts` and `examples/policy-mock.ts`.
 

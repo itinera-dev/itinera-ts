@@ -23,6 +23,10 @@ import { start } from "../../../src/engine/start.js";
 
 const factory = new DefaultDispatcherFactory();
 
+function throwing(): never {
+  throw new Error("no method");
+}
+
 async function refusedWith(started: Promise<unknown>): Promise<unknown> {
   const refusal = await started.then(String, (thrown: unknown) => thrown);
   expect(refusal).toBeInstanceOf(Refusal);
@@ -68,6 +72,30 @@ describe("start", () => {
       errorMessage: "no queue",
     });
   });
+
+  it.each<[string, unknown, string]>([
+    ["null", null, "null"],
+    [
+      "an object missing a method",
+      { add: String, dispatch: String },
+      "an object",
+    ],
+    [
+      "an object whose method throws when read",
+      Object.defineProperty({}, "add", { get: throwing }),
+      "an object",
+    ],
+  ])(
+    "refuses the instance for an unexpected result when the dispatcher factory returns %s",
+    async (_, made, what) => {
+      const returning = { create: () => made as never };
+      expect(await refusedWith(start(charging(), returning))).toEqual({
+        kind: "unexpected result",
+        source: { kind: "dispatcher factory" },
+        message: `the dispatcher factory returned ${what}, not a dispatcher`,
+      });
+    },
+  );
 
   it("refuses the instance when the dispatcher fails while reporters are added", async () => {
     const dispatcher = new DefaultDispatcher();

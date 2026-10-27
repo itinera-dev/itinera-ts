@@ -17,6 +17,9 @@ import {
   type StepReporter,
 } from "../../../src/step.js";
 import { success } from "../../../src/step/outcome.js";
+import { RescueStep, type RescueOutcome } from "../../../src/step/rescue.js";
+import { Ending } from "../../../src/testing/ending.js";
+import { stepMock } from "../../../src/testing/step-mock.js";
 import { string } from "../../../src/value/token.js";
 import { failureReason } from "../../../src/step/request.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
@@ -107,6 +110,12 @@ class Keeping extends Step {
 class Returning extends Step {
   override run(): never {
     return 42 as never;
+  }
+}
+
+class Unanswering extends RescueStep {
+  override run(): RescueOutcome {
+    return undefined as unknown as RescueOutcome;
   }
 }
 
@@ -271,12 +280,43 @@ describe("ran", () => {
     });
   });
 
-  it("ends in an abnormal termination an attempt whose run returns what is not an outcome", async () => {
-    expect(await pathOf(orders(Returning.builder("charge")))).toEqual([
-      "charge attempt 1 terminated abnormally: step charge returned number, not an outcome made with its helpers",
-      "charge given up: abnormal termination",
-      "journey failed at charge: step charge returned number, not an outcome made with its helpers",
+  it("aborts the journey with unexpected result, never retrying, when a step's run returns what is not an outcome", async () => {
+    const recorder = await recorded(
+      orders(Returning.builder("charge").retryBudget(2)),
+    );
+    expect(kindsOf(recorder)).toEqual([
+      "journey_started",
+      "attempt_started",
+      "journey_aborted",
     ]);
+    expect(recorder.events.at(-1)).toMatchObject({
+      abort: {
+        reason: "unexpected result",
+        step: "charge",
+        source: { kind: "step" },
+        message:
+          "step charge returned a number, not an outcome made with its helpers",
+      },
+    });
+  });
+
+  it("aborts the journey with unexpected result, naming the rescue step, when a rescue step's run returns what is not a rescue outcome", async () => {
+    const recorder = await recorded(
+      orders(
+        stepMock({ attempts: [Ending.failure("expired")] })
+          .builder("charge")
+          .rescue(Unanswering.builder()),
+      ),
+    );
+    expect(recorder.events.at(-1)).toMatchObject({
+      abort: {
+        reason: "unexpected result",
+        step: "charge_rescue",
+        source: { kind: "step" },
+        message:
+          "step charge_rescue returned undefined, not an outcome made with its helpers",
+      },
+    });
   });
 
   it("takes the text of what is thrown that is not an error as its message", async () => {

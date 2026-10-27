@@ -128,7 +128,9 @@ The specification lets an implementation make some rules impossible to express r
 - a policy needing a role the workflow does not provide;
 - a rescue step that skips;
 - a service provider returning anything but what `this.provide(...)` makes;
-- an input adapter writing to the data bag.
+- an input adapter writing to the data bag;
+- custom code returning what its call cannot return, such as a step's `run` returning something that is not an outcome;
+- an ID generator returning anything but a string.
 
 ## Contributing
 

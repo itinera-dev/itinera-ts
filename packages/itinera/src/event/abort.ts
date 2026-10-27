@@ -2,6 +2,7 @@ import type { AbortReason } from "../journey.js";
 import type { PolicyName } from "../policy.js";
 import type { StepName } from "../step.js";
 import type { NotAValue } from "./abort/not-a-value.js";
+import type { UnexpectedResult } from "./abort/unexpected-result.js";
 import type { MissingData, Requester } from "./requester.js";
 import type {
   ByAdapterForKey,
@@ -12,6 +13,7 @@ import type {
 } from "./source.js";
 
 export type * from "./abort/not-a-value.js";
+export type * from "./abort/unexpected-result.js";
 
 /**
  * Why a journey was aborted, as `journey_aborted` tells it: the abort reason,
@@ -31,7 +33,8 @@ export type JourneyAbort =
   | HookFailed
   | ReporterFailed
   | RescueSkipped
-  | ReservedMetadataKey;
+  | ReservedMetadataKey
+  | UnexpectedResult;
 
 /** What an abort for one reason carries, as every abort does. */
 interface AbortFields<R extends AbortReason> {
@@ -99,13 +102,14 @@ export interface WrongType extends AbortFields<"wrong type"> {
 }
 
 /**
- * A hook returned a lifecycle it may not return.
+ * A step hook returned a lifecycle it may not return: a failure hook
+ * finished the workflow.
  *
  * {@includeCode ../../examples/journey-abort.ts}
  */
 export interface InvalidLifecycle extends AbortFields<"invalid lifecycle"> {
-  /** The name of the step the hook acts on, except for a workflow hook. */
-  readonly step?: StepName;
+  /** The name of the step the hook acts on. */
+  readonly step: StepName;
 }
 
 /**

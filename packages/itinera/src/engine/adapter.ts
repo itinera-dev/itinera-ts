@@ -11,6 +11,7 @@ import type { AdapterRequest, DeclaredAdapter } from "../workflow/adapter.js";
 import { isSupplied } from "../workflow/adapter/supplied.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
+import { whatIs } from "./returned.js";
 import { inOrder } from "./order.js";
 import { byAdapter, requested } from "./request.js";
 import type { JourneyAbortError } from "./signal.js";
@@ -34,9 +35,10 @@ interface Asking {
  * the call has returned.
  *
  * @throws JourneyAbortError, aborting the journey when one of its own
- * requests aborts it, or with `step could not be built`, after
- * `input_adapter_failed`, when it fails, returns what itinera's helpers do
- * not make, or supplies what is not a value.
+ * requests aborts it, with `step could not be built`, after
+ * `input_adapter_failed`, when it fails or supplies what is not a value, or
+ * with `unexpected result`, and no event, when it returns what itinera's
+ * helpers do not make.
  */
 export async function adapted(
   journey: Journey,
@@ -108,16 +110,12 @@ async function called(
     throw await failed(journey, adapter, asking, Some(error));
   }
   if (!isSupplied(returned)) {
-    throw await failed(
-      journey,
-      adapter,
-      asking,
-      Some(
-        new TypeError(
-          `input adapter ${adapter.name} returned ${typeof returned}, not what supply() or fromDataBag() make`,
-        ),
-      ),
-    );
+    throw journey.abort({
+      reason: AbortReason.UnexpectedResult,
+      step: asking.step,
+      source: { kind: "adapter", adapter: adapter.name, key: asking.input.key },
+      message: `input adapter ${adapter.name} returned ${whatIs(returned)}, not what supply() or fromDataBag() make`,
+    });
   }
   if (returned.kind === "fromDataBag") {
     return None;

@@ -12,6 +12,7 @@ import { capture, type NotAValue } from "../value/capture.js";
 import { Handles } from "./handles.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
+import { whatIs } from "./returned.js";
 import { inOrder } from "./order.js";
 import { answer, type Calling } from "./provider/answer.js";
 import { JourneyAbortError } from "./signal.js";
@@ -44,8 +45,9 @@ type Called =
  * requests aborts it, before the provider is called; when it was aborted
  * while the provider ran, whatever the provider did afterwards; with `step
  * could not be built`, after `service_provider_failed`, when the provider
- * fails or returns what `this.provide(...)` does not make; or with `not a
- * value` when the data it supplied is not a value.
+ * fails; with `unexpected result` when it returns what `this.provide(...)`
+ * does not make; or with `not a value` when the data it supplied is not a
+ * value.
  */
 export async function providedBy(
   journey: Journey,
@@ -69,10 +71,7 @@ export async function providedBy(
     case "threw":
       throw await failed(calling, called.error);
     case "returned":
-      throw await failed(
-        calling,
-        new TypeError(notProvided(calling, called.returned)),
-      );
+      throw unexpected(calling, called.returned);
     case "provided": {
       const data = dataOf(calling, called.data);
       await journey.emit({
@@ -116,9 +115,21 @@ async function call(
   }
 }
 
-function notProvided({ provider }: Calling, returned: unknown): string {
-  const what = returned === undefined ? "nothing" : typeof returned;
-  return `service provider ${provider.name} returned ${what}, not what provide() makes`;
+/**
+ * Aborts the journey with `unexpected result`, naming the provider and the
+ * key, with no event about the provider, since it neither made an instance
+ * nor failed.
+ */
+function unexpected(
+  { journey, provider, source, key }: Calling,
+  returned: unknown,
+): JourneyAbortError {
+  return journey.abort({
+    reason: AbortReason.UnexpectedResult,
+    step: source.step,
+    source: { kind: "provider", provider: provider.name, key },
+    message: `service provider ${provider.name} returned ${whatIs(returned)}, not what provide() makes`,
+  });
 }
 
 /**
@@ -147,9 +158,8 @@ function dataOf(
 }
 
 /**
- * Reports that the provider failed, or returned no instance, and aborts the
- * journey with `step could not be built`, naming the provider and carrying
- * `error`, what it threw or why what it returned is not an instance.
+ * Reports that the provider failed, and aborts the journey with `step could
+ * not be built`, naming the provider and carrying `error`, what it threw.
  */
 async function failed(
   { journey, provider, source, key }: Calling,

@@ -1,7 +1,7 @@
 import { Refusal } from "../executor/refusal.js";
 import { AbortReason } from "../journey.js";
-import type {
-  PolicyDescriptor,
+import {
+  type PolicyDescriptor,
   StepPolicy,
   WorkflowPolicy,
 } from "../policy.js";
@@ -10,6 +10,7 @@ import type { StepDescriptor } from "../step.js";
 import type { WorkflowDescriptor } from "../workflow.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
+import { isOf, whatIs } from "./returned.js";
 
 /** A policy built for an attempt or for a journey, with its descriptor. */
 export interface BuiltPolicy {
@@ -24,7 +25,8 @@ export interface BuiltPolicy {
  * attempts, in the order they are attached.
  *
  * @throws JourneyAbortError, aborting the journey with `policy could not be
- * built` when one fails while it is built.
+ * built` when one fails while it is built, or with `unexpected result` when
+ * its constructor returns another object.
  */
 export function stepPolicies(
   journey: Journey,
@@ -39,7 +41,8 @@ export function stepPolicies(
  * The workflow policies attached to the workflow, each built once for the
  * journey, in the order they are attached.
  *
- * @throws Refusal when one fails while it is built.
+ * @throws Refusal when one fails while it is built, or its constructor
+ * returns another object.
  */
 export function workflowPolicies(
   workflow: WorkflowDescriptor,
@@ -64,8 +67,9 @@ function builtForStep(
   step: StepDescriptor,
   descriptor: PolicyDescriptor,
 ): BuiltPolicy {
+  let policy: unknown;
   try {
-    return { descriptor, policy: descriptor.build() };
+    policy = descriptor.build();
   } catch (error) {
     throw journey.abort({
       reason: AbortReason.PolicyCouldNotBeBuilt,
@@ -75,11 +79,21 @@ function builtForStep(
       error,
     });
   }
+  if (!isOf(policy, StepPolicy)) {
+    throw journey.abort({
+      reason: AbortReason.UnexpectedResult,
+      step: step.name,
+      source: { kind: "policy", policy: descriptor.name },
+      message: notThePolicy(descriptor, policy),
+    });
+  }
+  return { descriptor, policy };
 }
 
 function builtForJourney(descriptor: PolicyDescriptor): BuiltPolicy {
+  let policy: unknown;
   try {
-    return { descriptor, policy: descriptor.build() };
+    policy = descriptor.build();
   } catch (error) {
     throw new Refusal({
       kind: "workflow policy failed",
@@ -88,4 +102,16 @@ function builtForJourney(descriptor: PolicyDescriptor): BuiltPolicy {
       errorMessage: messageOf(error),
     });
   }
+  if (!isOf(policy, WorkflowPolicy)) {
+    throw new Refusal({
+      kind: "unexpected result",
+      source: { kind: "workflow policy", policy: descriptor.name },
+      message: notThePolicy(descriptor, policy),
+    });
+  }
+  return { descriptor, policy };
+}
+
+function notThePolicy(descriptor: PolicyDescriptor, policy: unknown): string {
+  return `the constructor of policy ${descriptor.name} returned ${whatIs(policy)}, not the policy`;
 }

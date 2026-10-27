@@ -14,7 +14,12 @@ import {
   type StepName,
 } from "../../../src/step.js";
 import { failureReason, input, stepName } from "../../../src/step/request.js";
-import { fromRescuedStep } from "../../../src/step/rescue.js";
+import {
+  fromRescuedStep,
+  RescueStep,
+  type RescueOutcome,
+} from "../../../src/step/rescue.js";
+import { success } from "../../../src/step/outcome.js";
 import type { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import { rescueStepMock } from "../../../src/testing/rescue-step-mock.js";
 import { stepMock } from "../../../src/testing/step-mock.js";
@@ -35,6 +40,7 @@ import {
   Shop,
 } from "../../fixtures/engine.js";
 import type { Scripting } from "../../../src/engine/script.js";
+import { revoked } from "../../fixtures/proxy.js";
 
 /** The step `charge`, whose constructor's arguments are kept in `needs`. */
 function charge(needs: unknown[][] = []) {
@@ -65,6 +71,32 @@ const diskFull: Abort = {
   errorMessage: "disk full",
   error: new Error("disk full"),
 };
+
+/** A step whose constructor returns what `made` makes, instead of the step. */
+function elsewhere(made: () => object) {
+  return class Elsewhere extends Step {
+    constructor() {
+      super();
+      return made() as Elsewhere;
+    }
+
+    override run(): Outcome {
+      return this.succeed();
+    }
+  };
+}
+
+/** A rescue step whose constructor returns another object. */
+class Misplaced extends RescueStep {
+  constructor() {
+    super();
+    return {} as Misplaced;
+  }
+
+  override run(): RescueOutcome {
+    return this.succeed();
+  }
+}
 
 class Declining extends Step {
   override run(contributor: Contributor): Outcome {
@@ -225,6 +257,51 @@ describe("built", () => {
         step: "charge",
         source: { kind: "step" },
         errorMessage: "no connection",
+      },
+    });
+  });
+
+  it.each([
+    ["another object", () => ({ run: () => success })],
+    ["a revoked proxy", revoked],
+  ])(
+    "aborts the journey with unexpected result, naming the step, when its constructor returns %s",
+    async (_, made) => {
+      const recorder = await recorded(
+        orders(elsewhere(made).builder("charge")),
+      );
+      expect(recorder.events.map((event) => event.kind)).toEqual([
+        "journey_started",
+        "attempt_started",
+        "journey_aborted",
+      ]);
+      expect(lastEvent(recorder)).toMatchObject({
+        abort: {
+          reason: "unexpected result",
+          step: "charge",
+          source: { kind: "step" },
+          message:
+            "the constructor of step charge returned an object, not the step",
+        },
+      });
+    },
+  );
+
+  it("aborts the journey with unexpected result, naming the rescue step, when its constructor returns another object", async () => {
+    const recorder = await recorded(
+      orders(
+        stepMock({ attempts: [Ending.failure("expired")] })
+          .builder("charge")
+          .rescue(Misplaced.builder()),
+      ),
+    );
+    expect(lastEvent(recorder)).toMatchObject({
+      abort: {
+        reason: "unexpected result",
+        step: "charge_rescue",
+        source: { kind: "step" },
+        message:
+          "the constructor of step charge_rescue returned an object, not the step",
       },
     });
   });

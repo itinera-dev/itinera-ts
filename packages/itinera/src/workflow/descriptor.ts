@@ -10,6 +10,7 @@ import type { Workflow, WorkflowName } from "../workflow.js";
 import { type ListedStep, listingOf } from "./listing.js";
 import { generatedBy } from "./id-generator.js";
 import type { Parts } from "./descriptor/assemble.js";
+import { whatIs } from "../engine/returned.js";
 
 declare const crypto: { randomUUID(): string };
 
@@ -145,7 +146,8 @@ export class WorkflowDescriptor {
    * holding `initialData`, with the workflow's ID generator or as a random
    * UUID.
    *
-   * @throws TypeError if the ID generator returns what is not a string.
+   * @throws TypeError if the ID generator returns what is not a string, or
+   * an empty string.
    * @throws Whatever the ID generator throws.
    */
   generateJourneyId(
@@ -157,9 +159,9 @@ export class WorkflowDescriptor {
       idGenerator === undefined
         ? crypto.randomUUID()
         : generatedBy(idGenerator, workflow, initialData);
-    if (typeof id !== "string") {
+    if (typeof id !== "string" || id === "") {
       throw new TypeError(
-        `the ID generator of workflow ${this.name} returned ${typeof id}, not a string`,
+        `the ID generator of workflow ${this.name} returned ${id === "" ? "an empty string" : whatIs(id)}, not a journey ID`,
       );
     }
     return id as JourneyId;

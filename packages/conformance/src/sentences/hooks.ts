@@ -142,6 +142,22 @@ Given<World>(
 );
 
 Given<World>(
+  "the hook {string} of policy {string} returns a value",
+  function (hook: string, policy: string) {
+    // TypeScript refuses a workflow hook that returns a value, so it returns nothing.
+    hookOf(this, hook, policy).ending = { kind: "keep default" };
+  },
+);
+
+Given<World>(
+  "the hook {string} of policy {string} is asynchronous",
+  function (hook: string, policy: string) {
+    // Every scripted hook is already an asynchronous method.
+    hookOf(this, hook, policy);
+  },
+);
+
+Given<World>(
   "the hook {string} of policy {string} throws",
   function (hook: string, policy: string) {
     hookOf(this, hook, policy).ending = { kind: "fail" };

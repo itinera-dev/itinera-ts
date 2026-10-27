@@ -9,6 +9,7 @@ import {
   type Journey,
   ran,
   ranScripted,
+  type Runs,
   streamOf,
 } from "./journeys.js";
 import { Model } from "./model.js";
@@ -34,6 +35,7 @@ export class World {
   readonly tested = new Tested();
   #admission: Admission | undefined;
   #journeys: readonly Journey[] = [];
+  #instanceFailure: TypeError | undefined;
   #listing: readonly ListedStep[] | undefined;
   #alone: Alone | undefined;
   #fixture: Fixture | undefined;
@@ -60,23 +62,22 @@ export class World {
    */
   async run(times: number): Promise<void> {
     if (this.#fixture !== undefined) {
-      this.#journeys = await ranFixture(
-        this.#fixture,
-        this.model,
-        this.recorders,
-        times,
+      this.#keep(
+        await ranFixture(this.#fixture, this.model, this.recorders, times),
       );
       return;
     }
     const admission = this.admit();
     if (admission.kind === "admitted") {
       await this.tested.caught(async () => {
-        this.#journeys = await ran(
-          admission.workflow,
-          this.model,
-          this.recorders,
-          this.tested,
-          times,
+        this.#keep(
+          await ran(
+            admission.workflow,
+            this.model,
+            this.recorders,
+            this.tested,
+            times,
+          ),
         );
       });
     }
@@ -90,11 +91,13 @@ export class World {
     const admission = this.admit();
     if (admission.kind === "admitted") {
       await this.tested.caught(async () => {
-        this.#journeys = await ranScripted(
-          admission.workflow,
-          this.model,
-          this.recorders,
-          this.tested,
+        this.#keep(
+          await ranScripted(
+            admission.workflow,
+            this.model,
+            this.recorders,
+            this.tested,
+          ),
         );
       });
     }
@@ -144,6 +147,20 @@ export class World {
       throw new ModelError("the workflow was neither admitted nor run");
     }
     return this.#admission;
+  }
+
+  #keep(runs: Runs): void {
+    this.#journeys = runs.journeys;
+    this.#instanceFailure = runs.instanceFailure;
+  }
+
+  /**
+   * The error that creating the workflow instance failed with, which
+   * stopped the scenario's journeys; `undefined` when every instance was
+   * created.
+   */
+  get instanceFailure(): TypeError | undefined {
+    return this.#instanceFailure;
   }
 
   /** Every journey the scenario ran, in order. */

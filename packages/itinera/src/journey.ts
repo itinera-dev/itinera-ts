@@ -66,7 +66,7 @@ export const AbortReason = closedSet({
   RequiredDataMissing: "required data missing",
   /** A requested value has the wrong type. */
   WrongType: "wrong type",
-  /** A hook returned a lifecycle it may not return. */
+  /** A step hook returned a lifecycle it may not return. */
   InvalidLifecycle: "invalid lifecycle",
   /** A step, hook or service provider gave something that is not a value. */
   NotAValue: "not a value",
@@ -78,6 +78,8 @@ export const AbortReason = closedSet({
   RescueSkipped: "rescue skipped",
   /** A step, hook or service provider set global metadata under `journey_id`. */
   ReservedMetadataKey: "reserved metadata key",
+  /** Custom code returned something its call cannot return. */
+  UnexpectedResult: "unexpected result",
 });
 
 /**

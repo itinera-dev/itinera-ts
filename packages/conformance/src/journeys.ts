@@ -34,6 +34,15 @@ export interface Journey {
 }
 
 /**
+ * The journeys the scenario ran, in order, and the error that creating the
+ * next workflow instance failed with, which stopped them.
+ */
+export interface Runs {
+  readonly journeys: readonly Journey[];
+  readonly instanceFailure: TypeError | undefined;
+}
+
+/**
  * Builds the workflow the scenario declares, keeping the violations when the
  * builder refuses it.
  */
@@ -58,7 +67,7 @@ export async function ran(
   recorders: Recorders,
   tested: Tested,
   times: number,
-): Promise<Journey[]> {
+): Promise<Runs> {
   return journeysOf(executorOf(model.dispatching, recorders), times, () =>
     tested.instanceOf(workflow, model, recorders),
   );
@@ -66,22 +75,40 @@ export async function ran(
 
 /**
  * Runs `times` journeys on the executor, one after another, each with a new
- * instance that `instance` makes.
+ * instance that `instance` makes, stopping when making one fails as itinera
+ * reports it, with a `TypeError`.
  */
 export async function journeysOf(
   executor: LocalExecutor,
   times: number,
   instance: () => WorkflowInstance,
-): Promise<Journey[]> {
+): Promise<Runs> {
   const journeys: Journey[] = [];
   for (let run = 0; run < times; run += 1) {
-    const made = instance();
+    const made = madeBy(instance);
+    if (made instanceof TypeError) {
+      return { journeys, instanceFailure: made };
+    }
     journeys.push({
       journeyId: made.journeyId,
       ended: await endedOf(executor.run(made)),
     });
   }
-  return journeys;
+  return { journeys, instanceFailure: undefined };
+}
+
+/** The instance `instance` makes, or the `TypeError` it fails with. */
+function madeBy(
+  instance: () => WorkflowInstance,
+): WorkflowInstance | TypeError {
+  try {
+    return instance();
+  } catch (error) {
+    if (error instanceof TypeError) {
+      return error;
+    }
+    throw error;
+  }
 }
 
 /**
@@ -97,7 +124,7 @@ export async function ranScripted(
   model: Model,
   recorders: Recorders,
   tested: Tested,
-): Promise<Journey[]> {
+): Promise<Runs> {
   const instance = tested.instanceOf(
     workflow,
     model,
@@ -106,12 +133,15 @@ export async function ranScripted(
   );
   const { script, ensuresAll } = model.testing;
   const running = runScript(instance, script, ensuresAll);
-  return [
-    {
-      journeyId: instance.journeyId,
-      ended: await endedOf(running.then((run) => tested.keep(run))),
-    },
-  ];
+  return {
+    journeys: [
+      {
+        journeyId: instance.journeyId,
+        ended: await endedOf(running.then((run) => tested.keep(run))),
+      },
+    ],
+    instanceFailure: undefined,
+  };
 }
 
 /** How a call to `run` ended: with the journey's result, or refused. */

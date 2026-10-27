@@ -2,7 +2,9 @@ import type {
   AdapterSource,
   ByAdapter,
   ByAdapterForKey,
+  ByPolicy,
   ByProvider,
+  ByProviderForKey,
   ByRescueStep,
   ByStep,
   ByStepHook,
@@ -28,6 +30,8 @@ type Named =
   | ByStepHook
   | ByWorkflowHook
   | ByProvider
+  | ByProviderForKey
+  | ByPolicy
   | StepSource
   | AdapterSource
   | StepHookSource
@@ -69,6 +73,10 @@ export class Writing {
         return;
       case "provider":
         this.set("provider", named.provider);
+        this.set("key", "key" in named ? named.key : undefined);
+        return;
+      case "policy":
+        this.set("policy", named.policy);
         return;
       case "step":
       case "rescue step":

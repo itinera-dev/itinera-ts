@@ -15,8 +15,9 @@ Chapter 6, 6.5 lets a language refuse at compile time what it can, and the confo
 - **`invalid-lifecycle`**: a failure hook returning `FinishWorkflow` does not compile, since its decorator and its builder method take only a method returning `OnFailure` (see [0010](0010-hooks-lifecycles-and-roles.md)). The engine still checks what a hook returned, for a cast: `invalid lifecycle`, in `src/engine/hook/lifecycle.ts`.
 - **`role-not-provided`**: a policy requesting a role the workflow does not implement does not compile, on a decorated class and through the builder (see [0010](0010-hooks-lifecycles-and-roles.md)).
 - **`bag-write`**: an input adapter writing through its access to the data bag does not compile, since `DataBag` has no method that writes, as the plan's section on rules made impossible decides (see [0091](0091-adapters-read-the-data-bag.md)). Setting a property of the access through `Reflect.set` or a cast still changes nothing the data bag holds, which the runner's own tests check.
+- **`unexpected-result`** and **`non-string-journey-id`**, added by proposal 0122: custom code returning what its call cannot return, and an ID generator returning what is not a string, do not compile (see [0122](0122-unexpected-results.md), which lists their proofs). The engine still checks each, for a cast.
 
-The scenarios of `late-handle` and `non-value` run, since types cannot stop a step from keeping a handle, or a cast from passing what is not a value.
+The scenarios of `late-handle`, `non-value` and `empty-journey-id` run, since types cannot stop a step from keeping a handle, a cast from passing what is not a value, or an ID generator from returning an empty string.
 
 ## Dependencies
 
