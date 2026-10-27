@@ -8,7 +8,7 @@ The TypeScript implementation of [Itinera](https://github.com/itinera-dev/spec),
 
 ## Status
 
-`0.1.0-beta.4`, the first release, implements tier 1 of specification 0.1.0, with the capabilities `async`, `testing` and `value-conversions`, and passes the conformance cases `v0.1.0-rc.16`. It is a beta, not yet meant for production: until `0.1.0`, features may be added and its API may still change. [CHANGELOG.md](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each release implements.
+`0.1.0-beta.5`, the first release, implements tier 1 of specification 0.1.0, with the capabilities `async`, `testing` and `value-conversions`, and passes the conformance cases `v0.1.0-rc.16`. It is a beta, not yet meant for production: until `0.1.0`, features may be added and its API may still change. [CHANGELOG.md](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each release implements.
 
 ## Using it
 

@@ -1,6 +1,6 @@
 {
   "name": "itinera",
-  "version": "0.1.0-beta.4",
+  "version": "0.1.0-beta.5",
   "description": "A workflow framework that keeps business rules separate from flow control.",
   "keywords": [
     "workflow",

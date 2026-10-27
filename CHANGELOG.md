@@ -2,9 +2,9 @@
 
 Every release of the package `itinera` on npm. Each release says the version of the [Itinera specification](https://github.com/itinera-dev/spec) it implements, the tier, the capabilities claimed and the [conformance cases](https://github.com/itinera-dev/conformance) it passes; its conformance report and its API reference are attached to its GitHub release. Before 1.0, a breaking change raises the minor version and a fix the patch version.
 
-## [0.1.0-beta.4]
+## [0.1.0-beta.5]
 
-The first release, a beta, published under the dist-tag `next`: specification 0.1.0, tier 1, capabilities `async`, `testing` and `value-conversions`, cases `v0.1.0-rc.16`. Its version follows itinera-rs, whose `0.1.0-beta.4` passes the same cases. It runs on Node 22.12 and later, and applications compile it with TypeScript 5.5 or later.
+The first release, a beta, published under the dist-tag `next`: specification 0.1.0, tier 1, capabilities `async`, `testing` and `value-conversions`, cases `v0.1.0-rc.16`. Its version matches that of itinera-rs, whose `0.1.0-beta.5` passes the same cases. It runs on Node 22.12 and later, and applications compile it with TypeScript 5.5 or later.
 
 ### Added
 
@@ -20,4 +20,4 @@ The first release, a beta, published under the dist-tag `next`: specification 0.
 - Test support, from `itinera/testing`: `RecordingReporter`, which keeps every event and the latest value of each entry of global metadata, and whose `path` lists the flow a journey took; `fakeProvider`, which puts a fake in place of a service provider for one instance; scripted runs, which play what named steps' attempts do without their business rules; recorders that lend a step, a hook or an input adapter its handles outside any journey; and mocks of steps, rescue steps and policies.
 - Compile errors, instead of checks while a journey runs, for the rules the specification lets an implementation make impossible to express: a lifecycle a hook may not return, a policy whose role the workflow does not implement, a rescue step that skips, a service provider returning what `this.provide(...)` does not make, and an input adapter writing to the data bag. Steps, rescue steps and policies keep no static data, refused at compile time where TypeScript can and when they are declared otherwise.
 
-[0.1.0-beta.4]: https://github.com/itinera-dev/itinera-ts/releases/tag/v0.1.0-beta.4
+[0.1.0-beta.5]: https://github.com/itinera-dev/itinera-ts/releases/tag/v0.1.0-beta.5

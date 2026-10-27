@@ -124,7 +124,7 @@ npm has no counterpart of docs.rs, so this repository's GitHub Pages serve the A
 
 - the newest release at `/itinera-ts/`;
 - `main` at `/itinera-ts/next/`;
-- a frozen copy of each release at `/itinera-ts/VERSION/`, such as `/itinera-ts/0.1.0-beta.4/`.
+- a frozen copy of each release at `/itinera-ts/VERSION/`, such as `/itinera-ts/0.1.0-beta.5/`.
 
 Before the first release, `/itinera-ts/` sends readers to `next/`.
 
