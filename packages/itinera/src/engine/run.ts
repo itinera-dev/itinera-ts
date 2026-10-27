@@ -8,6 +8,7 @@ import type { Buildable } from "./buildable.js";
 import { Handles } from "./handles.js";
 import type { Journey } from "./journey.js";
 import { messageOf } from "./message.js";
+import { whatIs } from "./returned.js";
 import { JourneyAbortError } from "./signal.js";
 
 /**
@@ -27,13 +28,14 @@ export type Ran =
  * Runs the step, or rescue step, built for `attempt`, lending its `run` the
  * handles and the services it requests, in order, and closes the handles
  * once the attempt and every call it made on them have settled. An error
- * escaping `run`, or what it returned that is not an outcome, ends the
- * attempt in an abnormal termination. For an attempt a scripted run
- * describes, the script plays in place of `run`, through the same handles.
+ * escaping `run` ends the attempt in an abnormal termination. For an attempt
+ * a scripted run describes, the script plays in place of `run`, through the
+ * same handles.
  *
  * @throws JourneyAbortError when the journey was aborted while the step ran,
- * whatever it did afterwards, or with `not a value` when its outcome's
- * reason was given details that are not a value.
+ * whatever it did afterwards, with `unexpected result` when `run` returned
+ * what is not an outcome, or with `not a value` when its outcome's reason
+ * was given details that are not a value.
  */
 export async function ran(
   journey: Journey,
@@ -51,12 +53,12 @@ export async function ran(
     lending(journey, step, lends, request),
   );
   const play = journey.script?.play(step.name, attempt);
-  let ended: Ran;
+  let ended: Ended;
   try {
     const returned: unknown = await (play === undefined
       ? made.run(...(lent as never[]))
       : play(handles));
-    ended = endedWith(step, returned, handles);
+    ended = { kind: "returned", returned };
   } catch (error) {
     ended = { kind: "abnormal termination", error };
   }
@@ -65,11 +67,32 @@ export async function ran(
   if (recorded !== undefined) {
     throw new JourneyAbortError(recorded);
   }
-  if (ended.kind === "outcome" && hasDetailsRefused(ended.outcome)) {
+  if (ended.kind === "abnormal termination") {
+    return ended;
+  }
+  const { returned } = ended;
+  if (!isOutcome(returned)) {
+    throw journey.abort({
+      reason: AbortReason.UnexpectedResult,
+      step: step.name,
+      source: { kind: "step" },
+      message: notAnOutcome(step, returned),
+    });
+  }
+  if (hasDetailsRefused(returned)) {
     throw journey.abort({ reason: AbortReason.NotAValue, step: step.name });
   }
-  return ended;
+  return {
+    kind: "outcome",
+    outcome: returned,
+    contributed: handles.contributed,
+  };
 }
+
+/** How the call of `run` ended: with what it returned, or what it threw. */
+type Ended =
+  | { readonly kind: "returned"; readonly returned: unknown }
+  | { readonly kind: "abnormal termination"; readonly error: unknown };
 
 /** What an attempt lends its step's `run`: its handles and its services. */
 interface Lent {
@@ -112,15 +135,6 @@ function notLent(
   });
 }
 
-function endedWith(step: Buildable, returned: unknown, handles: Handles): Ran {
-  return isOutcome(returned)
-    ? { kind: "outcome", outcome: returned, contributed: handles.contributed }
-    : {
-        kind: "abnormal termination",
-        error: new TypeError(notAnOutcome(step, returned)),
-      };
-}
-
 function notAnOutcome(step: Buildable, returned: unknown): string {
-  return `step ${step.name} returned ${typeof returned}, not an outcome made with its helpers`;
+  return `step ${step.name} returned ${whatIs(returned)}, not an outcome made with its helpers`;
 }

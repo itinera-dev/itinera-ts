@@ -133,13 +133,18 @@ describe("WorkflowDescriptor", () => {
     expect(kept.at(-1)?.keys()).toEqual([]);
   });
 
-  it("refuses a journey ID that is not a string", () => {
+  it.each<[string, unknown, string]>([
+    ["an empty string", "", "an empty string"],
+    ["a number", 7, "a number"],
+  ])("refuses what is not a journey ID, for %s", (_, id, what) => {
     const descriptor = assemble(
-      { ...nothing, idGenerator: generator(() => 7) },
+      { ...nothing, idGenerator: generator(() => id) },
       "Orders",
     );
     expect(() => descriptor.generateJourneyId(Shop.build(), noData)).toThrow(
-      "the ID generator of workflow orders returned number, not a string",
+      new TypeError(
+        `the ID generator of workflow orders returned ${what}, not a journey ID`,
+      ),
     );
   });
 

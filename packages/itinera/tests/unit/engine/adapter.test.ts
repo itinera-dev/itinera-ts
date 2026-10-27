@@ -179,16 +179,29 @@ describe("adapted", () => {
     },
   );
 
-  it("fails when it returns what supply() and fromDataBag() do not make", async () => {
-    const events = await travelled(adaptedBy(() => 7 as never, [key()]));
-    expect(events.at(-1)).toMatchObject({
-      abort: {
-        reason: "step could not be built",
-        errorMessage:
-          "input adapter pricing returned number, not what supply() or fromDataBag() make",
-      },
-    });
-  });
+  it.each<[string, unknown, string]>([
+    ["undefined", undefined, "undefined"],
+    ["null", null, "null"],
+    ["a bare value", 7, "a number"],
+  ])(
+    "aborts the journey with unexpected result, and no adapter event, when it returns %s",
+    async (_, returned, what) => {
+      const events = await travelled(
+        adaptedBy(() => returned as never, [key()]),
+      );
+      expect(kinds(events).at(-2)).toBe("attempt_started");
+      expect(events.at(-1)).toEqual(
+        expect.objectContaining({
+          abort: {
+            reason: "unexpected result",
+            step: "charge",
+            source: { kind: "adapter", adapter: "pricing", key: "amount" },
+            message: `input adapter pricing returned ${what}, not what supply() or fromDataBag() make`,
+          },
+        }),
+      );
+    },
+  );
 
   it("fails, carrying no error, when it supplies what is not a value", async () => {
     const events = await travelled(adaptedBy(supplyingNaN, [key()]));

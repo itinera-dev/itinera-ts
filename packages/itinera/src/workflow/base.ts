@@ -91,6 +91,8 @@ export abstract class Workflow {
    * instance is run.
    * @param options The instance's own reporters and initial global metadata.
    * @throws Error if the object was not made by `build()`.
+   * @throws TypeError if the ID generator returns what is not a string, or
+   * an empty string.
    * @throws Whatever the ID generator, or a function making a reporter,
    * throws.
    */

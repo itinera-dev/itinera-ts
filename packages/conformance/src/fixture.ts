@@ -10,7 +10,7 @@ import { Couriers } from "./fixture/courier.js";
 import { Delivery } from "./fixture/delivery.js";
 import { Payment } from "./fixture/payment.js";
 import { Warehouse } from "./fixture/warehouse.js";
-import { type Journey, journeysOf } from "./journeys.js";
+import { journeysOf, type Runs } from "./journeys.js";
 import { ModelError } from "./model/error.js";
 import type { Model } from "./model.js";
 import { executorOf } from "./executor.js";
@@ -83,7 +83,7 @@ export async function ranFixture(
   model: Model,
   recorders: Recorders,
   times: number,
-): Promise<Journey[]> {
+): Promise<Runs> {
   const { instance } = handWritten[fixture];
   const data = model.initialData.map(asGiven);
   return journeysOf(executorOf(model.dispatching, recorders), times, () =>

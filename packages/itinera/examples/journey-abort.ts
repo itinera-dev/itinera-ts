@@ -35,6 +35,9 @@ export function describe(abort: JourneyAbort): string {
   ) {
     return `${abort.step} could not be built: ${abort.source.adapter} failed for ${abort.source.key}`;
   }
+  if (abort.reason === "unexpected result") {
+    return `${abort.step}: ${abort.message}`;
+  }
   if (abort.reason === "hook failed" || abort.reason === "reporter failed") {
     return `${abort.reason}: ${abort.errorMessage}`;
   }

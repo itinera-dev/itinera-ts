@@ -3,7 +3,7 @@
   "proposals": [
     2, 3, 8, 9, 10, 11, 12, 24, 27, 32, 40, 41, 42, 49, 54, 55, 56, 57, 58, 60,
     61, 62, 63, 64, 65, 81, 83, 85, 91, 95, 98, 102, 104, 106, 108, 113, 116,
-    119, 121
+    119, 121, 122
   ],
   "capabilities": ["async", "testing", "value-conversions"],
   "impossible": {
@@ -53,6 +53,98 @@
         "scenario": "A provider that returns nothing aborts the journey, with no error",
         "proof": {
           "test": "a service provider cannot return what this.provide(...) does not make",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      }
+    ],
+    "unexpected-result": [
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A step that returns no outcome aborts the journey and is not retried",
+        "proof": {
+          "test": "a step's run cannot return anything but an outcome",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A rescue step that returns no outcome aborts the journey",
+        "proof": {
+          "test": "a rescue step's run cannot return anything but a rescue outcome",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A step hook that returns something that is not a lifecycle aborts the journey",
+        "proof": {
+          "test": "a step hook cannot return anything but keepDefault() or a lifecycle",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A step hook that returns a null-like value does not keep the default",
+        "proof": {
+          "test": "a step hook cannot return anything but keepDefault() or a lifecycle",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "An input adapter that returns no result aborts the journey",
+        "proof": {
+          "test": "an input adapter cannot return anything but what supply() or fromDataBag() make",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A service provider that returns a null-like value aborts the journey",
+        "proof": {
+          "test": "a service provider cannot return a null-like value",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A step whose construction returns no step aborts the journey",
+        "proof": {
+          "test": "a step's constructor cannot return anything but the step",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A step policy whose construction returns no policy aborts the journey",
+        "proof": {
+          "test": "a policy's constructor cannot return anything but the policy",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "A workflow policy whose construction returns no policy refuses run",
+        "proof": {
+          "test": "a policy's constructor cannot return anything but the policy",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      },
+      {
+        "feature": "cases/tier-1/0054-how-custom-code-fails/unexpected-results.feature",
+        "scenario": "An asynchronous step that resolves to no outcome aborts the journey",
+        "proof": {
+          "test": "a step's run cannot return anything but an outcome",
+          "file": "packages/itinera/tests/integration/proofs.test-d.ts"
+        }
+      }
+    ],
+    "non-string-journey-id": [
+      {
+        "feature": "cases/tier-1/0061-instance-carries-journey-id-and-reporters/journey-id-values.feature",
+        "scenario": "An ID generator that returns something that is not a string fails the instance",
+        "proof": {
+          "test": "an ID generator cannot return anything but a string",
           "file": "packages/itinera/tests/integration/proofs.test-d.ts"
         }
       }

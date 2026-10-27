@@ -50,19 +50,23 @@ function throwing(): never {
 
 const invalid = { reason: "invalid lifecycle", step: "charge" };
 
+const unexpected = {
+  reason: "unexpected result",
+  step: "charge",
+  source: { kind: "step hook", policy: "alarm", hook: "on step failure" },
+  message: expect.any(String) as unknown,
+};
+
 describe("lifecycleOf", () => {
-  it.each<[string, HookSource, unknown]>([
-    ["a step hook that returned nothing", onStepFailure, undefined],
-    ["a workflow hook that returned nothing", onWorkflowSuccess, undefined],
-    ["a step hook that kept the default", onStepFailure, keptDefault],
-    [
-      "a step hook that kept the default with an object of its own",
-      onStepFailure,
-      { kind: "KeepDefault" },
-    ],
-  ])("gives no lifecycle for %s", (_, hook, returned) => {
-    expect(checked(hook, returned)).toBeUndefined();
-  });
+  it.each<[string, unknown]>([
+    ["what keepDefault made", keptDefault],
+    ["an object of its own", { kind: "KeepDefault" }],
+  ])(
+    "gives no lifecycle for a step hook that kept the default with %s",
+    (_, returned) => {
+      expect(checked(onStepFailure, returned)).toBeUndefined();
+    },
+  );
 
   it("gives FinishWorkflow from on step success", () => {
     expect(
@@ -119,6 +123,7 @@ describe("lifecycleOf", () => {
   });
 
   it.each<[string, unknown]>([
+    ["undefined", undefined],
     ["text", "KeepDefault"],
     ["null", null],
     ["a number", 0],
@@ -132,10 +137,7 @@ describe("lifecycleOf", () => {
       "FailWorkflow with a message that is not text",
       { kind: "FailWorkflow", reason: { code: "fraud", message: 7 } },
     ],
-    [
-      "an object whose kind throws when read",
-      Object.defineProperty({}, "kind", { get: throwing }),
-    ],
+    ["an object whose kind throws when read", throwingKind()],
     [
       "FailWorkflow whose reason throws when read",
       Object.defineProperty({ kind: "FailWorkflow" }, "reason", {
@@ -143,22 +145,31 @@ describe("lifecycleOf", () => {
       }),
     ],
   ])(
-    "aborts the journey with invalid lifecycle when a step hook returns %s",
+    "aborts the journey with unexpected result, naming the hook, when a step hook returns %s",
     (_, returned) => {
-      expect(checked(onStepFailure, returned)).toEqual(invalid);
+      expect(checked(onStepFailure, returned)).toEqual(unexpected);
     },
   );
 
+  it("says what a step hook returned that is not a lifecycle", () => {
+    expect(checked(onStepFailure, undefined)).toHaveProperty(
+      "message",
+      "the hook on step failure of policy alarm returned undefined, not keepDefault() or a lifecycle",
+    );
+  });
+
   it.each<[string, unknown]>([
+    ["undefined", undefined],
     ["KeepDefault", keptDefault],
     ["FinishWorkflow", finished],
     ["FailWorkflow", failingWorkflow("fraud")],
-  ])(
-    "aborts the journey with invalid lifecycle, naming no step, when a workflow hook returns %s",
-    (_, returned) => {
-      expect(checked(onWorkflowSuccess, returned)).toEqual({
-        reason: "invalid lifecycle",
-      });
-    },
-  );
+    ["text", "done"],
+    ["an object whose kind throws when read", throwingKind()],
+  ])("never reads what a workflow hook returns, even %s", (_, returned) => {
+    expect(checked(onWorkflowSuccess, returned)).toBeUndefined();
+  });
 });
+
+function throwingKind(): object {
+  return Object.defineProperty({}, "kind", { get: throwing });
+}

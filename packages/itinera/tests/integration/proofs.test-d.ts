@@ -21,6 +21,7 @@ import {
   step,
 } from "itinera/step";
 import {
+  idGenerator,
   inputAdapter,
   key,
   type Supplied,
@@ -190,5 +191,167 @@ describe("rescue-skip", () => {
     // @ts-expect-error a step that may skip is not a rescue step
     Charge.builder("charge").rescue(Skipping);
     return [Renew, Skips, Orders];
+  });
+});
+
+describe("unexpected-result", () => {
+  it("a step's run cannot return anything but an outcome", () => {
+    class Unfinished extends Step {
+      // @ts-expect-error a step's run returns an outcome, never undefined
+      override run(): undefined {
+        return undefined;
+      }
+    }
+    class Later extends Step {
+      // @ts-expect-error an asynchronous run resolves to an outcome, never null
+      override async run(): Promise<null> {
+        return Promise.resolve(null);
+      }
+    }
+    return [Unfinished, Later];
+  });
+
+  it("a rescue step's run cannot return anything but a rescue outcome", () => {
+    class Renew extends RescueStep {
+      // @ts-expect-error a rescue step's run returns a rescue outcome, never null
+      override run(): null {
+        return null;
+      }
+    }
+    return Renew;
+  });
+
+  it("a step hook cannot return anything but keepDefault() or a lifecycle", () => {
+    @stepPolicy({ name: "audit" })
+    class Audit extends StepPolicy {
+      // @ts-expect-error a step hook returns keepDefault() or a lifecycle, never text
+      @onStepSuccess()
+      said(): string {
+        return "done";
+      }
+
+      // @ts-expect-error a step hook returns keepDefault() or a lifecycle, never null
+      @onStepFailure()
+      nothing(): null {
+        return null;
+      }
+    }
+    class Ledger extends StepPolicy {
+      said(): string {
+        return "done";
+      }
+
+      nothing(): null {
+        return null;
+      }
+    }
+    // @ts-expect-error a step hook returns keepDefault() or a lifecycle, never text
+    Ledger.builder("ledger").onStepSuccess("said");
+    // @ts-expect-error a step hook returns keepDefault() or a lifecycle, never null
+    Ledger.builder("ledger").onStepFailure("nothing");
+    return Audit;
+  });
+
+  it("an input adapter cannot return anything but what supply() or fromDataBag() make", () => {
+    class Orders extends Workflow {
+      // @ts-expect-error an input adapter returns supply(value) or fromDataBag(), never undefined
+      @inputAdapter({ steps: ["charge"] })
+      pricing(): undefined {
+        return undefined;
+      }
+    }
+    class Kiosk extends Workflow {
+      pricing(): undefined {
+        return undefined;
+      }
+    }
+    // @ts-expect-error an input adapter returns supply(value) or fromDataBag(), never undefined
+    Kiosk.builder().inputAdapter("pricing", { steps: ["charge"] });
+    return Orders;
+  });
+
+  it("a service provider cannot return a null-like value", () => {
+    const GATEWAY = serviceType<Gateway>("Gateway");
+    class Shop extends Workflow {
+      // @ts-expect-error a provider returns this.provide(instance), never null
+      @provider(GATEWAY)
+      none(): null {
+        return null;
+      }
+    }
+    class Kiosk extends Workflow {
+      none(): null {
+        return null;
+      }
+    }
+    // @ts-expect-error a provider returns this.provide(instance), never null
+    Kiosk.builder().provider("none", GATEWAY, {});
+    return Shop;
+  });
+
+  it("a step's constructor cannot return anything but the step", () => {
+    @step()
+    class Charging extends Step {
+      constructor() {
+        super();
+        // @ts-expect-error a constructor makes its own step, never null
+        return null;
+      }
+
+      override run(): Outcome {
+        return this.succeed();
+      }
+    }
+    return Charging;
+  });
+
+  it("a policy's constructor cannot return anything but the policy", () => {
+    @stepPolicy({ name: "audit" })
+    class Audit extends StepPolicy {
+      constructor() {
+        super();
+        // @ts-expect-error a constructor makes its own policy, never null
+        return null;
+      }
+
+      @onStepSuccess()
+      checked(): OnSuccess {
+        return this.keepDefault();
+      }
+    }
+    @workflowPolicy({ name: "closing" })
+    class Closing extends WorkflowPolicy {
+      constructor() {
+        super();
+        // @ts-expect-error a constructor makes its own policy, never null
+        return null;
+      }
+
+      @onWorkflowSuccess()
+      closed(): void {
+        gateway.take(0);
+      }
+    }
+    return [Audit, Closing];
+  });
+});
+
+describe("non-string-journey-id", () => {
+  it("an ID generator cannot return anything but a string", () => {
+    class Orders extends Workflow {
+      // @ts-expect-error an ID generator returns a string, never a number
+      @idGenerator()
+      numbered(): number {
+        return 7;
+      }
+    }
+    class Kiosk extends Workflow {
+      numbered(): number {
+        return 7;
+      }
+    }
+    // @ts-expect-error an ID generator returns a string, never a number
+    Kiosk.builder().idGenerator("numbered");
+    return Orders;
   });
 });

@@ -96,12 +96,6 @@ function isServiceProvided(event: Event): boolean {
   return event.kind === "service_provided";
 }
 
-function errorMessageOf(event: Event | undefined): unknown {
-  return event?.kind === "journey_aborted"
-    ? Reflect.get(event.abort, "errorMessage")
-    : undefined;
-}
-
 /** A provider that keeps the reporter it is lent in `kept`. */
 function keepingReporter(kept: ProviderReporter[]): Providing {
   return (till, provider, reporter) => {
@@ -200,31 +194,34 @@ describe("providedBy", () => {
 
   it.each([
     [
-      "nothing, carrying why",
+      "undefined",
       returningNothing,
-      "service provider main returned nothing, not what provide() makes",
+      "service provider main returned undefined, not what provide() makes",
     ],
     [
-      "what provide() does not make, carrying why",
+      "what provide() does not make",
       returningBare,
-      "service provider main returned object, not what provide() makes",
+      "service provider main returned an object, not what provide() makes",
     ],
-  ])("fails when it returns %s", async (_, providing, errorMessage) => {
-    const events = await travelled(chargingTill(providing));
-    expect(events.map(kindOf).slice(2)).toEqual([
-      "service_provider_failed",
-      "journey_aborted",
-    ]);
-    expect(events[2]).toMatchObject({
-      step: "charge",
-      key: "payments",
-      provider: "main",
-    });
-    expect(events[3]).toMatchObject({
-      abort: { reason: "step could not be built" },
-    });
-    expect(errorMessageOf(events[3])).toBe(errorMessage);
-  });
+  ])(
+    "aborts the journey with unexpected result, naming the key, with no provider event, when it returns %s",
+    async (_, providing, message) => {
+      const events = await travelled(chargingTill(providing));
+      expect(events.map(kindOf)).toEqual([
+        "journey_started",
+        "attempt_started",
+        "journey_aborted",
+      ]);
+      expect(events[2]).toMatchObject({
+        abort: {
+          reason: "unexpected result",
+          step: "charge",
+          source: { kind: "provider", provider: "main", key: "payments" },
+          message,
+        },
+      });
+    },
+  );
 
   it("is replaced by the instance's fake, called once per attempt after its requests are resolved", async () => {
     const till = chargingTill(counted, [fromWorkflow("gateway", string)]);

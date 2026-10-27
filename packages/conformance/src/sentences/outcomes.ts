@@ -32,6 +32,14 @@ Then<World>("journey_aborted names no adapter", function () {
   );
 });
 
+Then<World>("creating the workflow instance failed", function () {
+  holds(
+    this.instanceFailure !== undefined,
+    "creating the workflow instance to fail",
+    `${String(this.journeys.length)} journeys ran`,
+  );
+});
+
 Then<World>("no step ran", function () {
   const { ran } = this.witness;
   holds(ran.length === 0, "no step to run", `${String(ran.length)} steps ran`);

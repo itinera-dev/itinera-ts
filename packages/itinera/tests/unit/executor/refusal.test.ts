@@ -58,6 +58,15 @@ describe("Refusal", () => {
       { kind: "global metadata not set", ...failed },
       "run refused an instance: the global metadata could not be set: disk full",
     ],
+    [
+      "an unexpected result",
+      {
+        kind: "unexpected result",
+        source: { kind: "dispatcher factory" },
+        message: "the dispatcher factory returned null, not a dispatcher",
+      },
+      "run refused an instance: the dispatcher factory returned null, not a dispatcher",
+    ],
   ])("says why it refused, for %s", (_, refused, message) => {
     expect(new Refusal(refused).message).toBe(message);
   });

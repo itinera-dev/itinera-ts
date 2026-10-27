@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { Refusal } from "../../../src/executor/refusal.js";
+import {
+  type OnSuccess,
+  StepPolicy,
+  WorkflowPolicy,
+} from "../../../src/policy.js";
 import type { StepPolicyBuilder } from "../../../src/policy/step-policy/builder.js";
 import { RecordingReporter } from "../../../src/testing/recording-reporter.js";
 import type {
@@ -19,9 +24,42 @@ import {
   Logging,
   logging,
   orders,
+  Orders,
   recorded,
   run,
 } from "../../fixtures/engine.js";
+import { revoked } from "../../fixtures/proxy.js";
+
+/** A step policy whose constructor returns what `made` makes. */
+function elsewhere(made: () => object) {
+  return class Elsewhere extends StepPolicy {
+    constructor() {
+      super();
+      return made() as Elsewhere;
+    }
+
+    onStepSuccess(): OnSuccess {
+      return this.keepDefault();
+    }
+  };
+}
+
+/** A workflow policy whose constructor returns what `made` makes. */
+function absent(made: () => object) {
+  return class Absent extends WorkflowPolicy {
+    constructor() {
+      super();
+      return made() as Absent;
+    }
+
+    onWorkflowSuccess(): void {}
+  };
+}
+
+const returned = [
+  ["another object", () => ({})],
+  ["a revoked proxy", revoked],
+] as const;
 
 /** Runs the journey of `orders` with the step {@link loggedCharge} and `policies`. */
 async function loggedJourney(
@@ -64,6 +102,24 @@ describe("stepPolicies", () => {
       "journey_aborted",
     ]);
   });
+
+  it.each(returned)(
+    "aborts the journey with unexpected result, naming the step and the policy, when its constructor returns %s",
+    async (_, made) => {
+      const workflow = orders(
+        charge().policy(
+          elsewhere(made).builder("alarm").onStepSuccess("onStepSuccess"),
+        ),
+      );
+      expect((await run(workflow.instance())).abort).toEqual({
+        reason: "unexpected result",
+        step: "charge",
+        source: { kind: "policy", policy: "alarm" },
+        message:
+          "the constructor of policy alarm returned an object, not the policy",
+      });
+    },
+  );
 });
 
 describe("workflowPolicies", () => {
@@ -84,6 +140,30 @@ describe("workflowPolicies", () => {
     });
     expect(recorder.events).toEqual([]);
   });
+
+  it.each(returned)(
+    "makes run reject with a Refusal naming the workflow policy whose constructor returns %s, with no event",
+    async (_, made) => {
+      const recorder = new RecordingReporter();
+      const workflow = Orders.builder()
+        .name("orders")
+        .step(charge())
+        .policy(
+          absent(made).builder("audit").onWorkflowSuccess("onWorkflowSuccess"),
+        )
+        .build();
+      const refusal = await run(
+        workflow.instance({}, { reporters: [recorder] }),
+      ).catch(caught);
+      expect(refusal instanceof Refusal && refusal.refused).toEqual({
+        kind: "unexpected result",
+        source: { kind: "workflow policy", policy: "audit" },
+        message:
+          "the constructor of policy audit returned an object, not the policy",
+      });
+      expect(recorder.events).toEqual([]);
+    },
+  );
 });
 
 describe("defining", () => {

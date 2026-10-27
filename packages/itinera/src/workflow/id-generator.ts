@@ -10,9 +10,10 @@ import { declarationOn } from "./registry.js";
  * Marks the method of a workflow class that makes the journey ID of each of
  * its instances, in place of a random UUID. It is called with the workflow
  * object as `this`, while the instance is created, and returns the ID
- * synchronously. Its one parameter, when it has one, requests the data bag
- * with `@dataBag()`, holding the instance's initial data, from which it may
- * derive the ID.
+ * synchronously, as a string that is not empty: an empty one makes
+ * `instance()` throw a `TypeError`. Its one parameter, when it has one,
+ * requests the data bag with `@dataBag()`, holding the instance's initial
+ * data, from which it may derive the ID.
  *
  * {@includeCode ../../examples/id-generator.ts}
  *

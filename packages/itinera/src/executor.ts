@@ -14,6 +14,7 @@ export type {
   InstanceRan,
   JourneyRunning,
   Refused,
+  UnexpectedResultReturned,
   WorkflowPolicyFailed,
 } from "./executor/refusal.js";
 export { LocalExecutor } from "./executor/local.js";

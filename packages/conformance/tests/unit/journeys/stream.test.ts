@@ -20,7 +20,7 @@ async function admittedAndRan(
   model: Model,
   recorders: Recorders,
   times: number,
-): Promise<Journey[]> {
+): Promise<readonly Journey[]> {
   const admission = admitted(
     model,
     new Witness(model.policies.roles, model.providers),
@@ -28,7 +28,14 @@ async function admittedAndRan(
   if (admission.kind === "refused") {
     throw admission.violations;
   }
-  return ran(admission.workflow, model, recorders, new Tested(), times);
+  const { journeys } = await ran(
+    admission.workflow,
+    model,
+    recorders,
+    new Tested(),
+    times,
+  );
+  return journeys;
 }
 
 function journeyIdOf(event: Event): string {
