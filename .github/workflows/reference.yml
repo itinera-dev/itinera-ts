@@ -3,12 +3,16 @@ name: API reference
 # This repository's GitHub Pages serve the API reference: the newest release's
 # at the root, each release's under its version, from the archive attached to
 # its GitHub release, and main's under next/. Each change on main and each
-# release deploys every edition again.
+# release deploys every edition again. A release deploys through workflow_run,
+# which runs on main, because Pages kept serving the previous deployment when
+# the release workflow deployed from its tag.
 
 on:
   push:
     branches: [main]
-  workflow_call:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -17,6 +21,7 @@ permissions:
 jobs:
   build:
     name: build every edition
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

@@ -109,14 +109,15 @@ Pull requests merge with a merge commit, never squashed, because a squash folds 
 
 ## Releasing
 
-Only `itinera` is published. A maintainer requests a release by pushing, on `main`, an annotated tag `v` followed by its version, such as `v0.1.0-beta.1`, with the message `itinera <version>`, after the pull request that sets the version and adds its section to `CHANGELOG.md` has merged. The release workflow, `.github/workflows/release.yml`, then runs six jobs, each waiting for the one before:
+Only `itinera` is published. A maintainer requests a release by pushing, on `main`, an annotated tag `v` followed by its version, such as `v0.1.0-beta.1`, with the message `itinera <version>`, after the pull request that sets the version and adds its section to `CHANGELOG.md` has merged. The release workflow, `.github/workflows/release.yml`, then runs five jobs, each waiting for the one before:
 
 1. **release gate**: the `release-gate` action of itinera-dev/actions, given `packages/itinera/package.json`, refuses the tag unless it matches the version in `packages/itinera/package.json`, `package-lock.json` records that version, `publishConfig.tag` suits it, the commit is on `main`, `CHANGELOG.md` has a section for the version, and `conformance.json` lists every tier 1 proposal of the pinned cases, except one whose every case needs a capability the manifest does not claim;
 2. **CI**: the whole of `.github/workflows/ci.yml` runs again on the tagged commit, since its run on `main` after a merge blocks nothing, and its conformance job keeps the report;
 3. **API reference**: `npm run reference` builds the API reference, with the version on its front page, and packs it as `api-reference.tar.gz`, which the job keeps;
 4. **npm**: in the `npm` environment, which only tags `v*` may use, the `publish-npm` action of itinera-dev/actions runs `npm publish --workspace packages/itinera`, which builds the package and publishes it through trusted publishing, exchanging the workflow's identity for a short-lived token and adding provenance; when the version is on npm already, as the first one is, it publishes nothing;
-5. **GitHub release**: the `create-release` action of [itinera-dev/actions](https://github.com/itinera-dev/actions) creates the release with the notes of the version's changelog section, as a pre-release for a version such as `0.1.0-beta.1`, and attaches the conformance report and the API reference;
-6. **API reference on GitHub Pages**: `.github/workflows/reference.yml` deploys every edition of the API reference again, now with the new version's, as the next section says.
+5. **GitHub release**: the `create-release` action of [itinera-dev/actions](https://github.com/itinera-dev/actions) creates the release with the notes of the version's changelog section, as a pre-release for a version such as `0.1.0-beta.1`, and attaches the conformance report and the API reference.
+
+Once the release workflow has succeeded, `.github/workflows/reference.yml` deploys every edition of the API reference again, now with the new version's, as the next section says.
 
 npm makes any version it publishes `latest` unless told otherwise, so a version with a pre-release part is published under the dist-tag `next`, which `publishConfig.tag` in `packages/itinera/package.json` sets. The release pull request sets it for such a version and removes it for any other.
 
@@ -134,7 +135,7 @@ npm has no counterpart of docs.rs, so this repository's GitHub Pages serve the A
 
 Before the first release, `/itinera-ts/` sends readers to `next/`.
 
-`.github/workflows/reference.yml` deploys every edition after each change on `main`, at the end of each release, and when run by hand. It builds `next/` from `main` with `npm run docs`, naming it "itinera next" on its front page, and the `reference-editions` action of [itinera-dev/actions](https://github.com/itinera-dev/actions) takes each release's edition from the `api-reference.tar.gz` attached to its GitHub release, so a release's reference never changes once it is out. GitHub Pages take their source from GitHub Actions, and the `github-pages` environment allows `main` and tags `v*` to deploy, since the release workflow deploys from its tag.
+`.github/workflows/reference.yml` deploys every edition after each change on `main`, after each release workflow that succeeds, and when run by hand. It builds `next/` from `main` with `npm run docs`, naming it "itinera next" on its front page, and the `reference-editions` action of [itinera-dev/actions](https://github.com/itinera-dev/actions) takes each release's edition from the `api-reference.tar.gz` attached to its GitHub release, so a release's reference never changes once it is out. GitHub Pages take their source from GitHub Actions, and the `github-pages` environment allows `main` to deploy. After a release, the workflow runs through `workflow_run`, which always runs on `main`, since a deployment from the release's tag succeeded without Pages ever serving it.
 
 ### The release actions
 
