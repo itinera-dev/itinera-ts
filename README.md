@@ -4,21 +4,21 @@ The TypeScript implementation of [Itinera](https://github.com/itinera-dev/spec),
 
 ## Learning it
 
-[The Itinera site](https://itinera-dev.org/) explains why Itinera exists, and [the specification](https://github.com/itinera-dev/spec) defines what every implementation does. The Itinera book has no TypeScript edition yet; one is planned.
+[The Itinera book for TypeScript](https://itinera-dev.org/book/typescript/) teaches Itinera from a first workflow onwards, and every example in it compiles and runs. [The Itinera site](https://itinera-dev.org/) explains why Itinera exists, and [the specification](https://github.com/itinera-dev/spec) defines what every implementation does. [The API reference](https://itinera-dev.org/itinera-ts/) documents each item, with an example.
 
 ## Status
 
-itinera-ts is being built, and no version has been released yet. It is planned to implement tier 1 of specification 0.1.0, with the capabilities `async`, `testing` and `value-conversions`, checked by the conformance cases `v0.1.0-rc.16`, and to be released first as `0.1.0-beta.1`. [CHANGELOG.md](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) will say what each release implements.
+`0.1.0-beta.4`, the first release, implements tier 1 of specification 0.1.0, with the capabilities `async`, `testing` and `value-conversions`, and passes the conformance cases `v0.1.0-rc.16`. It is a beta, not yet meant for production: until `0.1.0`, features may be added and its API may still change. [CHANGELOG.md](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each release implements.
 
 ## Using it
 
-Once released, applications will depend on one package, `itinera`, installed with `npm install itinera`, and import each concept from a subpath of its own, such as `itinera/step`. Test support will be the subpath `itinera/testing`, which an application reaches only when it imports it.
+Applications depend on one package, `itinera`, installed with `npm install itinera@next reflect-metadata` while every version is a pre-release under the dist-tag `next`, and import each concept from a subpath of its own, such as `itinera/step`. Test support is the subpath `itinera/testing`, which an application reaches only when it imports it.
 
-The package will work with `import` and `require` alike, on Node 22.12 and later. Applications will declare their workflows mainly as classes marked with decorators, which need TypeScript 5.5 or later with `experimentalDecorators`, `emitDecoratorMetadata` and `strict` turned on, and a compiler that records decorator metadata, such as `tsc` or swc. Applications that do not use decorators, such as those built with esbuild, Vite or tsx, will declare them with a builder instead, which needs only TypeScript 5.5 or later with `strict`.
+The package works with `import` and `require` alike, on Node 22.12 and later. Applications declare their workflows mainly as classes marked with decorators, which need TypeScript 5.5 or later with `experimentalDecorators`, `emitDecoratorMetadata` and `strict` turned on, and a compiler that records decorator metadata, such as `tsc` or swc. Applications whose compiler records none, such as esbuild, Vite or tsx, put the same classes together with the builder instead, which needs only TypeScript 5.5 or later with `strict`.
 
 ## Conformance
 
-Each release will state the specification version, tier, capabilities and conformance cases it implements, and carry the report of those cases as a release asset.
+Each release states the specification version, tier, capabilities and conformance cases it implements, and carries the report of those cases as a release asset.
 
 To run the cases yourself, check out [itinera-dev/conformance](https://github.com/itinera-dev/conformance) at the tag pinned in [conformance.json](https://github.com/itinera-dev/itinera-ts/blob/main/conformance.json), then run `npm run conformance` from this repository with:
 
