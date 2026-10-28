@@ -41,4 +41,4 @@ The proposal adds no conformance scenario.
 
 ## Done when
 
-Done: 121 is listed in `conformance.json`, with the cases at `v0.1.0-rc.18`.
+Done: 121 is listed in `conformance.json`, with the cases at `v0.1.0-rc.19`.
