@@ -45,4 +45,4 @@ None of its own.
 
 ## Done when
 
-Done in stage 6: every scenario tagged `@proposal-0012` passes, but the one tagged `@capability-sync`, which does not run, and 12 is listed in `conformance.json`.
+Done in stage 6: every scenario tagged `@proposal-0012` passes, but the two tagged `@capability-sync`, which do not run, and 12 is listed in `conformance.json`.

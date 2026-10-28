@@ -41,4 +41,4 @@ None of its own.
 
 ## Done when
 
-Done in stage 7: every scenario tagged `@proposal-0060` passes, but those that also name a proposal not yet listed, and 60 is listed in `conformance.json`.
+Done in stage 7: every scenario tagged `@proposal-0060` passes, but those that also name a proposal not yet listed and the one tagged `@capability-sync`, which does not run, and 60 is listed in `conformance.json`. The runner has no step definition for the sentence that an input adapter is asynchronous, since only that scenario uses it and it never runs, as `sync` is not claimed.

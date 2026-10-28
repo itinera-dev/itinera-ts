@@ -2,7 +2,7 @@
 
 Tech spec for [proposal 0122](https://github.com/itinera-dev/spec/blob/main/proposals/0122-unexpected-results.md), implemented in [#83](https://github.com/itinera-dev/itinera-ts/issues/83). It amends [0054](0054-how-custom-code-fails.md), [0010](0010-hooks-lifecycles-and-roles.md) and [0009](0009-running-a-workflow.md). The [tier 1 plan](../tier-1-plan.md) holds what crosses proposals.
 
-Status: complete, and 122 is listed in `conformance.json`, with the cases at `v0.1.0-rc.18`.
+Status: complete, and 122 is listed in `conformance.json`, with the cases at `v0.1.0-rc.19`.
 
 ## The two shapes of call
 
