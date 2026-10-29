@@ -115,6 +115,27 @@ describe("leftOut", () => {
     ]);
   });
 
+  it.each([
+    ["fails", ending(Ending.failure("broken")), []],
+    [
+      "terminates abnormally",
+      ending(Ending.abnormalTermination("crashed")),
+      [],
+    ],
+    ["succeeds", ending(Ending.success), [attemptLeftOut(2)]],
+    ["runs for real", realRun, [attemptLeftOut(2)]],
+  ])(
+    "leaves out attempt 2 of a rescued step only when its rescue step may succeed: one that %s",
+    (_, rescueEnding, expected) => {
+      const { steps, target } = scripted(rescued(), [
+        ending(Ending.failure("declined")),
+      ]);
+      const rescue = targetOf(steps, "charge_rescue");
+      rescue.numbered.push(rescueEnding);
+      expect(leftOut([target, rescue], steps, false)).toEqual(expected);
+    },
+  );
+
   it("leaves out every step not scripted when every step is asked for", () => {
     const { steps, target } = scripted(charge(), [ending(Ending.success)]);
     expect(leftOut([target], steps, true)).toEqual([

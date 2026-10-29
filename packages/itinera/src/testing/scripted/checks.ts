@@ -25,12 +25,18 @@ function leftOutOf(
   targets: readonly Target[],
   target: Target,
 ): readonly Mistake[] {
-  return [...firstUncovered(target), ...unscriptedRescue(targets, target)];
+  return [
+    ...firstUncovered(target, rescueMaySucceed(targets, target)),
+    ...unscriptedRescue(targets, target),
+  ];
 }
 
 /** The first attempt the target can have that the script leaves out, if any. */
-function firstUncovered(target: Target): readonly Mistake[] {
-  const stop = attemptsOf(target).find(stopsAt(target));
+function firstUncovered(
+  target: Target,
+  rescueMaySucceed: boolean,
+): readonly Mistake[] {
+  const stop = attemptsOf(target).find(stopsAt(target, rescueMaySucceed));
   return stop !== undefined && target.described(stop) === undefined
     ? [{ kind: MistakeKind.AttemptLeftOut, step: target.name, attempt: stop }]
     : [];
@@ -49,35 +55,65 @@ function numberAt(_: unknown, index: number): number {
  * Whether no attempt can follow an attempt of the target, as the script
  * describes it, or because it does not.
  */
-function stopsAt(target: Target): (attempt: number) => boolean {
+function stopsAt(
+  target: Target,
+  rescueMaySucceed: boolean,
+): (attempt: number) => boolean {
   return (attempt) => {
     const described = target.described(attempt);
-    return described === undefined || !continues(target, described, attempt);
+    return (
+      described === undefined ||
+      !continues(target, described, attempt, rescueMaySucceed)
+    );
   };
 }
 
-/** Whether the step may be attempted again after this attempt, budget aside. */
+/**
+ * Whether the step may be attempted again after this attempt, budget aside.
+ * After a failed attempt 1 of a step with a rescue step, only a rescue step
+ * that may succeed lets it run again, since a failed rescue ends the journey.
+ */
 function continues(
   target: Target,
   described: Described,
   attempt: number,
+  rescueMaySucceed: boolean,
 ): boolean {
   if (described.kind === "real run") {
     return true;
   }
+  const rescuedFirst =
+    attempt === 1 &&
+    target.kind.kind === "step" &&
+    target.kind.rescue !== undefined;
   switch (described.ending.kind) {
     case "success":
     case "skipped":
       return false;
     case "failure":
-      return true;
+      return rescuedFirst ? rescueMaySucceed : true;
     case "abnormal termination":
-      return (
-        target.kind.kind === "step" &&
-        ((attempt === 1 && target.kind.rescue !== undefined) ||
-          target.kind.retryOnAbnormalTermination)
-      );
+      return rescuedFirst
+        ? rescueMaySucceed
+        : target.kind.kind === "step" && target.kind.retryOnAbnormalTermination;
   }
+}
+
+/**
+ * Whether the target's rescue step may succeed: unless the script says it
+ * fails or terminates abnormally. A rescue step the script leaves out, or runs
+ * for real, may.
+ */
+function rescueMaySucceed(targets: readonly Target[], target: Target): boolean {
+  if (target.kind.kind !== "step" || target.kind.rescue === undefined) {
+    return true;
+  }
+  const described = targets.find(namedAs(target.kind.rescue))?.described(1);
+  return described === undefined || maySucceed(described);
+}
+
+function maySucceed(described: Described): boolean {
+  return described.kind === "real run" || described.ending.kind === "success";
 }
 
 /**
