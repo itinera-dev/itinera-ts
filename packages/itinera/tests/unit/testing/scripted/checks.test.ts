@@ -29,6 +29,21 @@ function scripted(
   return { steps, target };
 }
 
+/** A shop whose `charge` has a rescue step, with the attempts of each numbered as given. */
+function rescuedScripted(
+  numbered: readonly Described[],
+  rescueNumbered: readonly Described[],
+): {
+  readonly steps: ReturnType<typeof stepsOf>;
+  readonly target: Target;
+  readonly rescue: Target;
+} {
+  const { steps, target } = scripted(rescued(), numbered);
+  const rescue = targetOf(steps, "charge_rescue");
+  rescue.numbered.push(...rescueNumbered);
+  return { steps, target, rescue };
+}
+
 function targetOf(steps: ReturnType<typeof stepsOf>, name: string): Target {
   const target = targetNamed(steps, name);
   if (target === undefined) {
@@ -105,14 +120,55 @@ describe("leftOut", () => {
   });
 
   it("leaves out no rescue step that is scripted", () => {
-    const { steps, target } = scripted(rescued(), [
-      ending(Ending.failure("declined")),
-      ending(Ending.success),
-    ]);
-    const rescue = targetOf(steps, "charge_rescue");
+    const { steps, target, rescue } = rescuedScripted(
+      [ending(Ending.failure("declined")), ending(Ending.success)],
+      [],
+    );
     expect(leftOut([target, rescue], steps, false)).toEqual([
       { kind: MistakeKind.AttemptLeftOut, step: "charge_rescue", attempt: 1 },
     ]);
+  });
+
+  it.each([
+    ["fails", ending(Ending.failure("broken")), []],
+    [
+      "terminates abnormally",
+      ending(Ending.abnormalTermination("crashed")),
+      [],
+    ],
+    ["succeeds", ending(Ending.success), [attemptLeftOut(2)]],
+    ["runs for real", realRun, [attemptLeftOut(2)]],
+  ])(
+    "leaves out attempt 2 of a rescued step only when its rescue step may succeed: one that %s",
+    (_, rescueEnding, expected) => {
+      const { steps, target, rescue } = rescuedScripted(
+        [ending(Ending.failure("declined"))],
+        [rescueEnding],
+      );
+      expect(leftOut([target, rescue], steps, false)).toEqual(expected);
+    },
+  );
+
+  it.each([
+    ["fails", Ending.failure("broken")],
+    ["terminates abnormally", Ending.abnormalTermination("crashed")],
+  ])(
+    "leaves out no attempt after a rescued step's real run when its rescue step %s",
+    (_, rescueEnding) => {
+      const { steps, target, rescue } = rescuedScripted(
+        [realRun],
+        [ending(rescueEnding)],
+      );
+      expect(leftOut([target, rescue], steps, false)).toEqual([]);
+    },
+  );
+
+  it("leaves out nothing when an attempt is described after a rescue step that fails", () => {
+    const { steps, target, rescue } = rescuedScripted(
+      [ending(Ending.failure("declined")), ending(Ending.success)],
+      [ending(Ending.failure("broken"))],
+    );
+    expect(leftOut([target, rescue], steps, false)).toEqual([]);
   });
 
   it("leaves out every step not scripted when every step is asked for", () => {
