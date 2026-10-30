@@ -79,13 +79,13 @@ function continues(
   attempt: number,
   rescueMaySucceed: boolean,
 ): boolean {
-  if (described.kind === "real run") {
-    return true;
-  }
   const rescuedFirst =
     attempt === 1 &&
     target.kind.kind === "step" &&
     target.kind.rescue !== undefined;
+  if (described.kind === "real run") {
+    return rescuedFirst ? rescueMaySucceed : true;
+  }
   switch (described.ending.kind) {
     case "success":
     case "skipped":
