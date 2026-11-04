@@ -53,9 +53,15 @@ Every one of these is a required check in CI:
 - `npm test`: Vitest, with its type checking;
 - `npm run package`: builds the package, then checks what it publishes with [publint](https://publint.dev/) and [Are the types wrong?](https://arethetypeswrong.github.io/), for Node 16 resolution and bundlers, since the package's subpaths need `exports`;
 - `npm run docs`: the API reference, with TypeDoc, warnings as errors and every exported item documented, written to `packages/itinera/api`; what the package takes from Zod and `ts-results-es` links to their own documentation instead of being copied into it, and a plugin of ours, `packages/itinera/typedoc/accessible.mjs`, puts right what axe found in the markup of TypeDoc's theme;
-- `npm run dependency-check`: `npm audit` for advisories, then [licensee](https://www.npmjs.com/package/licensee) for licences.
+- `npm run dependency-check`: `npm audit --omit=dev` for advisories in what the package ships, with no exception; then [better-npm-audit](https://www.npmjs.com/package/better-npm-audit) for advisories in every package installed, the tools included, skipping only those `.nsprc` lists; then [licensee](https://www.npmjs.com/package/licensee) for licences.
 
 `npm run check` runs them in this order, and stops at the first that fails. CI runs the tests on Linux on Node 22 and 24, the LTS lines, and on Node 26, the current release, and on Windows and macOS on Node 24; the other checks run on Node 24. Each week, CI also tries the type check and the tests on the next TypeScript, and the tests on the newest Node.
+
+### Advisories
+
+An advisory in a tool that has no fixed version yet the tool accepts goes in `.nsprc`, by its GHSA ID, with notes saying which tools reach it and why it cannot be fixed, and an expiry date about a month away, after which the check fails again and the exception is looked at anew. Since `npm audit --omit=dev` runs first, with no exception, an advisory in a dependency the package ships always fails the check. `GHSA-g3hv-75wg-m249`, in `minimatch` before 11.0.1, is listed: ESLint and TypeDoc reach it, and TypeDoc 0.28 calls a method that `minimatch` 11 removed.
+
+Where a fixed version works with the tool that needs it, `overrides` in `package.json` raises it instead. `glob` is raised to 14, which fixes `GHSA-3g3m-2fjr-6pw4`, for npm's own packages that licensee uses, which still ask for `glob` 13. An override is removed once the packages that need it ask for the fixed version themselves.
 
 ### Licences
 

@@ -1,0 +1,7 @@
+{
+  "GHSA-g3hv-75wg-m249": {
+    "active": true,
+    "notes": "minimatch before 11.0.1, reached only through dev tools; typedoc 0.28.20 needs minimatch 10. npm audit --omit=dev still checks every shipped dependency without exceptions.",
+    "expiry": "2026-12-04"
+  }
+}
