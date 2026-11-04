@@ -2,6 +2,14 @@
 
 Every release of the package `itinera` on npm. Each release says the version of the [Itinera specification](https://github.com/itinera-dev/spec) it implements, the tier, the capabilities claimed and the [conformance cases](https://github.com/itinera-dev/conformance) it passes; its conformance report and its API reference are attached to its GitHub release. Before 1.0, a breaking change raises the minor version and a fix the patch version.
 
+## [0.1.0-beta.7]
+
+The third release, a beta, published under the dist-tag `next`: specification 0.1.0, tier 1, capabilities `async`, `testing` and `value-conversions`, cases `v0.1.0-rc.20`. It does not break code written for `0.1.0-beta.6`. It follows two corrections of the specification that the cases `v0.1.0-rc.19` and `v0.1.0-rc.20` carry: an input adapter that runs in an execution mode the executor does not accept is `mode not accepted`, which changes nothing here, since the one executor accepts synchronous and asynchronous input adapters alike, and a scripted run needs no attempt after a rescue step scripted to fail or to end in an abnormal termination. What a journey does is unchanged. It runs on Node 22.12 and later, and applications compile it with TypeScript 5.5 or later.
+
+### Fixed
+
+- `run` of a script from `scripted` in `itinera/testing` no longer stops the test for the attempt after a rescued step's attempt 1 when its rescue step is scripted to fail or end in an abnormal termination, an attempt that never runs.
+
 ## [0.1.0-beta.6]
 
 The second release, a beta, published under the dist-tag `next`: specification 0.1.0, tier 1, capabilities `async`, `testing` and `value-conversions`, cases `v0.1.0-rc.18`. It breaks code written for `0.1.0-beta.5`. It implements proposal 0121, which says that a copy made to keep received data read-only is not a value conversion, and which changes nothing itinera does, and proposal 0122, on custom code that returns what its call cannot return, which now aborts the journey with `unexpected result`, or refuses `run`. TypeScript's types already refuse every such result where no cast hides it, so the scenarios tagged `unexpected-result` and `non-string-journey-id` are claimed impossible to express, each with a proof. It runs on Node 22.12 and later, and applications compile it with TypeScript 5.5 or later.
@@ -43,5 +51,6 @@ The first release, a beta, published under the dist-tag `next`: specification 0.
 - Test support, from `itinera/testing`: `RecordingReporter`, which keeps every event and the latest value of each entry of global metadata, and whose `path` lists the flow a journey took; `fakeProvider`, which puts a fake in place of a service provider for one instance; scripted runs, which play what named steps' attempts do without their business rules; recorders that lend a step, a hook or an input adapter its handles outside any journey; and mocks of steps, rescue steps and policies.
 - Compile errors, instead of checks while a journey runs, for the rules the specification lets an implementation make impossible to express: a lifecycle a hook may not return, a policy whose role the workflow does not implement, a rescue step that skips, a service provider returning what `this.provide(...)` does not make, and an input adapter writing to the data bag. Steps, rescue steps and policies keep no static data, refused at compile time where TypeScript can and when they are declared otherwise.
 
+[0.1.0-beta.7]: https://github.com/itinera-dev/itinera-ts/releases/tag/v0.1.0-beta.7
 [0.1.0-beta.6]: https://github.com/itinera-dev/itinera-ts/releases/tag/v0.1.0-beta.6
 [0.1.0-beta.5]: https://github.com/itinera-dev/itinera-ts/releases/tag/v0.1.0-beta.5
