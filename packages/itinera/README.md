@@ -7,10 +7,8 @@ A workflow is a list of steps. Each step holds one piece of business logic and s
 ## Installing it
 
 ```sh
-npm install itinera@next reflect-metadata
+npm install itinera reflect-metadata
 ```
-
-Every version of itinera so far is a pre-release, published under the dist-tag `next`, so `itinera@next` installs the newest one.
 
 itinera runs on Node 22.12 and later, and works with `import` and `require` alike. It uses only the language and the web platform, so it also runs on Deno and Bun, and in browsers through a bundler, though CI tests it on Node alone; in a browser, the default journey IDs need a secure context.
 
@@ -118,7 +116,7 @@ The package root exports nothing of its own. Each concept is imported from a sub
 
 ## Status
 
-`0.1.0-beta.7`, the third release, implements tier 1 of specification 0.1.0, with the capabilities `async`, `testing` and `value-conversions`, and passes the conformance cases `v0.1.0-rc.20`. It is a beta, not yet meant for production: until `0.1.0`, features may be added and its API may still change. The [changelog](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each release implements, and each [GitHub release](https://github.com/itinera-dev/itinera-ts/releases) carries the report of the conformance cases it passes.
+`0.1.0`, the fourth release and the first that is not a pre-release, implements tier 1 of specification 0.1.0, with the capabilities `async`, `testing` and `value-conversions`, and passes the conformance cases `v0.1.0`. Before 1.0, a change that breaks code written for a release raises the minor version. The [changelog](https://github.com/itinera-dev/itinera-ts/blob/main/CHANGELOG.md) says what each release implements, and each [GitHub release](https://github.com/itinera-dev/itinera-ts/releases) carries the report of the conformance cases it passes.
 
 ## Rules made impossible to express
 

@@ -1,6 +1,6 @@
 {
   "name": "itinera",
-  "version": "0.1.0-beta.7",
+  "version": "0.1.0",
   "description": "A workflow framework that keeps business rules separate from flow control.",
   "keywords": [
     "workflow",
@@ -188,9 +188,6 @@
   ],
   "engines": {
     "node": ">=22.12"
-  },
-  "publishConfig": {
-    "tag": "next"
   },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
