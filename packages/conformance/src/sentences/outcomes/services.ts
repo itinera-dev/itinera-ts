@@ -1,8 +1,8 @@
-import { Then } from "@cucumber/cucumber";
+import { type DataTable, Then } from "@cucumber/cucumber";
 import { Option } from "itinera/option";
 import { Attempt } from "itinera/step";
 import { equalTo } from "../../equal.js";
-import { ModelError } from "../../model.js";
+import { ModelError, rows } from "../../model.js";
 import { dataUnder, type ProviderRequest } from "../../model/provider.js";
 import { holds } from "../../unmet.js";
 import type { World } from "../../world.js";
@@ -22,15 +22,37 @@ Then<World>(
 Then<World>(
   "step {string} was given the service {string} labelled {string} for attempt {int}",
   function (step: string, key: string, label: string, attempt: number) {
-    const expected = { attempt, key, label };
-    const lent = this.witness.lent(step);
-    holds(
-      lent.some(equalTo(expected)),
-      `step "${step}" to be given ${JSON.stringify(expected)}`,
-      JSON.stringify(lent),
-    );
+    expectGiven(this, step, { attempt, key, label });
   },
 );
+
+Then<World>("the steps were given the services:", function (table: DataTable) {
+  for (const row of rows(table)) {
+    row.refuseColumnsBeyond(["step", "service", "label", "attempt"]);
+    expectGiven(this, row.required("step"), {
+      attempt: row.count("attempt"),
+      key: row.required("service"),
+      label: row.required("label"),
+    });
+  }
+});
+
+function expectGiven(
+  world: World,
+  step: string,
+  expected: {
+    readonly attempt: number;
+    readonly key: string;
+    readonly label: string;
+  },
+): void {
+  const lent = world.witness.lent(step);
+  holds(
+    lent.some(equalTo(expected)),
+    `step "${step}" to be given ${JSON.stringify(expected)}`,
+    JSON.stringify(lent),
+  );
+}
 
 Then<World>(
   "the service provider {string} received the step name {string}",

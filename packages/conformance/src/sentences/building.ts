@@ -5,21 +5,9 @@ import {
   rows,
   scripted,
   succeeds,
-  type Row,
   type CaseType,
 } from "../model.js";
 import type { World } from "../world.js";
-
-Given<World>(
-  "a workflow {string} with the steps:",
-  function (name: string, table: DataTable) {
-    this.model.declare(name, rows(table).map(stepName));
-  },
-);
-
-function stepName(row: Row): string {
-  return row.required("step");
-}
 
 Given<World>(
   "step {string} requests input {string} of type {type}",

@@ -75,7 +75,10 @@ function builderOf(
   model: Model,
   witness: Witness,
 ): WorkflowBuilder<typeof Scenario, true> {
-  const { name, steps, adapters, idGenerator } = model.workflow;
+  const { name, steps, idGenerator } = model.workflow;
+  model.adapters.refuseUnbound();
+  model.providers.refuseUnbound();
+  const { scripts: adapters } = model.adapters;
   const { scripts: providers } = model.providers;
   const builder = serving(providers.map(nameOf)).builder().name(name);
   for (const step of steps) {

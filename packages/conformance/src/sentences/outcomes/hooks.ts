@@ -22,14 +22,24 @@ Then<World>(
 Then<World>(
   /^the hook "([^"]*)" of policy "([^"]*)" was called (\d+) times?$/,
   function (hook: string, policy: string, times: string) {
-    const calls = callsOf(this, hook, policy);
-    holds(
-      calls.length === Number(times),
-      `${hook} of "${policy}" called ${times} times`,
-      `${String(calls.length)} calls`,
-    );
+    expectCalled(this, hook, policy, Number(times));
   },
 );
+
+/** Holds when the hook of the policy was called this many times. */
+export function expectCalled(
+  world: World,
+  hook: string,
+  policy: string,
+  times: number,
+): void {
+  const calls = callsOf(world, hook, policy);
+  holds(
+    calls.length === times,
+    `${hook} of "${policy}" called ${String(times)} times`,
+    `${String(calls.length)} calls`,
+  );
+}
 
 Then<World>(
   "the hooks were called in this order:",
