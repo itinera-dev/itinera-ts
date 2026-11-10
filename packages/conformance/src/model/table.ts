@@ -32,6 +32,41 @@ export class Row {
     }
     return cell;
   }
+
+  /**
+   * The whole number in the cell under this column, which the row must
+   * have.
+   *
+   * @throws ModelError when the cell holds anything else.
+   */
+  count(column: string): number {
+    const cell = this.required(column);
+    if (!/^\d+$/.test(cell)) {
+      throw new ModelError(`"${cell}" under ${column} is not a whole number`);
+    }
+    return Number(cell);
+  }
+
+  /**
+   * Refuses a column its sentence does not define, which would otherwise
+   * add or check nothing.
+   *
+   * @throws ModelError when the row's table has one.
+   */
+  refuseColumnsBeyond(known: readonly string[]): void {
+    const unknown = this.columns().find(isNotIn(known));
+    if (unknown !== undefined) {
+      throw new ModelError(`"${unknown}" is not a column of this table`);
+    }
+  }
+}
+
+function isNotIn(known: readonly string[]): (column: string) => boolean {
+  return (column) => isNotAmong(column, known);
+}
+
+function isNotAmong(column: string, known: readonly string[]): boolean {
+  return !known.includes(column);
 }
 
 /** The rows of a sentence's table, under its header. */

@@ -94,6 +94,11 @@ describe("the conformance runner", () => {
       "steps",
       "@proposal-0008",
     ],
+    [
+      "reads the columns of its tables that the tier 1 cases leave out",
+      "tables",
+      "@proposal-0010",
+    ],
   ])(
     "passes the scenarios whose expectations itinera meets: it %s",
     (_, cases, tags) => {
@@ -141,6 +146,9 @@ describe("the conformance runner", () => {
     const ran = run("in-error", "@tier-1");
     expect(ran.succeeded).toBe(false);
     expect(ran.output).toContain("no workflow is declared yet");
+    expect(ran.output).toContain(
+      'the input adapter "pricing" is defined but the workflow never binds it',
+    );
   });
 
   it("refuses to run without saying what to run", () => {

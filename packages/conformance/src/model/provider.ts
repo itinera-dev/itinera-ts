@@ -86,69 +86,7 @@ export interface ProviderFailure {
   readonly when?: { readonly key: string; readonly value: string };
 }
 
-/** The service providers a scenario declares, in the order declared. */
-export class Providers {
-  /** Every provider, in the order declared, two of one name included. */
-  readonly scripts: ProviderScript[] = [];
-
-  /** Declares a service provider that does nothing else yet. */
-  declare(
-    name: string,
-    service: ServiceRequest,
-    scope: ProviderScript["scope"],
-  ): void {
-    this.scripts.push({
-      name,
-      service,
-      scope,
-      requests: [],
-      actions: [],
-      implementation: "first labeller",
-      asynchronous: false,
-    });
-  }
-
-  /**
-   * The provider declared first under the name.
-   *
-   * @throws ModelError when none is.
-   */
-  provider(name: string): ProviderScript {
-    const script = this.scripts.find((declared) => isNamed(declared, name));
-    if (script === undefined) {
-      throw new ModelError(
-        `the workflow declares no service provider "${name}"`,
-      );
-    }
-    return script;
-  }
-
-  /** Attaches the provider to the steps, one or more. */
-  attach(name: string, steps: readonly string[]): void {
-    const [first, ...rest] = steps;
-    if (first === undefined) {
-      throw new ModelError(
-        `the service provider "${name}" is attached to no step`,
-      );
-    }
-    this.provider(name).steps = [first, ...rest];
-  }
-
-  /** Says how the provider fails, once. */
-  fails(name: string, failure: ProviderFailure): void {
-    const script = this.provider(name);
-    if (script.failure !== undefined) {
-      throw new ModelError(
-        `how the service provider "${name}" fails is already stated`,
-      );
-    }
-    script.failure = failure;
-  }
-}
-
-function isNamed(script: ProviderScript, name: string): boolean {
-  return script.name === name;
-}
+export { Providers } from "./provider/providers.js";
 
 /** Reads a service type the cases name. */
 export function serviceTypeNamed(name: string): ServiceTypeName {

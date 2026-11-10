@@ -38,4 +38,26 @@ describe("a sentence's table", () => {
       { kind: "value", value: 42 },
     ]);
   });
+
+  it("reads a whole number in a cell", () => {
+    const [row] = rowsOf(["calls"], ["3"]);
+    expect(row?.count("calls")).toBe(3);
+  });
+
+  it.each([
+    ["a word", "three"],
+    ["a fraction", "1.5"],
+  ])("refuses a count that is %s", (_, cell) => {
+    const [row] = rowsOf(["calls"], [cell]);
+    expect(() => row?.count("calls")).toThrow(
+      new ModelError(`"${cell}" under calls is not a whole number`),
+    );
+  });
+
+  it("refuses a column its sentence does not define", () => {
+    const [row] = rowsOf(["step", "polices"], ["charge", "audit"]);
+    expect(() => {
+      row?.refuseColumnsBeyond(["step", "policies"]);
+    }).toThrow(new ModelError('"polices" is not a column of this table'));
+  });
 });

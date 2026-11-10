@@ -143,7 +143,7 @@ export class Alone {
     },
     values: readonly (readonly [string, PlainValue])[],
   ): void {
-    const script = model.adapter(called.adapter);
+    const script = model.adapters.declared(called.adapter);
     const step = stepNamed(workflow, called.step);
     const bag = values.reduce(holding, new TestDataBag());
     const answers = script.requests.map((request) =>

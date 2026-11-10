@@ -5,10 +5,17 @@ import { type Scripted, caseType, type CaseType, written } from "./value.js";
  * What a scenario says one scripted input adapter does: the steps it is
  * attached to, what it requests, and what it answers for each input.
  */
-export interface AdapterScript {
-  readonly name: string;
+export interface AdapterScript extends AdapterDefinition {
   /** The steps it is attached to, by name, a rescue step by its own. */
   readonly steps: readonly [string, ...string[]];
+}
+
+/**
+ * What a scenario says one scripted input adapter does, before the workflow
+ * binds it to steps.
+ */
+export interface AdapterDefinition {
+  readonly name: string;
   /** Its own requests, in the order their sentences are written. */
   readonly requests: AdapterRequest[];
   /** What it answers for an input; for any other input it returns nothing. */
@@ -57,7 +64,12 @@ export function unscriptedAdapter(
   name: string,
   steps: readonly [string, ...string[]],
 ): AdapterScript {
-  return { name, steps, requests: [], answers: [], writes: [] };
+  return { ...unboundAdapter(name), steps };
+}
+
+/** An adapter that does nothing yet, bound to no step. */
+export function unboundAdapter(name: string): AdapterDefinition {
+  return { name, requests: [], answers: [], writes: [] };
 }
 
 const readFromTheDataBag = /^"([^"]*)" of type (.+), read from the data bag,$/;
@@ -65,7 +77,7 @@ const readFromTheDataBag = /^"([^"]*)" of type (.+), read from the data bag,$/;
 /** Whether an input adapter's script is of the adapter named `name`. */
 export function adapterNamed(
   name: string,
-): (adapter: AdapterScript) => boolean {
+): (adapter: AdapterDefinition) => boolean {
   return (adapter) => adapter.name === name;
 }
 

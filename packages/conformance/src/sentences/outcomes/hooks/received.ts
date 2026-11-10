@@ -23,7 +23,7 @@ Then<World>(
   },
 );
 
-function isCause(request: HookRequest): boolean {
+export function isCause(request: HookRequest): boolean {
   return request.kind === "failure cause" || request.kind === "retry cause";
 }
 
@@ -62,7 +62,7 @@ Then<World>(
   },
 );
 
-function isFailureReason(request: HookRequest): boolean {
+export function isFailureReason(request: HookRequest): boolean {
   return request.kind === "failure reason";
 }
 
@@ -74,7 +74,7 @@ function isTheReason(found: unknown, expected: unknown): boolean {
   return isDeepStrictEqual(reasonOf(found), Some(expected));
 }
 
-function hasNoReason(found: unknown): boolean {
+export function hasNoReason(found: unknown): boolean {
   return reasonOf(found).isNone();
 }
 
@@ -105,11 +105,11 @@ Then<World>(
   },
 );
 
-function isError(request: HookRequest): boolean {
+export function isError(request: HookRequest): boolean {
   return request.kind === "error";
 }
 
-function errorWith(message: string): (found: unknown) => boolean {
+export function errorWith(message: string): (found: unknown) => boolean {
   return (found) => isErrorWith(found, message);
 }
 
@@ -163,7 +163,7 @@ Then<World>(
   },
 );
 
-function attemptNumbered(number: number): (found: unknown) => boolean {
+export function attemptNumbered(number: number): (found: unknown) => boolean {
   return (found) => isAttemptNumbered(found, number);
 }
 
@@ -171,7 +171,9 @@ function isAttemptNumbered(found: unknown, number: number): boolean {
   return found instanceof Attempt && found.number === number;
 }
 
-function kindOf(kind: HookRequest["kind"]): (request: HookRequest) => boolean {
+export function kindOf(
+  kind: HookRequest["kind"],
+): (request: HookRequest) => boolean {
   return (request) => isOfKind(request, kind);
 }
 
@@ -180,7 +182,7 @@ function isOfKind(request: HookRequest, kind: HookRequest["kind"]): boolean {
 }
 
 /** Holds when, on at least one call, the hook's request was answered as `matches` says. */
-function expectAnswer(
+export function expectAnswer(
   world: World,
   hook: string,
   policy: string,

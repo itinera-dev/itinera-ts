@@ -8,7 +8,7 @@ function hookOf(world: World, hook: string, policy: string): HookScript {
 }
 
 /** Every request a hook makes with no parameter, by the words after "requests the". */
-const plainRequests = {
+export const plainRequests = {
   "step name": { kind: "step name" },
   "failure reason": { kind: "failure reason", optional: false },
   "optional failure reason": { kind: "failure reason", optional: true },

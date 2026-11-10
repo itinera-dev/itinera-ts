@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
-import { Then } from "@cucumber/cucumber";
+import { type DataTable, Then } from "@cucumber/cucumber";
 import { None, type Option, Some } from "itinera/option";
-import { json, ModelError } from "../../model.js";
+import { json, ModelError, rows } from "../../model.js";
 import type { Input } from "../../model/step.js";
 import { holds } from "../../unmet.js";
 import type { Mock } from "../../witness.js";
@@ -24,19 +24,42 @@ Then<World>(
 Then<World>(
   /^step "([^"]*)" was built for attempt (\d+) with input "([^"]*)" = (.+)$/,
   function (step: string, attempt: string, key: string, value: string) {
-    const at = Number(attempt) - 1;
-    if (at < 0) {
-      throw new ModelError(`step "${step}" has no attempt ${attempt}`);
-    }
     expectBuilt(
       this,
       step,
-      this.witness.built(step).slice(at, at + 1),
+      builtFor(this, step, attempt),
       key,
       Some(json(value)),
     );
   },
 );
+
+Then<World>("the steps were built with:", function (table: DataTable) {
+  for (const row of rows(table)) {
+    row.refuseColumnsBeyond(["step", "input", "value", "attempt"]);
+    const step = row.required("step");
+    const attempt = row.optional("attempt");
+    const value = row.required("value");
+    expectBuilt(
+      this,
+      step,
+      attempt === undefined
+        ? this.witness.built(step)
+        : builtFor(this, step, attempt),
+      row.required("input"),
+      value === "absent" ? None : Some(json(value)),
+    );
+  }
+});
+
+/** The step built for the attempt, as a list of none or one. */
+function builtFor(world: World, step: string, attempt: string): Mock[] {
+  const at = Number(attempt) - 1;
+  if (!Number.isInteger(at) || at < 0) {
+    throw new ModelError(`step "${step}" has no attempt ${attempt}`);
+  }
+  return world.witness.built(step).slice(at, at + 1);
+}
 
 /**
  * Holds when one of the steps built was given what is expected for the

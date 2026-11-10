@@ -1,7 +1,7 @@
 import { isDeepStrictEqual } from "node:util";
-import { Then } from "@cucumber/cucumber";
+import { type DataTable, Then } from "@cucumber/cucumber";
 import type { Event, EventKind } from "itinera/event";
-import { eventKind } from "../../model.js";
+import { eventKind, type Row, rows } from "../../model.js";
 import { eventsOf as recorded } from "../../recorders.js";
 import { kindOf, type Numbered, numbered } from "../../trace.js";
 import { expectOfStream, holds } from "../../unmet.js";
@@ -62,6 +62,30 @@ Then<World>(
     receivedTimes(this, reporter, eventKind(event), never);
   },
 );
+
+Then<World>("the reporters received:", function (table: DataTable) {
+  for (const row of rows(table)) {
+    row.refuseColumnsBeyond(["reporter", "event", "received"]);
+    receivedTimes(
+      this,
+      row.required("reporter"),
+      eventKind(row.required("event")),
+      timesOf(row),
+    );
+  }
+});
+
+/** How often the row's `received` cell says: yes, no, or a number of times. */
+function timesOf(row: Row): Times {
+  const written = row.required("received");
+  if (written === "yes") {
+    return atLeastOnce;
+  }
+  if (written === "no") {
+    return never;
+  }
+  return exactly(row.count("received"));
+}
 
 /** How often a reporter is expected to receive an event, and how that reads. */
 interface Times {
